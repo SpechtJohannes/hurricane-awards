@@ -276,6 +276,18 @@ h1 {
   gap: 14px;
 }
 
+.categories__notice {
+  width: min(100%, 960px);
+  margin: 0 auto;
+  padding: 18px 20px;
+  color: #f4e7cf;
+  font-weight: 700;
+  line-height: 1.45;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+}
+
 .category-card {
   padding: 20px;
   background: rgba(255, 255, 255, 0.08);
@@ -327,6 +339,70 @@ h1 {
   margin: 12px 0 0;
   color: #f4e7cf;
   line-height: 1.5;
+}
+
+.category-card__vote {
+  display: grid;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.category-card__vote label {
+  color: #ffbe0b;
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.category-card__vote select,
+.category-card__submit {
+  min-height: 52px;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.category-card__vote select {
+  width: 100%;
+  padding: 0 14px;
+  color: #ffffff;
+  background: rgba(16, 16, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.category-card__vote select:focus-visible,
+.category-card__submit:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.category-card__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  color: #101014;
+  font-weight: 850;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ffbe0b, #fb5607 52%, #ff006e);
+  border: 0;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.category-card__submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 36px rgba(251, 86, 7, 0.28);
+}
+
+.category-card__voted {
+  padding: 14px 16px;
+  margin-top: 22px;
+  color: #101014;
+  font-weight: 850;
+  background: #ffbe0b;
+  border-radius: 8px;
 }
 
 @media (min-width: 720px) {
