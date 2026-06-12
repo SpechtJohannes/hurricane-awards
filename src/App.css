@@ -164,15 +164,52 @@ h1 {
   text-transform: uppercase;
 }
 
-.identity__grid {
+.identity__form {
   display: grid;
-  gap: 10px;
+  gap: 12px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
 }
 
-.identity__participant,
+.identity__form label {
+  color: #ffbe0b;
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.identity__form input {
+  width: 100%;
+  min-height: 56px;
+  padding: 0 16px;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: rgba(16, 16, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+}
+
+.identity__form input::placeholder {
+  color: rgba(255, 247, 237, 0.42);
+}
+
+.identity__error {
+  margin: 0;
+  color: #ffd166;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.identity__submit,
 .identity__change {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-height: 52px;
   color: #ffffff;
   font-weight: 800;
@@ -182,20 +219,6 @@ h1 {
     transform 180ms ease,
     border-color 180ms ease,
     background 180ms ease;
-}
-
-.identity__participant {
-  padding: 14px 16px;
-  text-align: left;
-  background: rgba(255, 255, 255, 0.09);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-.identity__participant:hover,
-.identity__participant:focus-visible {
-  background: rgba(255, 190, 11, 0.16);
-  border-color: rgba(255, 190, 11, 0.68);
-  transform: translateY(-1px);
 }
 
 .identity__selected {
@@ -218,21 +241,24 @@ h1 {
   color: #ffbe0b;
 }
 
+.identity__submit,
 .identity__change {
-  justify-content: center;
   padding: 0 18px;
   color: #101014;
   background: #ffbe0b;
   border: 0;
 }
 
+.identity__submit:hover,
+.identity__submit:focus-visible,
 .identity__change:hover,
 .identity__change:focus-visible {
   transform: translateY(-1px);
   background: #ffd166;
 }
 
-.identity__participant:focus-visible,
+.identity__form input:focus-visible,
+.identity__submit:focus-visible,
 .identity__change:focus-visible {
   outline: 3px solid #ffffff;
   outline-offset: 3px;
@@ -432,8 +458,14 @@ h1 {
     margin-bottom: 28px;
   }
 
-  .identity__grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .identity__form {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+
+  .identity__form label,
+  .identity__error {
+    grid-column: 1 / -1;
   }
 
   .identity__selected {

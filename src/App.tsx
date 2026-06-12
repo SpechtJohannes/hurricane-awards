@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { categories, type CategoryStatus } from './data/categories'
 import { participants, type Participant } from './data/participants'
 import './App.css'
@@ -59,20 +59,41 @@ function App() {
   const openCategories = categories.filter((category) => category.status === 'open')
   const [selectedParticipant, setSelectedParticipant] =
     useState<Participant | null>(getStoredParticipant)
+  const [accessCode, setAccessCode] = useState('')
+  const [accessCodeError, setAccessCodeError] = useState('')
   const [votes, setVotes] = useState<Vote[]>(getStoredVotes)
   const [selectedVotesByCategory, setSelectedVotesByCategory] = useState<
     Record<string, string>
   >({})
 
-  function selectParticipant(participant: Participant) {
+  function submitAccessCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const normalizedAccessCode = accessCode.trim().toUpperCase()
+    const participant = participants.find(
+      (currentParticipant) =>
+        currentParticipant.accessCode === normalizedAccessCode,
+    )
+
+    if (!participant) {
+      setAccessCodeError(
+        'Der Code passt leider zu niemandem. Schau nochmal auf deinen Festival Code.',
+      )
+      return
+    }
+
     localStorage.setItem(selectedParticipantStorageKey, participant.id)
     setSelectedParticipant(participant)
     setSelectedVotesByCategory({})
+    setAccessCode('')
+    setAccessCodeError('')
   }
 
   function changeParticipant() {
     localStorage.removeItem(selectedParticipantStorageKey)
     setSelectedParticipant(null)
+    setAccessCode('')
+    setAccessCodeError('')
     setSelectedVotesByCategory({})
   }
 
@@ -149,7 +170,7 @@ function App() {
         aria-labelledby="identity-title"
       >
         <div className="identity__content">
-          <h2 id="identity-title">Wer bist du?</h2>
+          <h2 id="identity-title">Gib deinen Festival Code ein</h2>
 
           {selectedParticipant ? (
             <div className="identity__selected">
@@ -166,18 +187,27 @@ function App() {
               </button>
             </div>
           ) : (
-            <div className="identity__grid">
-              {participants.map((participant) => (
-                <button
-                  className="identity__participant"
-                  key={participant.id}
-                  type="button"
-                  onClick={() => selectParticipant(participant)}
-                >
-                  {participant.displayName}
-                </button>
-              ))}
-            </div>
+            <form className="identity__form" onSubmit={submitAccessCode}>
+              <label htmlFor="festival-code">Festival Code</label>
+              <input
+                id="festival-code"
+                type="text"
+                value={accessCode}
+                onChange={(event) => {
+                  setAccessCode(event.target.value)
+                  setAccessCodeError('')
+                }}
+                autoComplete="off"
+                inputMode="text"
+                placeholder="Code hier eingeben"
+              />
+              {accessCodeError ? (
+                <p className="identity__error">{accessCodeError}</p>
+              ) : null}
+              <button className="identity__submit" type="submit">
+                Code prüfen
+              </button>
+            </form>
           )}
         </div>
       </section>
@@ -190,7 +220,7 @@ function App() {
 
         {!selectedParticipant ? (
           <p className="categories__notice">
-            Wähle zuerst aus, wer du bist. Danach kannst du abstimmen.
+            Gib zuerst deinen Festival Code ein. Danach kannst du abstimmen.
           </p>
         ) : (
           <div className="categories__grid">
