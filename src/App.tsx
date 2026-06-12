@@ -1,5 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { categories, type CategoryStatus } from './data/categories'
+import {
+  loadCategories,
+  type Category,
+  type CategoryStatus,
+} from './data/categories'
 import { loadParticipants, type Participant } from './data/participants'
 import {
   loadVotesForParticipant,
@@ -16,8 +20,10 @@ const statusLabels: Record<CategoryStatus, string> = {
 
 function App() {
   const [participants, setParticipants] = useState<Participant[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [participantsError, setParticipantsError] = useState('')
-  const [isLoadingParticipants, setIsLoadingParticipants] = useState(true)
+  const [categoriesError, setCategoriesError] = useState('')
+  const [isLoadingData, setIsLoadingData] = useState(true)
   const participantCount = participants.length
   const openCategories = categories.filter((category) => category.status === 'open')
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(
@@ -39,20 +45,27 @@ function App() {
 
     async function loadData() {
       try {
-        const loadedParticipants = await loadParticipants()
+        const [loadedParticipants, loadedCategories] = await Promise.all([
+          loadParticipants(),
+          loadCategories(),
+        ])
 
         if (isCurrent) {
           setParticipants(loadedParticipants)
+          setCategories(loadedCategories)
         }
       } catch {
         if (isCurrent) {
           setParticipantsError(
             'Die Teilnehmer konnten gerade nicht geladen werden.',
           )
+          setCategoriesError(
+            'Die Kategorien konnten gerade nicht geladen werden.',
+          )
         }
       } finally {
         if (isCurrent) {
-          setIsLoadingParticipants(false)
+          setIsLoadingData(false)
         }
       }
     }
@@ -205,7 +218,7 @@ function App() {
                 id="festival-code"
                 type="text"
                 value={accessCode}
-                disabled={isLoadingParticipants || Boolean(participantsError)}
+                disabled={isLoadingData || Boolean(participantsError)}
                 onChange={(event) => {
                   setAccessCode(event.target.value)
                   setAccessCodeError('')
@@ -223,9 +236,9 @@ function App() {
               <button
                 className="identity__submit"
                 type="submit"
-                disabled={isLoadingParticipants || Boolean(participantsError)}
+                disabled={isLoadingData || Boolean(participantsError)}
               >
-                {isLoadingParticipants ? 'Lade...' : 'Code prüfen'}
+                {isLoadingData ? 'Lade...' : 'Code prüfen'}
               </button>
             </form>
           )}
@@ -239,6 +252,9 @@ function App() {
         </div>
 
         {votesError ? <p className="categories__notice">{votesError}</p> : null}
+        {categoriesError ? (
+          <p className="categories__notice">{categoriesError}</p>
+        ) : null}
 
         {!selectedParticipant ? (
           <p className="categories__notice">

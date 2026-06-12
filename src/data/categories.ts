@@ -1,4 +1,13 @@
+import { supabase } from '../lib/supabase'
+
 export type CategoryStatus = 'upcoming' | 'open' | 'closed'
+
+type CategoryRow = {
+  id: string
+  title: string
+  description: string
+  status: CategoryStatus
+}
 
 export type Category = {
   id: string
@@ -7,35 +16,28 @@ export type Category = {
   status: CategoryStatus
 }
 
-export const categories: Category[] = [
-  {
-    id: 'tagesvollster-donnerstag',
-    title: 'Tagesvollster Donnerstag',
-    description: 'Der Auftaktpreis für den stabilsten Start ins Festival.',
-    status: 'open',
-  },
-  {
-    id: 'tagesvollster-freitag',
-    title: 'Tagesvollster Freitag',
-    description: 'Auszeichnung für maximale Freitagsform auf dem Gelände.',
-    status: 'upcoming',
-  },
-  {
-    id: 'tagesvollster-samstag',
-    title: 'Tagesvollster Samstag',
-    description: 'Der finale Härtetest für Kondition, Timing und Eskalation.',
-    status: 'upcoming',
-  },
-  {
-    id: 'bestes-outfit',
-    title: 'Bestes Outfit',
-    description: 'Für den Look, der zwischen Festival, Fashion und Wahnsinn gewinnt.',
-    status: 'upcoming',
-  },
-  {
-    id: 'bester-festival-moment',
-    title: 'Bester Festival Moment',
-    description: 'Der Moment, über den auch 2027 noch gesprochen wird.',
-    status: 'upcoming',
-  },
-]
+function mapCategory(row: CategoryRow): Category {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    status: row.status,
+  }
+}
+
+export async function loadCategories(): Promise<Category[]> {
+  if (!supabase) {
+    throw new Error('Supabase ist noch nicht konfiguriert.')
+  }
+
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id, title, description, status, sort_order')
+    .order('sort_order', { ascending: true })
+
+  if (error) {
+    throw error
+  }
+
+  return (data ?? []).map((row) => mapCategory(row as CategoryRow))
+}
