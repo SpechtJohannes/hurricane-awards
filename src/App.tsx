@@ -1,17 +1,12 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { categories, type CategoryStatus } from './data/categories'
-import { participants, type Participant } from './data/participants'
+import { loadParticipants, type Participant } from './data/participants'
+import {
+  loadVotesForParticipant,
+  saveVote,
+  type Vote,
+} from './data/votes'
 import './App.css'
-
-const selectedParticipantStorageKey = 'hurricane-awards:selected-participant-id'
-const votesStorageKey = 'hurricane-awards:votes'
-
-type Vote = {
-  voterId: string
-  votedForId: string
-  categoryId: string
-  timestamp: string
-}
 
 const statusLabels: Record<CategoryStatus, string> = {
   upcoming: 'Demnächst',
@@ -19,54 +14,57 @@ const statusLabels: Record<CategoryStatus, string> = {
   closed: 'Geschlossen',
 }
 
-function getStoredParticipant(): Participant | null {
-  const storedParticipantId = localStorage.getItem(selectedParticipantStorageKey)
-
-  return (
-    participants.find((participant) => participant.id === storedParticipantId) ??
-    null
-  )
-}
-
-function getStoredVotes(): Vote[] {
-  const storedVotes = localStorage.getItem(votesStorageKey)
-
-  if (!storedVotes) {
-    return []
-  }
-
-  try {
-    const parsedVotes = JSON.parse(storedVotes)
-
-    if (!Array.isArray(parsedVotes)) {
-      return []
-    }
-
-    return parsedVotes.filter(
-      (vote): vote is Vote =>
-        typeof vote?.voterId === 'string' &&
-        typeof vote?.votedForId === 'string' &&
-        typeof vote?.categoryId === 'string' &&
-        typeof vote?.timestamp === 'string',
-    )
-  } catch {
-    return []
-  }
-}
-
 function App() {
+  const [participants, setParticipants] = useState<Participant[]>([])
+  const [participantsError, setParticipantsError] = useState('')
+  const [isLoadingParticipants, setIsLoadingParticipants] = useState(true)
   const participantCount = participants.length
   const openCategories = categories.filter((category) => category.status === 'open')
-  const [selectedParticipant, setSelectedParticipant] =
-    useState<Participant | null>(getStoredParticipant)
+  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(
+    null,
+  )
   const [accessCode, setAccessCode] = useState('')
   const [accessCodeError, setAccessCodeError] = useState('')
-  const [votes, setVotes] = useState<Vote[]>(getStoredVotes)
+  const [votes, setVotes] = useState<Vote[]>([])
+  const [votesError, setVotesError] = useState('')
   const [selectedVotesByCategory, setSelectedVotesByCategory] = useState<
     Record<string, string>
   >({})
+  const [submittingCategoryId, setSubmittingCategoryId] = useState<string | null>(
+    null,
+  )
 
-  function submitAccessCode(event: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    let isCurrent = true
+
+    async function loadData() {
+      try {
+        const loadedParticipants = await loadParticipants()
+
+        if (isCurrent) {
+          setParticipants(loadedParticipants)
+        }
+      } catch {
+        if (isCurrent) {
+          setParticipantsError(
+            'Die Teilnehmer konnten gerade nicht geladen werden.',
+          )
+        }
+      } finally {
+        if (isCurrent) {
+          setIsLoadingParticipants(false)
+        }
+      }
+    }
+
+    void loadData()
+
+    return () => {
+      isCurrent = false
+    }
+  }, [])
+
+  async function submitAccessCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const normalizedAccessCode = accessCode.trim().toUpperCase()
@@ -82,18 +80,25 @@ function App() {
       return
     }
 
-    localStorage.setItem(selectedParticipantStorageKey, participant.id)
     setSelectedParticipant(participant)
     setSelectedVotesByCategory({})
     setAccessCode('')
     setAccessCodeError('')
+    setVotesError('')
+
+    try {
+      setVotes(await loadVotesForParticipant(participant.id))
+    } catch {
+      setVotesError('Deine bisherigen Stimmen konnten nicht geladen werden.')
+    }
   }
 
   function changeParticipant() {
-    localStorage.removeItem(selectedParticipantStorageKey)
     setSelectedParticipant(null)
     setAccessCode('')
     setAccessCodeError('')
+    setVotes([])
+    setVotesError('')
     setSelectedVotesByCategory({})
   }
 
@@ -104,7 +109,7 @@ function App() {
     }))
   }
 
-  function submitVote(categoryId: string) {
+  async function submitVote(categoryId: string) {
     if (!selectedParticipant) {
       return
     }
@@ -119,24 +124,31 @@ function App() {
       return
     }
 
-    const nextVotes = [
-      ...votes,
-      {
-        voterId: selectedParticipant.id,
-        votedForId,
-        categoryId,
-        timestamp: new Date().toISOString(),
-      },
-    ]
+    const vote = {
+      voterId: selectedParticipant.id,
+      votedForId,
+      categoryId,
+      timestamp: new Date().toISOString(),
+    }
 
-    localStorage.setItem(votesStorageKey, JSON.stringify(nextVotes))
-    setVotes(nextVotes)
-    setSelectedVotesByCategory((currentVotes) => {
-      const remainingVotes = { ...currentVotes }
-      delete remainingVotes[categoryId]
+    setSubmittingCategoryId(categoryId)
+    setVotesError('')
 
-      return remainingVotes
-    })
+    try {
+      const savedVote = await saveVote(vote)
+
+      setVotes((currentVotes) => [...currentVotes, savedVote])
+      setSelectedVotesByCategory((currentVotes) => {
+        const remainingVotes = { ...currentVotes }
+        delete remainingVotes[categoryId]
+
+        return remainingVotes
+      })
+    } catch {
+      setVotesError('Deine Stimme konnte gerade nicht gespeichert werden.')
+    } finally {
+      setSubmittingCategoryId(null)
+    }
   }
 
   return (
@@ -193,6 +205,7 @@ function App() {
                 id="festival-code"
                 type="text"
                 value={accessCode}
+                disabled={isLoadingParticipants || Boolean(participantsError)}
                 onChange={(event) => {
                   setAccessCode(event.target.value)
                   setAccessCodeError('')
@@ -204,8 +217,15 @@ function App() {
               {accessCodeError ? (
                 <p className="identity__error">{accessCodeError}</p>
               ) : null}
-              <button className="identity__submit" type="submit">
-                Code prüfen
+              {participantsError ? (
+                <p className="identity__error">{participantsError}</p>
+              ) : null}
+              <button
+                className="identity__submit"
+                type="submit"
+                disabled={isLoadingParticipants || Boolean(participantsError)}
+              >
+                {isLoadingParticipants ? 'Lade...' : 'Code prüfen'}
               </button>
             </form>
           )}
@@ -217,6 +237,8 @@ function App() {
           <p className="categories__eyebrow">{participantCount} Teilnehmende</p>
           <h2 id="categories-title">Abstimmung</h2>
         </div>
+
+        {votesError ? <p className="categories__notice">{votesError}</p> : null}
 
         {!selectedParticipant ? (
           <p className="categories__notice">
@@ -275,9 +297,12 @@ function App() {
                         <button
                           className="category-card__submit"
                           type="button"
+                          disabled={submittingCategoryId === category.id}
                           onClick={() => submitVote(category.id)}
                         >
-                          Stimme abgeben
+                          {submittingCategoryId === category.id
+                            ? 'Speichere...'
+                            : 'Stimme abgeben'}
                         </button>
                       ) : null}
                     </div>
