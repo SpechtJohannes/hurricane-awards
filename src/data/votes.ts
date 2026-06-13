@@ -56,6 +56,21 @@ export async function loadVotes(): Promise<Vote[]> {
   return (data ?? []).map((row) => mapVote(row as VoteRow))
 }
 
+export async function deleteVotesForCategory(categoryId: string): Promise<void> {
+  if (!supabase) {
+    throw new Error('Supabase ist noch nicht konfiguriert.')
+  }
+
+  const { error } = await supabase
+    .from('votes')
+    .delete()
+    .eq('category_id', categoryId)
+
+  if (error) {
+    throw error
+  }
+}
+
 export async function saveVote(vote: Vote): Promise<Vote> {
   if (!supabase) {
     throw new Error('Supabase ist noch nicht konfiguriert.')

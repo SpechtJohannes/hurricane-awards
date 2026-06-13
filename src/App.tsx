@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import {
   loadCategories,
+  updateCategoryStatus,
   type Category,
   type CategoryStatus,
 } from './data/categories'
 import { loadParticipants, type Participant } from './data/participants'
 import {
+  deleteVotesForCategory,
   loadVotes,
   loadVotesForParticipant,
   saveVote,
@@ -24,6 +26,12 @@ function App() {
   const [categories, setCategories] = useState<Category[]>([])
   const [participantsError, setParticipantsError] = useState('')
   const [categoriesError, setCategoriesError] = useState('')
+  const [adminError, setAdminError] = useState('')
+  const [updatingCategoryId, setUpdatingCategoryId] = useState<string | null>(null)
+  const [resettingCategoryId, setResettingCategoryId] = useState<string | null>(
+    null,
+  )
+  const [isAdminVisible, setIsAdminVisible] = useState(false)
   const [isLoadingData, setIsLoadingData] = useState(true)
   const participantCount = participants.length
   const openCategories = categories.filter((category) => category.status === 'open')
@@ -172,6 +180,86 @@ function App() {
     }))
   }
 
+  function toggleAdminView() {
+    setIsAdminVisible((isVisible) => {
+      if (!isVisible) {
+        window.setTimeout(() => {
+          document.getElementById('admin')?.scrollIntoView({ behavior: 'smooth' })
+        })
+      }
+
+      return !isVisible
+    })
+  }
+
+  async function changeCategoryStatus(
+    categoryId: string,
+    status: CategoryStatus,
+  ) {
+    const previousCategories = categories
+
+    setAdminError('')
+    setUpdatingCategoryId(categoryId)
+    setCategories((currentCategories) =>
+      currentCategories.map((category) =>
+        category.id === categoryId ? { ...category, status } : category,
+      ),
+    )
+
+    try {
+      const updatedCategory = await updateCategoryStatus(categoryId, status)
+
+      setCategories((currentCategories) =>
+        currentCategories.map((category) =>
+          category.id === categoryId ? updatedCategory : category,
+        ),
+      )
+    } catch {
+      setCategories(previousCategories)
+      setAdminError('Der Status konnte gerade nicht gespeichert werden.')
+    } finally {
+      setUpdatingCategoryId(null)
+    }
+  }
+
+  async function resetCategoryVotes(categoryId: string) {
+    const shouldReset = window.confirm(
+      'Wirklich alle Stimmen für diese Kategorie löschen?',
+    )
+
+    if (!shouldReset) {
+      return
+    }
+
+    setAdminError('')
+    setResultsError('')
+    setResettingCategoryId(categoryId)
+
+    try {
+      await deleteVotesForCategory(categoryId)
+
+      const [loadedCategories, loadedVotes, loadedParticipantVotes] =
+        await Promise.all([
+          loadCategories(),
+          loadVotes(),
+          selectedParticipant
+            ? loadVotesForParticipant(selectedParticipant.id)
+            : Promise.resolve<Vote[]>([]),
+        ])
+
+      setCategories(loadedCategories)
+      setAllVotes(loadedVotes)
+
+      if (selectedParticipant) {
+        setVotes(loadedParticipantVotes)
+      }
+    } catch {
+      setAdminError('Die Stimmen konnten gerade nicht gelöscht werden.')
+    } finally {
+      setResettingCategoryId(null)
+    }
+  }
+
   async function submitVote(categoryId: string) {
     if (!selectedParticipant) {
       return
@@ -231,6 +319,13 @@ function App() {
           <a className="hero__button" href="#abstimmung">
             Zur Abstimmung
           </a>
+          <button
+            className="hero__button hero__button--secondary"
+            type="button"
+            onClick={toggleAdminView}
+          >
+            {isAdminVisible ? 'Admin schließen' : 'Admin öffnen'}
+          </button>
         </div>
 
         <div className="stage-lights" aria-hidden="true">
@@ -295,6 +390,63 @@ function App() {
           )}
         </div>
       </section>
+
+      {isAdminVisible ? (
+        <section className="admin" id="admin" aria-labelledby="admin-title">
+          <div className="admin__header">
+            <p className="admin__eyebrow">Admin</p>
+            <h2 id="admin-title">Kategorien</h2>
+          </div>
+
+          {adminError ? <p className="admin__notice">{adminError}</p> : null}
+          {categoriesError ? (
+            <p className="admin__notice">{categoriesError}</p>
+          ) : null}
+
+          <div className="admin__list">
+            {categories.map((category) => (
+              <article className="admin-card" key={category.id}>
+                <div>
+                  <h3>{category.title}</h3>
+                  <p>Aktueller Status: {statusLabels[category.status]}</p>
+                </div>
+
+                <label>
+                  Status ändern
+                  <select
+                    value={category.status}
+                    disabled={
+                      updatingCategoryId === category.id ||
+                      resettingCategoryId === category.id
+                    }
+                    onChange={(event) =>
+                      changeCategoryStatus(
+                        category.id,
+                        event.target.value as CategoryStatus,
+                      )
+                    }
+                  >
+                    <option value="upcoming">upcoming</option>
+                    <option value="open">open</option>
+                    <option value="closed">closed</option>
+                  </select>
+                </label>
+
+                <button
+                  className="admin-card__reset"
+                  type="button"
+                  disabled={resettingCategoryId === category.id}
+                  onClick={() => resetCategoryVotes(category.id)}
+                >
+                  {resettingCategoryId === category.id
+                    ? 'Setze zurück...'
+                    : 'Stimmen zurücksetzen'}
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="categories" id="abstimmung" aria-labelledby="categories-title">
         <div className="categories__header">

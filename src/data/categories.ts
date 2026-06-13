@@ -41,3 +41,25 @@ export async function loadCategories(): Promise<Category[]> {
 
   return (data ?? []).map((row) => mapCategory(row as CategoryRow))
 }
+
+export async function updateCategoryStatus(
+  categoryId: string,
+  status: CategoryStatus,
+): Promise<Category> {
+  if (!supabase) {
+    throw new Error('Supabase ist noch nicht konfiguriert.')
+  }
+
+  const { data, error } = await supabase
+    .from('categories')
+    .update({ status })
+    .eq('id', categoryId)
+    .select('id, title, description, status')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return mapCategory(data as CategoryRow)
+}
