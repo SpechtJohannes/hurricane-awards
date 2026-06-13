@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import {
   loadCategories,
   type Category,
@@ -6,6 +6,7 @@ import {
 } from './data/categories'
 import { loadParticipants, type Participant } from './data/participants'
 import {
+  loadVotes,
   loadVotesForParticipant,
   saveVote,
   type Vote,
@@ -32,7 +33,9 @@ function App() {
   const [accessCode, setAccessCode] = useState('')
   const [accessCodeError, setAccessCodeError] = useState('')
   const [votes, setVotes] = useState<Vote[]>([])
+  const [allVotes, setAllVotes] = useState<Vote[]>([])
   const [votesError, setVotesError] = useState('')
+  const [resultsError, setResultsError] = useState('')
   const [selectedVotesByCategory, setSelectedVotesByCategory] = useState<
     Record<string, string>
   >({})
@@ -63,6 +66,18 @@ function App() {
             'Die Kategorien konnten gerade nicht geladen werden.',
           )
         }
+      }
+
+      try {
+        const loadedVotes = await loadVotes()
+
+        if (isCurrent) {
+          setAllVotes(loadedVotes)
+        }
+      } catch {
+        if (isCurrent) {
+          setResultsError('Die Ergebnisse konnten gerade nicht geladen werden.')
+        }
       } finally {
         if (isCurrent) {
           setIsLoadingData(false)
@@ -76,6 +91,41 @@ function App() {
       isCurrent = false
     }
   }, [])
+
+  const resultsByCategory = useMemo(
+    () =>
+      categories.map((category) => {
+        const results = participants
+          .map((participant) => ({
+            participant,
+            voteCount: allVotes.filter(
+              (vote) =>
+                vote.categoryId === category.id &&
+                vote.votedForId === participant.id,
+            ).length,
+          }))
+          .sort((firstResult, secondResult) => {
+            if (secondResult.voteCount !== firstResult.voteCount) {
+              return secondResult.voteCount - firstResult.voteCount
+            }
+
+            return firstResult.participant.displayName.localeCompare(
+              secondResult.participant.displayName,
+            )
+          })
+
+        const highestVoteCount = results[0]?.voteCount ?? 0
+
+        return {
+          category,
+          results,
+          highestVoteCount,
+        }
+      }),
+    [allVotes, categories, participants],
+  )
+
+  const hasVotes = allVotes.length > 0
 
   async function submitAccessCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -151,6 +201,7 @@ function App() {
       const savedVote = await saveVote(vote)
 
       setVotes((currentVotes) => [...currentVotes, savedVote])
+      setAllVotes((currentVotes) => [...currentVotes, savedVote])
       setSelectedVotesByCategory((currentVotes) => {
         const remainingVotes = { ...currentVotes }
         delete remainingVotes[categoryId]
@@ -326,6 +377,55 @@ function App() {
                 </article>
               )
             })}
+          </div>
+        )}
+      </section>
+
+      <section className="results" id="ergebnisse" aria-labelledby="results-title">
+        <div className="results__header">
+          <p className="results__eyebrow">Zwischenstand</p>
+          <h2 id="results-title">Ergebnisse</h2>
+        </div>
+
+        {resultsError ? <p className="results__notice">{resultsError}</p> : null}
+
+        {!hasVotes ? (
+          <p className="results__notice">Noch keine Stimmen abgegeben.</p>
+        ) : (
+          <div className="results__grid">
+            {resultsByCategory.map(({ category, results, highestVoteCount }) => (
+              <article className="result-card" key={category.id}>
+                <h3>{category.title}</h3>
+
+                <div className="result-card__list">
+                  {results.map(({ participant, voteCount }) => {
+                    const width =
+                      highestVoteCount > 0
+                        ? `${(voteCount / highestVoteCount) * 100}%`
+                        : '0%'
+                    const isLeader =
+                      highestVoteCount > 0 && voteCount === highestVoteCount
+
+                    return (
+                      <div
+                        className={`result-card__row${
+                          isLeader ? ' result-card__row--leader' : ''
+                        }`}
+                        key={participant.id}
+                      >
+                        <div className="result-card__label">
+                          <span>{participant.displayName}</span>
+                          <strong>{voteCount}</strong>
+                        </div>
+                        <div className="result-card__bar" aria-hidden="true">
+                          <span style={{ width }} />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </article>
+            ))}
           </div>
         )}
       </section>
