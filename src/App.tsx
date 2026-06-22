@@ -21,6 +21,105 @@ const statusLabels: Record<CategoryStatus, string> = {
   closed: 'Geschlossen',
 }
 
+type CategoryResult = {
+  participant: Participant
+  voteCount: number
+}
+
+type ResultCardProps = {
+  category: Category
+  results: CategoryResult[]
+  highestVoteCount: number
+}
+
+function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
+  const isClosed = category.status === 'closed'
+  const [isClosedResultExpanded, setIsClosedResultExpanded] = useState(false)
+  const isCollapsed = isClosed && !isClosedResultExpanded
+  const resultListId = `result-list-${category.id}`
+  const leaders = results.filter(
+    ({ voteCount }) => highestVoteCount > 0 && voteCount === highestVoteCount,
+  )
+
+  return (
+    <article
+      className={`result-card${isCollapsed ? ' result-card--collapsed' : ''}`}
+    >
+      <div className="result-card__header">
+        <div>
+          <h3>{category.title}</h3>
+          {isClosed ? (
+            <span className="result-card__status">{statusLabels.closed}</span>
+          ) : null}
+        </div>
+
+        {isClosed ? (
+          <button
+            className="result-card__toggle"
+            type="button"
+            onClick={() => setIsClosedResultExpanded((isExpanded) => !isExpanded)}
+            aria-expanded={!isCollapsed}
+            aria-controls={resultListId}
+            aria-label={`${category.title} ${
+              isCollapsed ? 'aufklappen' : 'einklappen'
+            }`}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24">
+              <path d="m6.7 9.3 5.3 5.29 5.3-5.3 1.4 1.42-6.7 6.7-6.7-6.7 1.4-1.42Z" />
+            </svg>
+          </button>
+        ) : null}
+      </div>
+
+      {isCollapsed ? (
+        <div className="result-card__leaders">
+          <span>Führung</span>
+          {leaders.length > 0 ? (
+            <ul>
+              {leaders.map(({ participant, voteCount }) => (
+                <li key={participant.id}>
+                  <strong>{participant.displayName}</strong>
+                  <span>{voteCount}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Noch keine Stimmen in dieser Abstimmung.</p>
+          )}
+        </div>
+      ) : null}
+
+      <div className="result-card__list" id={resultListId} hidden={isCollapsed}>
+        {results.map(({ participant, voteCount }) => {
+          const width =
+            highestVoteCount > 0
+              ? `${(voteCount / highestVoteCount) * 100}%`
+              : '0%'
+          const isLeader =
+            highestVoteCount > 0 && voteCount === highestVoteCount
+
+          return (
+            <div
+              className={`result-card__row${
+                isLeader ? ' result-card__row--leader' : ''
+              }`}
+              key={participant.id}
+            >
+              <div className="result-card__label">
+                <span>{participant.displayName}</span>
+                <strong>{voteCount}</strong>
+              </div>
+              <div className="result-card__bar" aria-hidden="true">
+                <span style={{ width }} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </article>
+  )
+}
+
 function App() {
   const [participants, setParticipants] = useState<Participant[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -557,37 +656,12 @@ function App() {
         ) : (
           <div className="results__grid">
             {resultsByCategory.map(({ category, results, highestVoteCount }) => (
-              <article className="result-card" key={category.id}>
-                <h3>{category.title}</h3>
-
-                <div className="result-card__list">
-                  {results.map(({ participant, voteCount }) => {
-                    const width =
-                      highestVoteCount > 0
-                        ? `${(voteCount / highestVoteCount) * 100}%`
-                        : '0%'
-                    const isLeader =
-                      highestVoteCount > 0 && voteCount === highestVoteCount
-
-                    return (
-                      <div
-                        className={`result-card__row${
-                          isLeader ? ' result-card__row--leader' : ''
-                        }`}
-                        key={participant.id}
-                      >
-                        <div className="result-card__label">
-                          <span>{participant.displayName}</span>
-                          <strong>{voteCount}</strong>
-                        </div>
-                        <div className="result-card__bar" aria-hidden="true">
-                          <span style={{ width }} />
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </article>
+              <ResultCard
+                category={category}
+                results={results}
+                highestVoteCount={highestVoteCount}
+                key={`${category.id}-${category.status}`}
+              />
             ))}
           </div>
         )}
