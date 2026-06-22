@@ -308,7 +308,25 @@ function App() {
       className="home"
       aria-label={`Hurricane Awards 2026 mit ${participantCount} Teilnehmenden`}
     >
-      <section className="hero" aria-labelledby="hero-title">
+      <header className="hero" aria-labelledby="hero-title">
+        <button
+          className="hero__admin"
+          type="button"
+          onClick={toggleAdminView}
+          aria-expanded={isAdminVisible}
+          aria-controls="admin"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+          >
+            <path d="M19.14 12.94a7.43 7.43 0 0 0 .05-.94 7.43 7.43 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.2 7.2 0 0 0-1.62-.94L14.39 2.8a.49.49 0 0 0-.49-.4h-3.8a.49.49 0 0 0-.49.4l-.36 2.52a7.2 7.2 0 0 0-1.62.94L5.24 5.3a.5.5 0 0 0-.61.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.43 7.43 0 0 0-.05.94c0 .32.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.5.39 1.04.7 1.62.94l.36 2.52c.04.24.24.4.49.4h3.8c.25 0 .45-.16.49-.4l.36-2.52a7.2 7.2 0 0 0 1.62-.94l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
+          </svg>
+          <span>{isAdminVisible ? 'Admin schließen' : 'Admin'}</span>
+        </button>
+
         <div className="hero__content">
           <p className="hero__eyebrow">Live aus dem Freundeskreis</p>
           <h1 id="hero-title">Hurricane Awards 2026</h1>
@@ -319,13 +337,6 @@ function App() {
           <a className="hero__button" href="#abstimmung">
             Zur Abstimmung
           </a>
-          <button
-            className="hero__button hero__button--secondary"
-            type="button"
-            onClick={toggleAdminView}
-          >
-            {isAdminVisible ? 'Admin schließen' : 'Admin öffnen'}
-          </button>
         </div>
 
         <div className="stage-lights" aria-hidden="true">
@@ -333,7 +344,7 @@ function App() {
           <span />
           <span />
         </div>
-      </section>
+      </header>
 
       <section
         className="identity"
