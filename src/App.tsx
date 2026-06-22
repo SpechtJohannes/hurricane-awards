@@ -13,6 +13,10 @@ import {
   saveVote,
   type Vote,
 } from './data/votes'
+import {
+  loadAllTimeStandings,
+  type AllTimeStanding,
+} from './data/allTimeStandings'
 import './App.css'
 
 const statusLabels: Record<CategoryStatus, string> = {
@@ -143,6 +147,9 @@ function App() {
   const [allVotes, setAllVotes] = useState<Vote[]>([])
   const [votesError, setVotesError] = useState('')
   const [resultsError, setResultsError] = useState('')
+  const [allTimeStandings, setAllTimeStandings] = useState<AllTimeStanding[]>([])
+  const [standingsError, setStandingsError] = useState('')
+  const [isStandingsLoading, setIsStandingsLoading] = useState(true)
   const [selectedVotesByCategory, setSelectedVotesByCategory] = useState<
     Record<string, string>
   >({})
@@ -188,6 +195,24 @@ function App() {
       } finally {
         if (isCurrent) {
           setIsLoadingData(false)
+        }
+      }
+
+      try {
+        const loadedStandings = await loadAllTimeStandings()
+
+        if (isCurrent) {
+          setAllTimeStandings(loadedStandings)
+        }
+      } catch {
+        if (isCurrent) {
+          setStandingsError(
+            'Das Gesamtclassement konnte gerade nicht geladen werden.',
+          )
+        }
+      } finally {
+        if (isCurrent) {
+          setIsStandingsLoading(false)
         }
       }
     }
@@ -663,6 +688,54 @@ function App() {
                 key={`${category.id}-${category.status}`}
               />
             ))}
+          </div>
+        )}
+      </section>
+
+      <section
+        className="standings"
+        id="gesamtclassement"
+        aria-labelledby="standings-title"
+      >
+        <div className="standings__header">
+          <p className="standings__eyebrow">Ewige Tabelle</p>
+          <h2 id="standings-title">Gesamtclassement</h2>
+        </div>
+
+        {isStandingsLoading ? (
+          <p className="standings__notice" role="status">
+            Gesamtclassement wird geladen...
+          </p>
+        ) : standingsError ? (
+          <p className="standings__notice standings__notice--error" role="alert">
+            {standingsError}
+          </p>
+        ) : allTimeStandings.length === 0 ? (
+          <p className="standings__notice">Noch keine Gesamtpunkte vorhanden.</p>
+        ) : (
+          <div className="standings__table" role="table" aria-label="Gesamtclassement">
+            <div className="standings__columns" role="row">
+              <span role="columnheader">Platz</span>
+              <span role="columnheader">Name</span>
+              <span role="columnheader">Punkte</span>
+            </div>
+            <ol>
+              {allTimeStandings.map((standing, index) => (
+                <li key={standing.participantId} role="row">
+                  <span
+                    className="standings__rank"
+                    role="cell"
+                    aria-label={`Platz ${index + 1}`}
+                  >
+                    {index + 1}
+                  </span>
+                  <strong role="cell">{standing.participantName}</strong>
+                  <span className="standings__points" role="cell">
+                    {standing.totalPoints}
+                  </span>
+                </li>
+              ))}
+            </ol>
           </div>
         )}
       </section>
