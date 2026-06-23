@@ -17,12 +17,13 @@ import {
   loadAllTimeStandings,
   type AllTimeStanding,
 } from './data/allTimeStandings'
+import { t } from './i18n'
 import './App.css'
 
 const statusLabels: Record<CategoryStatus, string> = {
-  upcoming: 'Demnächst',
-  open: 'Offen',
-  closed: 'Geschlossen',
+  upcoming: t('status.upcoming'),
+  open: t('status.open'),
+  closed: t('status.closed'),
 }
 
 type CategoryResult = {
@@ -65,7 +66,7 @@ function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
             aria-expanded={!isCollapsed}
             aria-controls={resultListId}
             aria-label={`${category.title} ${
-              isCollapsed ? 'aufklappen' : 'einklappen'
+              isCollapsed ? t('results.expand') : t('results.collapse')
             }`}
           >
             <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24">
@@ -77,7 +78,7 @@ function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
 
       {isCollapsed ? (
         <div className="result-card__leaders">
-          <span>Führung</span>
+          <span>{t('results.leading')}</span>
           {leaders.length > 0 ? (
             <ul>
               {leaders.map(({ participant, voteCount }) => (
@@ -88,7 +89,7 @@ function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
               ))}
             </ul>
           ) : (
-            <p>Noch keine Stimmen in dieser Abstimmung.</p>
+            <p>{t('results.emptyCategory')}</p>
           )}
         </div>
       ) : null}
@@ -174,10 +175,10 @@ function App() {
       } catch {
         if (isCurrent) {
           setParticipantsError(
-            'Die Teilnehmer konnten gerade nicht geladen werden.',
+            t('identity.errors.participantsLoad'),
           )
           setCategoriesError(
-            'Die Kategorien konnten gerade nicht geladen werden.',
+            t('admin.errors.categoriesLoad'),
           )
         }
       }
@@ -190,7 +191,7 @@ function App() {
         }
       } catch {
         if (isCurrent) {
-          setResultsError('Die Ergebnisse konnten gerade nicht geladen werden.')
+          setResultsError(t('results.errors.load'))
         }
       } finally {
         if (isCurrent) {
@@ -207,7 +208,7 @@ function App() {
       } catch {
         if (isCurrent) {
           setStandingsError(
-            'Das Gesamtclassement konnte gerade nicht geladen werden.',
+            t('standings.errors.load'),
           )
         }
       } finally {
@@ -270,7 +271,7 @@ function App() {
 
     if (!participant) {
       setAccessCodeError(
-        'Der Code passt leider zu niemandem. Schau nochmal auf deinen Festival Code.',
+        t('identity.errors.invalidAccessCode'),
       )
       return
     }
@@ -284,7 +285,7 @@ function App() {
     try {
       setVotes(await loadVotesForParticipant(participant.id))
     } catch {
-      setVotesError('Deine bisherigen Stimmen konnten nicht geladen werden.')
+      setVotesError(t('identity.errors.participantVotesLoad'))
     }
   }
 
@@ -340,7 +341,7 @@ function App() {
       )
     } catch {
       setCategories(previousCategories)
-      setAdminError('Der Status konnte gerade nicht gespeichert werden.')
+      setAdminError(t('admin.errors.statusSave'))
     } finally {
       setUpdatingCategoryId(null)
     }
@@ -348,7 +349,7 @@ function App() {
 
   async function resetCategoryVotes(categoryId: string) {
     const shouldReset = window.confirm(
-      'Wirklich alle Stimmen für diese Kategorie löschen?',
+      t('admin.confirmResetVotes'),
     )
 
     if (!shouldReset) {
@@ -378,7 +379,7 @@ function App() {
         setVotes(loadedParticipantVotes)
       }
     } catch {
-      setAdminError('Die Stimmen konnten gerade nicht gelöscht werden.')
+      setAdminError(t('admin.errors.votesDelete'))
     } finally {
       setResettingCategoryId(null)
     }
@@ -421,7 +422,7 @@ function App() {
         return remainingVotes
       })
     } catch {
-      setVotesError('Deine Stimme konnte gerade nicht gespeichert werden.')
+      setVotesError(t('categories.errors.voteSave'))
     } finally {
       setSubmittingCategoryId(null)
     }
@@ -430,7 +431,7 @@ function App() {
   return (
     <main
       className="home"
-      aria-label={`Hurricane Awards 2026 mit ${participantCount} Teilnehmenden`}
+      aria-label={t('app.ariaLabel', { count: participantCount })}
     >
       <header className="hero" aria-labelledby="hero-title">
         <button
@@ -448,18 +449,15 @@ function App() {
           >
             <path d="M19.14 12.94a7.43 7.43 0 0 0 .05-.94 7.43 7.43 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.2 7.2 0 0 0-1.62-.94L14.39 2.8a.49.49 0 0 0-.49-.4h-3.8a.49.49 0 0 0-.49.4l-.36 2.52a7.2 7.2 0 0 0-1.62.94L5.24 5.3a.5.5 0 0 0-.61.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.43 7.43 0 0 0-.05.94c0 .32.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.5.39 1.04.7 1.62.94l.36 2.52c.04.24.24.4.49.4h3.8c.25 0 .45-.16.49-.4l.36-2.52a7.2 7.2 0 0 0 1.62-.94l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
           </svg>
-          <span>{isAdminVisible ? 'Admin schließen' : 'Admin'}</span>
+          <span>{isAdminVisible ? t('hero.adminClose') : t('hero.admin')}</span>
         </button>
 
         <div className="hero__content">
-          <p className="hero__eyebrow">Live aus dem Freundeskreis</p>
-          <h1 id="hero-title">Hurricane Awards 2026</h1>
-          <p className="hero__subtitle">
-            Ein entspanntes Wochenende mit Freunden? Nein. Dies ist ein
-            knallharter Wettbewerb.
-          </p>
+          <p className="hero__eyebrow">{t('hero.eyebrow')}</p>
+          <h1 id="hero-title">{t('hero.title')}</h1>
+          <p className="hero__subtitle">{t('hero.subtitle')}</p>
           <a className="hero__button" href="#abstimmung">
-            Zur Abstimmung
+            {t('hero.voteCta')}
           </a>
         </div>
 
@@ -476,12 +474,12 @@ function App() {
         aria-labelledby="identity-title"
       >
         <div className="identity__content">
-          <h2 id="identity-title">Gib deinen Festival Code ein</h2>
+          <h2 id="identity-title">{t('identity.title')}</h2>
 
           {selectedParticipant ? (
             <div className="identity__selected">
               <p>
-                Angemeldet als:{' '}
+                {t('identity.loggedInAs')}{' '}
                 <strong>{selectedParticipant.displayName}</strong>
               </p>
               <button
@@ -489,12 +487,14 @@ function App() {
                 type="button"
                 onClick={changeParticipant}
               >
-                Person wechseln
+                {t('identity.changePerson')}
               </button>
             </div>
           ) : (
             <form className="identity__form" onSubmit={submitAccessCode}>
-              <label htmlFor="festival-code">Festival Code</label>
+              <label htmlFor="festival-code">
+                {t('identity.festivalCodeLabel')}
+              </label>
               <input
                 id="festival-code"
                 type="text"
@@ -506,7 +506,7 @@ function App() {
                 }}
                 autoComplete="off"
                 inputMode="text"
-                placeholder="Code hier eingeben"
+                placeholder={t('identity.festivalCodePlaceholder')}
               />
               {accessCodeError ? (
                 <p className="identity__error">{accessCodeError}</p>
@@ -519,7 +519,7 @@ function App() {
                 type="submit"
                 disabled={isLoadingData || Boolean(participantsError)}
               >
-                {isLoadingData ? 'Lade...' : 'Code prüfen'}
+                {isLoadingData ? t('common.loading') : t('identity.submit')}
               </button>
             </form>
           )}
@@ -529,8 +529,8 @@ function App() {
       {isAdminVisible ? (
         <section className="admin" id="admin" aria-labelledby="admin-title">
           <div className="admin__header">
-            <p className="admin__eyebrow">Admin</p>
-            <h2 id="admin-title">Kategorien</h2>
+            <p className="admin__eyebrow">{t('admin.eyebrow')}</p>
+            <h2 id="admin-title">{t('admin.title')}</h2>
           </div>
 
           {adminError ? <p className="admin__notice">{adminError}</p> : null}
@@ -543,11 +543,15 @@ function App() {
               <article className="admin-card" key={category.id}>
                 <div>
                   <h3>{category.title}</h3>
-                  <p>Aktueller Status: {statusLabels[category.status]}</p>
+                  <p>
+                    {t('admin.currentStatus', {
+                      status: statusLabels[category.status],
+                    })}
+                  </p>
                 </div>
 
                 <label>
-                  Status ändern
+                  {t('admin.changeStatus')}
                   <select
                     value={category.status}
                     disabled={
@@ -561,9 +565,13 @@ function App() {
                       )
                     }
                   >
-                    <option value="upcoming">upcoming</option>
-                    <option value="open">open</option>
-                    <option value="closed">closed</option>
+                    <option value="upcoming">
+                      {t('admin.statusOptions.upcoming')}
+                    </option>
+                    <option value="open">{t('admin.statusOptions.open')}</option>
+                    <option value="closed">
+                      {t('admin.statusOptions.closed')}
+                    </option>
                   </select>
                 </label>
 
@@ -574,8 +582,8 @@ function App() {
                   onClick={() => resetCategoryVotes(category.id)}
                 >
                   {resettingCategoryId === category.id
-                    ? 'Setze zurück...'
-                    : 'Stimmen zurücksetzen'}
+                    ? t('admin.resettingVotes')
+                    : t('admin.resetVotes')}
                 </button>
               </article>
             ))}
@@ -585,8 +593,10 @@ function App() {
 
       <section className="categories" id="abstimmung" aria-labelledby="categories-title">
         <div className="categories__header">
-          <p className="categories__eyebrow">{participantCount} Teilnehmende</p>
-          <h2 id="categories-title">Abstimmung</h2>
+          <p className="categories__eyebrow">
+            {t('categories.eyebrow', { count: participantCount })}
+          </p>
+          <h2 id="categories-title">{t('categories.title')}</h2>
         </div>
 
         {votesError ? <p className="categories__notice">{votesError}</p> : null}
@@ -596,7 +606,7 @@ function App() {
 
         {!selectedParticipant ? (
           <p className="categories__notice">
-            Gib zuerst deinen Festival Code ein. Danach kannst du abstimmen.
+            {t('categories.loginRequired')}
           </p>
         ) : (
           <div className="categories__grid">
@@ -625,12 +635,12 @@ function App() {
 
                   {hasAlreadyVoted ? (
                     <p className="category-card__voted">
-                      Du hast bereits abgestimmt.
+                      {t('categories.alreadyVoted')}
                     </p>
                   ) : (
                     <div className="category-card__vote">
                       <label htmlFor={`vote-${category.id}`}>
-                        Stimme geht an
+                        {t('categories.voteTargetLabel')}
                       </label>
                       <select
                         id={`vote-${category.id}`}
@@ -639,7 +649,7 @@ function App() {
                           selectVote(category.id, event.target.value)
                         }
                       >
-                        <option value="">Person auswählen</option>
+                        <option value="">{t('categories.selectPerson')}</option>
                         {eligibleParticipants.map((participant) => (
                           <option key={participant.id} value={participant.id}>
                             {participant.displayName}
@@ -655,8 +665,8 @@ function App() {
                           onClick={() => submitVote(category.id)}
                         >
                           {submittingCategoryId === category.id
-                            ? 'Speichere...'
-                            : 'Stimme abgeben'}
+                            ? t('common.saving')
+                            : t('categories.submitVote')}
                         </button>
                       ) : null}
                     </div>
@@ -670,14 +680,14 @@ function App() {
 
       <section className="results" id="ergebnisse" aria-labelledby="results-title">
         <div className="results__header">
-          <p className="results__eyebrow">Zwischenstand</p>
-          <h2 id="results-title">Ergebnisse</h2>
+          <p className="results__eyebrow">{t('results.eyebrow')}</p>
+          <h2 id="results-title">{t('results.title')}</h2>
         </div>
 
         {resultsError ? <p className="results__notice">{resultsError}</p> : null}
 
         {!hasVotes ? (
-          <p className="results__notice">Noch keine Stimmen abgegeben.</p>
+          <p className="results__notice">{t('results.empty')}</p>
         ) : (
           <div className="results__grid">
             {resultsByCategory.map(({ category, results, highestVoteCount }) => (
@@ -698,26 +708,30 @@ function App() {
         aria-labelledby="standings-title"
       >
         <div className="standings__header">
-          <p className="standings__eyebrow">Ewige Tabelle</p>
-          <h2 id="standings-title">Gesamtclassement</h2>
+          <p className="standings__eyebrow">{t('standings.eyebrow')}</p>
+          <h2 id="standings-title">{t('standings.title')}</h2>
         </div>
 
         {isStandingsLoading ? (
           <p className="standings__notice" role="status">
-            Gesamtclassement wird geladen...
+            {t('standings.loading')}
           </p>
         ) : standingsError ? (
           <p className="standings__notice standings__notice--error" role="alert">
             {standingsError}
           </p>
         ) : allTimeStandings.length === 0 ? (
-          <p className="standings__notice">Noch keine Gesamtpunkte vorhanden.</p>
+          <p className="standings__notice">{t('standings.empty')}</p>
         ) : (
-          <div className="standings__table" role="table" aria-label="Gesamtclassement">
+          <div
+            className="standings__table"
+            role="table"
+            aria-label={t('standings.title')}
+          >
             <div className="standings__columns" role="row">
-              <span role="columnheader">Platz</span>
-              <span role="columnheader">Name</span>
-              <span role="columnheader">Punkte</span>
+              <span role="columnheader">{t('standings.columns.rank')}</span>
+              <span role="columnheader">{t('standings.columns.name')}</span>
+              <span role="columnheader">{t('standings.columns.points')}</span>
             </div>
             <ol>
               {allTimeStandings.map((standing, index) => (
@@ -725,7 +739,7 @@ function App() {
                   <span
                     className="standings__rank"
                     role="cell"
-                    aria-label={`Platz ${index + 1}`}
+                    aria-label={t('standings.rankLabel', { rank: index + 1 })}
                   >
                     {index + 1}
                   </span>

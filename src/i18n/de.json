@@ -1,0 +1,93 @@
+{
+  "app": {
+    "ariaLabel": "Hurricane Awards 2026 mit {{count}} Teilnehmenden"
+  },
+  "status": {
+    "upcoming": "Demnächst",
+    "open": "Offen",
+    "closed": "Geschlossen"
+  },
+  "common": {
+    "loading": "Lade...",
+    "saving": "Speichere..."
+  },
+  "hero": {
+    "admin": "Admin",
+    "adminClose": "Admin schließen",
+    "eyebrow": "Live aus dem Freundeskreis",
+    "title": "Hurricane Awards 2026",
+    "subtitle": "Ein entspanntes Wochenende mit Freunden? Nein. Dies ist ein knallharter Wettbewerb.",
+    "voteCta": "Zur Abstimmung"
+  },
+  "identity": {
+    "title": "Gib deinen Festival Code ein",
+    "loggedInAs": "Angemeldet als:",
+    "changePerson": "Person wechseln",
+    "festivalCodeLabel": "Festival Code",
+    "festivalCodePlaceholder": "Code hier eingeben",
+    "submit": "Code prüfen",
+    "errors": {
+      "participantsLoad": "Die Teilnehmer konnten gerade nicht geladen werden.",
+      "invalidAccessCode": "Der Code passt leider zu niemandem. Schau nochmal auf deinen Festival Code.",
+      "participantVotesLoad": "Deine bisherigen Stimmen konnten nicht geladen werden."
+    }
+  },
+  "admin": {
+    "eyebrow": "Admin",
+    "title": "Kategorien",
+    "currentStatus": "Aktueller Status: {{status}}",
+    "changeStatus": "Status ändern",
+    "resetVotes": "Stimmen zurücksetzen",
+    "resettingVotes": "Setze zurück...",
+    "confirmResetVotes": "Wirklich alle Stimmen für diese Kategorie löschen?",
+    "statusOptions": {
+      "upcoming": "upcoming",
+      "open": "open",
+      "closed": "closed"
+    },
+    "errors": {
+      "categoriesLoad": "Die Kategorien konnten gerade nicht geladen werden.",
+      "statusSave": "Der Status konnte gerade nicht gespeichert werden.",
+      "votesDelete": "Die Stimmen konnten gerade nicht gelöscht werden."
+    }
+  },
+  "categories": {
+    "eyebrow": "{{count}} Teilnehmende",
+    "title": "Abstimmung",
+    "loginRequired": "Gib zuerst deinen Festival Code ein. Danach kannst du abstimmen.",
+    "alreadyVoted": "Du hast bereits abgestimmt.",
+    "voteTargetLabel": "Stimme geht an",
+    "selectPerson": "Person auswählen",
+    "submitVote": "Stimme abgeben",
+    "errors": {
+      "voteSave": "Deine Stimme konnte gerade nicht gespeichert werden."
+    }
+  },
+  "results": {
+    "eyebrow": "Zwischenstand",
+    "title": "Ergebnisse",
+    "leading": "Führung",
+    "emptyCategory": "Noch keine Stimmen in dieser Abstimmung.",
+    "empty": "Noch keine Stimmen abgegeben.",
+    "expand": "aufklappen",
+    "collapse": "einklappen",
+    "errors": {
+      "load": "Die Ergebnisse konnten gerade nicht geladen werden."
+    }
+  },
+  "standings": {
+    "eyebrow": "Ewige Tabelle",
+    "title": "Gesamtclassement",
+    "loading": "Gesamtclassement wird geladen...",
+    "empty": "Noch keine Gesamtpunkte vorhanden.",
+    "columns": {
+      "rank": "Platz",
+      "name": "Name",
+      "points": "Punkte"
+    },
+    "rankLabel": "Platz {{rank}}",
+    "errors": {
+      "load": "Das Gesamtclassement konnte gerade nicht geladen werden."
+    }
+  }
+}
