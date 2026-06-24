@@ -2,6 +2,15 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## PWA lokal prüfen
+
+```bash
+npm run build
+npm run preview
+```
+
+Die Preview-URL im Browser öffnen und in den DevTools unter `Application` prüfen, ob Manifest und Service Worker vorhanden sind. Für einen Install-Test auf einem mobilen Gerät die Preview über eine HTTPS-fähige Umgebung oder ein lokales Netzwerk-Setup mit gültigem HTTPS öffnen und anschließend die Browser-Funktion `Zum Startbildschirm hinzufügen` verwenden.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
