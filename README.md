@@ -1,5 +1,21 @@
 # React + TypeScript + Vite
 
+## Tests
+
+Die Unit-Test-Infrastruktur nutzt Vitest, React Testing Library, jest-dom,
+jsdom und den V8 Coverage Provider.
+
+```bash
+npm run test
+npm run test:watch
+npm run test:coverage
+```
+
+Testdateien liegen gebuendelt unter `src/test`. Das globale Setup befindet
+sich in `src/test/setupTests.ts` und wird zentral ueber `vite.config.ts`
+eingebunden. Die vorhandenen Beispieltests pruefen nur die lokale
+Test-Infrastruktur und vermeiden Supabase-Zugriffe durch Mocks.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 ## PWA lokal prüfen
