@@ -2,21 +2,29 @@
 
 ## Tests
 
-Die Unit-Test-Infrastruktur nutzt Vitest, React Testing Library, jest-dom,
-jsdom und den V8 Coverage Provider.
+Die Unit Tests werden mit Vitest, React Testing Library, jest-dom, jsdom und dem V8 Coverage Provider ausgeführt.
+
+### Lokale Testausführung
 
 ```bash
-npm run test
+npm test
+```
+
+Weitere Testbefehle:
+
+```bash
 npm run test:watch
 npm run test:coverage
 ```
 
-Testdateien liegen gebuendelt unter `src/test`. Das globale Setup befindet
-sich in `src/test/setupTests.ts` und wird zentral ueber `vite.config.ts`
-eingebunden. Die vorhandenen Beispieltests pruefen nur die lokale
-Test-Infrastruktur und vermeiden Supabase-Zugriffe durch Mocks.
+Die Testdateien liegen unter `src/test`. Das globale Setup befindet sich in `src/test/setupTests.ts` und wird zentral über `vite.config.ts` eingebunden.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### Automatische Testausführung
+
+Bei jedem Push und bei jedem Pull Request werden die Unit Tests automatisch über GitHub Actions ausgeführt.
+
+Das Ergebnis der Testausführung ist im GitHub Repository unter **Actions** sichtbar. Schlägt ein Test fehl, kann die Ursache im jeweiligen Workflow Log nachvollzogen werden.
+
 
 ## PWA lokal prüfen
 
