@@ -10,7 +10,10 @@ vi.mock('../lib/supabase', () => ({
 
 import { loadAllTimeStandings } from '../data/allTimeStandings'
 import { loadCategories, updateCategoryStatus } from '../data/categories'
-import { loadParticipants } from '../data/participants'
+import {
+  findParticipantByAccessCode,
+  loadParticipants,
+} from '../data/participants'
 import {
   deleteVotesForCategory,
   loadVotes,
@@ -103,6 +106,32 @@ describe('Supabase Datenzugriffe', () => {
     ])
     expect(fromMock).toHaveBeenCalledWith('participants')
     expect(order).toHaveBeenCalledWith('name')
+  })
+
+  it('findet Teilnehmer ueber den Access Code', async () => {
+    const maybeSingle = vi.fn().mockResolvedValue({
+      data: {
+        id: 'alice',
+        name: 'alice',
+        display_name: 'Alice',
+        access_code: 'ALICE42',
+      },
+      error: null,
+    })
+    const eq = vi.fn().mockReturnValue({ maybeSingle })
+    const select = vi.fn().mockReturnValue({ eq })
+    fromMock.mockReturnValue({ select })
+
+    await expect(findParticipantByAccessCode('ALICE42')).resolves.toEqual({
+      id: 'alice',
+      name: 'alice',
+      displayName: 'Alice',
+      accessCode: 'ALICE42',
+    })
+    expect(fromMock).toHaveBeenCalledWith('participants')
+    expect(select).toHaveBeenCalledWith('id, name, display_name, access_code')
+    expect(eq).toHaveBeenCalledWith('access_code', 'ALICE42')
+    expect(maybeSingle).toHaveBeenCalled()
   })
 
   it('laedt alle Stimmen und einzelne Teilnehmerstimmen aus Supabase', async () => {

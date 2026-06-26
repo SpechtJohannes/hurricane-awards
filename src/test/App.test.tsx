@@ -7,7 +7,11 @@ import {
   updateCategoryStatus,
   type Category,
 } from '../data/categories'
-import { loadParticipants, type Participant } from '../data/participants'
+import {
+  findParticipantByAccessCode,
+  loadParticipants,
+  type Participant,
+} from '../data/participants'
 import {
   deleteVotesForCategory,
   loadVotes,
@@ -27,6 +31,7 @@ vi.mock('../data/categories', () => ({
 }))
 
 vi.mock('../data/participants', () => ({
+  findParticipantByAccessCode: vi.fn(),
   loadParticipants: vi.fn(),
 }))
 
@@ -120,6 +125,13 @@ function mockLoadedData({
   loadedStandings?: AllTimeStanding[]
 } = {}) {
   vi.mocked(loadParticipants).mockResolvedValue(loadedParticipants)
+  vi.mocked(findParticipantByAccessCode).mockImplementation(async (accessCode) => {
+    return (
+      loadedParticipants.find(
+        (participant) => participant.accessCode === accessCode,
+      ) ?? null
+    )
+  })
   vi.mocked(loadCategories).mockResolvedValue(loadedCategories)
   vi.mocked(loadVotes).mockResolvedValue(loadedVotes)
   vi.mocked(loadVotesForParticipant).mockResolvedValue(participantVotes)
@@ -145,11 +157,7 @@ async function renderLoadedApp() {
   render(<App />)
 
   await screen.findByRole('main', {
-    name: /hurricane awards 2026 mit/i,
-  })
-
-  await waitFor(() => {
-    expect(screen.queryByText('Lade...')).not.toBeInTheDocument()
+    name: /hurricane awards 2026 anmeldung/i,
   })
 }
 
@@ -161,6 +169,10 @@ async function loginWith(code: string) {
     code,
   )
   await user.click(screen.getByRole('button', { name: /code/i }))
+
+  await waitFor(() => {
+    expect(screen.queryByText('Lade...')).not.toBeInTheDocument()
+  })
 
   return user
 }
@@ -185,6 +197,7 @@ beforeEach(async () => {
 describe('Sprachumschaltung', () => {
   it('schaltet feste UI-Texte auf Niederlaendisch um und speichert die Auswahl', async () => {
     await renderLoadedApp()
+    await loginWith('ALICE42')
 
     await userEvent.click(
       screen.getByRole('button', { name: /niederl/i }),
@@ -217,6 +230,25 @@ describe('Sprachumschaltung', () => {
 })
 
 describe('Login', () => {
+  it('zeigt vor der Anmeldung nur Festivalname und Codeformular', async () => {
+    await renderLoadedApp()
+
+    expect(
+      screen.getByRole('heading', { name: 'Hurricane Awards 2026' }),
+    ).toBeVisible()
+    expect(screen.getByRole('textbox', { name: /^festival code$/i })).toBeVisible()
+    expect(screen.getByRole('button', { name: /code/i })).toBeVisible()
+    expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /ergebnisse/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: /gesamtclassement/i }),
+    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^admin$/i })).not.toBeInTheDocument()
+    expect(loadParticipants).not.toHaveBeenCalled()
+    expect(loadVotes).not.toHaveBeenCalled()
+    expect(loadAllTimeStandings).not.toHaveBeenCalled()
+  })
+
   it('erlaubt Zugriff mit gueltigem Teilnehmercode', async () => {
     await renderLoadedApp()
 
@@ -225,6 +257,7 @@ describe('Login', () => {
     const identitySection = sectionForHeading(/festival code/i)
     expect(await within(identitySection).findByText(/angemeldet als:/i)).toBeVisible()
     expect(within(identitySection).getByText('Alice')).toBeVisible()
+    expect(findParticipantByAccessCode).toHaveBeenCalledWith('ALICE42')
     expect(loadVotesForParticipant).toHaveBeenCalledWith('alice')
   })
 
@@ -235,7 +268,36 @@ describe('Login', () => {
 
     expect(screen.getByText(/code passt leider/i)).toBeVisible()
     expect(screen.queryByText(/angemeldet als:/i)).not.toBeInTheDocument()
+    expect(findParticipantByAccessCode).toHaveBeenCalledWith('FALSCH')
     expect(loadVotesForParticipant).not.toHaveBeenCalled()
+  })
+
+  it('erhaelt die Anmeldung nach einem Neuladen lokal', async () => {
+    localStorage.setItem(
+      'hurricane-awards:hurricane-awards-2026:participant',
+      JSON.stringify(participants[0]),
+    )
+
+    render(<App />)
+
+    expect(await screen.findByText(/angemeldet als:/i)).toBeVisible()
+    const identitySection = sectionForHeading(/festival code/i)
+    expect(within(identitySection).getByText('Alice')).toBeVisible()
+    expect(loadParticipants).toHaveBeenCalled()
+    expect(loadVotesForParticipant).toHaveBeenCalledWith('alice')
+  })
+
+  it('meldet ab und blendet geschuetzte Inhalte wieder aus', async () => {
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /abmelden/i }))
+
+    expect(screen.getByRole('heading', { name: 'Hurricane Awards 2026' })).toBeVisible()
+    expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
+    expect(
+      localStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
+    ).toBeNull()
   })
 })
 
@@ -332,6 +394,7 @@ describe('Ergebnisse', () => {
     })
 
     await renderLoadedApp()
+    await loginWith('ALICE42')
 
     const resultsSection = sectionForHeading(/ergebnisse/i)
     expect(within(resultsSection).getByText('Beste Festival-Energie')).toBeVisible()
@@ -357,6 +420,7 @@ describe('Ergebnisse', () => {
     mockLoadedData({ loadedVotes: [], loadedStandings: [] })
 
     await renderLoadedApp()
+    await loginWith('ALICE42')
 
     expect(screen.getByText(/noch keine stimmen abgegeben/i)).toBeVisible()
   })
@@ -365,6 +429,7 @@ describe('Ergebnisse', () => {
 describe('Ewige Tabelle', () => {
   it('laedt und zeigt Daten in geladener Rangfolge', async () => {
     await renderLoadedApp()
+    await loginWith('ALICE42')
 
     const standingsSection = sectionForHeading(/gesamtclassement/i)
     const rows = within(standingsSection).getAllByRole('row')
@@ -379,6 +444,7 @@ describe('Ewige Tabelle', () => {
     mockLoadedData({ loadedStandings: [] })
 
     await renderLoadedApp()
+    await loginWith('ALICE42')
 
     expect(screen.getByText(/noch keine gesamtpunkte vorhanden/i)).toBeVisible()
   })
@@ -387,6 +453,7 @@ describe('Ewige Tabelle', () => {
 describe('Admin', () => {
   it('macht Admin-Aktionen erst in der Admin-Ansicht verfuegbar', async () => {
     await renderLoadedApp()
+    await loginWith('ALICE42')
 
     expect(screen.queryByLabelText(/status/i)).not.toBeInTheDocument()
 
@@ -400,7 +467,7 @@ describe('Admin', () => {
 
   it('aendert den Kategorie-Status ueber den Admin-Bereich', async () => {
     await renderLoadedApp()
-    const user = userEvent.setup()
+    const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
     const statusSelects = await screen.findAllByLabelText(/status/i)
@@ -411,7 +478,8 @@ describe('Admin', () => {
       'upcoming-category',
       'open',
     )
-    const updatedCard = screen
+    const adminSection = sectionForHeading(/^kategorien$/i)
+    const updatedCard = within(adminSection)
       .getByRole('heading', { name: 'Bester Camp-Aufbau' })
       .closest('article')
 
@@ -444,6 +512,7 @@ describe('Admin', () => {
   it('bricht das Loeschen ab, wenn die Bestaetigung ausbleibt', async () => {
     vi.mocked(window.confirm).mockReturnValue(false)
     await renderLoadedApp()
+    await loginWith('ALICE42')
 
     await userEvent.click(screen.getByRole('button', { name: /^admin$/i }))
     await userEvent.click(

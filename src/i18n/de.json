@@ -1,6 +1,7 @@
 {
   "app": {
-    "ariaLabel": "Hurricane Awards 2026 mit {{count}} Teilnehmenden"
+    "ariaLabel": "Hurricane Awards 2026 mit {{count}} Teilnehmenden",
+    "lockedAriaLabel": "Hurricane Awards 2026 Anmeldung"
   },
   "language": {
     "label": "Sprache wählen",
@@ -27,12 +28,13 @@
   "identity": {
     "title": "Gib deinen Festival Code ein",
     "loggedInAs": "Angemeldet als:",
-    "changePerson": "Person wechseln",
+    "logout": "Abmelden",
     "festivalCodeLabel": "Festival Code",
     "festivalCodePlaceholder": "Code hier eingeben",
     "submit": "Code prüfen",
     "errors": {
       "participantsLoad": "Die Teilnehmer konnten gerade nicht geladen werden.",
+      "accessCodeLoad": "Der Code konnte gerade nicht geprüft werden. Versuch es bitte gleich nochmal.",
       "invalidAccessCode": "Der Code passt leider zu niemandem. Schau nochmal auf deinen Festival Code.",
       "participantVotesLoad": "Deine bisherigen Stimmen konnten nicht geladen werden."
     }

@@ -6,7 +6,11 @@ import {
   type Category,
   type CategoryStatus,
 } from './data/categories'
-import { loadParticipants, type Participant } from './data/participants'
+import {
+  findParticipantByAccessCode,
+  loadParticipants,
+  type Participant,
+} from './data/participants'
 import {
   deleteVotesForCategory,
   loadVotes,
@@ -25,6 +29,53 @@ import './App.css'
 type CategoryResult = {
   participant: Participant
   voteCount: number
+}
+
+const festivalConfig = {
+  id: 'hurricane-awards-2026',
+}
+
+const authenticatedParticipantStorageKey = `hurricane-awards:${festivalConfig.id}:participant`
+
+function readStoredParticipant(): Participant | null {
+  const storedParticipant = localStorage.getItem(authenticatedParticipantStorageKey)
+
+  if (!storedParticipant) {
+    return null
+  }
+
+  try {
+    const parsedParticipant = JSON.parse(storedParticipant) as Partial<Participant>
+
+    if (
+      typeof parsedParticipant.id === 'string' &&
+      typeof parsedParticipant.name === 'string' &&
+      typeof parsedParticipant.displayName === 'string' &&
+      typeof parsedParticipant.accessCode === 'string'
+    ) {
+      return {
+        id: parsedParticipant.id,
+        name: parsedParticipant.name,
+        displayName: parsedParticipant.displayName,
+        accessCode: parsedParticipant.accessCode,
+      }
+    }
+  } catch {
+    localStorage.removeItem(authenticatedParticipantStorageKey)
+  }
+
+  return null
+}
+
+function storeAuthenticatedParticipant(participant: Participant) {
+  localStorage.setItem(
+    authenticatedParticipantStorageKey,
+    JSON.stringify(participant),
+  )
+}
+
+function clearStoredParticipant() {
+  localStorage.removeItem(authenticatedParticipantStorageKey)
 }
 
 type ResultCardProps = {
@@ -157,6 +208,9 @@ function LanguageSwitcher() {
 
 function App() {
   const { t } = useTranslation()
+  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(
+    () => readStoredParticipant(),
+  )
   const [participants, setParticipants] = useState<Participant[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [participantsError, setParticipantsError] = useState('')
@@ -167,7 +221,8 @@ function App() {
     null,
   )
   const [isAdminVisible, setIsAdminVisible] = useState(false)
-  const [isLoadingData, setIsLoadingData] = useState(true)
+  const [isLoadingData, setIsLoadingData] = useState(Boolean(selectedParticipant))
+  const [isSubmittingAccessCode, setIsSubmittingAccessCode] = useState(false)
   const participantCount = participants.length
   const openCategories = categories.filter((category) => category.status === 'open')
   const statusLabels: Record<CategoryStatus, string> = {
@@ -175,9 +230,6 @@ function App() {
     open: t('status.open'),
     closed: t('status.closed'),
   }
-  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(
-    null,
-  )
   const [accessCode, setAccessCode] = useState('')
   const [accessCodeError, setAccessCodeError] = useState('')
   const [votes, setVotes] = useState<Vote[]>([])
@@ -186,7 +238,9 @@ function App() {
   const [resultsError, setResultsError] = useState('')
   const [allTimeStandings, setAllTimeStandings] = useState<AllTimeStanding[]>([])
   const [standingsError, setStandingsError] = useState('')
-  const [isStandingsLoading, setIsStandingsLoading] = useState(true)
+  const [isStandingsLoading, setIsStandingsLoading] = useState(
+    Boolean(selectedParticipant),
+  )
   const [selectedVotesByCategory, setSelectedVotesByCategory] = useState<
     Record<string, string>
   >({})
@@ -195,18 +249,37 @@ function App() {
   )
 
   useEffect(() => {
+    if (!selectedParticipant) {
+      return
+    }
+
+    const authenticatedParticipant = selectedParticipant
     let isCurrent = true
 
     async function loadData() {
+      setIsLoadingData(true)
+      setIsStandingsLoading(true)
+      setParticipantsError('')
+      setCategoriesError('')
+      setVotesError('')
+      setResultsError('')
+      setStandingsError('')
+
       try {
-        const [loadedParticipants, loadedCategories] = await Promise.all([
+        const [
+          loadedParticipants,
+          loadedCategories,
+          loadedParticipantVotes,
+        ] = await Promise.all([
           loadParticipants(),
           loadCategories(),
+          loadVotesForParticipant(authenticatedParticipant.id),
         ])
 
         if (isCurrent) {
           setParticipants(loadedParticipants)
           setCategories(loadedCategories)
+          setVotes(loadedParticipantVotes)
         }
       } catch {
         if (isCurrent) {
@@ -216,6 +289,7 @@ function App() {
           setCategoriesError(
             i18n.t('admin.errors.categoriesLoad'),
           )
+          setVotesError(i18n.t('identity.errors.participantVotesLoad'))
         }
       }
 
@@ -259,7 +333,7 @@ function App() {
     return () => {
       isCurrent = false
     }
-  }, [])
+  }, [selectedParticipant])
 
   const resultsByCategory = useMemo(
     () =>
@@ -300,38 +374,60 @@ function App() {
     event.preventDefault()
 
     const normalizedAccessCode = accessCode.trim().toUpperCase()
-    const participant = participants.find(
-      (currentParticipant) =>
-        currentParticipant.accessCode === normalizedAccessCode,
-    )
 
-    if (!participant) {
-      setAccessCodeError(
-        t('identity.errors.invalidAccessCode'),
-      )
+    if (!normalizedAccessCode) {
+      setAccessCodeError(t('identity.errors.invalidAccessCode'))
       return
     }
 
-    setSelectedParticipant(participant)
-    setSelectedVotesByCategory({})
-    setAccessCode('')
+    setIsSubmittingAccessCode(true)
     setAccessCodeError('')
-    setVotesError('')
 
     try {
-      setVotes(await loadVotesForParticipant(participant.id))
+      const participant = await findParticipantByAccessCode(normalizedAccessCode)
+
+      if (!participant) {
+        setAccessCodeError(
+          t('identity.errors.invalidAccessCode'),
+        )
+        return
+      }
+
+      storeAuthenticatedParticipant(participant)
+      setSelectedParticipant(participant)
+      setSelectedVotesByCategory({})
+      setAccessCode('')
+      setAccessCodeError('')
+      setVotesError('')
     } catch {
-      setVotesError(t('identity.errors.participantVotesLoad'))
+      setAccessCodeError(t('identity.errors.accessCodeLoad'))
+    } finally {
+      setIsSubmittingAccessCode(false)
     }
   }
 
-  function changeParticipant() {
+  function logout() {
+    clearStoredParticipant()
     setSelectedParticipant(null)
     setAccessCode('')
     setAccessCodeError('')
     setVotes([])
     setVotesError('')
+    setParticipantsError('')
+    setCategoriesError('')
+    setResultsError('')
+    setStandingsError('')
+    setAdminError('')
+    setIsAdminVisible(false)
     setSelectedVotesByCategory({})
+
+    if (window.location.hash) {
+      window.history.replaceState(
+        null,
+        '',
+        `${window.location.pathname}${window.location.search}`,
+      )
+    }
   }
 
   function selectVote(categoryId: string, votedForId: string) {
@@ -342,6 +438,10 @@ function App() {
   }
 
   function toggleAdminView() {
+    if (!selectedParticipant) {
+      return
+    }
+
     setIsAdminVisible((isVisible) => {
       if (!isVisible) {
         window.setTimeout(() => {
@@ -464,6 +564,55 @@ function App() {
     }
   }
 
+  if (!selectedParticipant) {
+    return (
+      <main className="home home--locked" aria-label={t('app.lockedAriaLabel')}>
+        <header className="hero hero--locked" aria-labelledby="hero-title">
+          <div className="hero__content hero__content--locked">
+            <h1 id="hero-title">{t('hero.title')}</h1>
+            <form
+              className="identity__form identity__form--locked"
+              onSubmit={submitAccessCode}
+            >
+              <label htmlFor="festival-code">
+                {t('identity.festivalCodeLabel')}
+              </label>
+              <input
+                id="festival-code"
+                type="text"
+                value={accessCode}
+                disabled={isSubmittingAccessCode}
+                onChange={(event) => {
+                  setAccessCode(event.target.value)
+                  setAccessCodeError('')
+                }}
+                autoComplete="off"
+                inputMode="text"
+                placeholder={t('identity.festivalCodePlaceholder')}
+              />
+              {accessCodeError ? (
+                <p className="identity__error">{accessCodeError}</p>
+              ) : null}
+              <button
+                className="identity__submit"
+                type="submit"
+                disabled={isSubmittingAccessCode}
+              >
+                {isSubmittingAccessCode ? t('common.loading') : t('identity.submit')}
+              </button>
+            </form>
+          </div>
+
+          <div className="stage-lights" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+        </header>
+      </main>
+    )
+  }
+
   return (
     <main
       className="home"
@@ -524,9 +673,9 @@ function App() {
               <button
                 className="identity__change"
                 type="button"
-                onClick={changeParticipant}
+                onClick={logout}
               >
-                {t('identity.changePerson')}
+                {t('identity.logout')}
               </button>
             </div>
           ) : (

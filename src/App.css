@@ -16,6 +16,10 @@
   padding: 40px 20px;
 }
 
+.hero--locked {
+  justify-items: center;
+}
+
 .hero::before {
   position: absolute;
   inset: 0;
@@ -42,6 +46,11 @@
   position: relative;
   z-index: 1;
   width: min(100%, 760px);
+}
+
+.hero__content--locked {
+  display: grid;
+  gap: 28px;
 }
 
 .hero__actions {
@@ -263,6 +272,13 @@ h1 {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
+}
+
+.identity__form--locked {
+  width: min(100%, 520px);
+  padding: 0;
+  background: transparent;
+  border: 0;
 }
 
 .identity__form label {
