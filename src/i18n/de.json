@@ -2,6 +2,11 @@
   "app": {
     "ariaLabel": "Hurricane Awards 2026 mit {{count}} Teilnehmenden"
   },
+  "language": {
+    "label": "Sprache wählen",
+    "de": "Deutsch",
+    "nl": "Niederländisch"
+  },
   "status": {
     "upcoming": "Demnächst",
     "open": "Offen",

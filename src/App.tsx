@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   loadCategories,
   updateCategoryStatus,
@@ -17,14 +18,9 @@ import {
   loadAllTimeStandings,
   type AllTimeStanding,
 } from './data/allTimeStandings'
-import { t } from './i18n'
+import i18n from './i18n'
+import { supportedLanguages, type SupportedLanguage } from './i18n'
 import './App.css'
-
-const statusLabels: Record<CategoryStatus, string> = {
-  upcoming: t('status.upcoming'),
-  open: t('status.open'),
-  closed: t('status.closed'),
-}
 
 type CategoryResult = {
   participant: Participant
@@ -38,6 +34,12 @@ type ResultCardProps = {
 }
 
 function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
+  const { t } = useTranslation()
+  const statusLabels: Record<CategoryStatus, string> = {
+    upcoming: t('status.upcoming'),
+    open: t('status.open'),
+    closed: t('status.closed'),
+  }
   const isClosed = category.status === 'closed'
   const [isClosedResultExpanded, setIsClosedResultExpanded] = useState(false)
   const isCollapsed = isClosed && !isClosedResultExpanded
@@ -125,7 +127,36 @@ function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
   )
 }
 
+function LanguageSwitcher() {
+  const { i18n, t } = useTranslation()
+  const activeLanguage = i18n.resolvedLanguage?.split('-')[0] ?? 'de'
+
+  function changeLanguage(language: SupportedLanguage) {
+    void i18n.changeLanguage(language)
+  }
+
+  return (
+    <div className="language-switcher" aria-label={t('language.label')}>
+      {supportedLanguages.map((language) => (
+        <button
+          className={
+            activeLanguage === language ? 'language-switcher__button is-active' : 'language-switcher__button'
+          }
+          type="button"
+          key={language}
+          onClick={() => changeLanguage(language)}
+          aria-pressed={activeLanguage === language}
+          aria-label={t(`language.${language}`)}
+        >
+          {language.toUpperCase()}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function App() {
+  const { t } = useTranslation()
   const [participants, setParticipants] = useState<Participant[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [participantsError, setParticipantsError] = useState('')
@@ -139,6 +170,11 @@ function App() {
   const [isLoadingData, setIsLoadingData] = useState(true)
   const participantCount = participants.length
   const openCategories = categories.filter((category) => category.status === 'open')
+  const statusLabels: Record<CategoryStatus, string> = {
+    upcoming: t('status.upcoming'),
+    open: t('status.open'),
+    closed: t('status.closed'),
+  }
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(
     null,
   )
@@ -175,10 +211,10 @@ function App() {
       } catch {
         if (isCurrent) {
           setParticipantsError(
-            t('identity.errors.participantsLoad'),
+            i18n.t('identity.errors.participantsLoad'),
           )
           setCategoriesError(
-            t('admin.errors.categoriesLoad'),
+            i18n.t('admin.errors.categoriesLoad'),
           )
         }
       }
@@ -191,7 +227,7 @@ function App() {
         }
       } catch {
         if (isCurrent) {
-          setResultsError(t('results.errors.load'))
+          setResultsError(i18n.t('results.errors.load'))
         }
       } finally {
         if (isCurrent) {
@@ -208,7 +244,7 @@ function App() {
       } catch {
         if (isCurrent) {
           setStandingsError(
-            t('standings.errors.load'),
+            i18n.t('standings.errors.load'),
           )
         }
       } finally {
@@ -434,23 +470,26 @@ function App() {
       aria-label={t('app.ariaLabel', { count: participantCount })}
     >
       <header className="hero" aria-labelledby="hero-title">
-        <button
-          className="hero__admin"
-          type="button"
-          onClick={toggleAdminView}
-          aria-expanded={isAdminVisible}
-          aria-controls="admin"
-        >
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            width="20"
-            height="20"
+        <div className="hero__actions">
+          <LanguageSwitcher />
+          <button
+            className="hero__admin"
+            type="button"
+            onClick={toggleAdminView}
+            aria-expanded={isAdminVisible}
+            aria-controls="admin"
           >
-            <path d="M19.14 12.94a7.43 7.43 0 0 0 .05-.94 7.43 7.43 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.2 7.2 0 0 0-1.62-.94L14.39 2.8a.49.49 0 0 0-.49-.4h-3.8a.49.49 0 0 0-.49.4l-.36 2.52a7.2 7.2 0 0 0-1.62.94L5.24 5.3a.5.5 0 0 0-.61.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.43 7.43 0 0 0-.05.94c0 .32.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.5.39 1.04.7 1.62.94l.36 2.52c.04.24.24.4.49.4h3.8c.25 0 .45-.16.49-.4l.36-2.52a7.2 7.2 0 0 0 1.62-.94l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
-          </svg>
-          <span>{isAdminVisible ? t('hero.adminClose') : t('hero.admin')}</span>
-        </button>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+            >
+              <path d="M19.14 12.94a7.43 7.43 0 0 0 .05-.94 7.43 7.43 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.2 7.2 0 0 0-1.62-.94L14.39 2.8a.49.49 0 0 0-.49-.4h-3.8a.49.49 0 0 0-.49.4l-.36 2.52a7.2 7.2 0 0 0-1.62.94L5.24 5.3a.5.5 0 0 0-.61.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.43 7.43 0 0 0-.05.94c0 .32.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.5.39 1.04.7 1.62.94l.36 2.52c.04.24.24.4.49.4h3.8c.25 0 .45-.16.49-.4l.36-2.52a7.2 7.2 0 0 0 1.62-.94l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
+            </svg>
+            <span>{isAdminVisible ? t('hero.adminClose') : t('hero.admin')}</span>
+          </button>
+        </div>
 
         <div className="hero__content">
           <p className="hero__eyebrow">{t('hero.eyebrow')}</p>

@@ -1,0 +1,98 @@
+{
+  "app": {
+    "ariaLabel": "Hurricane Awards 2026 met {{count}} deelnemers"
+  },
+  "language": {
+    "label": "Taal kiezen",
+    "de": "Duits",
+    "nl": "Nederlands"
+  },
+  "status": {
+    "upcoming": "Binnenkort",
+    "open": "Open",
+    "closed": "Gesloten"
+  },
+  "common": {
+    "loading": "Laden...",
+    "saving": "Opslaan..."
+  },
+  "hero": {
+    "admin": "Admin",
+    "adminClose": "Admin sluiten",
+    "eyebrow": "Live uit de vriendengroep",
+    "title": "Hurricane Awards 2026",
+    "subtitle": "Een ontspannen weekend met vrienden? Nee. Dit is een keiharde competitie.",
+    "voteCta": "Naar de stemming"
+  },
+  "identity": {
+    "title": "Voer je festivalcode in",
+    "loggedInAs": "Aangemeld als:",
+    "changePerson": "Persoon wisselen",
+    "festivalCodeLabel": "Festivalcode",
+    "festivalCodePlaceholder": "Code hier invoeren",
+    "submit": "Code controleren",
+    "errors": {
+      "participantsLoad": "De deelnemers konden net niet worden geladen.",
+      "invalidAccessCode": "De code hoort helaas bij niemand. Kijk nog eens naar je festivalcode.",
+      "participantVotesLoad": "Je eerdere stemmen konden niet worden geladen."
+    }
+  },
+  "admin": {
+    "eyebrow": "Admin",
+    "title": "Categorieën",
+    "currentStatus": "Huidige status: {{status}}",
+    "changeStatus": "Status wijzigen",
+    "resetVotes": "Stemmen resetten",
+    "resettingVotes": "Resetten...",
+    "confirmResetVotes": "Echt alle stemmen voor deze categorie verwijderen?",
+    "statusOptions": {
+      "upcoming": "upcoming",
+      "open": "open",
+      "closed": "closed"
+    },
+    "errors": {
+      "categoriesLoad": "De categorieën konden net niet worden geladen.",
+      "statusSave": "De status kon net niet worden opgeslagen.",
+      "votesDelete": "De stemmen konden net niet worden verwijderd."
+    }
+  },
+  "categories": {
+    "eyebrow": "{{count}} deelnemers",
+    "title": "Stemming",
+    "loginRequired": "Voer eerst je festivalcode in. Daarna kun je stemmen.",
+    "alreadyVoted": "Je hebt al gestemd.",
+    "voteTargetLabel": "Stem gaat naar",
+    "selectPerson": "Persoon kiezen",
+    "submitVote": "Stem uitbrengen",
+    "errors": {
+      "voteSave": "Je stem kon net niet worden opgeslagen."
+    }
+  },
+  "results": {
+    "eyebrow": "Tussenstand",
+    "title": "Resultaten",
+    "leading": "Aan de leiding",
+    "emptyCategory": "Nog geen stemmen in deze stemming.",
+    "empty": "Nog geen stemmen uitgebracht.",
+    "expand": "uitklappen",
+    "collapse": "inklappen",
+    "errors": {
+      "load": "De resultaten konden net niet worden geladen."
+    }
+  },
+  "standings": {
+    "eyebrow": "Eeuwige ranglijst",
+    "title": "Algemeen klassement",
+    "loading": "Algemeen klassement wordt geladen...",
+    "empty": "Nog geen totaalpunten beschikbaar.",
+    "columns": {
+      "rank": "Plaats",
+      "name": "Naam",
+      "points": "Punten"
+    },
+    "rankLabel": "Plaats {{rank}}",
+    "errors": {
+      "load": "Het algemeen klassement kon net niet worden geladen."
+    }
+  }
+}

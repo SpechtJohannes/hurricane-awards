@@ -19,6 +19,7 @@ import {
   loadAllTimeStandings,
   type AllTimeStanding,
 } from '../data/allTimeStandings'
+import i18n from '../i18n'
 
 vi.mock('../data/categories', () => ({
   loadCategories: vi.fn(),
@@ -173,10 +174,46 @@ function sectionForHeading(name: RegExp) {
   return section as HTMLElement
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.clearAllMocks()
+  localStorage.clear()
+  await i18n.changeLanguage('de')
   vi.spyOn(window, 'confirm').mockReturnValue(true)
   mockLoadedData()
+})
+
+describe('Sprachumschaltung', () => {
+  it('schaltet feste UI-Texte auf Niederlaendisch um und speichert die Auswahl', async () => {
+    await renderLoadedApp()
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /niederl/i }),
+    )
+
+    expect(
+      await screen.findByRole('main', {
+        name: /hurricane awards 2026 met 3 deelnemers/i,
+      }),
+    ).toBeVisible()
+    expect(
+      screen.getByRole('heading', { name: /stemming/i }),
+    ).toBeVisible()
+    expect(screen.getByRole('button', { name: /nederlands/i })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    expect(localStorage.getItem('hurricane-awards-language')).toBe('nl')
+  })
+
+  it('laesst Datenbankinhalte beim Sprachwechsel unveraendert', async () => {
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    await userEvent.click(screen.getByRole('button', { name: /niederl/i }))
+
+    expect(screen.getByText('Beste Festival-Energie')).toBeVisible()
+    expect(screen.getByText('Aktuell offen.')).toBeVisible()
+  })
 })
 
 describe('Login', () => {
