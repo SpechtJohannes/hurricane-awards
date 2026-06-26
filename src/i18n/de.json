@@ -32,10 +32,11 @@
     "festivalCodeLabel": "Festival Code",
     "festivalCodePlaceholder": "Code hier eingeben",
     "submit": "Code prüfen",
+    "locked": "Zu viele Versuche. Bitte warte noch {{seconds}} Sekunden und probiere es dann erneut.",
     "errors": {
       "participantsLoad": "Die Teilnehmer konnten gerade nicht geladen werden.",
       "accessCodeLoad": "Der Code konnte gerade nicht geprüft werden. Versuch es bitte gleich nochmal.",
-      "invalidAccessCode": "Der Code passt leider zu niemandem. Schau nochmal auf deinen Festival Code.",
+      "invalidAccessCode": "Der Code konnte nicht bestätigt werden. Prüfe deine Eingabe und versuche es erneut.",
       "participantVotesLoad": "Deine bisherigen Stimmen konnten nicht geladen werden."
     }
   },

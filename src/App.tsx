@@ -22,6 +22,15 @@ import {
   loadAllTimeStandings,
   type AllTimeStanding,
 } from './data/allTimeStandings'
+import {
+  clearStoredLoginAttemptGuard,
+  getLoginLockRemainingMs,
+  readStoredLoginAttemptGuard,
+  registerInvalidLoginAttempt,
+  resetLoginAttemptGuard,
+  storeLoginAttemptGuard,
+  type LoginAttemptGuardState,
+} from './lib/loginAttemptGuard'
 import i18n from './i18n'
 import { supportedLanguages, type SupportedLanguage } from './i18n'
 import './App.css'
@@ -36,6 +45,7 @@ const festivalConfig = {
 }
 
 const authenticatedParticipantStorageKey = `hurricane-awards:${festivalConfig.id}:participant`
+const loginAttemptGuardStorageKey = `hurricane-awards:${festivalConfig.id}:login-attempt-guard`
 
 function readStoredParticipant(): Participant | null {
   const storedParticipant = localStorage.getItem(authenticatedParticipantStorageKey)
@@ -223,6 +233,15 @@ function App() {
   const [isAdminVisible, setIsAdminVisible] = useState(false)
   const [isLoadingData, setIsLoadingData] = useState(Boolean(selectedParticipant))
   const [isSubmittingAccessCode, setIsSubmittingAccessCode] = useState(false)
+  const [loginAttemptGuard, setLoginAttemptGuard] =
+    useState<LoginAttemptGuardState>(() =>
+      readStoredLoginAttemptGuard(
+        localStorage,
+        loginAttemptGuardStorageKey,
+        Date.now(),
+      ),
+    )
+  const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now())
   const participantCount = participants.length
   const openCategories = categories.filter((category) => category.status === 'open')
   const statusLabels: Record<CategoryStatus, string> = {
@@ -247,6 +266,33 @@ function App() {
   const [submittingCategoryId, setSubmittingCategoryId] = useState<string | null>(
     null,
   )
+  const loginLockRemainingMs = getLoginLockRemainingMs(
+    loginAttemptGuard,
+    currentTimeMs,
+  )
+  const loginLockRemainingSeconds = Math.ceil(loginLockRemainingMs / 1000)
+  const isLoginLocked = loginLockRemainingMs > 0
+
+  useEffect(() => {
+    if (!isLoginLocked) {
+      return
+    }
+
+    const timerId = window.setInterval(() => {
+      const now = Date.now()
+
+      setCurrentTimeMs(now)
+
+      if (getLoginLockRemainingMs(loginAttemptGuard, now) === 0) {
+        setLoginAttemptGuard(resetLoginAttemptGuard())
+        clearStoredLoginAttemptGuard(localStorage, loginAttemptGuardStorageKey)
+      }
+    }, 1000)
+
+    return () => {
+      window.clearInterval(timerId)
+    }
+  }, [isLoginLocked, loginAttemptGuard])
 
   useEffect(() => {
     if (!selectedParticipant) {
@@ -373,6 +419,13 @@ function App() {
   async function submitAccessCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
+    const now = Date.now()
+
+    if (getLoginLockRemainingMs(loginAttemptGuard, now) > 0) {
+      setCurrentTimeMs(now)
+      return
+    }
+
     const normalizedAccessCode = accessCode.trim().toUpperCase()
 
     if (!normalizedAccessCode) {
@@ -390,9 +443,23 @@ function App() {
         setAccessCodeError(
           t('identity.errors.invalidAccessCode'),
         )
+        const updatedGuard = registerInvalidLoginAttempt(
+          loginAttemptGuard,
+          Date.now(),
+        )
+
+        setLoginAttemptGuard(updatedGuard)
+        storeLoginAttemptGuard(
+          localStorage,
+          loginAttemptGuardStorageKey,
+          updatedGuard,
+        )
+        setCurrentTimeMs(Date.now())
         return
       }
 
+      setLoginAttemptGuard(resetLoginAttemptGuard())
+      clearStoredLoginAttemptGuard(localStorage, loginAttemptGuardStorageKey)
       storeAuthenticatedParticipant(participant)
       setSelectedParticipant(participant)
       setSelectedVotesByCategory({})
@@ -413,6 +480,9 @@ function App() {
     setAccessCodeError('')
     setVotes([])
     setVotesError('')
+    setLoginAttemptGuard(resetLoginAttemptGuard())
+    clearStoredLoginAttemptGuard(localStorage, loginAttemptGuardStorageKey)
+    setCurrentTimeMs(Date.now())
     setParticipantsError('')
     setCategoriesError('')
     setResultsError('')
@@ -581,7 +651,7 @@ function App() {
                 id="festival-code"
                 type="text"
                 value={accessCode}
-                disabled={isSubmittingAccessCode}
+                disabled={isSubmittingAccessCode || isLoginLocked}
                 onChange={(event) => {
                   setAccessCode(event.target.value)
                   setAccessCodeError('')
@@ -593,10 +663,17 @@ function App() {
               {accessCodeError ? (
                 <p className="identity__error">{accessCodeError}</p>
               ) : null}
+              {isLoginLocked ? (
+                <p className="identity__error" role="status">
+                  {t('identity.locked', {
+                    seconds: loginLockRemainingSeconds,
+                  })}
+                </p>
+              ) : null}
               <button
                 className="identity__submit"
                 type="submit"
-                disabled={isSubmittingAccessCode}
+                disabled={isSubmittingAccessCode || isLoginLocked}
               >
                 {isSubmittingAccessCode ? t('common.loading') : t('identity.submit')}
               </button>

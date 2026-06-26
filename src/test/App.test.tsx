@@ -1,6 +1,13 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../App'
 import {
   loadCategories,
@@ -19,6 +26,7 @@ import {
   saveVote,
   type Vote,
 } from '../data/votes'
+import { loginAttemptGuardConfig } from '../lib/loginAttemptGuard'
 import {
   loadAllTimeStandings,
   type AllTimeStanding,
@@ -101,6 +109,9 @@ const standings: AllTimeStanding[] = [
   },
 ]
 
+const loginAttemptGuardStorageKey =
+  'hurricane-awards:hurricane-awards-2026:login-attempt-guard'
+
 function vote(overrides: Partial<Vote> = {}): Vote {
   return {
     voterId: 'alice',
@@ -154,11 +165,13 @@ function mockLoadedData({
 }
 
 async function renderLoadedApp() {
-  render(<App />)
+  const view = render(<App />)
 
   await screen.findByRole('main', {
     name: /hurricane awards 2026 anmeldung/i,
   })
+
+  return view
 }
 
 async function loginWith(code: string) {
@@ -187,11 +200,18 @@ function sectionForHeading(name: RegExp) {
 }
 
 beforeEach(async () => {
+  vi.useRealTimers()
   vi.clearAllMocks()
+  loginAttemptGuardConfig.maxInvalidAttempts = 3
+  loginAttemptGuardConfig.lockDurationMs = 30_000
   localStorage.clear()
   await i18n.changeLanguage('de')
   vi.spyOn(window, 'confirm').mockReturnValue(true)
   mockLoadedData()
+})
+
+afterEach(() => {
+  vi.useRealTimers()
 })
 
 describe('Sprachumschaltung', () => {
@@ -266,10 +286,128 @@ describe('Login', () => {
 
     await loginWith('FALSCH')
 
-    expect(screen.getByText(/code passt leider/i)).toBeVisible()
+    expect(screen.getByText(/code konnte nicht bestätigt/i)).toBeVisible()
     expect(screen.queryByText(/angemeldet als:/i)).not.toBeInTheDocument()
     expect(findParticipantByAccessCode).toHaveBeenCalledWith('FALSCH')
     expect(loadVotesForParticipant).not.toHaveBeenCalled()
+  })
+
+  it('sperrt die Codeeingabe nach mehreren ungueltigen Versuchen kurzzeitig', async () => {
+    await renderLoadedApp()
+    loginAttemptGuardConfig.lockDurationMs = 1_000
+
+    for (const code of ['FALSCH1', 'FALSCH2', 'FALSCH3']) {
+      const input = screen.getByRole('textbox', { name: /^festival code$/i })
+
+      fireEvent.change(input, { target: { value: code } })
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: /code/i }))
+      })
+    }
+
+    expect(screen.getByText(/code konnte nicht bestätigt/i)).toBeVisible()
+    expect(screen.getByRole('button', { name: /code/i })).toBeDisabled()
+    expect(screen.getByRole('textbox', { name: /^festival code$/i })).toBeDisabled()
+    expect(screen.getByRole('status')).toHaveTextContent(/1 sekunden/i)
+    expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
+    expect(loadParticipants).not.toHaveBeenCalled()
+    expect(loadVotes).not.toHaveBeenCalled()
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /code/i })).toBeEnabled()
+    }, { timeout: 2000 })
+    expect(screen.getByRole('textbox', { name: /^festival code$/i })).toBeEnabled()
+  })
+
+  it('beruecksichtigt persistierte Fehlversuche nach einem Reload', async () => {
+    const firstRender = await renderLoadedApp()
+
+    for (const code of ['FALSCH1', 'FALSCH2']) {
+      fireEvent.change(screen.getByRole('textbox', { name: /^festival code$/i }), {
+        target: { value: code },
+      })
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: /code/i }))
+      })
+    }
+
+    expect(localStorage.getItem(loginAttemptGuardStorageKey)).toContain(
+      '"invalidAttempts":2',
+    )
+
+    firstRender.unmount()
+    await renderLoadedApp()
+
+    fireEvent.change(screen.getByRole('textbox', { name: /^festival code$/i }), {
+      target: { value: 'FALSCH3' },
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /code/i }))
+    })
+
+    expect(screen.getByRole('button', { name: /code/i })).toBeDisabled()
+    expect(screen.getByRole('status')).toHaveTextContent(/sekunden/i)
+    expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
+  })
+
+  it('haelt eine aktive Sperre nach einem Reload aufrecht', async () => {
+    localStorage.setItem(
+      loginAttemptGuardStorageKey,
+      JSON.stringify({
+        invalidAttempts: 0,
+        lockedUntil: Date.now() + 10_000,
+      }),
+    )
+
+    await renderLoadedApp()
+
+    expect(screen.getByRole('button', { name: /code/i })).toBeDisabled()
+    expect(screen.getByRole('textbox', { name: /^festival code$/i })).toBeDisabled()
+    expect(screen.getByRole('status')).toHaveTextContent(/10 sekunden|9 sekunden/i)
+    expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
+  })
+
+  it('bereinigt abgelaufene und ungueltige Sperrdaten beim Laden', async () => {
+    localStorage.setItem(
+      loginAttemptGuardStorageKey,
+      JSON.stringify({
+        invalidAttempts: 0,
+        lockedUntil: Date.now() - 1_000,
+      }),
+    )
+
+    const expiredRender = await renderLoadedApp()
+
+    expect(screen.getByRole('button', { name: /code/i })).toBeEnabled()
+    expect(localStorage.getItem(loginAttemptGuardStorageKey)).toBeNull()
+
+    expiredRender.unmount()
+    localStorage.setItem(loginAttemptGuardStorageKey, '{kaputt')
+
+    await renderLoadedApp()
+
+    expect(screen.getByRole('button', { name: /code/i })).toBeEnabled()
+    expect(localStorage.getItem(loginAttemptGuardStorageKey)).toBeNull()
+  })
+
+  it('setzt Fehlversuche bei erfolgreichem Login zurueck', async () => {
+    await renderLoadedApp()
+    const user = userEvent.setup()
+
+    for (const code of ['FALSCH1', 'FALSCH2']) {
+      await user.clear(screen.getByRole('textbox', { name: /^festival code$/i }))
+      await user.type(screen.getByRole('textbox', { name: /^festival code$/i }), code)
+      await user.click(screen.getByRole('button', { name: /code/i }))
+    }
+
+    await user.clear(screen.getByRole('textbox', { name: /^festival code$/i }))
+    await user.type(screen.getByRole('textbox', { name: /^festival code$/i }), 'ALICE42')
+    await user.click(screen.getByRole('button', { name: /code/i }))
+
+    const identitySection = sectionForHeading(/festival code/i)
+    expect(await within(identitySection).findByText(/angemeldet als:/i)).toBeVisible()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    expect(localStorage.getItem(loginAttemptGuardStorageKey)).toBeNull()
   })
 
   it('erhaelt die Anmeldung nach einem Neuladen lokal', async () => {

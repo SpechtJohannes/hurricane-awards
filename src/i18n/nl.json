@@ -32,10 +32,11 @@
     "festivalCodeLabel": "Festivalcode",
     "festivalCodePlaceholder": "Code hier invoeren",
     "submit": "Code controleren",
+    "locked": "Te veel pogingen. Wacht nog {{seconds}} seconden en probeer het daarna opnieuw.",
     "errors": {
       "participantsLoad": "De deelnemers konden net niet worden geladen.",
       "accessCodeLoad": "De code kon net niet worden gecontroleerd. Probeer het zo nog eens.",
-      "invalidAccessCode": "De code hoort helaas bij niemand. Kijk nog eens naar je festivalcode.",
+      "invalidAccessCode": "De code kon niet worden bevestigd. Controleer je invoer en probeer het opnieuw.",
       "participantVotesLoad": "Je eerdere stemmen konden niet worden geladen."
     }
   },
