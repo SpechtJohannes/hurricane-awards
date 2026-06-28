@@ -38,6 +38,10 @@ import {
   type LoginAttemptGuardState,
 } from './lib/loginAttemptGuard'
 import { activeFestival, festivalStorageKey } from './config/festivals'
+import {
+  AdminParticipants,
+  type ParticipantFormState,
+} from './components/AdminParticipants'
 import { useFestivalAccess } from './hooks/useFestivalAccess'
 import i18n from './i18n'
 import { supportedLanguages, type SupportedLanguage } from './i18n'
@@ -46,12 +50,6 @@ import './App.css'
 type CategoryResult = {
   participant: Participant
   voteCount: number
-}
-
-type ParticipantFormState = {
-  id: string | null
-  displayName: string
-  accessCode: string
 }
 
 const authenticatedParticipantStorageKey = festivalStorageKey(
@@ -1183,172 +1181,23 @@ function App() {
             ))}
           </div>
 
-          <div className="admin__header admin__header--participants">
-            <p className="admin__eyebrow">{t('admin.participants.eyebrow')}</p>
-            <h2>{t('admin.participants.title')}</h2>
-          </div>
-
-          {adminParticipantsError ? (
-            <p className="admin__notice">{adminParticipantsError}</p>
-          ) : null}
-
-          <div className="admin-participants">
-            <div className="admin-participants__toolbar">
-              <button
-                className="admin-card__reset admin-card__reset--primary"
-                type="button"
-                onClick={startCreateParticipant}
-              >
-                {t('admin.participants.createButton')}
-              </button>
-            </div>
-
-            {participantForm ? (
-              <form
-                className="admin-participant-form"
-                onSubmit={submitParticipantForm}
-              >
-                <h3>
-                  {participantForm.id
-                    ? t('admin.participants.editTitle')
-                    : t('admin.participants.createTitle')}
-                </h3>
-
-                <label htmlFor="admin-participant-display-name">
-                  {t('admin.participants.displayNameLabel')}
-                  <input
-                    id="admin-participant-display-name"
-                    type="text"
-                    value={participantForm.displayName}
-                    disabled={isSavingParticipant}
-                    onChange={(event) => {
-                      setParticipantForm({
-                        ...participantForm,
-                        displayName: event.target.value,
-                      })
-                      setParticipantFormError('')
-                    }}
-                  />
-                </label>
-
-                <label htmlFor="admin-participant-access-code">
-                  {t('admin.participants.accessCodeLabel')}
-                  <input
-                    id="admin-participant-access-code"
-                    type="text"
-                    value={participantForm.accessCode}
-                    disabled={isSavingParticipant}
-                    onChange={(event) => {
-                      setParticipantForm({
-                        ...participantForm,
-                        accessCode: event.target.value.toUpperCase(),
-                      })
-                      setParticipantFormError('')
-                    }}
-                    autoComplete="off"
-                    inputMode="text"
-                  />
-                </label>
-
-                {participantFormError ? (
-                  <p className="admin-participant-form__error">
-                    {participantFormError}
-                  </p>
-                ) : null}
-
-                <div className="admin-participant-form__actions">
-                  <button
-                    className="admin-card__reset admin-card__reset--primary"
-                    type="submit"
-                    disabled={isSavingParticipant}
-                  >
-                    {isSavingParticipant
-                      ? t('common.saving')
-                      : t('admin.participants.save')}
-                  </button>
-                  <button
-                    className="admin-card__reset admin-card__reset--secondary"
-                    type="button"
-                    disabled={isSavingParticipant}
-                    onClick={cancelParticipantForm}
-                  >
-                    {t('admin.participants.cancel')}
-                  </button>
-                </div>
-              </form>
-            ) : null}
-
-            {isLoadingAdminParticipants ? (
-              <p className="admin__notice" role="status">
-                {t('admin.participants.loading')}
-              </p>
-            ) : (
-              <div className="admin-participants__list">
-                {adminParticipants.map((participant) => (
-                  <article
-                    className={`admin-participant-card${
-                      participant.isActive
-                        ? ''
-                        : ' admin-participant-card--inactive'
-                    }`}
-                    key={participant.id}
-                  >
-                    <div className="admin-participant-card__main">
-                      <h3>{participant.displayName}</h3>
-                      <dl>
-                        <div>
-                          <dt>{t('admin.participants.codeLabel')}</dt>
-                          <dd>{participant.accessCode}</dd>
-                        </div>
-                        <div>
-                          <dt>{t('admin.participants.statusLabel')}</dt>
-                          <dd>
-                            {participant.isActive
-                              ? t('admin.participants.status.active')
-                              : t('admin.participants.status.inactive')}
-                          </dd>
-                        </div>
-                      </dl>
-                    </div>
-
-                    <div className="admin-participant-card__actions">
-                      <button
-                        className="admin-card__reset admin-card__reset--secondary"
-                        type="button"
-                        onClick={() => startEditParticipant(participant)}
-                      >
-                        {t('admin.participants.edit')}
-                      </button>
-
-                      {participant.isActive ? (
-                        <button
-                          className="admin-card__reset"
-                          type="button"
-                          disabled={togglingParticipantId === participant.id}
-                          onClick={() => deactivateAdminParticipant(participant)}
-                        >
-                          {togglingParticipantId === participant.id
-                            ? t('admin.participants.deactivating')
-                            : t('admin.participants.deactivate')}
-                        </button>
-                      ) : (
-                        <button
-                          className="admin-card__reset admin-card__reset--primary"
-                          type="button"
-                          disabled={togglingParticipantId === participant.id}
-                          onClick={() => reactivateAdminParticipant(participant)}
-                        >
-                          {togglingParticipantId === participant.id
-                            ? t('admin.participants.reactivating')
-                            : t('admin.participants.reactivate')}
-                        </button>
-                      )}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </div>
+          <AdminParticipants
+            participants={adminParticipants}
+            error={adminParticipantsError}
+            isLoading={isLoadingAdminParticipants}
+            form={participantForm}
+            formError={participantFormError}
+            isSaving={isSavingParticipant}
+            togglingParticipantId={togglingParticipantId}
+            onCreate={startCreateParticipant}
+            onEdit={startEditParticipant}
+            onCancelForm={cancelParticipantForm}
+            onSubmitForm={submitParticipantForm}
+            onChangeForm={setParticipantForm}
+            onClearFormError={() => setParticipantFormError('')}
+            onDeactivate={deactivateAdminParticipant}
+            onReactivate={reactivateAdminParticipant}
+          />
         </section>
       ) : null}
 
