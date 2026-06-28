@@ -8,6 +8,7 @@ Die SQL-Aenderungen liegen in:
 
 ```text
 supabase/migrations/20260628123000_secure_data_access.sql
+supabase/migrations/20260628133000_restrict_admin_functions.sql
 ```
 
 Diese Migration ist auf das aktuelle Live-Schema zugeschnitten:
@@ -17,7 +18,9 @@ Diese Migration ist auf das aktuelle Live-Schema zugeschnitten:
 - `votes(id, voter_id, voted_for_id, category_id, created_at, timestamp)`
 - `archived_votes(id, festival, voter_id, voted_for_id, category_id, created_at, archived_at)`
 
-Die Migration legt keine `festivals` Tabelle an, ergaenzt keine `festival_id` Spalten und veraendert keine bestehenden Daten.
+Die Basismigration legt keine `festivals` Tabelle an, ergaenzt keine `festival_id` Spalten und veraendert keine bestehenden Daten.
+
+Die Admin-Folgemigration ergaenzt die minimale Berechtigungsspalte `participants.is_admin boolean not null default false`. Bestehende Teilnehmer werden dadurch standardmaessig normale Teilnehmer. Admins muessen danach explizit markiert werden.
 
 ## Direkte Zugriffe
 
@@ -64,9 +67,17 @@ Adminfunktionen sind von normalen Teilnehmerfunktionen getrennt:
 - `ha_update_category_status`
 - `ha_delete_category_votes`
 
-Die bestehende App hat keine separate Adminrolle: Jeder erfolgreich angemeldete Teilnehmer kann die Adminansicht oeffnen und dort Kategorien aendern oder Stimmen zuruecksetzen. Die Migration fuehrt deshalb keine neue `is_admin` Spalte ein und verlangt fuer Admin-RPCs denselben serverseitig geprueften Teilnehmercode wie das Frontend bisher. Dadurch bleibt das bestehende Verhalten erhalten, waehrend direkte Tabellenzugriffe gesperrt werden.
+Adminrechte werden ueber `participants.is_admin` gesteuert. Die App zeigt Adminfunktionen nur fuer Teilnehmer an, deren Login-RPC `is_admin = true` zurueckgibt. Das ist nur Komfort; verbindlich ist die serverseitige Pruefung in `ha_has_admin_access`.
 
-Wenn spaeter echte Adminrollen eingefuehrt werden sollen, muss ein eigenes Datenfeld oder eine Auth-Schicht ergaenzt und `ha_has_admin_access` entsprechend verschaerft werden.
+Die Admin-RPCs `ha_update_category_status` und `ha_delete_category_votes` rufen `ha_has_admin_access` auf. Manipulierte Requests normaler Teilnehmer werden dadurch mit fehlender Berechtigung abgelehnt.
+
+Einen Teilnehmer als Admin markieren:
+
+```sql
+update public.participants
+set is_admin = true
+where access_code = 'PERSOENLICHER_TEILNEHMERCODE';
+```
 
 ## Offene Grenzen
 

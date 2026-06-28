@@ -72,6 +72,7 @@ function readStoredParticipant(): Participant | null {
         name: parsedParticipant.name,
         displayName: parsedParticipant.displayName,
         accessCode: parsedParticipant.accessCode,
+        isAdmin: parsedParticipant.isAdmin === true,
       }
     }
   } catch {
@@ -586,7 +587,7 @@ function App() {
   }
 
   function toggleAdminView() {
-    if (!selectedParticipant) {
+    if (!selectedParticipant?.isAdmin) {
       return
     }
 
@@ -605,7 +606,7 @@ function App() {
     categoryId: string,
     status: CategoryStatus,
   ) {
-    if (!selectedParticipant) {
+    if (!selectedParticipant?.isAdmin) {
       return
     }
 
@@ -638,7 +639,7 @@ function App() {
   }
 
   async function resetCategoryVotes(categoryId: string) {
-    if (!selectedParticipant) {
+    if (!selectedParticipant?.isAdmin) {
       return
     }
 
@@ -800,23 +801,25 @@ function App() {
       <header className="hero" aria-labelledby="hero-title">
         <div className="hero__actions">
           <LanguageSwitcher />
-          <button
-            className="hero__admin"
-            type="button"
-            onClick={toggleAdminView}
-            aria-expanded={isAdminVisible}
-            aria-controls="admin"
-          >
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
+          {selectedParticipant.isAdmin ? (
+            <button
+              className="hero__admin"
+              type="button"
+              onClick={toggleAdminView}
+              aria-expanded={isAdminVisible}
+              aria-controls="admin"
             >
-              <path d="M19.14 12.94a7.43 7.43 0 0 0 .05-.94 7.43 7.43 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.2 7.2 0 0 0-1.62-.94L14.39 2.8a.49.49 0 0 0-.49-.4h-3.8a.49.49 0 0 0-.49.4l-.36 2.52a7.2 7.2 0 0 0-1.62.94L5.24 5.3a.5.5 0 0 0-.61.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.43 7.43 0 0 0-.05.94c0 .32.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.5.39 1.04.7 1.62.94l.36 2.52c.04.24.24.4.49.4h3.8c.25 0 .45-.16.49-.4l.36-2.52a7.2 7.2 0 0 0 1.62-.94l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
-            </svg>
-            <span>{isAdminVisible ? t('hero.adminClose') : t('hero.admin')}</span>
-          </button>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+              >
+                <path d="M19.14 12.94a7.43 7.43 0 0 0 .05-.94 7.43 7.43 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.2 7.2 0 0 0-1.62-.94L14.39 2.8a.49.49 0 0 0-.49-.4h-3.8a.49.49 0 0 0-.49.4l-.36 2.52a7.2 7.2 0 0 0-1.62.94L5.24 5.3a.5.5 0 0 0-.61.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.43 7.43 0 0 0-.05.94c0 .32.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.5.39 1.04.7 1.62.94l.36 2.52c.04.24.24.4.49.4h3.8c.25 0 .45-.16.49-.4l.36-2.52a7.2 7.2 0 0 0 1.62-.94l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
+              </svg>
+              <span>{isAdminVisible ? t('hero.adminClose') : t('hero.admin')}</span>
+            </button>
+          ) : null}
         </div>
 
         <div className="hero__content">
@@ -893,7 +896,7 @@ function App() {
         </div>
       </section>
 
-      {isAdminVisible ? (
+      {selectedParticipant.isAdmin && isAdminVisible ? (
         <section className="admin" id="admin" aria-labelledby="admin-title">
           <div className="admin__header">
             <p className="admin__eyebrow">{t('admin.eyebrow')}</p>

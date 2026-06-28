@@ -60,18 +60,21 @@ const participants: Participant[] = [
     name: 'alice',
     displayName: 'Alice',
     accessCode: 'ALICE42',
+    isAdmin: true,
   },
   {
     id: 'bob',
     name: 'bob',
     displayName: 'Bob',
     accessCode: 'BOB42',
+    isAdmin: false,
   },
   {
     id: 'carla',
     name: 'carla',
     displayName: 'Carla',
     accessCode: 'CARLA42',
+    isAdmin: false,
   },
 ]
 
@@ -665,6 +668,19 @@ describe('Ewige Tabelle', () => {
 })
 
 describe('Admin', () => {
+  it('blendet Adminfunktionen fuer normale Teilnehmer aus', async () => {
+    await renderLoadedApp()
+    await loginWith('BOB42')
+
+    expect(screen.queryByRole('button', { name: /^admin$/i })).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/status/i)).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /stimmen zur/i }),
+    ).not.toBeInTheDocument()
+    expect(updateCategoryStatus).not.toHaveBeenCalled()
+    expect(deleteVotesForCategory).not.toHaveBeenCalled()
+  })
+
   it('macht Admin-Aktionen erst in der Admin-Ansicht verfuegbar', async () => {
     await renderLoadedApp()
     await loginWith('ALICE42')

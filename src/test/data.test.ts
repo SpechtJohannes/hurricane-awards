@@ -96,6 +96,7 @@ describe('Supabase Datenzugriffe', () => {
           id: 'alice',
           name: 'alice',
           display_name: 'Alice',
+          is_admin: false,
         },
       ],
       error: null,
@@ -107,6 +108,7 @@ describe('Supabase Datenzugriffe', () => {
         name: 'alice',
         displayName: 'Alice',
         accessCode: '',
+        isAdmin: false,
       },
     ])
     expect(rpcMock).toHaveBeenCalledWith(
@@ -122,6 +124,7 @@ describe('Supabase Datenzugriffe', () => {
           id: 'alice',
           name: 'alice',
           display_name: 'Alice',
+          is_admin: true,
         },
       ],
       error: null,
@@ -132,6 +135,7 @@ describe('Supabase Datenzugriffe', () => {
       name: 'alice',
       displayName: 'Alice',
       accessCode: 'ALICE42',
+      isAdmin: true,
     })
     expect(rpcMock).toHaveBeenCalledWith('ha_find_participant', {
       p_access_code: 'ALICE42',

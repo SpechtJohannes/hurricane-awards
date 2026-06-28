@@ -9,6 +9,7 @@ type ParticipantRow = {
   name: string
   display_name: string
   access_code?: string
+  is_admin?: boolean
 }
 
 export type Participant = {
@@ -16,6 +17,7 @@ export type Participant = {
   name: string
   displayName: string
   accessCode: string
+  isAdmin: boolean
 }
 
 function mapParticipant(row: ParticipantRow, accessCode = ''): Participant {
@@ -24,6 +26,7 @@ function mapParticipant(row: ParticipantRow, accessCode = ''): Participant {
     name: row.name,
     displayName: row.display_name,
     accessCode: row.access_code ?? accessCode,
+    isAdmin: row.is_admin ?? false,
   }
 }
 
