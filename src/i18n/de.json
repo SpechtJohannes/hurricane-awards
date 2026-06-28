@@ -57,6 +57,40 @@
     "resetVotes": "Stimmen zurücksetzen",
     "resettingVotes": "Setze zurück...",
     "confirmResetVotes": "Wirklich alle Stimmen für diese Kategorie löschen?",
+    "participants": {
+      "eyebrow": "Verwaltung",
+      "title": "Teilnehmer",
+      "loading": "Teilnehmer werden geladen...",
+      "createButton": "Teilnehmer anlegen",
+      "createTitle": "Teilnehmer anlegen",
+      "editTitle": "Teilnehmer bearbeiten",
+      "displayNameLabel": "Anzeigename",
+      "accessCodeLabel": "Teilnehmercode",
+      "codeLabel": "Code",
+      "statusLabel": "Status",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "edit": "Bearbeiten",
+      "deactivate": "Deaktivieren",
+      "deactivating": "Deaktiviere...",
+      "reactivate": "Reaktivieren",
+      "reactivating": "Reaktiviere...",
+      "confirmDeactivate": "{{name}} wirklich deaktivieren? Bereits abgegebene Stimmen bleiben erhalten.",
+      "status": {
+        "active": "Aktiv",
+        "inactive": "Deaktiviert"
+      },
+      "errors": {
+        "load": "Die Teilnehmerverwaltung konnte gerade nicht geladen werden.",
+        "save": "Der Teilnehmer konnte gerade nicht gespeichert werden.",
+        "deactivate": "Der Teilnehmer konnte gerade nicht deaktiviert werden.",
+        "reactivate": "Der Teilnehmer konnte gerade nicht reaktiviert werden.",
+        "codeSuggest": "Der vorgeschlagene Teilnehmercode konnte gerade nicht geladen werden.",
+        "duplicateCode": "Dieser Teilnehmercode ist bereits vergeben.",
+        "displayNameRequired": "Der Anzeigename ist erforderlich.",
+        "accessCodeRequired": "Der Teilnehmercode ist erforderlich."
+      }
+    },
     "statusOptions": {
       "upcoming": "upcoming",
       "open": "open",

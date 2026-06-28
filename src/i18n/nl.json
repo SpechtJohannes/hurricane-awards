@@ -57,6 +57,40 @@
     "resetVotes": "Stemmen resetten",
     "resettingVotes": "Resetten...",
     "confirmResetVotes": "Echt alle stemmen voor deze categorie verwijderen?",
+    "participants": {
+      "eyebrow": "Beheer",
+      "title": "Deelnemers",
+      "loading": "Deelnemers worden geladen...",
+      "createButton": "Deelnemer aanmaken",
+      "createTitle": "Deelnemer aanmaken",
+      "editTitle": "Deelnemer bewerken",
+      "displayNameLabel": "Weergavenaam",
+      "accessCodeLabel": "Deelnemerscode",
+      "codeLabel": "Code",
+      "statusLabel": "Status",
+      "save": "Opslaan",
+      "cancel": "Annuleren",
+      "edit": "Bewerken",
+      "deactivate": "Deactiveren",
+      "deactivating": "Deactiveren...",
+      "reactivate": "Reactiveren",
+      "reactivating": "Reactiveren...",
+      "confirmDeactivate": "{{name}} echt deactiveren? Eerder uitgebrachte stemmen blijven behouden.",
+      "status": {
+        "active": "Actief",
+        "inactive": "Gedeactiveerd"
+      },
+      "errors": {
+        "load": "Het deelnemersbeheer kon net niet worden geladen.",
+        "save": "De deelnemer kon net niet worden opgeslagen.",
+        "deactivate": "De deelnemer kon net niet worden gedeactiveerd.",
+        "reactivate": "De deelnemer kon net niet worden gereactiveerd.",
+        "codeSuggest": "De voorgestelde deelnemerscode kon net niet worden geladen.",
+        "duplicateCode": "Deze deelnemerscode is al in gebruik.",
+        "displayNameRequired": "De weergavenaam is verplicht.",
+        "accessCodeRequired": "De deelnemerscode is verplicht."
+      }
+    },
     "statusOptions": {
       "upcoming": "upcoming",
       "open": "open",

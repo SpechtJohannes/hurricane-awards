@@ -15,9 +15,15 @@ import {
   type Category,
 } from '../data/categories'
 import {
+  createParticipant,
+  deactivateParticipant,
   findParticipantByAccessCode,
+  loadAdminParticipants,
   loadParticipants,
+  reactivateParticipant,
+  suggestParticipantAccessCode,
   type Participant,
+  updateParticipant,
 } from '../data/participants'
 import {
   deleteVotesForCategory,
@@ -39,8 +45,14 @@ vi.mock('../data/categories', () => ({
 }))
 
 vi.mock('../data/participants', () => ({
+  createParticipant: vi.fn(),
+  deactivateParticipant: vi.fn(),
   findParticipantByAccessCode: vi.fn(),
+  loadAdminParticipants: vi.fn(),
   loadParticipants: vi.fn(),
+  reactivateParticipant: vi.fn(),
+  suggestParticipantAccessCode: vi.fn(),
+  updateParticipant: vi.fn(),
 }))
 
 vi.mock('../data/votes', () => ({
@@ -61,6 +73,7 @@ const participants: Participant[] = [
     displayName: 'Alice',
     accessCode: 'ALICE42',
     isAdmin: true,
+    isActive: true,
   },
   {
     id: 'bob',
@@ -68,6 +81,7 @@ const participants: Participant[] = [
     displayName: 'Bob',
     accessCode: 'BOB42',
     isAdmin: false,
+    isActive: true,
   },
   {
     id: 'carla',
@@ -75,6 +89,7 @@ const participants: Participant[] = [
     displayName: 'Carla',
     accessCode: 'CARLA42',
     isAdmin: false,
+    isActive: true,
   },
 ]
 
@@ -129,18 +144,21 @@ function vote(overrides: Partial<Vote> = {}): Vote {
 
 function mockLoadedData({
   loadedParticipants = participants,
+  loadedAdminParticipants = loadedParticipants,
   loadedCategories = categories,
   loadedVotes = [],
   participantVotes = [],
   loadedStandings = standings,
 }: {
   loadedParticipants?: Participant[]
+  loadedAdminParticipants?: Participant[]
   loadedCategories?: Category[]
   loadedVotes?: Vote[]
   participantVotes?: Vote[]
   loadedStandings?: AllTimeStanding[]
 } = {}) {
   vi.mocked(loadParticipants).mockResolvedValue(loadedParticipants)
+  vi.mocked(loadAdminParticipants).mockResolvedValue(loadedAdminParticipants)
   vi.mocked(findParticipantByAccessCode).mockImplementation(async (accessCode) => {
     return (
       loadedParticipants.find(
@@ -152,6 +170,52 @@ function mockLoadedData({
   vi.mocked(loadVotes).mockResolvedValue(loadedVotes)
   vi.mocked(loadVotesForParticipant).mockResolvedValue(participantVotes)
   vi.mocked(loadAllTimeStandings).mockResolvedValue(loadedStandings)
+  vi.mocked(suggestParticipantAccessCode).mockResolvedValue('NEU23456')
+  vi.mocked(createParticipant).mockImplementation(async (input) => ({
+    id: input.displayName.toLowerCase().replace(/\s+/g, '-'),
+    name: input.displayName.toLowerCase().replace(/\s+/g, '-'),
+    displayName: input.displayName,
+    accessCode: input.accessCode ?? 'NEU23456',
+    isAdmin: false,
+    isActive: true,
+  }))
+  vi.mocked(updateParticipant).mockImplementation(async (input) => {
+    const participant = loadedAdminParticipants.find(
+      (currentParticipant) => currentParticipant.id === input.id,
+    )
+
+    if (!participant) {
+      throw new Error('Unknown participant')
+    }
+
+    return {
+      ...participant,
+      displayName: input.displayName ?? participant.displayName,
+      accessCode: input.accessCode ?? participant.accessCode,
+    }
+  })
+  vi.mocked(deactivateParticipant).mockImplementation(async (participantId) => {
+    const participant = loadedAdminParticipants.find(
+      (currentParticipant) => currentParticipant.id === participantId,
+    )
+
+    if (!participant) {
+      throw new Error('Unknown participant')
+    }
+
+    return { ...participant, isActive: false }
+  })
+  vi.mocked(reactivateParticipant).mockImplementation(async (participantId) => {
+    const participant = loadedAdminParticipants.find(
+      (currentParticipant) => currentParticipant.id === participantId,
+    )
+
+    if (!participant) {
+      throw new Error('Unknown participant')
+    }
+
+    return { ...participant, isActive: true }
+  })
   vi.mocked(updateCategoryStatus).mockImplementation(
     async (categoryId, status) => {
       const category = loadedCategories.find(
@@ -695,6 +759,211 @@ describe('Admin', () => {
     ).toHaveLength(3)
   })
 
+  it('zeigt die Teilnehmerverwaltung mit aktiven und deaktivierten Teilnehmern', async () => {
+    mockLoadedData({
+      loadedAdminParticipants: [
+        participants[0],
+        { ...participants[1], isActive: false },
+      ],
+    })
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const participantsSection = sectionForHeading(/^teilnehmer$/i)
+
+    expect(await within(participantsSection).findByText('Alice')).toBeVisible()
+    expect(within(participantsSection).getByText('ALICE42')).toBeVisible()
+    expect(within(participantsSection).getByText('Bob')).toBeVisible()
+    expect(within(participantsSection).getByText('BOB42')).toBeVisible()
+    expect(within(participantsSection).getByText('Aktiv')).toBeVisible()
+    expect(within(participantsSection).getByText('Deaktiviert')).toBeVisible()
+    expect(loadAdminParticipants).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+  })
+
+  it('legt Teilnehmer im Adminbereich an und aktualisiert die Liste', async () => {
+    const newParticipant = {
+      id: 'dina',
+      name: 'dina',
+      displayName: 'Dina',
+      accessCode: 'NEU23456',
+      isAdmin: false,
+      isActive: true,
+    }
+
+    mockLoadedData()
+    vi.mocked(loadAdminParticipants)
+      .mockResolvedValueOnce(participants)
+      .mockResolvedValueOnce([...participants, newParticipant])
+    vi.mocked(createParticipant).mockResolvedValue(newParticipant)
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await user.click(
+      await screen.findByRole('button', { name: /teilnehmer anlegen/i }),
+    )
+
+    expect(suggestParticipantAccessCode).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+    expect(screen.getByLabelText(/^teilnehmercode$/i)).toHaveValue('NEU23456')
+
+    await user.type(screen.getByLabelText(/^anzeigename$/i), 'Dina')
+    await user.click(screen.getByRole('button', { name: /^speichern$/i }))
+
+    expect(createParticipant).toHaveBeenCalledWith(
+      { displayName: 'Dina', accessCode: 'NEU23456' },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(await screen.findByText('Dina')).toBeVisible()
+  })
+
+  it('bearbeitet Teilnehmer im Adminbereich', async () => {
+    const updatedParticipant = {
+      ...participants[1],
+      displayName: 'Bobby',
+      accessCode: 'BOBBY42',
+    }
+
+    mockLoadedData()
+    vi.mocked(loadAdminParticipants)
+      .mockResolvedValueOnce(participants)
+      .mockResolvedValueOnce([participants[0], updatedParticipant, participants[2]])
+    vi.mocked(updateParticipant).mockResolvedValue(updatedParticipant)
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const participantsSection = sectionForHeading(/^teilnehmer$/i)
+    const bobCard = (await within(participantsSection).findByText('Bob')).closest(
+      'article',
+    )
+
+    expect(bobCard).not.toBeNull()
+
+    await user.click(
+      within(bobCard as HTMLElement).getByRole('button', { name: /bearbeiten/i }),
+    )
+    await user.clear(screen.getByLabelText(/^anzeigename$/i))
+    await user.type(screen.getByLabelText(/^anzeigename$/i), 'Bobby')
+    await user.clear(screen.getByLabelText(/^teilnehmercode$/i))
+    await user.type(screen.getByLabelText(/^teilnehmercode$/i), 'BOBBY42')
+    await user.click(screen.getByRole('button', { name: /^speichern$/i }))
+
+    expect(updateParticipant).toHaveBeenCalledWith(
+      { id: 'bob', displayName: 'Bobby', accessCode: 'BOBBY42' },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(await screen.findByText('Bobby')).toBeVisible()
+  })
+
+  it('deaktiviert aktive Teilnehmer nach Bestaetigung', async () => {
+    mockLoadedData()
+    vi.mocked(loadAdminParticipants)
+      .mockResolvedValueOnce(participants)
+      .mockResolvedValueOnce([
+        participants[0],
+        { ...participants[1], isActive: false },
+        participants[2],
+      ])
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const participantsSection = sectionForHeading(/^teilnehmer$/i)
+    const bobCard = (await within(participantsSection).findByText('Bob')).closest(
+      'article',
+    )
+
+    expect(bobCard).not.toBeNull()
+
+    await user.click(
+      within(bobCard as HTMLElement).getByRole('button', {
+        name: /deaktivieren/i,
+      }),
+    )
+
+    expect(window.confirm).toHaveBeenCalled()
+    expect(deactivateParticipant).toHaveBeenCalledWith('bob', {
+      participantAccessCode: 'ALICE42',
+    })
+    expect(await within(participantsSection).findByText('Deaktiviert')).toBeVisible()
+  })
+
+  it('reaktiviert deaktivierte Teilnehmer', async () => {
+    const inactiveParticipants = [
+      participants[0],
+      { ...participants[1], isActive: false },
+      participants[2],
+    ]
+
+    mockLoadedData({ loadedAdminParticipants: inactiveParticipants })
+    vi.mocked(loadAdminParticipants)
+      .mockResolvedValueOnce(inactiveParticipants)
+      .mockResolvedValueOnce(participants)
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const participantsSection = sectionForHeading(/^teilnehmer$/i)
+    const bobCard = (await within(participantsSection).findByText('Bob')).closest(
+      'article',
+    )
+
+    expect(bobCard).not.toBeNull()
+
+    await user.click(
+      within(bobCard as HTMLElement).getByRole('button', {
+        name: /reaktivieren/i,
+      }),
+    )
+
+    expect(reactivateParticipant).toHaveBeenCalledWith('bob', {
+      participantAccessCode: 'ALICE42',
+    })
+    await waitFor(() => {
+      expect(within(participantsSection).getAllByText('Aktiv').length).toBeGreaterThan(1)
+    })
+  })
+
+  it('zeigt Fehler beim Laden und Speichern der Teilnehmerverwaltung', async () => {
+    mockLoadedData()
+    vi.mocked(loadAdminParticipants).mockRejectedValueOnce(
+      new Error('load failed'),
+    )
+    vi.mocked(createParticipant).mockRejectedValueOnce(
+      new Error('participant access code already exists'),
+    )
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    expect(
+      await screen.findByText(/teilnehmerverwaltung konnte gerade nicht geladen/i),
+    ).toBeVisible()
+
+    await user.click(screen.getByRole('button', { name: /teilnehmer anlegen/i }))
+    await user.type(screen.getByLabelText(/^anzeigename$/i), 'Dina')
+    await user.click(screen.getByRole('button', { name: /^speichern$/i }))
+
+    expect(
+      await screen.findByText(/teilnehmercode ist bereits vergeben/i),
+    ).toBeVisible()
+  })
+
   it('aendert den Kategorie-Status ueber den Admin-Bereich', async () => {
     await renderLoadedApp()
     const user = await loginWith('ALICE42')
@@ -753,5 +1022,12 @@ describe('Admin', () => {
     )
 
     expect(deleteVotesForCategory).not.toHaveBeenCalled()
+  })
+
+  it('laedt Teilnehmerverwaltung nicht fuer normale Teilnehmer', async () => {
+    await renderLoadedApp()
+    await loginWith('BOB42')
+
+    expect(loadAdminParticipants).not.toHaveBeenCalled()
   })
 })

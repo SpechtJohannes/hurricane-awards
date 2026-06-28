@@ -18,6 +18,13 @@ const adminMigration = readFileSync(
   ),
   'utf8',
 )
+const activeParticipantMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260628143000_add_participant_active_flag.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -82,8 +89,61 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(adminMigration).toContain('is_admin boolean')
   })
 
+  it('erkennt nur aktive Teilnehmer als gueltigen serverseitigen Zugriff', () => {
+    expect(activeParticipantMigration).toContain(
+      'add column if not exists is_active boolean not null default true',
+    )
+    expect(activeParticipantMigration).toContain(
+      'create or replace function public.ha_participant_id_for_access',
+    )
+    expect(activeParticipantMigration).toContain(
+      'create or replace function public.ha_find_participant',
+    )
+    expect(activeParticipantMigration).toContain('is_active boolean')
+    expect(activeParticipantMigration).toContain(
+      'p.name::text, p.display_name::text, p.is_admin, p.is_active',
+    )
+    expect(activeParticipantMigration).toContain(
+      'create or replace function public.ha_has_admin_access',
+    )
+    expect(activeParticipantMigration.match(/and p\.is_active = true/g)).toHaveLength(3)
+  })
+
+  it('stellt Admin RPCs fuer die Teilnehmerverwaltung bereit', () => {
+    for (const functionName of [
+      'ha_admin_list_participants',
+      'ha_suggest_participant_access_code',
+      'ha_create_participant',
+      'ha_update_participant',
+      'ha_deactivate_participant',
+      'ha_reactivate_participant',
+    ]) {
+      expect(activeParticipantMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(activeParticipantMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+
+    expect(activeParticipantMigration).toContain(
+      "v_alphabet constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'",
+    )
+    expect(activeParticipantMigration).toContain(
+      'participant access code already exists',
+    )
+    expect(activeParticipantMigration).toContain('display name is required')
+    expect(
+      activeParticipantMigration.match(
+        /if not public\.ha_has_admin_access\(p_participant_access_code\)/g,
+      ),
+    ).toHaveLength(6)
+    expect(activeParticipantMigration).toContain('set is_active = false')
+    expect(activeParticipantMigration).toContain('set is_active = true')
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
-    const migrations = `${baseMigration}\n${adminMigration}`
+    const migrations = `${baseMigration}\n${adminMigration}\n${activeParticipantMigration}`
 
     expect(migrations).not.toContain('create table if not exists public.festivals')
     expect(migrations).not.toContain('add column if not exists festival_id')
