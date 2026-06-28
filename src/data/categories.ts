@@ -1,4 +1,9 @@
 import { supabase } from '../lib/supabase'
+import {
+  participantRpcParams,
+  type AdminAccessContext,
+  type ParticipantAccessContext,
+} from './accessContext'
 
 export type CategoryStatus = 'upcoming' | 'open' | 'closed'
 
@@ -25,41 +30,45 @@ function mapCategory(row: CategoryRow): Category {
   }
 }
 
-export async function loadCategories(): Promise<Category[]> {
+export async function loadCategories(
+  context: ParticipantAccessContext,
+): Promise<Category[]> {
   if (!supabase) {
     throw new Error('Supabase ist noch nicht konfiguriert.')
   }
 
-  const { data, error } = await supabase
-    .from('categories')
-    .select('id, title, description, status, sort_order')
-    .order('sort_order', { ascending: true })
+  const { data, error } = await supabase.rpc(
+    'ha_list_categories',
+    participantRpcParams(context),
+  )
 
   if (error) {
     throw error
   }
 
-  return (data ?? []).map((row) => mapCategory(row as CategoryRow))
+  return ((data ?? []) as CategoryRow[]).map((row) => mapCategory(row))
 }
 
 export async function updateCategoryStatus(
   categoryId: string,
   status: CategoryStatus,
+  context: AdminAccessContext,
 ): Promise<Category> {
   if (!supabase) {
     throw new Error('Supabase ist noch nicht konfiguriert.')
   }
 
-  const { data, error } = await supabase
-    .from('categories')
-    .update({ status })
-    .eq('id', categoryId)
-    .select('id, title, description, status')
-    .single()
+  const { data, error } = await supabase.rpc('ha_update_category_status', {
+    ...participantRpcParams(context),
+    p_category_id: categoryId,
+    p_status: status,
+  })
 
   if (error) {
     throw error
   }
 
-  return mapCategory(data as CategoryRow)
+  const category = Array.isArray(data) ? data[0] : data
+
+  return mapCategory(category as CategoryRow)
 }

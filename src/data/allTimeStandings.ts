@@ -1,4 +1,8 @@
 import { supabase } from '../lib/supabase'
+import {
+  participantRpcParams,
+  type ParticipantAccessContext,
+} from './accessContext'
 
 type AllTimeStandingRow = {
   participant_id: string
@@ -20,22 +24,23 @@ function mapAllTimeStanding(row: AllTimeStandingRow): AllTimeStanding {
   }
 }
 
-export async function loadAllTimeStandings(): Promise<AllTimeStanding[]> {
+export async function loadAllTimeStandings(
+  context: ParticipantAccessContext,
+): Promise<AllTimeStanding[]> {
   if (!supabase) {
     throw new Error('Supabase ist noch nicht konfiguriert.')
   }
 
-  const { data, error } = await supabase
-    .from('all_time_standings')
-    .select('participant_id, participant_name, total_points')
-    .order('total_points', { ascending: false })
-    .order('participant_name', { ascending: true })
+  const { data, error } = await supabase.rpc(
+    'ha_list_all_time_standings',
+    participantRpcParams(context),
+  )
 
   if (error) {
     throw error
   }
 
-  return (data ?? []).map((row) =>
-    mapAllTimeStanding(row as AllTimeStandingRow),
+  return ((data ?? []) as AllTimeStandingRow[]).map((row) =>
+    mapAllTimeStanding(row),
   )
 }

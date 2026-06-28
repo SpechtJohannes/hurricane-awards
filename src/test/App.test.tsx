@@ -342,7 +342,9 @@ describe('Login', () => {
     expect(await within(identitySection).findByText(/angemeldet als:/i)).toBeVisible()
     expect(within(identitySection).getByText('Alice')).toBeVisible()
     expect(findParticipantByAccessCode).toHaveBeenCalledWith('ALICE42')
-    expect(loadVotesForParticipant).toHaveBeenCalledWith('alice')
+    expect(loadVotesForParticipant).toHaveBeenCalledWith('alice', {
+      participantAccessCode: 'ALICE42',
+    })
   })
 
   it('verhindert Zugriff mit ungueltigem Teilnehmercode', async () => {
@@ -491,7 +493,9 @@ describe('Login', () => {
     const identitySection = sectionForHeading(/teilnehmercode/i)
     expect(within(identitySection).getByText('Alice')).toBeVisible()
     expect(loadParticipants).toHaveBeenCalled()
-    expect(loadVotesForParticipant).toHaveBeenCalledWith('alice')
+    expect(loadVotesForParticipant).toHaveBeenCalledWith('alice', {
+      participantAccessCode: 'ALICE42',
+    })
   })
 
   it('meldet ab und blendet geschuetzte Inhalte wieder aus', async () => {
@@ -562,12 +566,15 @@ describe('Voting', () => {
       within(votingSection).getByRole('button', { name: /stimme abgeben/i }),
     )
 
-    expect(saveVote).toHaveBeenCalledWith({
-      voterId: 'alice',
-      votedForId: 'bob',
-      categoryId: 'open-category',
-      timestamp: expect.any(String),
-    })
+    expect(saveVote).toHaveBeenCalledWith(
+      {
+        voterId: 'alice',
+        votedForId: 'bob',
+        categoryId: 'open-category',
+        timestamp: expect.any(String),
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
     expect(await within(votingSection).findByText(/bereits abgestimmt/i)).toBeVisible()
   })
 
@@ -684,6 +691,7 @@ describe('Admin', () => {
     expect(updateCategoryStatus).toHaveBeenCalledWith(
       'upcoming-category',
       'open',
+      { participantAccessCode: 'ALICE42' },
     )
     const adminSection = sectionForHeading(/^kategorien$/i)
     const updatedCard = within(adminSection)
@@ -708,7 +716,9 @@ describe('Admin', () => {
     await user.click(screen.getAllByRole('button', { name: /stimmen zur/i })[1])
 
     expect(window.confirm).toHaveBeenCalled()
-    expect(deleteVotesForCategory).toHaveBeenCalledWith('open-category')
+    expect(deleteVotesForCategory).toHaveBeenCalledWith('open-category', {
+      participantAccessCode: 'ALICE42',
+    })
     await waitFor(() => {
       expect(loadCategories).toHaveBeenCalledTimes(2)
       expect(loadVotes).toHaveBeenCalledTimes(2)

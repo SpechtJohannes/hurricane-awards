@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const fromMock = vi.hoisted(() => vi.fn())
+const rpcMock = vi.hoisted(() => vi.fn())
 
 vi.mock('../lib/supabase', () => ({
   supabase: {
-    from: fromMock,
+    rpc: rpcMock,
   },
 }))
 
@@ -21,28 +21,33 @@ import {
   saveVote,
 } from '../data/votes'
 
+const participantContext = {
+  participantAccessCode: 'ALICE42',
+}
+
+const expectedParticipantRpcContext = {
+  p_participant_access_code: 'ALICE42',
+}
+
 beforeEach(() => {
-  fromMock.mockReset()
+  rpcMock.mockReset()
 })
 
 describe('Supabase Datenzugriffe', () => {
-  it('laedt Kategorien sortiert und mappt Datenbankfelder', async () => {
-    const order = vi.fn().mockResolvedValue({
+  it('laedt Kategorien ueber eine geschuetzte RPC Funktion', async () => {
+    rpcMock.mockResolvedValue({
       data: [
         {
           id: 'cat-1',
           title: 'Beste Energie',
           description: 'Offene Kategorie',
           status: 'open',
-          sort_order: 10,
         },
       ],
       error: null,
     })
-    const select = vi.fn().mockReturnValue({ order })
-    fromMock.mockReturnValue({ select })
 
-    await expect(loadCategories()).resolves.toEqual([
+    await expect(loadCategories(participantContext)).resolves.toEqual([
       {
         id: 'cat-1',
         title: 'Beste Energie',
@@ -50,77 +55,77 @@ describe('Supabase Datenzugriffe', () => {
         status: 'open',
       },
     ])
-    expect(fromMock).toHaveBeenCalledWith('categories')
-    expect(select).toHaveBeenCalledWith('id, title, description, status, sort_order')
-    expect(order).toHaveBeenCalledWith('sort_order', { ascending: true })
+    expect(rpcMock).toHaveBeenCalledWith(
+      'ha_list_categories',
+      expectedParticipantRpcContext,
+    )
   })
 
-  it('speichert Kategorie-Status und gibt die aktualisierte Kategorie zurueck', async () => {
-    const single = vi.fn().mockResolvedValue({
-      data: {
-        id: 'cat-1',
-        title: 'Beste Energie',
-        description: 'Offene Kategorie',
-        status: 'closed',
-      },
+  it('speichert Kategorie-Status ueber die Admin RPC Funktion', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          id: 'cat-1',
+          title: 'Beste Energie',
+          description: 'Offene Kategorie',
+          status: 'closed',
+        },
+      ],
       error: null,
     })
-    const select = vi.fn().mockReturnValue({ single })
-    const eq = vi.fn().mockReturnValue({ select })
-    const update = vi.fn().mockReturnValue({ eq })
-    fromMock.mockReturnValue({ update })
 
-    await expect(updateCategoryStatus('cat-1', 'closed')).resolves.toEqual({
+    await expect(
+      updateCategoryStatus('cat-1', 'closed', participantContext),
+    ).resolves.toEqual({
       id: 'cat-1',
       title: 'Beste Energie',
       description: 'Offene Kategorie',
       status: 'closed',
     })
-    expect(fromMock).toHaveBeenCalledWith('categories')
-    expect(update).toHaveBeenCalledWith({ status: 'closed' })
-    expect(eq).toHaveBeenCalledWith('id', 'cat-1')
+    expect(rpcMock).toHaveBeenCalledWith('ha_update_category_status', {
+      ...expectedParticipantRpcContext,
+      p_category_id: 'cat-1',
+      p_status: 'closed',
+    })
   })
 
-  it('laedt Teilnehmer alphabetisch und mappt Access Codes', async () => {
-    const order = vi.fn().mockResolvedValue({
+  it('laedt Teilnehmer ohne Access Codes ueber eine geschuetzte RPC Funktion', async () => {
+    rpcMock.mockResolvedValue({
       data: [
         {
           id: 'alice',
           name: 'alice',
           display_name: 'Alice',
-          access_code: 'ALICE42',
         },
       ],
       error: null,
     })
-    const select = vi.fn().mockReturnValue({ order })
-    fromMock.mockReturnValue({ select })
 
-    await expect(loadParticipants()).resolves.toEqual([
+    await expect(loadParticipants(participantContext)).resolves.toEqual([
       {
         id: 'alice',
         name: 'alice',
         displayName: 'Alice',
-        accessCode: 'ALICE42',
+        accessCode: '',
       },
     ])
-    expect(fromMock).toHaveBeenCalledWith('participants')
-    expect(order).toHaveBeenCalledWith('name')
+    expect(rpcMock).toHaveBeenCalledWith(
+      'ha_list_participants',
+      expectedParticipantRpcContext,
+    )
   })
 
-  it('findet Teilnehmer ueber den Access Code', async () => {
-    const maybeSingle = vi.fn().mockResolvedValue({
-      data: {
-        id: 'alice',
-        name: 'alice',
-        display_name: 'Alice',
-        access_code: 'ALICE42',
-      },
+  it('findet den angemeldeten Teilnehmer ueber Codepruefung auf dem Server', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          id: 'alice',
+          name: 'alice',
+          display_name: 'Alice',
+        },
+      ],
       error: null,
     })
-    const eq = vi.fn().mockReturnValue({ maybeSingle })
-    const select = vi.fn().mockReturnValue({ eq })
-    fromMock.mockReturnValue({ select })
 
     await expect(findParticipantByAccessCode('ALICE42')).resolves.toEqual({
       id: 'alice',
@@ -128,14 +133,13 @@ describe('Supabase Datenzugriffe', () => {
       displayName: 'Alice',
       accessCode: 'ALICE42',
     })
-    expect(fromMock).toHaveBeenCalledWith('participants')
-    expect(select).toHaveBeenCalledWith('id, name, display_name, access_code')
-    expect(eq).toHaveBeenCalledWith('access_code', 'ALICE42')
-    expect(maybeSingle).toHaveBeenCalled()
+    expect(rpcMock).toHaveBeenCalledWith('ha_find_participant', {
+      p_access_code: 'ALICE42',
+    })
   })
 
-  it('laedt alle Stimmen und einzelne Teilnehmerstimmen aus Supabase', async () => {
-    const selectAll = vi.fn().mockResolvedValue({
+  it('laedt Ergebnisstimmen und einzelne Teilnehmerstimmen ueber RPC Funktionen', async () => {
+    rpcMock.mockResolvedValueOnce({
       data: [
         {
           voter_id: 'alice',
@@ -146,9 +150,8 @@ describe('Supabase Datenzugriffe', () => {
       ],
       error: null,
     })
-    fromMock.mockReturnValueOnce({ select: selectAll })
 
-    await expect(loadVotes()).resolves.toEqual([
+    await expect(loadVotes(participantContext)).resolves.toEqual([
       {
         voterId: 'alice',
         votedForId: 'bob',
@@ -157,7 +160,7 @@ describe('Supabase Datenzugriffe', () => {
       },
     ])
 
-    const eq = vi.fn().mockResolvedValue({
+    rpcMock.mockResolvedValueOnce({
       data: [
         {
           voter_id: 'alice',
@@ -168,10 +171,10 @@ describe('Supabase Datenzugriffe', () => {
       ],
       error: null,
     })
-    const selectForParticipant = vi.fn().mockReturnValue({ eq })
-    fromMock.mockReturnValueOnce({ select: selectForParticipant })
 
-    await expect(loadVotesForParticipant('alice')).resolves.toEqual([
+    await expect(
+      loadVotesForParticipant('alice', participantContext),
+    ).resolves.toEqual([
       {
         voterId: 'alice',
         votedForId: 'carla',
@@ -179,53 +182,67 @@ describe('Supabase Datenzugriffe', () => {
         timestamp: '2026-06-26T13:00:00.000Z',
       },
     ])
-    expect(eq).toHaveBeenCalledWith('voter_id', 'alice')
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      1,
+      'ha_list_result_votes',
+      expectedParticipantRpcContext,
+    )
+    expect(rpcMock).toHaveBeenNthCalledWith(2, 'ha_list_participant_votes', {
+      ...expectedParticipantRpcContext,
+      p_voter_id: 'alice',
+    })
   })
 
-  it('speichert und loescht Stimmen mit den fachlichen Schluesseln', async () => {
-    const single = vi.fn().mockResolvedValue({
-      data: {
-        voter_id: 'alice',
-        voted_for_id: 'bob',
-        category_id: 'cat-1',
-        timestamp: '2026-06-26T12:00:00.000Z',
-      },
+  it('speichert und loescht Stimmen ueber geschuetzte RPC Funktionen', async () => {
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          voter_id: 'alice',
+          voted_for_id: 'bob',
+          category_id: 'cat-1',
+          timestamp: '2026-06-26T12:00:00.000Z',
+        },
+      ],
       error: null,
     })
-    const select = vi.fn().mockReturnValue({ single })
-    const insert = vi.fn().mockReturnValue({ select })
-    fromMock.mockReturnValueOnce({ insert })
 
     await expect(
-      saveVote({
-        voterId: 'alice',
-        votedForId: 'bob',
-        categoryId: 'cat-1',
-        timestamp: '2026-06-26T12:00:00.000Z',
-      }),
+      saveVote(
+        {
+          voterId: 'alice',
+          votedForId: 'bob',
+          categoryId: 'cat-1',
+          timestamp: '2026-06-26T12:00:00.000Z',
+        },
+        participantContext,
+      ),
     ).resolves.toEqual({
       voterId: 'alice',
       votedForId: 'bob',
       categoryId: 'cat-1',
       timestamp: '2026-06-26T12:00:00.000Z',
     })
-    expect(insert).toHaveBeenCalledWith({
-      voter_id: 'alice',
-      voted_for_id: 'bob',
-      category_id: 'cat-1',
-      timestamp: '2026-06-26T12:00:00.000Z',
+    expect(rpcMock).toHaveBeenCalledWith('ha_save_vote', {
+      ...expectedParticipantRpcContext,
+      p_voter_id: 'alice',
+      p_voted_for_id: 'bob',
+      p_category_id: 'cat-1',
+      p_timestamp: '2026-06-26T12:00:00.000Z',
     })
 
-    const eq = vi.fn().mockResolvedValue({ error: null })
-    const deleteMock = vi.fn().mockReturnValue({ eq })
-    fromMock.mockReturnValueOnce({ delete: deleteMock })
+    rpcMock.mockResolvedValueOnce({ data: null, error: null })
 
-    await expect(deleteVotesForCategory('cat-1')).resolves.toBeUndefined()
-    expect(eq).toHaveBeenCalledWith('category_id', 'cat-1')
+    await expect(
+      deleteVotesForCategory('cat-1', participantContext),
+    ).resolves.toBeUndefined()
+    expect(rpcMock).toHaveBeenLastCalledWith('ha_delete_category_votes', {
+      ...expectedParticipantRpcContext,
+      p_category_id: 'cat-1',
+    })
   })
 
-  it('laedt die ewige Tabelle nach Gesamtpunkten und Namen sortiert', async () => {
-    const secondOrder = vi.fn().mockResolvedValue({
+  it('laedt die ewige Tabelle ueber eine geschuetzte RPC Funktion', async () => {
+    rpcMock.mockResolvedValue({
       data: [
         {
           participant_id: 'bob',
@@ -235,23 +252,17 @@ describe('Supabase Datenzugriffe', () => {
       ],
       error: null,
     })
-    const firstOrder = vi.fn().mockReturnValue({ order: secondOrder })
-    const select = vi.fn().mockReturnValue({ order: firstOrder })
-    fromMock.mockReturnValue({ select })
 
-    await expect(loadAllTimeStandings()).resolves.toEqual([
+    await expect(loadAllTimeStandings(participantContext)).resolves.toEqual([
       {
         participantId: 'bob',
         participantName: 'Bob',
         totalPoints: 18,
       },
     ])
-    expect(fromMock).toHaveBeenCalledWith('all_time_standings')
-    expect(firstOrder).toHaveBeenCalledWith('total_points', {
-      ascending: false,
-    })
-    expect(secondOrder).toHaveBeenCalledWith('participant_name', {
-      ascending: true,
-    })
+    expect(rpcMock).toHaveBeenCalledWith(
+      'ha_list_all_time_standings',
+      expectedParticipantRpcContext,
+    )
   })
 })

@@ -1,10 +1,14 @@
 import { supabase } from '../lib/supabase'
+import {
+  participantRpcParams,
+  type ParticipantAccessContext,
+} from './accessContext'
 
 type ParticipantRow = {
   id: string
   name: string
   display_name: string
-  access_code: string
+  access_code?: string
 }
 
 export type Participant = {
@@ -14,30 +18,32 @@ export type Participant = {
   accessCode: string
 }
 
-function mapParticipant(row: ParticipantRow): Participant {
+function mapParticipant(row: ParticipantRow, accessCode = ''): Participant {
   return {
     id: row.id,
     name: row.name,
     displayName: row.display_name,
-    accessCode: row.access_code,
+    accessCode: row.access_code ?? accessCode,
   }
 }
 
-export async function loadParticipants(): Promise<Participant[]> {
+export async function loadParticipants(
+  context: ParticipantAccessContext,
+): Promise<Participant[]> {
   if (!supabase) {
     throw new Error('Supabase ist noch nicht konfiguriert.')
   }
 
-  const { data, error } = await supabase
-    .from('participants')
-    .select('id, name, display_name, access_code')
-    .order('name')
+  const { data, error } = await supabase.rpc(
+    'ha_list_participants',
+    participantRpcParams(context),
+  )
 
   if (error) {
     throw error
   }
 
-  return (data ?? []).map((row) => mapParticipant(row as ParticipantRow))
+  return ((data ?? []) as ParticipantRow[]).map((row) => mapParticipant(row))
 }
 
 export async function findParticipantByAccessCode(
@@ -47,15 +53,15 @@ export async function findParticipantByAccessCode(
     throw new Error('Supabase ist noch nicht konfiguriert.')
   }
 
-  const { data, error } = await supabase
-    .from('participants')
-    .select('id, name, display_name, access_code')
-    .eq('access_code', accessCode)
-    .maybeSingle()
+  const { data, error } = await supabase.rpc('ha_find_participant', {
+    p_access_code: accessCode,
+  })
 
   if (error) {
     throw error
   }
 
-  return data ? mapParticipant(data as ParticipantRow) : null
+  const participant = Array.isArray(data) ? data[0] : data
+
+  return participant ? mapParticipant(participant as ParticipantRow, accessCode) : null
 }

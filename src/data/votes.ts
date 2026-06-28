@@ -1,4 +1,9 @@
 import { supabase } from '../lib/supabase'
+import {
+  participantRpcParams,
+  type AdminAccessContext,
+  type ParticipantAccessContext,
+} from './accessContext'
 
 type VoteRow = {
   voter_id: string
@@ -23,73 +28,84 @@ function mapVote(row: VoteRow): Vote {
   }
 }
 
-export async function loadVotesForParticipant(voterId: string): Promise<Vote[]> {
+export async function loadVotesForParticipant(
+  voterId: string,
+  context: ParticipantAccessContext,
+): Promise<Vote[]> {
   if (!supabase) {
     throw new Error('Supabase ist noch nicht konfiguriert.')
   }
 
-  const { data, error } = await supabase
-    .from('votes')
-    .select('voter_id, voted_for_id, category_id, timestamp')
-    .eq('voter_id', voterId)
+  const { data, error } = await supabase.rpc('ha_list_participant_votes', {
+    ...participantRpcParams(context),
+    p_voter_id: voterId,
+  })
 
   if (error) {
     throw error
   }
 
-  return (data ?? []).map((row) => mapVote(row as VoteRow))
+  return ((data ?? []) as VoteRow[]).map((row) => mapVote(row))
 }
 
-export async function loadVotes(): Promise<Vote[]> {
+export async function loadVotes(
+  context: ParticipantAccessContext,
+): Promise<Vote[]> {
   if (!supabase) {
     throw new Error('Supabase ist noch nicht konfiguriert.')
   }
 
-  const { data, error } = await supabase
-    .from('votes')
-    .select('voter_id, voted_for_id, category_id, timestamp')
+  const { data, error } = await supabase.rpc(
+    'ha_list_result_votes',
+    participantRpcParams(context),
+  )
 
   if (error) {
     throw error
   }
 
-  return (data ?? []).map((row) => mapVote(row as VoteRow))
+  return ((data ?? []) as VoteRow[]).map((row) => mapVote(row))
 }
 
-export async function deleteVotesForCategory(categoryId: string): Promise<void> {
+export async function deleteVotesForCategory(
+  categoryId: string,
+  context: AdminAccessContext,
+): Promise<void> {
   if (!supabase) {
     throw new Error('Supabase ist noch nicht konfiguriert.')
   }
 
-  const { error } = await supabase
-    .from('votes')
-    .delete()
-    .eq('category_id', categoryId)
+  const { error } = await supabase.rpc('ha_delete_category_votes', {
+    ...participantRpcParams(context),
+    p_category_id: categoryId,
+  })
 
   if (error) {
     throw error
   }
 }
 
-export async function saveVote(vote: Vote): Promise<Vote> {
+export async function saveVote(
+  vote: Vote,
+  context: ParticipantAccessContext,
+): Promise<Vote> {
   if (!supabase) {
     throw new Error('Supabase ist noch nicht konfiguriert.')
   }
 
-  const { data, error } = await supabase
-    .from('votes')
-    .insert({
-      voter_id: vote.voterId,
-      voted_for_id: vote.votedForId,
-      category_id: vote.categoryId,
-      timestamp: vote.timestamp,
-    })
-    .select('voter_id, voted_for_id, category_id, timestamp')
-    .single()
+  const { data, error } = await supabase.rpc('ha_save_vote', {
+    ...participantRpcParams(context),
+    p_voter_id: vote.voterId,
+    p_voted_for_id: vote.votedForId,
+    p_category_id: vote.categoryId,
+    p_timestamp: vote.timestamp,
+  })
 
   if (error) {
     throw error
   }
 
-  return mapVote(data as VoteRow)
+  const savedVote = Array.isArray(data) ? data[0] : data
+
+  return mapVote(savedVote as VoteRow)
 }

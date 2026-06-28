@@ -377,6 +377,10 @@ function App() {
     let isCurrent = true
 
     async function loadData() {
+      const accessContext = {
+        participantAccessCode: authenticatedParticipant.accessCode,
+      }
+
       setIsLoadingData(true)
       setIsStandingsLoading(true)
       setParticipantsError('')
@@ -391,9 +395,9 @@ function App() {
           loadedCategories,
           loadedParticipantVotes,
         ] = await Promise.all([
-          loadParticipants(),
-          loadCategories(),
-          loadVotesForParticipant(authenticatedParticipant.id),
+          loadParticipants(accessContext),
+          loadCategories(accessContext),
+          loadVotesForParticipant(authenticatedParticipant.id, accessContext),
         ])
 
         if (isCurrent) {
@@ -414,7 +418,7 @@ function App() {
       }
 
       try {
-        const loadedVotes = await loadVotes()
+        const loadedVotes = await loadVotes(accessContext)
 
         if (isCurrent) {
           setAllVotes(loadedVotes)
@@ -430,7 +434,7 @@ function App() {
       }
 
       try {
-        const loadedStandings = await loadAllTimeStandings()
+        const loadedStandings = await loadAllTimeStandings(accessContext)
 
         if (isCurrent) {
           setAllTimeStandings(loadedStandings)
@@ -601,6 +605,10 @@ function App() {
     categoryId: string,
     status: CategoryStatus,
   ) {
+    if (!selectedParticipant) {
+      return
+    }
+
     const previousCategories = categories
 
     setAdminError('')
@@ -612,7 +620,9 @@ function App() {
     )
 
     try {
-      const updatedCategory = await updateCategoryStatus(categoryId, status)
+      const updatedCategory = await updateCategoryStatus(categoryId, status, {
+        participantAccessCode: selectedParticipant.accessCode,
+      })
 
       setCategories((currentCategories) =>
         currentCategories.map((category) =>
@@ -628,6 +638,10 @@ function App() {
   }
 
   async function resetCategoryVotes(categoryId: string) {
+    if (!selectedParticipant) {
+      return
+    }
+
     const shouldReset = window.confirm(
       t('admin.confirmResetVotes'),
     )
@@ -641,14 +655,22 @@ function App() {
     setResettingCategoryId(categoryId)
 
     try {
-      await deleteVotesForCategory(categoryId)
+      await deleteVotesForCategory(categoryId, {
+        participantAccessCode: selectedParticipant.accessCode,
+      })
 
       const [loadedCategories, loadedVotes, loadedParticipantVotes] =
         await Promise.all([
-          loadCategories(),
-          loadVotes(),
+          loadCategories({
+            participantAccessCode: selectedParticipant.accessCode,
+          }),
+          loadVotes({
+            participantAccessCode: selectedParticipant.accessCode,
+          }),
           selectedParticipant
-            ? loadVotesForParticipant(selectedParticipant.id)
+            ? loadVotesForParticipant(selectedParticipant.id, {
+                participantAccessCode: selectedParticipant.accessCode,
+              })
             : Promise.resolve<Vote[]>([]),
         ])
 
@@ -691,7 +713,9 @@ function App() {
     setVotesError('')
 
     try {
-      const savedVote = await saveVote(vote)
+      const savedVote = await saveVote(vote, {
+        participantAccessCode: selectedParticipant.accessCode,
+      })
 
       setVotes((currentVotes) => [...currentVotes, savedVote])
       setAllVotes((currentVotes) => [...currentVotes, savedVote])

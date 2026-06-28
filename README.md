@@ -1,5 +1,11 @@
 # React + TypeScript + Vite
 
+## Supabase Sicherheit
+
+Die App greift aus dem Browser nicht direkt auf geschuetzte Tabellen zu, sondern verwendet serverseitig gepruefte Supabase RPC-Funktionen. Die zugehoerige RLS- und RPC-Migration liegt unter `supabase/migrations/20260628123000_secure_data_access.sql`.
+
+Details zu Tabellen, Policies, Adminrechten und verbleibenden Grenzen stehen in `docs/security.md`.
+
 ## Tests
 
 Die Unit Tests werden mit Vitest, React Testing Library, jest-dom, jsdom und dem V8 Coverage Provider ausgeführt.
