@@ -25,6 +25,13 @@ const activeParticipantMigration = readFileSync(
   ),
   'utf8',
 )
+const participantManagementMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260628153000_create_participant_management_rpcs.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -118,32 +125,37 @@ describe('Supabase Sicherheitsmigration', () => {
       'ha_deactivate_participant',
       'ha_reactivate_participant',
     ]) {
-      expect(activeParticipantMigration).toContain(
+      expect(participantManagementMigration).toContain(
         `create or replace function public.${functionName}`,
       )
-      expect(activeParticipantMigration).toContain(
+      expect(participantManagementMigration).toContain(
         `grant execute on function public.${functionName}`,
       )
     }
 
-    expect(activeParticipantMigration).toContain(
+    expect(participantManagementMigration).toContain(
       "v_alphabet constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'",
     )
-    expect(activeParticipantMigration).toContain(
+    expect(participantManagementMigration).toContain(
       'participant access code already exists',
     )
-    expect(activeParticipantMigration).toContain('display name is required')
+    expect(participantManagementMigration).toContain('display name is required')
     expect(
-      activeParticipantMigration.match(
+      participantManagementMigration.match(
         /if not public\.ha_has_admin_access\(p_participant_access_code\)/g,
       ),
     ).toHaveLength(6)
-    expect(activeParticipantMigration).toContain('set is_active = false')
-    expect(activeParticipantMigration).toContain('set is_active = true')
+    expect(participantManagementMigration).toContain('set is_active = false')
+    expect(participantManagementMigration).toContain('set is_active = true')
   })
 
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
-    const migrations = `${baseMigration}\n${adminMigration}\n${activeParticipantMigration}`
+    const migrations = [
+      baseMigration,
+      adminMigration,
+      activeParticipantMigration,
+      participantManagementMigration,
+    ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')
     expect(migrations).not.toContain('add column if not exists festival_id')
