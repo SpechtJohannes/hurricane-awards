@@ -17,6 +17,15 @@
     "loading": "Laden...",
     "saving": "Opslaan..."
   },
+  "festivalAccess": {
+    "ariaLabel": "Hurricane Awards 2026 festivaltoegang",
+    "codeLabel": "Festivalcode",
+    "codePlaceholder": "Festivalcode invoeren",
+    "submit": "Festival ontgrendelen",
+    "errors": {
+      "invalidCode": "De festivalcode is ongeldig. Controleer je invoer en probeer het opnieuw."
+    }
+  },
   "hero": {
     "admin": "Admin",
     "adminClose": "Admin sluiten",
@@ -26,11 +35,11 @@
     "voteCta": "Naar de stemming"
   },
   "identity": {
-    "title": "Voer je festivalcode in",
+    "title": "Voer je deelnemerscode in",
     "loggedInAs": "Aangemeld als:",
     "logout": "Afmelden",
-    "festivalCodeLabel": "Festivalcode",
-    "festivalCodePlaceholder": "Code hier invoeren",
+    "participantCodeLabel": "Deelnemerscode",
+    "participantCodePlaceholder": "Deelnemerscode invoeren",
     "submit": "Code controleren",
     "locked": "Te veel pogingen. Wacht nog {{seconds}} seconden en probeer het daarna opnieuw.",
     "errors": {
@@ -62,7 +71,7 @@
   "categories": {
     "eyebrow": "{{count}} deelnemers",
     "title": "Stemming",
-    "loginRequired": "Voer eerst je festivalcode in. Daarna kun je stemmen.",
+    "loginRequired": "Voer eerst je deelnemerscode in. Daarna kun je stemmen.",
     "alreadyVoted": "Je hebt al gestemd.",
     "voteTargetLabel": "Stem gaat naar",
     "selectPerson": "Persoon kiezen",

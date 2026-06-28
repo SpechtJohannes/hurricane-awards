@@ -17,6 +17,15 @@
     "loading": "Lade...",
     "saving": "Speichere..."
   },
+  "festivalAccess": {
+    "ariaLabel": "Hurricane Awards 2026 Festivalzugang",
+    "codeLabel": "Festivalcode",
+    "codePlaceholder": "Festivalcode eingeben",
+    "submit": "Festival freischalten",
+    "errors": {
+      "invalidCode": "Der Festivalcode ist ungültig. Prüfe deine Eingabe und versuche es erneut."
+    }
+  },
   "hero": {
     "admin": "Admin",
     "adminClose": "Admin schließen",
@@ -26,11 +35,11 @@
     "voteCta": "Zur Abstimmung"
   },
   "identity": {
-    "title": "Gib deinen Festival Code ein",
+    "title": "Gib deinen Teilnehmercode ein",
     "loggedInAs": "Angemeldet als:",
     "logout": "Abmelden",
-    "festivalCodeLabel": "Festival Code",
-    "festivalCodePlaceholder": "Code hier eingeben",
+    "participantCodeLabel": "Teilnehmercode",
+    "participantCodePlaceholder": "Teilnehmercode eingeben",
     "submit": "Code prüfen",
     "locked": "Zu viele Versuche. Bitte warte noch {{seconds}} Sekunden und probiere es dann erneut.",
     "errors": {
@@ -62,7 +71,7 @@
   "categories": {
     "eyebrow": "{{count}} Teilnehmende",
     "title": "Abstimmung",
-    "loginRequired": "Gib zuerst deinen Festival Code ein. Danach kannst du abstimmen.",
+    "loginRequired": "Gib zuerst deinen Teilnehmercode ein. Danach kannst du abstimmen.",
     "alreadyVoted": "Du hast bereits abgestimmt.",
     "voteTargetLabel": "Stimme geht an",
     "selectPerson": "Person auswählen",

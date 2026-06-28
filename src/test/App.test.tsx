@@ -111,6 +111,8 @@ const standings: AllTimeStanding[] = [
 
 const loginAttemptGuardStorageKey =
   'hurricane-awards:hurricane-awards-2026:login-attempt-guard'
+const festivalAccessStorageKey =
+  'hurricane-awards:hurricane-awards-2026:festival-access'
 
 function vote(overrides: Partial<Vote> = {}): Vote {
   return {
@@ -167,18 +169,33 @@ function mockLoadedData({
 async function renderLoadedApp() {
   const view = render(<App />)
 
-  await screen.findByRole('main', {
-    name: /hurricane awards 2026 anmeldung/i,
+  await waitFor(() => {
+    expect(screen.getByRole('main')).toBeVisible()
   })
 
   return view
 }
 
-async function loginWith(code: string) {
+async function unlockFestivalWith(code = 'HURRICANE2026') {
   const user = userEvent.setup()
 
   await user.type(
-    screen.getByRole('textbox', { name: /^festival code$/i }),
+    screen.getByRole('textbox', { name: /^festivalcode$/i }),
+    code,
+  )
+  await user.click(screen.getByRole('button', { name: /festival freischalten/i }))
+
+  return user
+}
+
+async function loginWith(code: string) {
+  const user = screen.queryByRole('textbox', { name: /^teilnehmercode$/i })
+    ? userEvent.setup()
+    : await unlockFestivalWith()
+
+  await user.clear(screen.getByRole('textbox', { name: /^teilnehmercode$/i }))
+  await user.type(
+    screen.getByRole('textbox', { name: /^teilnehmercode$/i }),
     code,
   )
   await user.click(screen.getByRole('button', { name: /code/i }))
@@ -250,14 +267,19 @@ describe('Sprachumschaltung', () => {
 })
 
 describe('Login', () => {
-  it('zeigt vor der Anmeldung nur Festivalname und Codeformular', async () => {
+  it('zeigt vor der Festivalfreischaltung nur Festivalname und Festivalcodeformular', async () => {
     await renderLoadedApp()
 
     expect(
       screen.getByRole('heading', { name: 'Hurricane Awards 2026' }),
     ).toBeVisible()
-    expect(screen.getByRole('textbox', { name: /^festival code$/i })).toBeVisible()
-    expect(screen.getByRole('button', { name: /code/i })).toBeVisible()
+    expect(screen.getByRole('textbox', { name: /^festivalcode$/i })).toBeVisible()
+    expect(
+      screen.getByRole('button', { name: /festival freischalten/i }),
+    ).toBeVisible()
+    expect(
+      screen.queryByRole('textbox', { name: /^teilnehmercode$/i }),
+    ).not.toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: /ergebnisse/i })).not.toBeInTheDocument()
     expect(
@@ -269,12 +291,54 @@ describe('Login', () => {
     expect(loadAllTimeStandings).not.toHaveBeenCalled()
   })
 
+  it('zeigt nach gueltigem Festivalcode den Teilnehmerlogin und speichert die Freischaltung', async () => {
+    await renderLoadedApp()
+
+    await unlockFestivalWith(' hurricane2026 ')
+
+    expect(localStorage.getItem(festivalAccessStorageKey)).toBe('unlocked')
+    expect(
+      await screen.findByRole('textbox', { name: /^teilnehmercode$/i }),
+    ).toBeVisible()
+    expect(loadParticipants).not.toHaveBeenCalled()
+    expect(loadVotes).not.toHaveBeenCalled()
+  })
+
+  it('verhindert Zugriff mit ungueltigem Festivalcode', async () => {
+    await renderLoadedApp()
+
+    await unlockFestivalWith('FALSCH')
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/festivalcode ist ungültig/i)
+    expect(localStorage.getItem(festivalAccessStorageKey)).toBeNull()
+    expect(
+      screen.queryByRole('textbox', { name: /^teilnehmercode$/i }),
+    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
+    expect(loadParticipants).not.toHaveBeenCalled()
+    expect(loadVotes).not.toHaveBeenCalled()
+    expect(loadAllTimeStandings).not.toHaveBeenCalled()
+  })
+
+  it('ueberspringt den Festivalcode nach gespeicherter Freischaltung', async () => {
+    localStorage.setItem(festivalAccessStorageKey, 'unlocked')
+
+    render(<App />)
+
+    expect(
+      await screen.findByRole('textbox', { name: /^teilnehmercode$/i }),
+    ).toBeVisible()
+    expect(
+      screen.queryByRole('textbox', { name: /^festivalcode$/i }),
+    ).not.toBeInTheDocument()
+  })
+
   it('erlaubt Zugriff mit gueltigem Teilnehmercode', async () => {
     await renderLoadedApp()
 
     await loginWith(' alice42 ')
 
-    const identitySection = sectionForHeading(/festival code/i)
+    const identitySection = sectionForHeading(/teilnehmercode/i)
     expect(await within(identitySection).findByText(/angemeldet als:/i)).toBeVisible()
     expect(within(identitySection).getByText('Alice')).toBeVisible()
     expect(findParticipantByAccessCode).toHaveBeenCalledWith('ALICE42')
@@ -294,10 +358,11 @@ describe('Login', () => {
 
   it('sperrt die Codeeingabe nach mehreren ungueltigen Versuchen kurzzeitig', async () => {
     await renderLoadedApp()
+    await unlockFestivalWith()
     loginAttemptGuardConfig.lockDurationMs = 1_000
 
     for (const code of ['FALSCH1', 'FALSCH2', 'FALSCH3']) {
-      const input = screen.getByRole('textbox', { name: /^festival code$/i })
+      const input = screen.getByRole('textbox', { name: /^teilnehmercode$/i })
 
       fireEvent.change(input, { target: { value: code } })
       await act(async () => {
@@ -307,7 +372,7 @@ describe('Login', () => {
 
     expect(screen.getByText(/code konnte nicht bestätigt/i)).toBeVisible()
     expect(screen.getByRole('button', { name: /code/i })).toBeDisabled()
-    expect(screen.getByRole('textbox', { name: /^festival code$/i })).toBeDisabled()
+    expect(screen.getByRole('textbox', { name: /^teilnehmercode$/i })).toBeDisabled()
     expect(screen.getByRole('status')).toHaveTextContent(/1 sekunden/i)
     expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
     expect(loadParticipants).not.toHaveBeenCalled()
@@ -316,14 +381,15 @@ describe('Login', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /code/i })).toBeEnabled()
     }, { timeout: 2000 })
-    expect(screen.getByRole('textbox', { name: /^festival code$/i })).toBeEnabled()
+    expect(screen.getByRole('textbox', { name: /^teilnehmercode$/i })).toBeEnabled()
   })
 
   it('beruecksichtigt persistierte Fehlversuche nach einem Reload', async () => {
     const firstRender = await renderLoadedApp()
+    await unlockFestivalWith()
 
     for (const code of ['FALSCH1', 'FALSCH2']) {
-      fireEvent.change(screen.getByRole('textbox', { name: /^festival code$/i }), {
+      fireEvent.change(screen.getByRole('textbox', { name: /^teilnehmercode$/i }), {
         target: { value: code },
       })
       await act(async () => {
@@ -338,7 +404,7 @@ describe('Login', () => {
     firstRender.unmount()
     await renderLoadedApp()
 
-    fireEvent.change(screen.getByRole('textbox', { name: /^festival code$/i }), {
+    fireEvent.change(screen.getByRole('textbox', { name: /^teilnehmercode$/i }), {
       target: { value: 'FALSCH3' },
     })
     await act(async () => {
@@ -351,6 +417,7 @@ describe('Login', () => {
   })
 
   it('haelt eine aktive Sperre nach einem Reload aufrecht', async () => {
+    localStorage.setItem(festivalAccessStorageKey, 'unlocked')
     localStorage.setItem(
       loginAttemptGuardStorageKey,
       JSON.stringify({
@@ -362,12 +429,13 @@ describe('Login', () => {
     await renderLoadedApp()
 
     expect(screen.getByRole('button', { name: /code/i })).toBeDisabled()
-    expect(screen.getByRole('textbox', { name: /^festival code$/i })).toBeDisabled()
+    expect(screen.getByRole('textbox', { name: /^teilnehmercode$/i })).toBeDisabled()
     expect(screen.getByRole('status')).toHaveTextContent(/10 sekunden|9 sekunden/i)
     expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
   })
 
   it('bereinigt abgelaufene und ungueltige Sperrdaten beim Laden', async () => {
+    localStorage.setItem(festivalAccessStorageKey, 'unlocked')
     localStorage.setItem(
       loginAttemptGuardStorageKey,
       JSON.stringify({
@@ -392,25 +460,26 @@ describe('Login', () => {
 
   it('setzt Fehlversuche bei erfolgreichem Login zurueck', async () => {
     await renderLoadedApp()
-    const user = userEvent.setup()
+    const user = await unlockFestivalWith()
 
     for (const code of ['FALSCH1', 'FALSCH2']) {
-      await user.clear(screen.getByRole('textbox', { name: /^festival code$/i }))
-      await user.type(screen.getByRole('textbox', { name: /^festival code$/i }), code)
+      await user.clear(screen.getByRole('textbox', { name: /^teilnehmercode$/i }))
+      await user.type(screen.getByRole('textbox', { name: /^teilnehmercode$/i }), code)
       await user.click(screen.getByRole('button', { name: /code/i }))
     }
 
-    await user.clear(screen.getByRole('textbox', { name: /^festival code$/i }))
-    await user.type(screen.getByRole('textbox', { name: /^festival code$/i }), 'ALICE42')
+    await user.clear(screen.getByRole('textbox', { name: /^teilnehmercode$/i }))
+    await user.type(screen.getByRole('textbox', { name: /^teilnehmercode$/i }), 'ALICE42')
     await user.click(screen.getByRole('button', { name: /code/i }))
 
-    const identitySection = sectionForHeading(/festival code/i)
+    const identitySection = sectionForHeading(/teilnehmercode/i)
     expect(await within(identitySection).findByText(/angemeldet als:/i)).toBeVisible()
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
     expect(localStorage.getItem(loginAttemptGuardStorageKey)).toBeNull()
   })
 
   it('erhaelt die Anmeldung nach einem Neuladen lokal', async () => {
+    localStorage.setItem(festivalAccessStorageKey, 'unlocked')
     localStorage.setItem(
       'hurricane-awards:hurricane-awards-2026:participant',
       JSON.stringify(participants[0]),
@@ -419,7 +488,7 @@ describe('Login', () => {
     render(<App />)
 
     expect(await screen.findByText(/angemeldet als:/i)).toBeVisible()
-    const identitySection = sectionForHeading(/festival code/i)
+    const identitySection = sectionForHeading(/teilnehmercode/i)
     expect(within(identitySection).getByText('Alice')).toBeVisible()
     expect(loadParticipants).toHaveBeenCalled()
     expect(loadVotesForParticipant).toHaveBeenCalledWith('alice')

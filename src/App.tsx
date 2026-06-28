@@ -31,6 +31,8 @@ import {
   storeLoginAttemptGuard,
   type LoginAttemptGuardState,
 } from './lib/loginAttemptGuard'
+import { activeFestival, festivalStorageKey } from './config/festivals'
+import { useFestivalAccess } from './hooks/useFestivalAccess'
 import i18n from './i18n'
 import { supportedLanguages, type SupportedLanguage } from './i18n'
 import './App.css'
@@ -40,12 +42,14 @@ type CategoryResult = {
   voteCount: number
 }
 
-const festivalConfig = {
-  id: 'hurricane-awards-2026',
-}
-
-const authenticatedParticipantStorageKey = `hurricane-awards:${festivalConfig.id}:participant`
-const loginAttemptGuardStorageKey = `hurricane-awards:${festivalConfig.id}:login-attempt-guard`
+const authenticatedParticipantStorageKey = festivalStorageKey(
+  activeFestival.id,
+  'participant',
+)
+const loginAttemptGuardStorageKey = festivalStorageKey(
+  activeFestival.id,
+  'login-attempt-guard',
+)
 
 function readStoredParticipant(): Participant | null {
   const storedParticipant = localStorage.getItem(authenticatedParticipantStorageKey)
@@ -216,10 +220,80 @@ function LanguageSwitcher() {
   )
 }
 
+type FestivalAccessProps = {
+  onUnlock: (code: string) => boolean
+}
+
+function FestivalAccess({ onUnlock }: FestivalAccessProps) {
+  const { t } = useTranslation()
+  const [festivalCode, setFestivalCode] = useState('')
+  const [festivalCodeError, setFestivalCodeError] = useState('')
+
+  function submitFestivalCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    if (!onUnlock(festivalCode)) {
+      setFestivalCodeError(t('festivalAccess.errors.invalidCode'))
+      return
+    }
+
+    setFestivalCode('')
+    setFestivalCodeError('')
+  }
+
+  return (
+    <main
+      className="home home--locked"
+      aria-label={t('festivalAccess.ariaLabel')}
+    >
+      <header className="hero hero--locked" aria-labelledby="hero-title">
+        <div className="hero__content hero__content--locked">
+          <h1 id="hero-title">{activeFestival.name}</h1>
+          <form
+            className="identity__form identity__form--locked"
+            onSubmit={submitFestivalCode}
+          >
+            <label htmlFor="festival-access-code">
+              {t('festivalAccess.codeLabel')}
+            </label>
+            <input
+              id="festival-access-code"
+              type="text"
+              value={festivalCode}
+              onChange={(event) => {
+                setFestivalCode(event.target.value)
+                setFestivalCodeError('')
+              }}
+              autoComplete="off"
+              inputMode="text"
+              placeholder={t('festivalAccess.codePlaceholder')}
+            />
+            {festivalCodeError ? (
+              <p className="identity__error" role="alert">
+                {festivalCodeError}
+              </p>
+            ) : null}
+            <button className="identity__submit" type="submit">
+              {t('festivalAccess.submit')}
+            </button>
+          </form>
+        </div>
+
+        <div className="stage-lights" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+      </header>
+    </main>
+  )
+}
+
 function App() {
   const { t } = useTranslation()
+  const festivalAccess = useFestivalAccess(activeFestival)
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(
-    () => readStoredParticipant(),
+    () => (festivalAccess.isUnlocked ? readStoredParticipant() : null),
   )
   const [participants, setParticipants] = useState<Participant[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -295,7 +369,7 @@ function App() {
   }, [isLoginLocked, loginAttemptGuard])
 
   useEffect(() => {
-    if (!selectedParticipant) {
+    if (!festivalAccess.isUnlocked || !selectedParticipant) {
       return
     }
 
@@ -379,7 +453,7 @@ function App() {
     return () => {
       isCurrent = false
     }
-  }, [selectedParticipant])
+  }, [festivalAccess.isUnlocked, selectedParticipant])
 
   const resultsByCategory = useMemo(
     () =>
@@ -634,21 +708,25 @@ function App() {
     }
   }
 
+  if (!festivalAccess.isUnlocked) {
+    return <FestivalAccess onUnlock={festivalAccess.unlock} />
+  }
+
   if (!selectedParticipant) {
     return (
       <main className="home home--locked" aria-label={t('app.lockedAriaLabel')}>
         <header className="hero hero--locked" aria-labelledby="hero-title">
           <div className="hero__content hero__content--locked">
-            <h1 id="hero-title">{t('hero.title')}</h1>
+            <h1 id="hero-title">{activeFestival.name}</h1>
             <form
               className="identity__form identity__form--locked"
               onSubmit={submitAccessCode}
             >
-              <label htmlFor="festival-code">
-                {t('identity.festivalCodeLabel')}
+              <label htmlFor="participant-access-code">
+                {t('identity.participantCodeLabel')}
               </label>
               <input
-                id="festival-code"
+                id="participant-access-code"
                 type="text"
                 value={accessCode}
                 disabled={isSubmittingAccessCode || isLoginLocked}
@@ -658,7 +736,7 @@ function App() {
                 }}
                 autoComplete="off"
                 inputMode="text"
-                placeholder={t('identity.festivalCodePlaceholder')}
+                placeholder={t('identity.participantCodePlaceholder')}
               />
               {accessCodeError ? (
                 <p className="identity__error">{accessCodeError}</p>
@@ -757,11 +835,11 @@ function App() {
             </div>
           ) : (
             <form className="identity__form" onSubmit={submitAccessCode}>
-              <label htmlFor="festival-code">
-                {t('identity.festivalCodeLabel')}
+              <label htmlFor="participant-access-code">
+                {t('identity.participantCodeLabel')}
               </label>
               <input
-                id="festival-code"
+                id="participant-access-code"
                 type="text"
                 value={accessCode}
                 disabled={isLoadingData || Boolean(participantsError)}
@@ -771,7 +849,7 @@ function App() {
                 }}
                 autoComplete="off"
                 inputMode="text"
-                placeholder={t('identity.festivalCodePlaceholder')}
+                placeholder={t('identity.participantCodePlaceholder')}
               />
               {accessCodeError ? (
                 <p className="identity__error">{accessCodeError}</p>
