@@ -32,6 +32,13 @@ const participantManagementMigration = readFileSync(
   ),
   'utf8',
 )
+const dataIntegrityMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260629100000_enforce_data_integrity.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -149,12 +156,73 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(participantManagementMigration).toContain('set is_active = true')
   })
 
+  it('erzwingt Teilnehmercodes case insensitive serverseitig eindeutig', () => {
+    expect(dataIntegrityMigration).toContain(
+      'create unique index if not exists participants_access_code_upper_unique',
+    )
+    expect(dataIntegrityMigration).toContain(
+      'on public.participants (upper(access_code))',
+    )
+    expect(dataIntegrityMigration).toContain('where access_code is not null')
+    expect(dataIntegrityMigration.match(/when unique_violation then/g)).toHaveLength(3)
+    expect(dataIntegrityMigration.match(
+      /participant access code already exists/g,
+    )).toHaveLength(2)
+  })
+
+  it('erzwingt eine Stimme pro Waehler und Kategorie serverseitig eindeutig', () => {
+    expect(dataIntegrityMigration).toContain(
+      'create unique index if not exists votes_voter_category_unique',
+    )
+    expect(dataIntegrityMigration).toContain(
+      'on public.votes (voter_id, category_id)',
+    )
+    expect(dataIntegrityMigration).toContain(
+      "raise exception 'vote already exists for category' using errcode = '23505'",
+    )
+  })
+
+  it('definiert nur die fuer Integritaetsfehler relevanten RPCs neu', () => {
+    expect(
+      dataIntegrityMigration.match(/create or replace function public\.(\w+)/g),
+    ).toEqual([
+      'create or replace function public.ha_create_participant',
+      'create or replace function public.ha_update_participant',
+      'create or replace function public.ha_save_vote',
+    ])
+
+    for (const functionName of [
+      'ha_normalize_participant_access_code',
+      'ha_generate_participant_access_code',
+      'ha_admin_participant_row',
+      'ha_admin_list_participants',
+      'ha_suggest_participant_access_code',
+      'ha_create_participant',
+      'ha_update_participant',
+      'ha_deactivate_participant',
+      'ha_reactivate_participant',
+    ]) {
+      const expectedCount =
+        functionName === 'ha_create_participant' ||
+        functionName === 'ha_update_participant'
+          ? 1
+          : 0
+
+      expect(
+        dataIntegrityMigration.match(
+          new RegExp(`create or replace function public\\.${functionName}\\(`, 'g'),
+        )?.length ?? 0,
+      ).toBe(expectedCount)
+    }
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
       adminMigration,
       activeParticipantMigration,
       participantManagementMigration,
+      dataIntegrityMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')
