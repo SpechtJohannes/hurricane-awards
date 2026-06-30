@@ -1,7 +1,7 @@
 {
   "app": {
-    "ariaLabel": "Hurricane Awards 2026 mit {{count}} Teilnehmenden",
-    "lockedAriaLabel": "Hurricane Awards 2026 Anmeldung"
+    "ariaLabel": "{{festivalName}} mit {{count}} Teilnehmenden",
+    "lockedAriaLabel": "{{festivalName}} Anmeldung"
   },
   "language": {
     "label": "Sprache wählen",
@@ -18,7 +18,7 @@
     "saving": "Speichere..."
   },
   "festivalAccess": {
-    "ariaLabel": "Hurricane Awards 2026 Festivalzugang",
+    "ariaLabel": "{{festivalName}} Festivalzugang",
     "codeLabel": "Festivalcode",
     "codePlaceholder": "Festivalcode eingeben",
     "submit": "Festival freischalten",
@@ -26,11 +26,15 @@
       "invalidCode": "Der Festivalcode ist ungültig. Prüfe deine Eingabe und versuche es erneut."
     }
   },
+  "festival": {
+    "errors": {
+      "load": "Der Festivalname konnte gerade nicht geladen werden."
+    }
+  },
   "hero": {
     "admin": "Admin",
     "adminClose": "Admin schließen",
     "eyebrow": "Live aus dem Freundeskreis",
-    "title": "Hurricane Awards 2026",
     "subtitle": "Ein entspanntes Wochenende mit Freunden? Nein. Dies ist ein knallharter Wettbewerb.",
     "voteCta": "Zur Abstimmung"
   },
@@ -53,6 +57,16 @@
     "eyebrow": "Admin",
     "title": "Kategorien",
     "changeStatus": "Status ändern",
+    "festival": {
+      "eyebrow": "Admin",
+      "title": "Festival",
+      "nameLabel": "Festivalname",
+      "save": "Festivalname speichern",
+      "errors": {
+        "save": "Der Festivalname konnte gerade nicht gespeichert werden.",
+        "nameRequired": "Der Festivalname ist erforderlich."
+      }
+    },
     "categories": {
       "loading": "Kategorien werden geladen...",
       "createButton": "Kategorie anlegen",

@@ -32,6 +32,7 @@ import {
   loadAllTimeStandings,
   type AllTimeStanding,
 } from './data/allTimeStandings'
+import { loadFestivalName, updateFestivalName } from './data/festival'
 import {
   clearStoredLoginAttemptGuard,
   getLoginLockRemainingMs,
@@ -46,6 +47,7 @@ import {
   AdminParticipants,
   type ParticipantFormState,
 } from './components/AdminParticipants'
+import { AdminFestival } from './components/AdminFestival'
 import { AdminCategories } from './components/AdminCategories'
 import { useFestivalAccess } from './hooks/useFestivalAccess'
 import i18n from './i18n'
@@ -56,6 +58,8 @@ type CategoryResult = {
   participant: Participant
   voteCount: number
 }
+
+const fallbackFestivalName = ''
 
 const authenticatedParticipantStorageKey = festivalStorageKey(
   activeFestival.id,
@@ -238,10 +242,11 @@ function LanguageSwitcher() {
 }
 
 type FestivalAccessProps = {
+  festivalName: string
   onUnlock: (code: string) => boolean
 }
 
-function FestivalAccess({ onUnlock }: FestivalAccessProps) {
+function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
   const { t } = useTranslation()
   const [festivalCode, setFestivalCode] = useState('')
   const [festivalCodeError, setFestivalCodeError] = useState('')
@@ -261,11 +266,13 @@ function FestivalAccess({ onUnlock }: FestivalAccessProps) {
   return (
     <main
       className="home home--locked"
-      aria-label={t('festivalAccess.ariaLabel')}
+      aria-label={t('festivalAccess.ariaLabel', {
+        festivalName: festivalName || t('common.loading'),
+      })}
     >
       <header className="hero hero--locked" aria-labelledby="hero-title">
         <div className="hero__content hero__content--locked">
-          <h1 id="hero-title">{activeFestival.name}</h1>
+          <h1 id="hero-title">{festivalName || t('common.loading')}</h1>
           <form
             className="identity__form identity__form--locked"
             onSubmit={submitFestivalCode}
@@ -309,6 +316,9 @@ function FestivalAccess({ onUnlock }: FestivalAccessProps) {
 function App() {
   const { t } = useTranslation()
   const festivalAccess = useFestivalAccess(activeFestival)
+  const [festivalName, setFestivalName] = useState(fallbackFestivalName)
+  const [festivalNameError, setFestivalNameError] = useState('')
+  const [isSavingFestivalName, setIsSavingFestivalName] = useState(false)
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(
     () => (festivalAccess.isUnlocked ? readStoredParticipant() : null),
   )
@@ -349,6 +359,7 @@ function App() {
     )
   const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now())
   const participantCount = participants.length
+  const displayedFestivalName = festivalName || t('common.loading')
   const openCategories = categories.filter((category) => category.status === 'open')
   const statusLabels: Record<CategoryStatus, string> = {
     upcoming: t('status.upcoming'),
@@ -378,6 +389,32 @@ function App() {
   )
   const loginLockRemainingSeconds = Math.ceil(loginLockRemainingMs / 1000)
   const isLoginLocked = loginLockRemainingMs > 0
+
+  useEffect(() => {
+    let isCurrent = true
+
+    async function loadName() {
+      setFestivalNameError('')
+
+      try {
+        const loadedFestivalName = await loadFestivalName()
+
+        if (isCurrent) {
+          setFestivalName(loadedFestivalName)
+        }
+      } catch {
+        if (isCurrent) {
+          setFestivalNameError(i18n.t('festival.errors.load'))
+        }
+      }
+    }
+
+    void loadName()
+
+    return () => {
+      isCurrent = false
+    }
+  }, [])
 
   useEffect(() => {
     if (!isLoginLocked) {
@@ -688,6 +725,16 @@ function App() {
     return t('admin.categories.errors.save')
   }
 
+  function festivalNameMutationErrorMessage(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+
+    if (message.includes('festival name is required')) {
+      return t('admin.festival.errors.nameRequired')
+    }
+
+    return t('admin.festival.errors.save')
+  }
+
   async function reloadCategoriesForAdminChange() {
     const adminContext = getParticipantAdminContext()
 
@@ -743,6 +790,27 @@ function App() {
       setAdminParticipantsError(t('admin.participants.errors.load'))
     } finally {
       setIsLoadingAdminParticipants(false)
+    }
+  }
+
+  async function saveFestivalName(name: string) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsSavingFestivalName(true)
+    setFestivalNameError('')
+
+    try {
+      const savedFestivalName = await updateFestivalName(name, adminContext)
+
+      setFestivalName(savedFestivalName)
+    } catch (error) {
+      throw new Error(festivalNameMutationErrorMessage(error), { cause: error })
+    } finally {
+      setIsSavingFestivalName(false)
     }
   }
 
@@ -1055,15 +1123,25 @@ function App() {
   }
 
   if (!festivalAccess.isUnlocked) {
-    return <FestivalAccess onUnlock={festivalAccess.unlock} />
+    return (
+      <FestivalAccess
+        festivalName={festivalName}
+        onUnlock={festivalAccess.unlock}
+      />
+    )
   }
 
   if (!selectedParticipant) {
     return (
-      <main className="home home--locked" aria-label={t('app.lockedAriaLabel')}>
+      <main
+        className="home home--locked"
+        aria-label={t('app.lockedAriaLabel', {
+          festivalName: displayedFestivalName,
+        })}
+      >
         <header className="hero hero--locked" aria-labelledby="hero-title">
           <div className="hero__content hero__content--locked">
-            <h1 id="hero-title">{activeFestival.name}</h1>
+            <h1 id="hero-title">{displayedFestivalName}</h1>
             <form
               className="identity__form identity__form--locked"
               onSubmit={submitAccessCode}
@@ -1117,7 +1195,10 @@ function App() {
   return (
     <main
       className="home"
-      aria-label={t('app.ariaLabel', { count: participantCount })}
+      aria-label={t('app.ariaLabel', {
+        count: participantCount,
+        festivalName: displayedFestivalName,
+      })}
     >
       <header className="hero" aria-labelledby="hero-title">
         <div className="hero__actions">
@@ -1145,7 +1226,7 @@ function App() {
 
         <div className="hero__content">
           <p className="hero__eyebrow">{t('hero.eyebrow')}</p>
-          <h1 id="hero-title">{t('hero.title')}</h1>
+          <h1 id="hero-title">{displayedFestivalName}</h1>
           <p className="hero__subtitle">{t('hero.subtitle')}</p>
           <a className="hero__button" href="#abstimmung">
             {t('hero.voteCta')}
@@ -1219,6 +1300,14 @@ function App() {
 
       {selectedParticipant.isAdmin && isAdminVisible ? (
         <section className="admin" id="admin" aria-labelledby="admin-title">
+          <AdminFestival
+            key={festivalName}
+            festivalName={festivalName}
+            error={festivalNameError}
+            isSaving={isSavingFestivalName}
+            onSave={saveFestivalName}
+          />
+
           {adminError ? <p className="admin__notice">{adminError}</p> : null}
           {categoriesError ? (
             <p className="admin__notice">{categoriesError}</p>

@@ -1,6 +1,5 @@
 export type FestivalConfig = {
   id: string
-  name: string
   accessCode: string
 }
 
@@ -8,7 +7,6 @@ const storagePrefix = 'hurricane-awards'
 
 export const activeFestival: FestivalConfig = {
   id: 'hurricane-awards-2026',
-  name: 'Hurricane Awards 2026',
   accessCode: 'HURRICANE2026',
 }
 

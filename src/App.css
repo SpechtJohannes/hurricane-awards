@@ -548,11 +548,53 @@ h1 {
 }
 
 .admin-categories,
+.admin-festival,
 .admin-participants {
   display: grid;
   width: min(100%, 960px);
   margin: 0 auto;
   gap: 14px;
+}
+
+.admin-festival {
+  grid-template-columns: minmax(0, 1fr);
+  padding: 20px;
+  margin-bottom: 42px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.admin-festival label {
+  display: grid;
+  gap: 8px;
+  color: #ffbe0b;
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.admin-festival input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  color: #ffffff;
+  font: inherit;
+  text-transform: none;
+  background: rgba(16, 16, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+}
+
+.admin-festival input:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.admin-festival input:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
 }
 
 .admin-categories__toolbar,
@@ -1332,6 +1374,15 @@ h1 {
 
   .admin__header {
     margin-bottom: 32px;
+  }
+
+  .admin-festival {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .admin-festival .admin-participant-form__error {
+    grid-column: 1 / -1;
   }
 
   .admin-card {

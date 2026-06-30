@@ -46,6 +46,13 @@ const categoryManagementMigration = readFileSync(
   ),
   'utf8',
 )
+const festivalNameMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260630110000_create_festival_name_setting.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -259,6 +266,44 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(categoryManagementMigration).toContain('from public.archived_votes av')
   })
 
+  it('speichert den Festivalnamen zentral und schuetzt direkte Settings-Zugriffe', () => {
+    expect(festivalNameMigration).toContain(
+      'create table if not exists public.app_settings',
+    )
+    expect(festivalNameMigration).toContain(
+      'alter table public.app_settings enable row level security',
+    )
+    expect(festivalNameMigration).toContain(
+      'revoke all on table public.app_settings from anon, authenticated',
+    )
+    expect(festivalNameMigration).toContain(
+      'create policy "deny direct app settings access"',
+    )
+    expect(festivalNameMigration).toContain(
+      "values ('festival_name', 'Hurricane Awards 2026')",
+    )
+
+    for (const functionName of [
+      'ha_get_festival_name',
+      'ha_update_festival_name',
+    ]) {
+      expect(festivalNameMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(festivalNameMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+
+    expect(festivalNameMigration).toContain(
+      'if not public.ha_has_admin_access(p_participant_access_code)',
+    )
+    expect(festivalNameMigration).toContain('festival name is required')
+    expect(festivalNameMigration).toContain(
+      'constraint app_settings_value_not_blank',
+    )
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -267,6 +312,7 @@ describe('Supabase Sicherheitsmigration', () => {
       participantManagementMigration,
       dataIntegrityMigration,
       categoryManagementMigration,
+      festivalNameMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')
