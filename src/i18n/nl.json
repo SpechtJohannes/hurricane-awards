@@ -62,9 +62,14 @@
       "title": "Festival",
       "nameLabel": "Festivalnaam",
       "save": "Festivalnaam opslaan",
+      "archive": "Festival archiveren",
+      "archiving": "Archiveren...",
+      "archiveConfirm": "Huidig festival echt archiveren? De actieve gegevens blijven ongewijzigd.",
+      "archiveSuccess": "Festival is gearchiveerd. Archief-ID: {{archiveId}}",
       "errors": {
         "save": "De festivalnaam kon net niet worden opgeslagen.",
-        "nameRequired": "De festivalnaam is verplicht."
+        "nameRequired": "De festivalnaam is verplicht.",
+        "archive": "Het festival kon net niet worden gearchiveerd."
       }
     },
     "categories": {

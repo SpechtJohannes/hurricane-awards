@@ -14,6 +14,7 @@ supabase/migrations/20260628153000_create_participant_management_rpcs.sql
 supabase/migrations/20260629100000_enforce_data_integrity.sql
 supabase/migrations/20260630100000_create_category_management_rpcs.sql
 supabase/migrations/20260630110000_create_festival_name_setting.sql
+supabase/migrations/20260630120000_create_festival_archives.sql
 ```
 
 Diese Migration ist auf das aktuelle Live-Schema zugeschnitten:
@@ -23,6 +24,7 @@ Diese Migration ist auf das aktuelle Live-Schema zugeschnitten:
 - `votes(id, voter_id, voted_for_id, category_id, created_at, timestamp)`
 - `archived_votes(id, festival, voter_id, voted_for_id, category_id, created_at, archived_at)`
 - `app_settings(key, value, updated_at)` fuer zentrale App-Einstellungen wie den Festivalnamen
+- `festival_archives(...)` und zugehoerige `festival_archive_*` Tabellen fuer unveraenderliche Festival-Snapshots
 
 Die Migrationen legen keine `festivals` Tabelle an und ergaenzen keine `festival_id` Spalten. Der editierbare Festivalname liegt stattdessen als einzelner Eintrag `festival_name` in `app_settings`.
 
@@ -38,6 +40,8 @@ supabase.from('categories').select('*')
 supabase.from('votes').select('*')
 supabase.from('archived_votes').select('*')
 supabase.from('app_settings').select('*')
+supabase.from('festival_archives').select('*')
+supabase.from('festival_archive_votes').insert(...)
 supabase.from('votes').insert(...)
 supabase.from('categories').update(...)
 supabase.from('app_settings').update(...)
@@ -55,6 +59,10 @@ RLS wird fuer diese Tabellen aktiviert:
 - `votes`
 - `archived_votes`
 - `app_settings`
+- `festival_archives`
+- `festival_archive_participants`
+- `festival_archive_categories`
+- `festival_archive_votes`
 - `all_time_standings`, falls es eine Tabelle ist
 
 Fuer `all_time_standings` prueft die Migration zur Laufzeit, ob es eine Tabelle, materialisierte View oder View ist. Bei einer View wird keine RLS Policy erzwungen; stattdessen werden direkte Rechte entzogen und die App nutzt `ha_list_all_time_standings`.
@@ -85,12 +93,15 @@ Adminfunktionen sind von normalen Teilnehmerfunktionen getrennt:
 - `ha_update_category`
 - `ha_delete_category`
 - `ha_update_festival_name`
+- `ha_archive_festival`
 
 Adminrechte werden ueber `participants.is_admin` gesteuert. Die App zeigt Adminfunktionen nur fuer Teilnehmer an, deren Login-RPC `is_admin = true` zurueckgibt. Das ist nur Komfort; verbindlich ist die serverseitige Pruefung in `ha_has_admin_access`.
 
 Die Admin-RPCs rufen `ha_has_admin_access` auf. Manipulierte Requests normaler Teilnehmer werden dadurch mit fehlender Berechtigung abgelehnt.
 
 Der Festivalname wird fuer die Anzeige ueber `ha_get_festival_name` gelesen. Aenderungen laufen ausschliesslich ueber `ha_update_festival_name`, validieren einen nicht-leeren Namen serverseitig und sind Admins vorbehalten.
+
+Festival-Archivierungen laufen ausschliesslich ueber `ha_archive_festival`. Die Funktion kopiert Teilnehmer, Kategorien und Stimmen inklusive Anzeigeinformationen in getrennte Archivtabellen. Diese Archivtabellen haben keine Fremdschluessel auf aktive `participants`, `categories` oder `votes` und sind fuer direkte Browserzugriffe gesperrt.
 
 Einen Teilnehmer als Admin markieren:
 

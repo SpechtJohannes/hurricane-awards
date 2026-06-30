@@ -6,6 +6,7 @@ type AdminFestivalProps = {
   error: string
   isSaving: boolean
   onSave: (name: string) => Promise<void>
+  onArchive: () => Promise<string>
 }
 
 export function AdminFestival({
@@ -13,10 +14,14 @@ export function AdminFestival({
   error,
   isSaving,
   onSave,
+  onArchive,
 }: AdminFestivalProps) {
   const { t } = useTranslation()
   const [name, setName] = useState(festivalName)
   const [formError, setFormError] = useState('')
+  const [archiveMessage, setArchiveMessage] = useState('')
+  const [archiveError, setArchiveError] = useState('')
+  const [isArchiving, setIsArchiving] = useState(false)
 
   async function submitForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -38,6 +43,32 @@ export function AdminFestival({
           ? saveError.message
           : t('admin.festival.errors.save'),
       )
+    }
+  }
+
+  async function archiveCurrentFestival() {
+    const shouldArchive = window.confirm(t('admin.festival.archiveConfirm'))
+
+    if (!shouldArchive) {
+      return
+    }
+
+    setIsArchiving(true)
+    setArchiveMessage('')
+    setArchiveError('')
+
+    try {
+      const archiveId = await onArchive()
+
+      setArchiveMessage(
+        t('admin.festival.archiveSuccess', {
+          archiveId,
+        }),
+      )
+    } catch {
+      setArchiveError(t('admin.festival.errors.archive'))
+    } finally {
+      setIsArchiving(false)
     }
   }
 
@@ -74,11 +105,32 @@ export function AdminFestival({
         <button
           className="admin-card__reset admin-card__reset--primary"
           type="submit"
-          disabled={isSaving}
+          disabled={isSaving || isArchiving}
         >
           {isSaving ? t('common.saving') : t('admin.festival.save')}
         </button>
       </form>
+
+      <div className="admin-festival-archive">
+        <button
+          className="admin-card__reset admin-card__reset--secondary"
+          type="button"
+          disabled={isSaving || isArchiving}
+          onClick={archiveCurrentFestival}
+        >
+          {isArchiving
+            ? t('admin.festival.archiving')
+            : t('admin.festival.archive')}
+        </button>
+
+        {archiveMessage ? (
+          <p className="admin-festival-archive__success">{archiveMessage}</p>
+        ) : null}
+
+        {archiveError ? (
+          <p className="admin-participant-form__error">{archiveError}</p>
+        ) : null}
+      </div>
     </>
   )
 }

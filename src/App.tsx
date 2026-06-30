@@ -32,7 +32,11 @@ import {
   loadAllTimeStandings,
   type AllTimeStanding,
 } from './data/allTimeStandings'
-import { loadFestivalName, updateFestivalName } from './data/festival'
+import {
+  archiveFestival,
+  loadFestivalName,
+  updateFestivalName,
+} from './data/festival'
 import {
   clearStoredLoginAttemptGuard,
   getLoginLockRemainingMs,
@@ -814,6 +818,14 @@ function App() {
     }
   }
 
+  async function archiveCurrentFestival() {
+    if (!selectedParticipant?.isAdmin) {
+      return ''
+    }
+
+    return archiveFestival(selectedParticipant.accessCode)
+  }
+
   async function startCreateParticipant() {
     const adminContext = getParticipantAdminContext()
 
@@ -1306,6 +1318,7 @@ function App() {
             error={festivalNameError}
             isSaving={isSavingFestivalName}
             onSave={saveFestivalName}
+            onArchive={archiveCurrentFestival}
           />
 
           {adminError ? <p className="admin__notice">{adminError}</p> : null}
