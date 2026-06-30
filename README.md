@@ -8,6 +8,8 @@ Details zu Tabellen, Policies, Adminrechten und verbleibenden Grenzen stehen in 
 
 Eine Uebersicht ueber Aufbau, Datenfluss und wichtige Architekturentscheidungen steht in `docs/architecture.md`.
 
+Die technische Referenz zum aktuellen Datenbankschema steht in `docs/database-schema.md`.
+
 ## Tests
 
 Die Unit Tests werden mit Vitest, React Testing Library, jest-dom, jsdom und dem V8 Coverage Provider ausgeführt.
