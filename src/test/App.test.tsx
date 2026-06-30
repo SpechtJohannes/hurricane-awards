@@ -40,6 +40,7 @@ import {
   loadAllTimeStandings,
   type AllTimeStanding,
 } from '../data/allTimeStandings'
+import { loadFestivalName, updateFestivalName } from '../data/festival'
 import i18n from '../i18n'
 
 vi.mock('../data/categories', () => ({
@@ -70,6 +71,11 @@ vi.mock('../data/votes', () => ({
 
 vi.mock('../data/allTimeStandings', () => ({
   loadAllTimeStandings: vi.fn(),
+}))
+
+vi.mock('../data/festival', () => ({
+  loadFestivalName: vi.fn(),
+  updateFestivalName: vi.fn(),
 }))
 
 const participants: Participant[] = [
@@ -152,6 +158,7 @@ function vote(overrides: Partial<Vote> = {}): Vote {
 }
 
 function mockLoadedData({
+  loadedFestivalName = 'Hurricane Awards 2026',
   loadedParticipants = participants,
   loadedAdminParticipants = loadedParticipants,
   loadedCategories = categories,
@@ -159,6 +166,7 @@ function mockLoadedData({
   participantVotes = [],
   loadedStandings = standings,
 }: {
+  loadedFestivalName?: string
   loadedParticipants?: Participant[]
   loadedAdminParticipants?: Participant[]
   loadedCategories?: Category[]
@@ -166,6 +174,7 @@ function mockLoadedData({
   participantVotes?: Vote[]
   loadedStandings?: AllTimeStanding[]
 } = {}) {
+  vi.mocked(loadFestivalName).mockResolvedValue(loadedFestivalName)
   vi.mocked(loadParticipants).mockResolvedValue(loadedParticipants)
   vi.mocked(loadAdminParticipants).mockResolvedValue(loadedAdminParticipants)
   vi.mocked(findParticipantByAccessCode).mockImplementation(async (accessCode) => {
@@ -265,6 +274,7 @@ function mockLoadedData({
   }))
   vi.mocked(deleteCategory).mockResolvedValue()
   vi.mocked(saveVote).mockImplementation(async (savedVote) => savedVote)
+  vi.mocked(updateFestivalName).mockImplementation(async (name) => name)
 }
 
 async function renderLoadedApp() {
@@ -372,7 +382,7 @@ describe('Login', () => {
     await renderLoadedApp()
 
     expect(
-      screen.getByRole('heading', { name: 'Hurricane Awards 2026' }),
+      await screen.findByRole('heading', { name: 'Hurricane Awards 2026' }),
     ).toBeVisible()
     expect(screen.getByRole('textbox', { name: /^festivalcode$/i })).toBeVisible()
     expect(
@@ -390,6 +400,7 @@ describe('Login', () => {
     expect(loadParticipants).not.toHaveBeenCalled()
     expect(loadVotes).not.toHaveBeenCalled()
     expect(loadAllTimeStandings).not.toHaveBeenCalled()
+    expect(loadFestivalName).toHaveBeenCalled()
   })
 
   it('zeigt nach gueltigem Festivalcode den Teilnehmerlogin und speichert die Freischaltung', async () => {
@@ -605,7 +616,9 @@ describe('Login', () => {
 
     await user.click(screen.getByRole('button', { name: /abmelden/i }))
 
-    expect(screen.getByRole('heading', { name: 'Hurricane Awards 2026' })).toBeVisible()
+    expect(
+      await screen.findByRole('heading', { name: 'Hurricane Awards 2026' }),
+    ).toBeVisible()
     expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
     expect(
       localStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
@@ -817,6 +830,61 @@ describe('Admin', () => {
     expect(loadAdminParticipants).toHaveBeenCalledWith({
       participantAccessCode: 'ALICE42',
     })
+  })
+
+  it('bearbeitet den Festivalnamen und zeigt ihn sofort in der App', async () => {
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const festivalSection = sectionForHeading(/^festival$/i)
+    const nameInput = within(festivalSection).getByLabelText(/^festivalname$/i)
+
+    expect(nameInput).toHaveValue('Hurricane Awards 2026')
+
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Hurricane Crew Awards')
+    await user.click(
+      within(festivalSection).getByRole('button', {
+        name: /festivalname speichern/i,
+      }),
+    )
+
+    expect(updateFestivalName).toHaveBeenCalledWith(
+      'Hurricane Crew Awards',
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(
+      await screen.findByRole('heading', { name: 'Hurricane Crew Awards' }),
+    ).toBeVisible()
+    expect(
+      screen.getByRole('main', {
+        name: /hurricane crew awards mit 3 teilnehmenden/i,
+      }),
+    ).toBeVisible()
+  })
+
+  it('validiert einen leeren Festivalnamen clientseitig', async () => {
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const festivalSection = sectionForHeading(/^festival$/i)
+    const nameInput = within(festivalSection).getByLabelText(/^festivalname$/i)
+
+    await user.clear(nameInput)
+    await user.click(
+      within(festivalSection).getByRole('button', {
+        name: /festivalname speichern/i,
+      }),
+    )
+
+    expect(updateFestivalName).not.toHaveBeenCalled()
+    expect(
+      await within(festivalSection).findByText(/festivalname ist erforderlich/i),
+    ).toBeVisible()
   })
 
   it('legt Teilnehmer im Adminbereich an und aktualisiert die Liste', async () => {

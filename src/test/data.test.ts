@@ -9,6 +9,7 @@ vi.mock('../lib/supabase', () => ({
 }))
 
 import { loadAllTimeStandings } from '../data/allTimeStandings'
+import { loadFestivalName, updateFestivalName } from '../data/festival'
 import {
   createCategory,
   deleteCategory,
@@ -65,6 +66,31 @@ beforeEach(() => {
 })
 
 describe('Supabase Datenzugriffe', () => {
+  it('laedt den Festivalnamen ueber eine RPC Funktion', async () => {
+    rpcMock.mockResolvedValue({
+      data: 'Hurricane Awards 2026',
+      error: null,
+    })
+
+    await expect(loadFestivalName()).resolves.toBe('Hurricane Awards 2026')
+    expect(rpcMock).toHaveBeenCalledWith('ha_get_festival_name')
+  })
+
+  it('speichert den Festivalnamen ueber Admin RPC', async () => {
+    rpcMock.mockResolvedValue({
+      data: 'Hurricane Crew Awards',
+      error: null,
+    })
+
+    await expect(
+      updateFestivalName('Hurricane Crew Awards', participantContext),
+    ).resolves.toBe('Hurricane Crew Awards')
+    expect(rpcMock).toHaveBeenCalledWith('ha_update_festival_name', {
+      ...expectedParticipantRpcContext,
+      p_name: 'Hurricane Crew Awards',
+    })
+  })
+
   it('laedt Kategorien ueber eine geschuetzte RPC Funktion', async () => {
     rpcMock.mockResolvedValue({
       data: [

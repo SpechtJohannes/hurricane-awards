@@ -1,7 +1,7 @@
 {
   "app": {
-    "ariaLabel": "Hurricane Awards 2026 met {{count}} deelnemers",
-    "lockedAriaLabel": "Hurricane Awards 2026 aanmelden"
+    "ariaLabel": "{{festivalName}} met {{count}} deelnemers",
+    "lockedAriaLabel": "{{festivalName}} aanmelden"
   },
   "language": {
     "label": "Taal kiezen",
@@ -18,7 +18,7 @@
     "saving": "Opslaan..."
   },
   "festivalAccess": {
-    "ariaLabel": "Hurricane Awards 2026 festivaltoegang",
+    "ariaLabel": "{{festivalName}} festivaltoegang",
     "codeLabel": "Festivalcode",
     "codePlaceholder": "Festivalcode invoeren",
     "submit": "Festival ontgrendelen",
@@ -26,11 +26,15 @@
       "invalidCode": "De festivalcode is ongeldig. Controleer je invoer en probeer het opnieuw."
     }
   },
+  "festival": {
+    "errors": {
+      "load": "De festivalnaam kon net niet worden geladen."
+    }
+  },
   "hero": {
     "admin": "Admin",
     "adminClose": "Admin sluiten",
     "eyebrow": "Live uit de vriendengroep",
-    "title": "Hurricane Awards 2026",
     "subtitle": "Een ontspannen weekend met vrienden? Nee. Dit is een keiharde competitie.",
     "voteCta": "Naar de stemming"
   },
@@ -53,6 +57,16 @@
     "eyebrow": "Admin",
     "title": "Categorieën",
     "changeStatus": "Status wijzigen",
+    "festival": {
+      "eyebrow": "Admin",
+      "title": "Festival",
+      "nameLabel": "Festivalnaam",
+      "save": "Festivalnaam opslaan",
+      "errors": {
+        "save": "De festivalnaam kon net niet worden opgeslagen.",
+        "nameRequired": "De festivalnaam is verplicht."
+      }
+    },
     "categories": {
       "loading": "Categorieën worden geladen...",
       "createButton": "Categorie aanmaken",
