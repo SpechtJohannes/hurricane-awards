@@ -25,7 +25,7 @@ import {
 import {
   createParticipant,
   deactivateParticipant,
-  findParticipantByAccessCode,
+  loginParticipant,
   loadAdminParticipants,
   loadParticipants,
   reactivateParticipant,
@@ -333,10 +333,12 @@ describe('Supabase Datenzugriffe', () => {
     )
   })
 
-  it('findet den angemeldeten Teilnehmer ueber Codepruefung auf dem Server', async () => {
+  it('meldet Teilnehmer ueber geschuetzten Login RPC an', async () => {
     rpcMock.mockResolvedValue({
       data: [
         {
+          status: 'success',
+          locked_until: null,
           id: 'alice',
           name: 'alice',
           display_name: 'Alice',
@@ -347,16 +349,66 @@ describe('Supabase Datenzugriffe', () => {
       error: null,
     })
 
-    await expect(findParticipantByAccessCode('ALICE42')).resolves.toEqual({
-      id: 'alice',
-      name: 'alice',
-      displayName: 'Alice',
-      accessCode: 'ALICE42',
-      isAdmin: true,
-      isActive: true,
+    await expect(loginParticipant(' alice42 ')).resolves.toEqual({
+      status: 'success',
+      participant: {
+        id: 'alice',
+        name: 'alice',
+        displayName: 'Alice',
+        accessCode: 'ALICE42',
+        isAdmin: true,
+        isActive: true,
+      },
+      lockedUntil: null,
     })
-    expect(rpcMock).toHaveBeenCalledWith('ha_find_participant', {
+    expect(rpcMock).toHaveBeenCalledWith('ha_login_participant', {
       p_access_code: 'ALICE42',
+    })
+  })
+
+  it('gibt ungueltige Logins generisch aus dem Login RPC weiter', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          status: 'invalid',
+          locked_until: null,
+          id: null,
+          name: null,
+          display_name: null,
+          is_admin: null,
+          is_active: null,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(loginParticipant('FALSCH')).resolves.toEqual({
+      status: 'invalid',
+      participant: null,
+      lockedUntil: null,
+    })
+  })
+
+  it('gibt temporaere Login Sperren aus dem Login RPC weiter', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          status: 'blocked',
+          locked_until: '2026-06-30T12:00:30.000Z',
+          id: null,
+          name: null,
+          display_name: null,
+          is_admin: null,
+          is_active: null,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(loginParticipant('FALSCH')).resolves.toEqual({
+      status: 'blocked',
+      participant: null,
+      lockedUntil: '2026-06-30T12:00:30.000Z',
     })
   })
 

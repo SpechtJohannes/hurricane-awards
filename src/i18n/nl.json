@@ -50,6 +50,7 @@
       "participantsLoad": "De deelnemers konden net niet worden geladen.",
       "accessCodeLoad": "De code kon net niet worden gecontroleerd. Probeer het zo nog eens.",
       "invalidAccessCode": "De code kon niet worden bevestigd. Controleer je invoer en probeer het opnieuw.",
+      "loginLocked": "De code kon net niet worden gecontroleerd. Wacht even en probeer het daarna opnieuw.",
       "participantVotesLoad": "Je eerdere stemmen konden niet worden geladen."
     }
   },

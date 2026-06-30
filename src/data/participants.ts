@@ -23,6 +23,23 @@ export type Participant = {
   isActive: boolean
 }
 
+export type ParticipantLoginResult =
+  | {
+      status: 'success'
+      participant: Participant
+      lockedUntil: null
+    }
+  | {
+      status: 'invalid'
+      participant: null
+      lockedUntil: null
+    }
+  | {
+      status: 'blocked'
+      participant: null
+      lockedUntil: string
+    }
+
 export type CreateParticipantInput = {
   displayName: string
   accessCode?: string
@@ -70,24 +87,50 @@ export async function loadParticipants(
   return ((data ?? []) as ParticipantRow[]).map((row) => mapParticipant(row))
 }
 
-export async function findParticipantByAccessCode(
+export async function loginParticipant(
   accessCode: string,
-): Promise<Participant | null> {
+): Promise<ParticipantLoginResult> {
   if (!supabase) {
     throw new Error('Supabase ist noch nicht konfiguriert.')
   }
 
-  const { data, error } = await supabase.rpc('ha_find_participant', {
-    p_access_code: accessCode,
+  const normalizedAccessCode = accessCode.trim().toUpperCase()
+  const { data, error } = await supabase.rpc('ha_login_participant', {
+    p_access_code: normalizedAccessCode,
   })
 
   if (error) {
     throw error
   }
 
-  const participant = Array.isArray(data) ? data[0] : data
+  const loginResult = (Array.isArray(data) ? data[0] : data) as
+    | (ParticipantRow & {
+        status?: string
+        locked_until?: string | null
+      })
+    | null
 
-  return participant ? mapParticipant(participant as ParticipantRow, accessCode) : null
+  if (!loginResult || loginResult.status === 'invalid') {
+    return {
+      status: 'invalid',
+      participant: null,
+      lockedUntil: null,
+    }
+  }
+
+  if (loginResult.status === 'blocked') {
+    return {
+      status: 'blocked',
+      participant: null,
+      lockedUntil: loginResult.locked_until ?? new Date().toISOString(),
+    }
+  }
+
+  return {
+    status: 'success',
+    participant: mapParticipant(loginResult, normalizedAccessCode),
+    lockedUntil: null,
+  }
 }
 
 export async function loadAdminParticipants(

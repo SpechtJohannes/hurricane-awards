@@ -14,7 +14,7 @@ import {
 import {
   createParticipant,
   deactivateParticipant,
-  findParticipantByAccessCode,
+  loginParticipant,
   loadAdminParticipants,
   loadParticipants,
   reactivateParticipant,
@@ -37,15 +37,6 @@ import {
   loadFestivalName,
   updateFestivalName,
 } from './data/festival'
-import {
-  clearStoredLoginAttemptGuard,
-  getLoginLockRemainingMs,
-  readStoredLoginAttemptGuard,
-  registerInvalidLoginAttempt,
-  resetLoginAttemptGuard,
-  storeLoginAttemptGuard,
-  type LoginAttemptGuardState,
-} from './lib/loginAttemptGuard'
 import { activeFestival, festivalStorageKey } from './config/festivals'
 import {
   AdminParticipants,
@@ -69,11 +60,6 @@ const authenticatedParticipantStorageKey = festivalStorageKey(
   activeFestival.id,
   'participant',
 )
-const loginAttemptGuardStorageKey = festivalStorageKey(
-  activeFestival.id,
-  'login-attempt-guard',
-)
-
 function readStoredParticipant(): Participant | null {
   const storedParticipant = localStorage.getItem(authenticatedParticipantStorageKey)
 
@@ -353,14 +339,7 @@ function App() {
   const [isAdminVisible, setIsAdminVisible] = useState(false)
   const [isLoadingData, setIsLoadingData] = useState(Boolean(selectedParticipant))
   const [isSubmittingAccessCode, setIsSubmittingAccessCode] = useState(false)
-  const [loginAttemptGuard, setLoginAttemptGuard] =
-    useState<LoginAttemptGuardState>(() =>
-      readStoredLoginAttemptGuard(
-        localStorage,
-        loginAttemptGuardStorageKey,
-        Date.now(),
-      ),
-    )
+  const [loginLockedUntil, setLoginLockedUntil] = useState<number | null>(null)
   const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now())
   const participantCount = participants.length
   const displayedFestivalName = festivalName || t('common.loading')
@@ -387,10 +366,9 @@ function App() {
   const [submittingCategoryId, setSubmittingCategoryId] = useState<string | null>(
     null,
   )
-  const loginLockRemainingMs = getLoginLockRemainingMs(
-    loginAttemptGuard,
-    currentTimeMs,
-  )
+  const loginLockRemainingMs = loginLockedUntil
+    ? Math.max(0, loginLockedUntil - currentTimeMs)
+    : 0
   const loginLockRemainingSeconds = Math.ceil(loginLockRemainingMs / 1000)
   const isLoginLocked = loginLockRemainingMs > 0
 
@@ -430,16 +408,15 @@ function App() {
 
       setCurrentTimeMs(now)
 
-      if (getLoginLockRemainingMs(loginAttemptGuard, now) === 0) {
-        setLoginAttemptGuard(resetLoginAttemptGuard())
-        clearStoredLoginAttemptGuard(localStorage, loginAttemptGuardStorageKey)
+      if (loginLockedUntil && loginLockedUntil <= now) {
+        setLoginLockedUntil(null)
       }
     }, 1000)
 
     return () => {
       window.clearInterval(timerId)
     }
-  }, [isLoginLocked, loginAttemptGuard])
+  }, [isLoginLocked, loginLockedUntil])
 
   useEffect(() => {
     if (!festivalAccess.isUnlocked || !selectedParticipant) {
@@ -572,7 +549,7 @@ function App() {
 
     const now = Date.now()
 
-    if (getLoginLockRemainingMs(loginAttemptGuard, now) > 0) {
+    if (loginLockedUntil && loginLockedUntil > now) {
       setCurrentTimeMs(now)
       return
     }
@@ -588,31 +565,25 @@ function App() {
     setAccessCodeError('')
 
     try {
-      const participant = await findParticipantByAccessCode(normalizedAccessCode)
+      const loginResult = await loginParticipant(normalizedAccessCode)
 
-      if (!participant) {
-        setAccessCodeError(
-          t('identity.errors.invalidAccessCode'),
-        )
-        const updatedGuard = registerInvalidLoginAttempt(
-          loginAttemptGuard,
-          Date.now(),
-        )
-
-        setLoginAttemptGuard(updatedGuard)
-        storeLoginAttemptGuard(
-          localStorage,
-          loginAttemptGuardStorageKey,
-          updatedGuard,
-        )
+      if (loginResult.status === 'blocked') {
+        setAccessCodeError(t('identity.errors.loginLocked'))
+        setLoginLockedUntil(Date.parse(loginResult.lockedUntil))
         setCurrentTimeMs(Date.now())
         return
       }
 
-      setLoginAttemptGuard(resetLoginAttemptGuard())
-      clearStoredLoginAttemptGuard(localStorage, loginAttemptGuardStorageKey)
-      storeAuthenticatedParticipant(participant)
-      setSelectedParticipant(participant)
+      if (loginResult.status === 'invalid') {
+        setAccessCodeError(
+          t('identity.errors.invalidAccessCode'),
+        )
+        return
+      }
+
+      setLoginLockedUntil(null)
+      storeAuthenticatedParticipant(loginResult.participant)
+      setSelectedParticipant(loginResult.participant)
       setSelectedVotesByCategory({})
       setAccessCode('')
       setAccessCodeError('')
@@ -631,8 +602,7 @@ function App() {
     setAccessCodeError('')
     setVotes([])
     setVotesError('')
-    setLoginAttemptGuard(resetLoginAttemptGuard())
-    clearStoredLoginAttemptGuard(localStorage, loginAttemptGuardStorageKey)
+    setLoginLockedUntil(null)
     setCurrentTimeMs(Date.now())
     setParticipantsError('')
     setCategoriesError('')
