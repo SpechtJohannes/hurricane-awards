@@ -6,6 +6,8 @@ Die App greift aus dem Browser nicht direkt auf geschuetzte Tabellen zu, sondern
 
 Details zu Tabellen, Policies, Adminrechten und verbleibenden Grenzen stehen in `docs/security.md`.
 
+Eine Uebersicht ueber Aufbau, Datenfluss und wichtige Architekturentscheidungen steht in `docs/architecture.md`.
+
 ## Tests
 
 Die Unit Tests werden mit Vitest, React Testing Library, jest-dom, jsdom und dem V8 Coverage Provider ausgeführt.

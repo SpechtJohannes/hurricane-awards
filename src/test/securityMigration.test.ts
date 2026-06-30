@@ -392,11 +392,29 @@ describe('Supabase Sicherheitsmigration', () => {
     )
     expect(secureParticipantLoginMigration).toContain("select 'invalid'::text")
     expect(secureParticipantLoginMigration).toContain("select 'blocked'::text")
-    expect(secureParticipantLoginMigration).toContain("select\n      'success'::text")
+    expect(secureParticipantLoginMigration).toMatch(/'success'::text/)
     expect(secureParticipantLoginMigration).toContain('and p.is_active = true')
+    expect(secureParticipantLoginMigration).toContain(
+      'v_failed_attempts := coalesce(v_attempt.failed_attempts, 0) + 1',
+    )
+    expect(secureParticipantLoginMigration).toContain(
+      'failed_attempts = excluded.failed_attempts',
+    )
+    expect(secureParticipantLoginMigration).toContain('v_locked_until := case')
+    expect(secureParticipantLoginMigration).toContain(
+      'then now() + v_lock_duration',
+    )
+    expect(secureParticipantLoginMigration).toContain(
+      'locked_until = excluded.locked_until',
+    )
     expect(secureParticipantLoginMigration).toContain(
       'delete from public.participant_login_attempts pla',
     )
+    expect(
+      secureParticipantLoginMigration.match(
+        /create table if not exists public\.participant_login_attempts \(([\s\S]*?)\n\);/,
+      )?.[1] ?? '',
+    ).not.toContain('access_code')
     expect(secureParticipantLoginMigration).toContain(
       'grant execute on function public.ha_login_participant(text, text) to anon, authenticated',
     )
