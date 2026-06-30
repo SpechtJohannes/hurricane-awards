@@ -547,6 +547,7 @@ h1 {
   background: rgba(255, 255, 255, 0.2);
 }
 
+.admin-categories,
 .admin-participants {
   display: grid;
   width: min(100%, 960px);
@@ -554,11 +555,13 @@ h1 {
   gap: 14px;
 }
 
+.admin-categories__toolbar,
 .admin-participants__toolbar {
   display: flex;
   justify-content: flex-start;
 }
 
+.admin-category-form,
 .admin-participant-form {
   display: grid;
   gap: 16px;
@@ -568,6 +571,7 @@ h1 {
   border-radius: 8px;
 }
 
+.admin-category-form h3,
 .admin-participant-form h3 {
   margin: 0;
   color: #ffffff;
@@ -575,6 +579,7 @@ h1 {
   line-height: 1.08;
 }
 
+.admin-category-form label,
 .admin-participant-form label {
   display: grid;
   gap: 8px;
@@ -585,6 +590,9 @@ h1 {
   text-transform: uppercase;
 }
 
+.admin-category-form input,
+.admin-category-form select,
+.admin-category-form textarea,
 .admin-participant-form input {
   width: 100%;
   min-height: 52px;
@@ -597,11 +605,23 @@ h1 {
   border-radius: 8px;
 }
 
+.admin-category-form textarea {
+  min-height: 112px;
+  padding-block: 14px;
+  resize: vertical;
+}
+
+.admin-category-form input:disabled,
+.admin-category-form select:disabled,
+.admin-category-form textarea:disabled,
 .admin-participant-form input:disabled {
   cursor: not-allowed;
   opacity: 0.7;
 }
 
+.admin-category-form input:focus-visible,
+.admin-category-form select:focus-visible,
+.admin-category-form textarea:focus-visible,
 .admin-participant-form input:focus-visible {
   outline: 3px solid #ffffff;
   outline-offset: 3px;
@@ -615,17 +635,20 @@ h1 {
 }
 
 .admin-participant-form__actions,
+.admin-category-card__actions,
 .admin-participant-card__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
+.admin-categories__list,
 .admin-participants__list {
   display: grid;
   gap: 14px;
 }
 
+.admin-category-card,
 .admin-participant-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -637,10 +660,16 @@ h1 {
   border-radius: 8px;
 }
 
+.admin-category-card {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+}
+
 .admin-participant-card--inactive {
   background: rgba(255, 255, 255, 0.045);
 }
 
+.admin-category-card h3,
 .admin-participant-card h3 {
   margin: 0 0 12px;
   color: #ffffff;
@@ -648,6 +677,13 @@ h1 {
   line-height: 1.08;
 }
 
+.admin-category-card p {
+  margin: 0 0 16px;
+  color: #f4e7cf;
+  line-height: 1.5;
+}
+
+.admin-category-card dl,
 .admin-participant-card dl {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -655,6 +691,7 @@ h1 {
   margin: 0;
 }
 
+.admin-category-card dt,
 .admin-participant-card dt {
   color: #ffbe0b;
   font-size: 0.72rem;
@@ -663,10 +700,48 @@ h1 {
   text-transform: uppercase;
 }
 
+.admin-category-card dd,
 .admin-participant-card dd {
   margin: 4px 0 0;
   color: #f4e7cf;
   font-weight: 800;
+}
+
+.admin-category-card__controls {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-category-card__controls label {
+  display: grid;
+  gap: 8px;
+  color: #ffbe0b;
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.admin-category-card__controls select {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  color: #ffffff;
+  font: inherit;
+  text-transform: none;
+  background: rgba(16, 16, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+}
+
+.admin-category-card__controls select:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.admin-category-card__controls select:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
 }
 
 .categories {
@@ -1264,14 +1339,23 @@ h1 {
     align-items: center;
   }
 
+  .admin-category-form,
   .admin-participant-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .admin-category-form h3,
+  .admin-category-form__error,
+  .admin-category-form .admin-participant-form__error,
+  .admin-category-form .admin-participant-form__actions,
   .admin-participant-form h3,
   .admin-participant-form__error,
   .admin-participant-form__actions {
     grid-column: 1 / -1;
+  }
+
+  .admin-category-card {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
   }
 
   .categories {

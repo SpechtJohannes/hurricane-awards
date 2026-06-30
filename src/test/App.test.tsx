@@ -10,7 +10,11 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../App'
 import {
+  createCategory,
+  deleteCategory,
+  loadAdminCategories,
   loadCategories,
+  updateCategory,
   updateCategoryStatus,
   type Category,
 } from '../data/categories'
@@ -26,7 +30,6 @@ import {
   updateParticipant,
 } from '../data/participants'
 import {
-  deleteVotesForCategory,
   loadVotes,
   loadVotesForParticipant,
   saveVote,
@@ -40,7 +43,11 @@ import {
 import i18n from '../i18n'
 
 vi.mock('../data/categories', () => ({
+  createCategory: vi.fn(),
+  deleteCategory: vi.fn(),
+  loadAdminCategories: vi.fn(),
   loadCategories: vi.fn(),
+  updateCategory: vi.fn(),
   updateCategoryStatus: vi.fn(),
 }))
 
@@ -56,7 +63,6 @@ vi.mock('../data/participants', () => ({
 }))
 
 vi.mock('../data/votes', () => ({
-  deleteVotesForCategory: vi.fn(),
   loadVotes: vi.fn(),
   loadVotesForParticipant: vi.fn(),
   saveVote: vi.fn(),
@@ -99,18 +105,21 @@ const categories: Category[] = [
     title: 'Bester Camp-Aufbau',
     description: 'Noch nicht freigeschaltet.',
     status: 'upcoming',
+    sortOrder: 1,
   },
   {
     id: 'open-category',
     title: 'Beste Festival-Energie',
     description: 'Aktuell offen.',
     status: 'open',
+    sortOrder: 2,
   },
   {
     id: 'closed-category',
     title: 'Beste Regenjacke',
     description: 'Schon beendet.',
     status: 'closed',
+    sortOrder: 3,
   },
 ]
 
@@ -167,6 +176,7 @@ function mockLoadedData({
     )
   })
   vi.mocked(loadCategories).mockResolvedValue(loadedCategories)
+  vi.mocked(loadAdminCategories).mockResolvedValue(loadedCategories)
   vi.mocked(loadVotes).mockResolvedValue(loadedVotes)
   vi.mocked(loadVotesForParticipant).mockResolvedValue(participantVotes)
   vi.mocked(loadAllTimeStandings).mockResolvedValue(loadedStandings)
@@ -229,8 +239,32 @@ function mockLoadedData({
       return { ...category, status }
     },
   )
+  vi.mocked(updateCategory).mockImplementation(async (input) => {
+    const category = loadedCategories.find(
+      (currentCategory) => currentCategory.id === input.id,
+    )
+
+    if (!category) {
+      throw new Error('Unknown category')
+    }
+
+    return {
+      ...category,
+      title: input.title ?? category.title,
+      description: input.description ?? category.description,
+      status: input.status ?? category.status,
+      sortOrder: input.sortOrder ?? category.sortOrder,
+    }
+  })
+  vi.mocked(createCategory).mockImplementation(async (input) => ({
+    id: input.title.toLowerCase().replace(/\s+/g, '-'),
+    title: input.title,
+    description: input.description ?? '',
+    status: input.status ?? 'upcoming',
+    sortOrder: input.sortOrder,
+  }))
+  vi.mocked(deleteCategory).mockResolvedValue()
   vi.mocked(saveVote).mockImplementation(async (savedVote) => savedVote)
-  vi.mocked(deleteVotesForCategory).mockResolvedValue()
 }
 
 async function renderLoadedApp() {
@@ -738,11 +772,9 @@ describe('Admin', () => {
 
     expect(screen.queryByRole('button', { name: /^admin$/i })).not.toBeInTheDocument()
     expect(screen.queryByLabelText(/status/i)).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /stimmen zur/i }),
-    ).not.toBeInTheDocument()
+    expect(loadAdminCategories).not.toHaveBeenCalled()
+    expect(updateCategory).not.toHaveBeenCalled()
     expect(updateCategoryStatus).not.toHaveBeenCalled()
-    expect(deleteVotesForCategory).not.toHaveBeenCalled()
   })
 
   it('macht Admin-Aktionen erst in der Admin-Ansicht verfuegbar', async () => {
@@ -755,8 +787,11 @@ describe('Admin', () => {
 
     expect(await screen.findAllByLabelText(/status/i)).toHaveLength(3)
     expect(
-      screen.getAllByRole('button', { name: /stimmen zur/i }),
+      screen.getAllByRole('button', { name: /^löschen$/i }),
     ).toHaveLength(3)
+    expect(loadAdminCategories).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
   })
 
   it('zeigt die Teilnehmerverwaltung mit aktiven und deaktivierten Teilnehmern', async () => {
@@ -973,9 +1008,8 @@ describe('Admin', () => {
 
     await user.selectOptions(statusSelects[0], 'open')
 
-    expect(updateCategoryStatus).toHaveBeenCalledWith(
-      'upcoming-category',
-      'open',
+    expect(updateCategory).toHaveBeenCalledWith(
+      { id: 'upcoming-category', status: 'open' },
       { participantAccessCode: 'ALICE42' },
     )
     const adminSection = sectionForHeading(/^kategorien$/i)
@@ -985,30 +1019,184 @@ describe('Admin', () => {
 
     expect(updatedCard).not.toBeNull()
     expect(
-      within(updatedCard as HTMLElement).getByText(/aktueller status: offen/i),
+      within(updatedCard as HTMLElement).getByText(/^offen$/i),
     ).toBeVisible()
   })
 
-  it('loescht Kategorie-Stimmen nach Bestaetigung und laedt Daten neu', async () => {
-    mockLoadedData({
-      participantVotes: [vote()],
-      loadedVotes: [vote()],
-    })
+  it('legt Kategorien im Adminbereich an und aktualisiert die Liste', async () => {
+    const newCategory: Category = {
+      id: 'new-category',
+      title: 'Beste Playlist',
+      description: 'Soundtrack des Wochenendes.',
+      status: 'upcoming',
+      sortOrder: 4,
+    }
+
+    mockLoadedData()
+    vi.mocked(loadAdminCategories)
+      .mockResolvedValueOnce(categories)
+      .mockResolvedValueOnce([...categories, newCategory])
+    vi.mocked(loadCategories).mockResolvedValueOnce(categories)
+    vi.mocked(createCategory).mockResolvedValue(newCategory)
+
     await renderLoadedApp()
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
-    await user.click(screen.getAllByRole('button', { name: /stimmen zur/i })[1])
+    await user.click(
+      await screen.findByRole('button', { name: /kategorie anlegen/i }),
+    )
 
-    expect(window.confirm).toHaveBeenCalled()
-    expect(deleteVotesForCategory).toHaveBeenCalledWith('open-category', {
+    await user.type(screen.getByLabelText(/^titel$/i), 'Beste Playlist')
+    await user.type(
+      screen.getByLabelText(/^beschreibung$/i),
+      'Soundtrack des Wochenendes.',
+    )
+    await user.type(screen.getByLabelText(/^sortierung$/i), '4')
+    await user.click(screen.getByRole('button', { name: /^speichern$/i }))
+
+    expect(createCategory).toHaveBeenCalledWith(
+      {
+        title: 'Beste Playlist',
+        description: 'Soundtrack des Wochenendes.',
+        status: 'upcoming',
+        sortOrder: 4,
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(await screen.findByText('Beste Playlist')).toBeVisible()
+  })
+
+  it('bearbeitet Kategorien im Adminbereich', async () => {
+    const updatedCategory: Category = {
+      ...categories[1],
+      title: 'Beste Festival-Laune',
+      description: 'Aktualisierte Beschreibung.',
+      status: 'closed',
+      sortOrder: 5,
+    }
+
+    mockLoadedData()
+    vi.mocked(loadAdminCategories)
+      .mockResolvedValueOnce(categories)
+      .mockResolvedValueOnce([categories[0], updatedCategory, categories[2]])
+    vi.mocked(updateCategory).mockResolvedValue(updatedCategory)
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const adminSection = sectionForHeading(/^kategorien$/i)
+    const categoryCard = (
+      await within(adminSection).findByRole('heading', {
+        name: 'Beste Festival-Energie',
+      })
+    ).closest('article')
+
+    expect(categoryCard).not.toBeNull()
+
+    await user.click(
+      within(categoryCard as HTMLElement).getByRole('button', {
+        name: /bearbeiten/i,
+      }),
+    )
+    await user.clear(screen.getByLabelText(/^titel$/i))
+    await user.type(screen.getByLabelText(/^titel$/i), 'Beste Festival-Laune')
+    await user.clear(screen.getByLabelText(/^beschreibung$/i))
+    await user.type(
+      screen.getByLabelText(/^beschreibung$/i),
+      'Aktualisierte Beschreibung.',
+    )
+    await user.selectOptions(screen.getByLabelText(/^status$/i), 'closed')
+    await user.clear(screen.getByLabelText(/^sortierung$/i))
+    await user.type(screen.getByLabelText(/^sortierung$/i), '5')
+    await user.click(screen.getByRole('button', { name: /^speichern$/i }))
+
+    expect(updateCategory).toHaveBeenCalledWith(
+      {
+        id: 'open-category',
+        title: 'Beste Festival-Laune',
+        description: 'Aktualisierte Beschreibung.',
+        status: 'closed',
+        sortOrder: 5,
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(await screen.findByText('Beste Festival-Laune')).toBeVisible()
+  })
+
+  it('loescht Kategorien nach Bestaetigung und aktualisiert die Liste', async () => {
+    mockLoadedData()
+    vi.mocked(loadAdminCategories)
+      .mockResolvedValueOnce(categories)
+      .mockResolvedValueOnce([categories[0], categories[1]])
+    vi.mocked(loadCategories).mockResolvedValueOnce(categories)
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const adminSection = sectionForHeading(/^kategorien$/i)
+    const categoryCard = (
+      await within(adminSection).findByRole('heading', {
+        name: 'Beste Regenjacke',
+      })
+    ).closest('article')
+
+    expect(categoryCard).not.toBeNull()
+
+    await user.click(
+      within(categoryCard as HTMLElement).getByRole('button', {
+        name: /^löschen$/i,
+      }),
+    )
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringContaining('Beste Regenjacke'),
+    )
+    expect(deleteCategory).toHaveBeenCalledWith('closed-category', {
       participantAccessCode: 'ALICE42',
     })
     await waitFor(() => {
-      expect(loadCategories).toHaveBeenCalledTimes(2)
-      expect(loadVotes).toHaveBeenCalledTimes(2)
-      expect(loadVotesForParticipant).toHaveBeenCalledTimes(2)
+      expect(
+        within(adminSection).queryByRole('heading', {
+          name: 'Beste Regenjacke',
+        }),
+      ).not.toBeInTheDocument()
     })
+  })
+
+  it('zeigt Fehler aus der Kategorienverwaltung verstaendlich an', async () => {
+    mockLoadedData()
+    vi.mocked(deleteCategory).mockRejectedValueOnce(
+      new Error('category cannot be deleted while votes exist'),
+    )
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const adminSection = sectionForHeading(/^kategorien$/i)
+    const categoryCard = (
+      await within(adminSection).findByRole('heading', {
+        name: 'Beste Festival-Energie',
+      })
+    ).closest('article')
+
+    expect(categoryCard).not.toBeNull()
+
+    await user.click(
+      within(categoryCard as HTMLElement).getByRole('button', {
+        name: /^löschen$/i,
+      }),
+    )
+
+    expect(
+      await screen.findByText(/solange stimmen vorhanden sind/i),
+    ).toBeVisible()
   })
 
   it('bricht das Loeschen ab, wenn die Bestaetigung ausbleibt', async () => {
@@ -1018,10 +1206,10 @@ describe('Admin', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /^admin$/i }))
     await userEvent.click(
-      screen.getAllByRole('button', { name: /stimmen zur/i })[1],
+      screen.getAllByRole('button', { name: /^löschen$/i })[1],
     )
 
-    expect(deleteVotesForCategory).not.toHaveBeenCalled()
+    expect(deleteCategory).not.toHaveBeenCalled()
   })
 
   it('laedt Teilnehmerverwaltung nicht fuer normale Teilnehmer', async () => {
@@ -1029,5 +1217,6 @@ describe('Admin', () => {
     await loginWith('BOB42')
 
     expect(loadAdminParticipants).not.toHaveBeenCalled()
+    expect(loadAdminCategories).not.toHaveBeenCalled()
   })
 })
