@@ -10,6 +10,8 @@ Eine Uebersicht ueber Aufbau, Datenfluss und wichtige Architekturentscheidungen 
 
 Die technische Referenz zum aktuellen Datenbankschema steht in `docs/database-schema.md`.
 
+Installations- und Deployment-Hinweise stehen in `docs/installation-and-deployment.md`.
+
 ## Tests
 
 Die Unit Tests werden mit Vitest, React Testing Library, jest-dom, jsdom und dem V8 Coverage Provider ausgeführt.
