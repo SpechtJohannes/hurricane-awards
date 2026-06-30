@@ -549,6 +549,7 @@ h1 {
 
 .admin-categories,
 .admin-festival,
+.admin-festival-archive,
 .admin-participants {
   display: grid;
   width: min(100%, 960px);
@@ -595,6 +596,16 @@ h1 {
 .admin-festival input:focus-visible {
   outline: 3px solid #ffffff;
   outline-offset: 3px;
+}
+
+.admin-festival-archive {
+  margin-bottom: 42px;
+}
+
+.admin-festival-archive__success {
+  margin: 0;
+  color: #9ef01a;
+  font-weight: 800;
 }
 
 .admin-categories__toolbar,

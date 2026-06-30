@@ -9,7 +9,11 @@ vi.mock('../lib/supabase', () => ({
 }))
 
 import { loadAllTimeStandings } from '../data/allTimeStandings'
-import { loadFestivalName, updateFestivalName } from '../data/festival'
+import {
+  archiveFestival,
+  loadFestivalName,
+  updateFestivalName,
+} from '../data/festival'
 import {
   createCategory,
   deleteCategory,
@@ -88,6 +92,20 @@ describe('Supabase Datenzugriffe', () => {
     expect(rpcMock).toHaveBeenCalledWith('ha_update_festival_name', {
       ...expectedParticipantRpcContext,
       p_name: 'Hurricane Crew Awards',
+    })
+  })
+
+  it('archiviert das Festival ueber Admin RPC', async () => {
+    rpcMock.mockResolvedValue({
+      data: '8e560706-5e2f-4b50-9e41-381625fd8102',
+      error: null,
+    })
+
+    await expect(archiveFestival('ALICE42')).resolves.toBe(
+      '8e560706-5e2f-4b50-9e41-381625fd8102',
+    )
+    expect(rpcMock).toHaveBeenCalledWith('ha_archive_festival', {
+      p_admin_access_code: 'ALICE42',
     })
   })
 

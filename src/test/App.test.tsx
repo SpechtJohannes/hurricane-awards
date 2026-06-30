@@ -40,7 +40,11 @@ import {
   loadAllTimeStandings,
   type AllTimeStanding,
 } from '../data/allTimeStandings'
-import { loadFestivalName, updateFestivalName } from '../data/festival'
+import {
+  archiveFestival,
+  loadFestivalName,
+  updateFestivalName,
+} from '../data/festival'
 import i18n from '../i18n'
 
 vi.mock('../data/categories', () => ({
@@ -74,6 +78,7 @@ vi.mock('../data/allTimeStandings', () => ({
 }))
 
 vi.mock('../data/festival', () => ({
+  archiveFestival: vi.fn(),
   loadFestivalName: vi.fn(),
   updateFestivalName: vi.fn(),
 }))
@@ -275,6 +280,9 @@ function mockLoadedData({
   vi.mocked(deleteCategory).mockResolvedValue()
   vi.mocked(saveVote).mockImplementation(async (savedVote) => savedVote)
   vi.mocked(updateFestivalName).mockImplementation(async (name) => name)
+  vi.mocked(archiveFestival).mockResolvedValue(
+    '8e560706-5e2f-4b50-9e41-381625fd8102',
+  )
 }
 
 async function renderLoadedApp() {
@@ -784,10 +792,14 @@ describe('Admin', () => {
     await loginWith('BOB42')
 
     expect(screen.queryByRole('button', { name: /^admin$/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /festival archivieren/i }),
+    ).not.toBeInTheDocument()
     expect(screen.queryByLabelText(/status/i)).not.toBeInTheDocument()
     expect(loadAdminCategories).not.toHaveBeenCalled()
     expect(updateCategory).not.toHaveBeenCalled()
     expect(updateCategoryStatus).not.toHaveBeenCalled()
+    expect(archiveFestival).not.toHaveBeenCalled()
   })
 
   it('macht Admin-Aktionen erst in der Admin-Ansicht verfuegbar', async () => {
@@ -884,6 +896,30 @@ describe('Admin', () => {
     expect(updateFestivalName).not.toHaveBeenCalled()
     expect(
       await within(festivalSection).findByText(/festivalname ist erforderlich/i),
+    ).toBeVisible()
+  })
+
+  it('archiviert das Festival im Adminbereich nach Bestaetigung', async () => {
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const festivalSection = sectionForHeading(/^festival$/i)
+    await user.click(
+      within(festivalSection).getByRole('button', {
+        name: /festival archivieren/i,
+      }),
+    )
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringContaining('wirklich archivieren'),
+    )
+    expect(archiveFestival).toHaveBeenCalledWith('ALICE42')
+    expect(
+      await within(festivalSection).findByText(
+        /archiv id: 8e560706-5e2f-4b50-9e41-381625fd8102/i,
+      ),
     ).toBeVisible()
   })
 

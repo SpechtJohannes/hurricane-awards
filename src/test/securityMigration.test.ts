@@ -53,6 +53,13 @@ const festivalNameMigration = readFileSync(
   ),
   'utf8',
 )
+const festivalArchiveMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260630120000_create_festival_archives.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -304,6 +311,47 @@ describe('Supabase Sicherheitsmigration', () => {
     )
   })
 
+  it('archiviert Festivaldaten in getrennte geschuetzte Archivtabellen', () => {
+    for (const table of [
+      'festival_archives',
+      'festival_archive_participants',
+      'festival_archive_categories',
+      'festival_archive_votes',
+    ]) {
+      expect(festivalArchiveMigration).toContain(
+        `create table if not exists public.${table}`,
+      )
+      expect(festivalArchiveMigration).toContain(
+        `alter table public.${table} enable row level security`,
+      )
+      expect(festivalArchiveMigration).toContain(
+        `revoke all on table public.${table} from anon, authenticated`,
+      )
+    }
+
+    expect(festivalArchiveMigration).toContain(
+      'create or replace function public.ha_archive_festival',
+    )
+    expect(festivalArchiveMigration).toContain(
+      'if not public.ha_has_admin_access(p_admin_access_code)',
+    )
+    expect(festivalArchiveMigration).toContain(
+      'grant execute on function public.ha_archive_festival(text) to anon, authenticated',
+    )
+    expect(festivalArchiveMigration).toContain('from public.app_settings s')
+    expect(festivalArchiveMigration).toContain('from public.participants p')
+    expect(festivalArchiveMigration).toContain('from public.categories c')
+    expect(festivalArchiveMigration).toContain('from public.votes v')
+    expect(festivalArchiveMigration).toContain('voter_display_name')
+    expect(festivalArchiveMigration).toContain('category_name')
+    expect(festivalArchiveMigration).toContain('nominee_display_name')
+    expect(festivalArchiveMigration).not.toContain(
+      'references public.participants',
+    )
+    expect(festivalArchiveMigration).not.toContain('references public.categories')
+    expect(festivalArchiveMigration).not.toContain('references public.votes')
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -313,6 +361,7 @@ describe('Supabase Sicherheitsmigration', () => {
       dataIntegrityMigration,
       categoryManagementMigration,
       festivalNameMigration,
+      festivalArchiveMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

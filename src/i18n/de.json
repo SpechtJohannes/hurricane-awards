@@ -62,9 +62,14 @@
       "title": "Festival",
       "nameLabel": "Festivalname",
       "save": "Festivalname speichern",
+      "archive": "Festival archivieren",
+      "archiving": "Archiviere...",
+      "archiveConfirm": "Aktuelles Festival wirklich archivieren? Die aktiven Daten bleiben unverändert.",
+      "archiveSuccess": "Festival wurde archiviert. Archiv ID: {{archiveId}}",
       "errors": {
         "save": "Der Festivalname konnte gerade nicht gespeichert werden.",
-        "nameRequired": "Der Festivalname ist erforderlich."
+        "nameRequired": "Der Festivalname ist erforderlich.",
+        "archive": "Das Festival konnte gerade nicht archiviert werden."
       }
     },
     "categories": {

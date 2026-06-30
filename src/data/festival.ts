@@ -37,3 +37,19 @@ export async function updateFestivalName(
 
   return String(data ?? '')
 }
+
+export async function archiveFestival(adminAccessCode: string): Promise<string> {
+  if (!supabase) {
+    throw new Error('Supabase ist noch nicht konfiguriert.')
+  }
+
+  const { data, error } = await supabase.rpc('ha_archive_festival', {
+    p_admin_access_code: adminAccessCode,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return String(data ?? '')
+}
