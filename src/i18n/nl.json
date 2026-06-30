@@ -52,11 +52,31 @@
   "admin": {
     "eyebrow": "Admin",
     "title": "Categorieën",
-    "currentStatus": "Huidige status: {{status}}",
     "changeStatus": "Status wijzigen",
-    "resetVotes": "Stemmen resetten",
-    "resettingVotes": "Resetten...",
-    "confirmResetVotes": "Echt alle stemmen voor deze categorie verwijderen?",
+    "categories": {
+      "loading": "Categorieën worden geladen...",
+      "createButton": "Categorie aanmaken",
+      "createTitle": "Categorie aanmaken",
+      "editTitle": "Categorie bewerken",
+      "titleLabel": "Titel",
+      "descriptionLabel": "Beschrijving",
+      "statusLabel": "Status",
+      "sortOrderLabel": "Sortering",
+      "save": "Opslaan",
+      "cancel": "Annuleren",
+      "edit": "Bewerken",
+      "delete": "Verwijderen",
+      "deleting": "Verwijderen...",
+      "confirmDelete": "Categorie \"{{title}}\" echt verwijderen? Dat kan alleen als er nog geen stemmen zijn.",
+      "errors": {
+        "load": "Het categoriebeheer kon net niet worden geladen.",
+        "save": "De categorie kon net niet worden opgeslagen.",
+        "titleRequired": "De titel is verplicht.",
+        "invalidStatus": "Deze status is niet geldig.",
+        "sortOrderInvalid": "De sortering moet een geheel getal vanaf 0 zijn.",
+        "deleteHasVotes": "Deze categorie kan niet worden verwijderd zolang er stemmen zijn."
+      }
+    },
     "participants": {
       "eyebrow": "Beheer",
       "title": "Deelnemers",
@@ -98,8 +118,7 @@
     },
     "errors": {
       "categoriesLoad": "De categorieën konden net niet worden geladen.",
-      "statusSave": "De status kon net niet worden opgeslagen.",
-      "votesDelete": "De stemmen konden net niet worden verwijderd."
+      "statusSave": "De status kon net niet worden opgeslagen."
     }
   },
   "categories": {

@@ -52,11 +52,31 @@
   "admin": {
     "eyebrow": "Admin",
     "title": "Kategorien",
-    "currentStatus": "Aktueller Status: {{status}}",
     "changeStatus": "Status ändern",
-    "resetVotes": "Stimmen zurücksetzen",
-    "resettingVotes": "Setze zurück...",
-    "confirmResetVotes": "Wirklich alle Stimmen für diese Kategorie löschen?",
+    "categories": {
+      "loading": "Kategorien werden geladen...",
+      "createButton": "Kategorie anlegen",
+      "createTitle": "Kategorie anlegen",
+      "editTitle": "Kategorie bearbeiten",
+      "titleLabel": "Titel",
+      "descriptionLabel": "Beschreibung",
+      "statusLabel": "Status",
+      "sortOrderLabel": "Sortierung",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "deleting": "Lösche...",
+      "confirmDelete": "Kategorie \"{{title}}\" wirklich löschen? Das geht nur, wenn noch keine Stimmen vorhanden sind.",
+      "errors": {
+        "load": "Die Kategorienverwaltung konnte gerade nicht geladen werden.",
+        "save": "Die Kategorie konnte gerade nicht gespeichert werden.",
+        "titleRequired": "Der Titel ist erforderlich.",
+        "invalidStatus": "Dieser Status ist nicht gültig.",
+        "sortOrderInvalid": "Die Sortierung muss eine ganze Zahl ab 0 sein.",
+        "deleteHasVotes": "Diese Kategorie kann nicht gelöscht werden, solange Stimmen vorhanden sind."
+      }
+    },
     "participants": {
       "eyebrow": "Verwaltung",
       "title": "Teilnehmer",
@@ -98,8 +118,7 @@
     },
     "errors": {
       "categoriesLoad": "Die Kategorien konnten gerade nicht geladen werden.",
-      "statusSave": "Der Status konnte gerade nicht gespeichert werden.",
-      "votesDelete": "Die Stimmen konnten gerade nicht gelöscht werden."
+      "statusSave": "Der Status konnte gerade nicht gespeichert werden."
     }
   },
   "categories": {

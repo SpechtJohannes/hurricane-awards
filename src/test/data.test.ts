@@ -9,7 +9,14 @@ vi.mock('../lib/supabase', () => ({
 }))
 
 import { loadAllTimeStandings } from '../data/allTimeStandings'
-import { loadCategories, updateCategoryStatus } from '../data/categories'
+import {
+  createCategory,
+  deleteCategory,
+  loadAdminCategories,
+  loadCategories,
+  updateCategory,
+  updateCategoryStatus,
+} from '../data/categories'
 import {
   createParticipant,
   deactivateParticipant,
@@ -111,6 +118,145 @@ describe('Supabase Datenzugriffe', () => {
       p_category_id: 'cat-1',
       p_status: 'closed',
     })
+  })
+
+  it('laedt Kategorien fuer die Verwaltung ueber Admin RPC', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          id: 'cat-1',
+          title: 'Beste Energie',
+          description: 'Offene Kategorie',
+          status: 'open',
+          sort_order: 2,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(loadAdminCategories(participantContext)).resolves.toEqual([
+      {
+        id: 'cat-1',
+        title: 'Beste Energie',
+        description: 'Offene Kategorie',
+        status: 'open',
+        sortOrder: 2,
+      },
+    ])
+    expect(rpcMock).toHaveBeenCalledWith(
+      'ha_admin_list_categories',
+      expectedParticipantRpcContext,
+    )
+  })
+
+  it('legt Kategorien ueber Admin RPC an', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          id: 'cat-2',
+          title: 'Beste Crew',
+          description: 'Teamkategorie',
+          status: 'upcoming',
+          sort_order: 3,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      createCategory(
+        {
+          title: 'Beste Crew',
+          description: 'Teamkategorie',
+          status: 'upcoming',
+          sortOrder: 3,
+        },
+        participantContext,
+      ),
+    ).resolves.toEqual({
+      id: 'cat-2',
+      title: 'Beste Crew',
+      description: 'Teamkategorie',
+      status: 'upcoming',
+      sortOrder: 3,
+    })
+    expect(rpcMock).toHaveBeenCalledWith('ha_create_category', {
+      ...expectedParticipantRpcContext,
+      p_title: 'Beste Crew',
+      p_description: 'Teamkategorie',
+      p_status: 'upcoming',
+      p_sort_order: 3,
+    })
+  })
+
+  it('bearbeitet Kategorien ueber Admin RPC', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          id: 'cat-2',
+          title: 'Beste Crew Neu',
+          description: 'Aktualisierte Teamkategorie',
+          status: 'closed',
+          sort_order: 4,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      updateCategory(
+        {
+          id: 'cat-2',
+          title: 'Beste Crew Neu',
+          description: 'Aktualisierte Teamkategorie',
+          status: 'closed',
+          sortOrder: 4,
+        },
+        participantContext,
+      ),
+    ).resolves.toEqual({
+      id: 'cat-2',
+      title: 'Beste Crew Neu',
+      description: 'Aktualisierte Teamkategorie',
+      status: 'closed',
+      sortOrder: 4,
+    })
+    expect(rpcMock).toHaveBeenCalledWith('ha_update_category', {
+      ...expectedParticipantRpcContext,
+      p_category_id: 'cat-2',
+      p_title: 'Beste Crew Neu',
+      p_description: 'Aktualisierte Teamkategorie',
+      p_status: 'closed',
+      p_sort_order: 4,
+    })
+  })
+
+  it('loescht Kategorien ueber Admin RPC', async () => {
+    rpcMock.mockResolvedValue({
+      data: null,
+      error: null,
+    })
+
+    await expect(
+      deleteCategory('cat-2', participantContext),
+    ).resolves.toBeUndefined()
+    expect(rpcMock).toHaveBeenCalledWith('ha_delete_category', {
+      ...expectedParticipantRpcContext,
+      p_category_id: 'cat-2',
+    })
+  })
+
+  it('reicht Admin RPC Fehler aus der Kategorienverwaltung weiter', async () => {
+    const error = new Error('category cannot be deleted while votes exist')
+
+    rpcMock.mockResolvedValue({
+      data: null,
+      error,
+    })
+
+    await expect(
+      deleteCategory('cat-2', participantContext),
+    ).rejects.toThrow('category cannot be deleted while votes exist')
   })
 
   it('laedt Teilnehmer ohne Access Codes ueber eine geschuetzte RPC Funktion', async () => {

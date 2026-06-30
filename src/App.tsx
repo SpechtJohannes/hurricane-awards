@@ -1,10 +1,15 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  createCategory,
+  deleteCategory,
+  loadAdminCategories,
   loadCategories,
-  updateCategoryStatus,
+  updateCategory,
   type Category,
   type CategoryStatus,
+  type CreateCategoryInput,
+  type UpdateCategoryInput,
 } from './data/categories'
 import {
   createParticipant,
@@ -18,7 +23,6 @@ import {
   type Participant,
 } from './data/participants'
 import {
-  deleteVotesForCategory,
   loadVotes,
   loadVotesForParticipant,
   saveVote,
@@ -42,6 +46,7 @@ import {
   AdminParticipants,
   type ParticipantFormState,
 } from './components/AdminParticipants'
+import { AdminCategories } from './components/AdminCategories'
 import { useFestivalAccess } from './hooks/useFestivalAccess'
 import i18n from './i18n'
 import { supportedLanguages, type SupportedLanguage } from './i18n'
@@ -312,6 +317,13 @@ function App() {
   const [participantsError, setParticipantsError] = useState('')
   const [categoriesError, setCategoriesError] = useState('')
   const [adminError, setAdminError] = useState('')
+  const [adminCategories, setAdminCategories] = useState<Category[]>([])
+  const [adminCategoriesError, setAdminCategoriesError] = useState('')
+  const [isLoadingAdminCategories, setIsLoadingAdminCategories] =
+    useState(false)
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(
+    null,
+  )
   const [adminParticipants, setAdminParticipants] = useState<Participant[]>([])
   const [adminParticipantsError, setAdminParticipantsError] = useState('')
   const [isLoadingAdminParticipants, setIsLoadingAdminParticipants] =
@@ -324,9 +336,6 @@ function App() {
     string | null
   >(null)
   const [updatingCategoryId, setUpdatingCategoryId] = useState<string | null>(null)
-  const [resettingCategoryId, setResettingCategoryId] = useState<string | null>(
-    null,
-  )
   const [isAdminVisible, setIsAdminVisible] = useState(false)
   const [isLoadingData, setIsLoadingData] = useState(Boolean(selectedParticipant))
   const [isSubmittingAccessCode, setIsSubmittingAccessCode] = useState(false)
@@ -589,6 +598,8 @@ function App() {
     setResultsError('')
     setStandingsError('')
     setAdminError('')
+    setAdminCategories([])
+    setAdminCategoriesError('')
     setAdminParticipants([])
     setAdminParticipantsError('')
     setParticipantForm(null)
@@ -619,6 +630,7 @@ function App() {
 
     setIsAdminVisible((isVisible) => {
       if (!isVisible) {
+        void reloadAdminCategories()
         void reloadAdminParticipants()
 
         window.setTimeout(() => {
@@ -656,6 +668,61 @@ function App() {
     }
 
     return t('admin.participants.errors.save')
+  }
+
+  function categoryMutationErrorMessage(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+
+    if (message.includes('category title is required')) {
+      return t('admin.categories.errors.titleRequired')
+    }
+
+    if (message.includes('invalid status')) {
+      return t('admin.categories.errors.invalidStatus')
+    }
+
+    if (message.includes('category cannot be deleted while votes exist')) {
+      return t('admin.categories.errors.deleteHasVotes')
+    }
+
+    return t('admin.categories.errors.save')
+  }
+
+  async function reloadCategoriesForAdminChange() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    const [loadedAdminCategories, loadedCategories] = await Promise.all([
+      loadAdminCategories(adminContext),
+      loadCategories(adminContext),
+    ])
+
+    setAdminCategories(loadedAdminCategories)
+    setCategories(loadedCategories)
+  }
+
+  async function reloadAdminCategories() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsLoadingAdminCategories(true)
+    setAdminCategoriesError('')
+
+    try {
+      const loadedAdminCategories = await loadAdminCategories(adminContext)
+
+      setAdminCategories(loadedAdminCategories)
+    } catch {
+      setAdminCategoriesError(t('admin.categories.errors.load'))
+    } finally {
+      setIsLoadingAdminCategories(false)
+    }
   }
 
   async function reloadAdminParticipants() {
@@ -824,6 +891,40 @@ function App() {
     }
   }
 
+  async function createAdminCategory(input: CreateCategoryInput) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setAdminCategoriesError('')
+
+    try {
+      await createCategory(input, adminContext)
+      await reloadCategoriesForAdminChange()
+    } catch (error) {
+      throw new Error(categoryMutationErrorMessage(error), { cause: error })
+    }
+  }
+
+  async function updateAdminCategory(input: UpdateCategoryInput) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setAdminCategoriesError('')
+
+    try {
+      await updateCategory(input, adminContext)
+      await reloadCategoriesForAdminChange()
+    } catch (error) {
+      throw new Error(categoryMutationErrorMessage(error), { cause: error })
+    }
+  }
+
   async function changeCategoryStatus(
     categoryId: string,
     status: CategoryStatus,
@@ -833,6 +934,7 @@ function App() {
     }
 
     const previousCategories = categories
+    const previousAdminCategories = adminCategories
 
     setAdminError('')
     setUpdatingCategoryId(categoryId)
@@ -841,72 +943,69 @@ function App() {
         category.id === categoryId ? { ...category, status } : category,
       ),
     )
+    setAdminCategories((currentCategories) =>
+      currentCategories.map((category) =>
+        category.id === categoryId ? { ...category, status } : category,
+      ),
+    )
 
     try {
-      const updatedCategory = await updateCategoryStatus(categoryId, status, {
-        participantAccessCode: selectedParticipant.accessCode,
-      })
+      const updatedCategory = await updateCategory(
+        {
+          id: categoryId,
+          status,
+        },
+        {
+          participantAccessCode: selectedParticipant.accessCode,
+        },
+      )
 
       setCategories((currentCategories) =>
         currentCategories.map((category) =>
           category.id === categoryId ? updatedCategory : category,
         ),
       )
+      setAdminCategories((currentCategories) =>
+        currentCategories.map((category) =>
+          category.id === categoryId ? updatedCategory : category,
+        ),
+      )
     } catch {
       setCategories(previousCategories)
+      setAdminCategories(previousAdminCategories)
       setAdminError(t('admin.errors.statusSave'))
     } finally {
       setUpdatingCategoryId(null)
     }
   }
 
-  async function resetCategoryVotes(categoryId: string) {
-    if (!selectedParticipant?.isAdmin) {
+  async function deleteAdminCategory(category: Category) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
       return
     }
 
-    const shouldReset = window.confirm(
-      t('admin.confirmResetVotes'),
+    const shouldDelete = window.confirm(
+      t('admin.categories.confirmDelete', {
+        title: category.title,
+      }),
     )
 
-    if (!shouldReset) {
+    if (!shouldDelete) {
       return
     }
 
-    setAdminError('')
-    setResultsError('')
-    setResettingCategoryId(categoryId)
+    setDeletingCategoryId(category.id)
+    setAdminCategoriesError('')
 
     try {
-      await deleteVotesForCategory(categoryId, {
-        participantAccessCode: selectedParticipant.accessCode,
-      })
-
-      const [loadedCategories, loadedVotes, loadedParticipantVotes] =
-        await Promise.all([
-          loadCategories({
-            participantAccessCode: selectedParticipant.accessCode,
-          }),
-          loadVotes({
-            participantAccessCode: selectedParticipant.accessCode,
-          }),
-          selectedParticipant
-            ? loadVotesForParticipant(selectedParticipant.id, {
-                participantAccessCode: selectedParticipant.accessCode,
-              })
-            : Promise.resolve<Vote[]>([]),
-        ])
-
-      setCategories(loadedCategories)
-      setAllVotes(loadedVotes)
-
-      if (selectedParticipant) {
-        setVotes(loadedParticipantVotes)
-      }
-    } catch {
-      setAdminError(t('admin.errors.votesDelete'))
+      await deleteCategory(category.id, adminContext)
+      await reloadCategoriesForAdminChange()
+    } catch (error) {
+      setAdminCategoriesError(categoryMutationErrorMessage(error))
     } finally {
-      setResettingCategoryId(null)
+      setDeletingCategoryId(null)
     }
   }
 
@@ -1120,66 +1219,22 @@ function App() {
 
       {selectedParticipant.isAdmin && isAdminVisible ? (
         <section className="admin" id="admin" aria-labelledby="admin-title">
-          <div className="admin__header">
-            <p className="admin__eyebrow">{t('admin.eyebrow')}</p>
-            <h2 id="admin-title">{t('admin.title')}</h2>
-          </div>
-
           {adminError ? <p className="admin__notice">{adminError}</p> : null}
           {categoriesError ? (
             <p className="admin__notice">{categoriesError}</p>
           ) : null}
 
-          <div className="admin__list">
-            {categories.map((category) => (
-              <article className="admin-card" key={category.id}>
-                <div>
-                  <h3>{category.title}</h3>
-                  <p>
-                    {t('admin.currentStatus', {
-                      status: statusLabels[category.status],
-                    })}
-                  </p>
-                </div>
-
-                <label>
-                  {t('admin.changeStatus')}
-                  <select
-                    value={category.status}
-                    disabled={
-                      updatingCategoryId === category.id ||
-                      resettingCategoryId === category.id
-                    }
-                    onChange={(event) =>
-                      changeCategoryStatus(
-                        category.id,
-                        event.target.value as CategoryStatus,
-                      )
-                    }
-                  >
-                    <option value="upcoming">
-                      {t('admin.statusOptions.upcoming')}
-                    </option>
-                    <option value="open">{t('admin.statusOptions.open')}</option>
-                    <option value="closed">
-                      {t('admin.statusOptions.closed')}
-                    </option>
-                  </select>
-                </label>
-
-                <button
-                  className="admin-card__reset"
-                  type="button"
-                  disabled={resettingCategoryId === category.id}
-                  onClick={() => resetCategoryVotes(category.id)}
-                >
-                  {resettingCategoryId === category.id
-                    ? t('admin.resettingVotes')
-                    : t('admin.resetVotes')}
-                </button>
-              </article>
-            ))}
-          </div>
+          <AdminCategories
+            categories={adminCategories}
+            error={adminCategoriesError}
+            isLoading={isLoadingAdminCategories}
+            updatingCategoryId={updatingCategoryId}
+            deletingCategoryId={deletingCategoryId}
+            onCreate={createAdminCategory}
+            onUpdate={updateAdminCategory}
+            onChangeStatus={changeCategoryStatus}
+            onDelete={deleteAdminCategory}
+          />
 
           <AdminParticipants
             participants={adminParticipants}

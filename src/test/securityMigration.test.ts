@@ -39,6 +39,13 @@ const dataIntegrityMigration = readFileSync(
   ),
   'utf8',
 )
+const categoryManagementMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260630100000_create_category_management_rpcs.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -216,6 +223,42 @@ describe('Supabase Sicherheitsmigration', () => {
     }
   })
 
+  it('stellt Admin RPCs fuer die Kategorienverwaltung bereit', () => {
+    for (const functionName of [
+      'ha_admin_list_categories',
+      'ha_create_category',
+      'ha_update_category',
+      'ha_delete_category',
+    ]) {
+      expect(categoryManagementMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(categoryManagementMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+
+    expect(categoryManagementMigration).toContain(
+      'create or replace function public.ha_admin_category_row',
+    )
+    expect(categoryManagementMigration).toContain(
+      'revoke all on function public.ha_admin_category_row(text) from public',
+    )
+    expect(
+      categoryManagementMigration.match(
+        /if not public\.ha_has_admin_access\(p_participant_access_code\)/g,
+      ),
+    ).toHaveLength(4)
+    expect(categoryManagementMigration).toContain('category title is required')
+    expect(categoryManagementMigration).toContain('invalid status')
+    expect(categoryManagementMigration).toContain('category not found')
+    expect(categoryManagementMigration).toContain(
+      'category cannot be deleted while votes exist',
+    )
+    expect(categoryManagementMigration).toContain('from public.votes v')
+    expect(categoryManagementMigration).toContain('from public.archived_votes av')
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -223,6 +266,7 @@ describe('Supabase Sicherheitsmigration', () => {
       activeParticipantMigration,
       participantManagementMigration,
       dataIntegrityMigration,
+      categoryManagementMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')
