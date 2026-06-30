@@ -60,6 +60,13 @@ const festivalArchiveMigration = readFileSync(
   ),
   'utf8',
 )
+const secureParticipantLoginMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260630130000_secure_participant_login.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -352,6 +359,52 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(festivalArchiveMigration).not.toContain('references public.votes')
   })
 
+  it('schuetzt Teilnehmerlogin serverseitig gegen Code Erraten', () => {
+    expect(secureParticipantLoginMigration).toContain(
+      'create table if not exists public.participant_login_attempts',
+    )
+    expect(secureParticipantLoginMigration).toContain('festival_id text not null')
+    expect(secureParticipantLoginMigration).toContain('technical_key text not null')
+    expect(secureParticipantLoginMigration).toContain(
+      'primary key (festival_id, technical_key)',
+    )
+    expect(secureParticipantLoginMigration).toContain(
+      'alter table public.participant_login_attempts enable row level security',
+    )
+    expect(secureParticipantLoginMigration).toContain(
+      'revoke all on table public.participant_login_attempts from anon, authenticated',
+    )
+    expect(secureParticipantLoginMigration).toContain(
+      'create or replace function public.ha_login_rate_limit_key',
+    )
+    expect(secureParticipantLoginMigration).toContain('current_setting')
+    expect(secureParticipantLoginMigration).toContain('request.headers')
+    expect(secureParticipantLoginMigration).toContain('digest(')
+    expect(secureParticipantLoginMigration).not.toContain('p_access_code,')
+    expect(secureParticipantLoginMigration).toContain(
+      'v_max_failed_attempts constant integer := 3',
+    )
+    expect(secureParticipantLoginMigration).toContain(
+      "v_lock_duration constant interval := interval '30 seconds'",
+    )
+    expect(secureParticipantLoginMigration).toContain(
+      'create or replace function public.ha_login_participant',
+    )
+    expect(secureParticipantLoginMigration).toContain("select 'invalid'::text")
+    expect(secureParticipantLoginMigration).toContain("select 'blocked'::text")
+    expect(secureParticipantLoginMigration).toContain("select\n      'success'::text")
+    expect(secureParticipantLoginMigration).toContain('and p.is_active = true')
+    expect(secureParticipantLoginMigration).toContain(
+      'delete from public.participant_login_attempts pla',
+    )
+    expect(secureParticipantLoginMigration).toContain(
+      'grant execute on function public.ha_login_participant(text, text) to anon, authenticated',
+    )
+    expect(secureParticipantLoginMigration).toContain(
+      'revoke all on function public.ha_find_participant(text) from anon, authenticated',
+    )
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -362,12 +415,12 @@ describe('Supabase Sicherheitsmigration', () => {
       categoryManagementMigration,
       festivalNameMigration,
       festivalArchiveMigration,
+      secureParticipantLoginMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')
     expect(migrations).not.toContain('add column if not exists festival_id')
     expect(migrations).not.toContain('set festival_id')
-    expect(migrations).not.toContain('p_festival_id')
     expect(migrations).not.toContain('p_festival_code')
   })
 })

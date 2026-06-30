@@ -50,6 +50,7 @@
       "participantsLoad": "Die Teilnehmer konnten gerade nicht geladen werden.",
       "accessCodeLoad": "Der Code konnte gerade nicht geprüft werden. Versuch es bitte gleich nochmal.",
       "invalidAccessCode": "Der Code konnte nicht bestätigt werden. Prüfe deine Eingabe und versuche es erneut.",
+      "loginLocked": "Der Code konnte gerade nicht geprüft werden. Bitte warte kurz und versuche es dann erneut.",
       "participantVotesLoad": "Deine bisherigen Stimmen konnten nicht geladen werden."
     }
   },

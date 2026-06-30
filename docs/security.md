@@ -15,6 +15,7 @@ supabase/migrations/20260629100000_enforce_data_integrity.sql
 supabase/migrations/20260630100000_create_category_management_rpcs.sql
 supabase/migrations/20260630110000_create_festival_name_setting.sql
 supabase/migrations/20260630120000_create_festival_archives.sql
+supabase/migrations/20260630130000_secure_participant_login.sql
 ```
 
 Diese Migration ist auf das aktuelle Live-Schema zugeschnitten:
@@ -25,6 +26,7 @@ Diese Migration ist auf das aktuelle Live-Schema zugeschnitten:
 - `archived_votes(id, festival, voter_id, voted_for_id, category_id, created_at, archived_at)`
 - `app_settings(key, value, updated_at)` fuer zentrale App-Einstellungen wie den Festivalnamen
 - `festival_archives(...)` und zugehoerige `festival_archive_*` Tabellen fuer unveraenderliche Festival-Snapshots
+- `participant_login_attempts(festival_id, technical_key, failed_attempts, locked_until, ...)` fuer serverseitige Login-Sperren ohne Klartextcodes
 
 Die Migrationen legen keine `festivals` Tabelle an und ergaenzen keine `festival_id` Spalten. Der editierbare Festivalname liegt stattdessen als einzelner Eintrag `festival_name` in `app_settings`.
 
@@ -48,7 +50,7 @@ supabase.from('app_settings').update(...)
 supabase.from('all_time_standings').select('*')
 ```
 
-Der gewuenschte Zugriff laeuft ausschliesslich ueber RPC-Funktionen wie `ha_find_participant`, `ha_list_categories`, `ha_save_vote` und die Admin-RPCs.
+Der gewuenschte Zugriff laeuft ausschliesslich ueber RPC-Funktionen wie `ha_login_participant`, `ha_list_categories`, `ha_save_vote` und die Admin-RPCs. Der aeltere direkte Teilnehmer-Lookup `ha_find_participant` wird fuer Browserrollen entzogen.
 
 ## RLS und Rechte
 
@@ -71,7 +73,9 @@ Fuer `all_time_standings` prueft die Migration zur Laufzeit, ob es eine Tabelle,
 
 Normale Teilnehmer muessen ihren persoenlichen Teilnehmercode liefern. Die RPCs pruefen serverseitig:
 
-- Teilnehmercode existiert.
+- Der Login laeuft ueber `ha_login_participant`; ungueltige und inaktive Teilnehmercodes liefern nur generische Fehler.
+- Wiederholte ungueltige Loginversuche werden in `participant_login_attempts` serverseitig gezaehlt und temporaer gesperrt.
+- Fuer das Rate Limiting wird ein technischer Hash aus Festivalkontext und Request-Metadaten gespeichert, nicht der Teilnehmercode im Klartext.
 - Teilnehmerlisten enthalten keine Access Codes.
 - Teilnehmer duerfen nur ihre eigenen bereits abgegebenen Stimmen als persoenliche Stimmen laden.
 - Stimmen koennen nur fuer offene Kategorien, fuer andere existierende Teilnehmer und nur ueber `ha_save_vote` gespeichert werden.

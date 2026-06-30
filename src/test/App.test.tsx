@@ -21,7 +21,7 @@ import {
 import {
   createParticipant,
   deactivateParticipant,
-  findParticipantByAccessCode,
+  loginParticipant,
   loadAdminParticipants,
   loadParticipants,
   reactivateParticipant,
@@ -35,7 +35,6 @@ import {
   saveVote,
   type Vote,
 } from '../data/votes'
-import { loginAttemptGuardConfig } from '../lib/loginAttemptGuard'
 import {
   loadAllTimeStandings,
   type AllTimeStanding,
@@ -59,7 +58,7 @@ vi.mock('../data/categories', () => ({
 vi.mock('../data/participants', () => ({
   createParticipant: vi.fn(),
   deactivateParticipant: vi.fn(),
-  findParticipantByAccessCode: vi.fn(),
+  loginParticipant: vi.fn(),
   loadAdminParticipants: vi.fn(),
   loadParticipants: vi.fn(),
   reactivateParticipant: vi.fn(),
@@ -147,8 +146,6 @@ const standings: AllTimeStanding[] = [
   },
 ]
 
-const loginAttemptGuardStorageKey =
-  'hurricane-awards:hurricane-awards-2026:login-attempt-guard'
 const festivalAccessStorageKey =
   'hurricane-awards:hurricane-awards-2026:festival-access'
 
@@ -182,12 +179,24 @@ function mockLoadedData({
   vi.mocked(loadFestivalName).mockResolvedValue(loadedFestivalName)
   vi.mocked(loadParticipants).mockResolvedValue(loadedParticipants)
   vi.mocked(loadAdminParticipants).mockResolvedValue(loadedAdminParticipants)
-  vi.mocked(findParticipantByAccessCode).mockImplementation(async (accessCode) => {
-    return (
-      loadedParticipants.find(
-        (participant) => participant.accessCode === accessCode,
-      ) ?? null
+  vi.mocked(loginParticipant).mockImplementation(async (accessCode) => {
+    const participant = loadedParticipants.find(
+      (currentParticipant) =>
+        currentParticipant.accessCode === accessCode &&
+        currentParticipant.isActive,
     )
+
+    return participant
+      ? {
+          status: 'success',
+          participant,
+          lockedUntil: null,
+        }
+      : {
+          status: 'invalid',
+          participant: null,
+          lockedUntil: null,
+        }
   })
   vi.mocked(loadCategories).mockResolvedValue(loadedCategories)
   vi.mocked(loadAdminCategories).mockResolvedValue(loadedCategories)
@@ -338,8 +347,6 @@ function sectionForHeading(name: RegExp) {
 beforeEach(async () => {
   vi.useRealTimers()
   vi.clearAllMocks()
-  loginAttemptGuardConfig.maxInvalidAttempts = 3
-  loginAttemptGuardConfig.lockDurationMs = 30_000
   localStorage.clear()
   await i18n.changeLanguage('de')
   vi.spyOn(window, 'confirm').mockReturnValue(true)
@@ -461,7 +468,7 @@ describe('Login', () => {
     const identitySection = sectionForHeading(/teilnehmercode/i)
     expect(await within(identitySection).findByText(/angemeldet als:/i)).toBeVisible()
     expect(within(identitySection).getByText('Alice')).toBeVisible()
-    expect(findParticipantByAccessCode).toHaveBeenCalledWith('ALICE42')
+    expect(loginParticipant).toHaveBeenCalledWith('ALICE42')
     expect(loadVotesForParticipant).toHaveBeenCalledWith('alice', {
       participantAccessCode: 'ALICE42',
     })
@@ -474,14 +481,31 @@ describe('Login', () => {
 
     expect(screen.getByText(/code konnte nicht bestätigt/i)).toBeVisible()
     expect(screen.queryByText(/angemeldet als:/i)).not.toBeInTheDocument()
-    expect(findParticipantByAccessCode).toHaveBeenCalledWith('FALSCH')
+    expect(loginParticipant).toHaveBeenCalledWith('FALSCH')
     expect(loadVotesForParticipant).not.toHaveBeenCalled()
   })
 
   it('sperrt die Codeeingabe nach mehreren ungueltigen Versuchen kurzzeitig', async () => {
     await renderLoadedApp()
     await unlockFestivalWith()
-    loginAttemptGuardConfig.lockDurationMs = 1_000
+    const lockedUntil = new Date(Date.now() + 1_000).toISOString()
+
+    vi.mocked(loginParticipant)
+      .mockResolvedValueOnce({
+        status: 'invalid',
+        participant: null,
+        lockedUntil: null,
+      })
+      .mockResolvedValueOnce({
+        status: 'invalid',
+        participant: null,
+        lockedUntil: null,
+      })
+      .mockResolvedValueOnce({
+        status: 'blocked',
+        participant: null,
+        lockedUntil,
+      })
 
     for (const code of ['FALSCH1', 'FALSCH2', 'FALSCH3']) {
       const input = screen.getByRole('textbox', { name: /^teilnehmercode$/i })
@@ -492,7 +516,7 @@ describe('Login', () => {
       })
     }
 
-    expect(screen.getByText(/code konnte nicht bestätigt/i)).toBeVisible()
+    expect(screen.getByText(/warte kurz/i)).toBeVisible()
     expect(screen.getByRole('button', { name: /code/i })).toBeDisabled()
     expect(screen.getByRole('textbox', { name: /^teilnehmercode$/i })).toBeDisabled()
     expect(screen.getByRole('status')).toHaveTextContent(/1 sekunden/i)
@@ -506,49 +530,22 @@ describe('Login', () => {
     expect(screen.getByRole('textbox', { name: /^teilnehmercode$/i })).toBeEnabled()
   })
 
-  it('beruecksichtigt persistierte Fehlversuche nach einem Reload', async () => {
-    const firstRender = await renderLoadedApp()
+  it('zeigt eine vom Server gemeldete aktive Sperre an', async () => {
+    await renderLoadedApp()
     await unlockFestivalWith()
 
-    for (const code of ['FALSCH1', 'FALSCH2']) {
-      fireEvent.change(screen.getByRole('textbox', { name: /^teilnehmercode$/i }), {
-        target: { value: code },
-      })
-      await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: /code/i }))
-      })
-    }
-
-    expect(localStorage.getItem(loginAttemptGuardStorageKey)).toContain(
-      '"invalidAttempts":2',
-    )
-
-    firstRender.unmount()
-    await renderLoadedApp()
+    vi.mocked(loginParticipant).mockResolvedValueOnce({
+      status: 'blocked',
+      participant: null,
+      lockedUntil: new Date(Date.now() + 10_000).toISOString(),
+    })
 
     fireEvent.change(screen.getByRole('textbox', { name: /^teilnehmercode$/i }), {
-      target: { value: 'FALSCH3' },
+      target: { value: 'FALSCH' },
     })
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /code/i }))
     })
-
-    expect(screen.getByRole('button', { name: /code/i })).toBeDisabled()
-    expect(screen.getByRole('status')).toHaveTextContent(/sekunden/i)
-    expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
-  })
-
-  it('haelt eine aktive Sperre nach einem Reload aufrecht', async () => {
-    localStorage.setItem(festivalAccessStorageKey, 'unlocked')
-    localStorage.setItem(
-      loginAttemptGuardStorageKey,
-      JSON.stringify({
-        invalidAttempts: 0,
-        lockedUntil: Date.now() + 10_000,
-      }),
-    )
-
-    await renderLoadedApp()
 
     expect(screen.getByRole('button', { name: /code/i })).toBeDisabled()
     expect(screen.getByRole('textbox', { name: /^teilnehmercode$/i })).toBeDisabled()
@@ -556,33 +553,26 @@ describe('Login', () => {
     expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
   })
 
-  it('bereinigt abgelaufene und ungueltige Sperrdaten beim Laden', async () => {
-    localStorage.setItem(festivalAccessStorageKey, 'unlocked')
-    localStorage.setItem(
-      loginAttemptGuardStorageKey,
-      JSON.stringify({
-        invalidAttempts: 0,
-        lockedUntil: Date.now() - 1_000,
-      }),
-    )
-
-    const expiredRender = await renderLoadedApp()
-
-    expect(screen.getByRole('button', { name: /code/i })).toBeEnabled()
-    expect(localStorage.getItem(loginAttemptGuardStorageKey)).toBeNull()
-
-    expiredRender.unmount()
-    localStorage.setItem(loginAttemptGuardStorageKey, '{kaputt')
-
-    await renderLoadedApp()
-
-    expect(screen.getByRole('button', { name: /code/i })).toBeEnabled()
-    expect(localStorage.getItem(loginAttemptGuardStorageKey)).toBeNull()
-  })
-
   it('setzt Fehlversuche bei erfolgreichem Login zurueck', async () => {
     await renderLoadedApp()
     const user = await unlockFestivalWith()
+
+    vi.mocked(loginParticipant)
+      .mockResolvedValueOnce({
+        status: 'invalid',
+        participant: null,
+        lockedUntil: null,
+      })
+      .mockResolvedValueOnce({
+        status: 'invalid',
+        participant: null,
+        lockedUntil: null,
+      })
+      .mockResolvedValueOnce({
+        status: 'success',
+        participant: participants[0],
+        lockedUntil: null,
+      })
 
     for (const code of ['FALSCH1', 'FALSCH2']) {
       await user.clear(screen.getByRole('textbox', { name: /^teilnehmercode$/i }))
@@ -597,7 +587,25 @@ describe('Login', () => {
     const identitySection = sectionForHeading(/teilnehmercode/i)
     expect(await within(identitySection).findByText(/angemeldet als:/i)).toBeVisible()
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
-    expect(localStorage.getItem(loginAttemptGuardStorageKey)).toBeNull()
+    expect(loginParticipant).toHaveBeenLastCalledWith('ALICE42')
+  })
+
+  it('weist deaktivierte Teilnehmer beim Login generisch ab', async () => {
+    mockLoadedData({
+      loadedParticipants: [
+        participants[0],
+        { ...participants[1], isActive: false },
+        participants[2],
+      ],
+    })
+    await renderLoadedApp()
+
+    await loginWith('BOB42')
+
+    expect(screen.getByText(/code konnte nicht bestätigt/i)).toBeVisible()
+    expect(screen.queryByText(/angemeldet als:/i)).not.toBeInTheDocument()
+    expect(loginParticipant).toHaveBeenCalledWith('BOB42')
+    expect(loadVotesForParticipant).not.toHaveBeenCalled()
   })
 
   it('erhaelt die Anmeldung nach einem Neuladen lokal', async () => {
