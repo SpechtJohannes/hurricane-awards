@@ -63,6 +63,9 @@
       "title": "Festival",
       "nameLabel": "Festivalnaam",
       "save": "Festivalnaam opslaan",
+      "export": "JSON exporteren",
+      "exporting": "Exporteren...",
+      "exportSuccess": "JSON-export is aangemaakt.",
       "archive": "Festival archiveren",
       "archiving": "Archiveren...",
       "archiveConfirm": "Huidig festival echt archiveren? De actieve gegevens blijven ongewijzigd.",
@@ -70,6 +73,7 @@
       "errors": {
         "save": "De festivalnaam kon net niet worden opgeslagen.",
         "nameRequired": "De festivalnaam is verplicht.",
+        "export": "De JSON-export kon net niet worden aangemaakt.",
         "archive": "Het festival kon net niet worden gearchiveerd."
       }
     },

@@ -15,6 +15,12 @@ import {
   updateFestivalName,
 } from '../data/festival'
 import {
+  createFestivalExportData,
+  festivalExportFileName,
+  loadFestivalExportData,
+  serializeFestivalExport,
+} from '../data/export'
+import {
   createCategory,
   deleteCategory,
   loadAdminCategories,
@@ -698,5 +704,117 @@ describe('Supabase Datenzugriffe', () => {
       'ha_list_all_time_standings',
       expectedParticipantRpcContext,
     )
+  })
+
+  it('laedt Exportdaten ueber bestehende geschuetzte RPC Funktionen', async () => {
+    const exportedAt = new Date('2026-07-01T10:11:12.000Z')
+
+    rpcMock
+      .mockResolvedValueOnce({
+        data: 'Hurricane Awards 2026',
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: [participantRow],
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: [
+          {
+            id: 'cat-1',
+            title: 'Beste Energie',
+            description: 'Offene Kategorie',
+            status: 'open',
+            sort_order: 2,
+          },
+        ],
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: [
+          {
+            voter_id: 'alice',
+            voted_for_id: 'bob',
+            category_id: 'cat-1',
+            timestamp: '2026-06-26T12:00:00.000Z',
+          },
+        ],
+        error: null,
+      })
+
+    await expect(
+      loadFestivalExportData(
+        participantContext,
+        {
+          type: 'active',
+          festivalId: 'hurricane-awards-2026',
+        },
+        exportedAt,
+      ),
+    ).resolves.toEqual({
+      formatVersion: 1,
+      exportedAt: '2026-07-01T10:11:12.000Z',
+      festival: {
+        id: 'hurricane-awards-2026',
+        name: 'Hurricane Awards 2026',
+        source: 'active',
+      },
+      participants: [mappedParticipant],
+      categories: [
+        {
+          id: 'cat-1',
+          title: 'Beste Energie',
+          description: 'Offene Kategorie',
+          status: 'open',
+          sortOrder: 2,
+        },
+      ],
+      votes: [
+        {
+          voterId: 'alice',
+          votedForId: 'bob',
+          categoryId: 'cat-1',
+          timestamp: '2026-06-26T12:00:00.000Z',
+        },
+      ],
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(1, 'ha_get_festival_name')
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      2,
+      'ha_admin_list_participants',
+      expectedParticipantRpcContext,
+    )
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      3,
+      'ha_admin_list_categories',
+      expectedParticipantRpcContext,
+    )
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      4,
+      'ha_list_result_votes',
+      expectedParticipantRpcContext,
+    )
+  })
+
+  it('formatiert Export JSON lesbar und erzeugt stabile Dateinamen', () => {
+    const exportedAt = new Date('2026-07-01T10:11:12.000Z')
+    const exportData = createFestivalExportData({
+      festivalName: 'Hurricane Crew Awards!',
+      festivalSource: {
+        type: 'active',
+        festivalId: 'hurricane-awards-2026',
+      },
+      participants: [mappedParticipant],
+      categories: [],
+      votes: [],
+      exportedAt,
+    })
+
+    expect(serializeFestivalExport(exportData)).toBe(
+      `${JSON.stringify(exportData, null, 2)}\n`,
+    )
+    expect(
+      festivalExportFileName('Hurricane Crew Awards!', exportedAt),
+    ).toBe('festival-awards-hurricane-crew-awards-2026-07-01.json')
   })
 })

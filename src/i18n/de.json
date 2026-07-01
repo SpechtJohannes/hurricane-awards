@@ -63,6 +63,9 @@
       "title": "Festival",
       "nameLabel": "Festivalname",
       "save": "Festivalname speichern",
+      "export": "JSON exportieren",
+      "exporting": "Exportiere...",
+      "exportSuccess": "JSON-Export wurde erstellt.",
       "archive": "Festival archivieren",
       "archiving": "Archiviere...",
       "archiveConfirm": "Aktuelles Festival wirklich archivieren? Die aktiven Daten bleiben unverändert.",
@@ -70,6 +73,7 @@
       "errors": {
         "save": "Der Festivalname konnte gerade nicht gespeichert werden.",
         "nameRequired": "Der Festivalname ist erforderlich.",
+        "export": "Der JSON-Export konnte gerade nicht erstellt werden.",
         "archive": "Das Festival konnte gerade nicht archiviert werden."
       }
     },
