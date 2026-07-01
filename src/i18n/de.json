@@ -38,6 +38,47 @@
       "email": "specht.johannes@gmx.de"
     }
   },
+  "privacy": {
+    "link": "Datenschutz",
+    "ariaLabel": "{{festivalName}} Datenschutzerklärung",
+    "eyebrow": "Datenschutz",
+    "title": "Datenschutzerklärung",
+    "back": "Zurück zur App",
+    "sections": {
+      "controller": {
+        "title": "Verantwortlicher",
+        "body": "Verantwortlich ist Johannes Aaron Specht, Hermannstraße 2, 38114 Braunschweig, Deutschland, specht.johannes@gmx.de"
+      },
+      "processedData": {
+        "title": "Verarbeitete Daten",
+        "body": "Die App verarbeitet Festivalname, Festivalcode, Teilnehmernamen, Teilnehmercodes, Adminstatus, Aktivstatus, Kategorien, abgegebene Stimmen und technische Zeitpunkte wie Stimm- und Exportzeitpunkte."
+      },
+      "purpose": {
+        "title": "Zweck der Verarbeitung",
+        "body": "Die Daten werden verarbeitet, um den Zugang zur Festival App zu ermöglichen, Teilnehmer zu verwalten, Abstimmungen durchzuführen, Ergebnisse anzuzeigen, Exporte zu erstellen und Festivalstände zu archivieren."
+      },
+      "legalBasis": {
+        "title": "Rechtsgrundlage",
+        "body": "Die Verarbeitung erfolgt, damit die Festival App für die teilnehmenden Personen bereitgestellt und administriert werden kann."
+      },
+      "retention": {
+        "title": "Speicherdauer",
+        "body": "Die Daten werden gespeichert, solange sie für die Durchführung, Auswertung oder Archivierung des Festivals benötigt werden. Administratoren können Teilnehmer deaktivieren, Kategorien verwalten, JSON-Exporte erstellen und Festivalstände archivieren."
+      },
+      "supabase": {
+        "title": "Nutzung von Supabase",
+        "body": "Die App nutzt Supabase als Backend für Speicherung und Verarbeitung der Daten. Direkte Tabellenzugriffe aus dem Browser sind gesperrt; die App verwendet geschützte Serverfunktionen."
+      },
+      "rights": {
+        "title": "Rechte betroffener Personen",
+        "body": "Betroffene Personen können Auskunft, Berichtigung oder Löschung ihrer personenbezogenen Daten verlangen, soweit keine organisatorischen Gründe für eine weitere Speicherung bestehen."
+      },
+      "contact": {
+        "title": "Kontaktmöglichkeit",
+        "body": "Für Datenschutzanfragen nutze bitte specht.johannes@gmx.de."
+      }
+    }
+  },
   "festivalAccess": {
     "ariaLabel": "{{festivalName}} Festivalzugang",
     "codeLabel": "Festivalcode",

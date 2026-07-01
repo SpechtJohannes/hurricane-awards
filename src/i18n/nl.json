@@ -38,6 +38,47 @@
       "email": "specht.johannes@gmx.de"
     }
   },
+  "privacy": {
+    "link": "Privacy",
+    "ariaLabel": "{{festivalName}} privacyverklaring",
+    "eyebrow": "Privacy",
+    "title": "Privacyverklaring",
+    "back": "Terug naar de app",
+    "sections": {
+      "controller": {
+        "title": "Verantwoordelijke",
+        "body": "Verantwoordelijk is Johannes Aaron Specht, Hermannstraße 2, 38114 Braunschweig, specht.johannes@gmx.de"
+      },
+      "processedData": {
+        "title": "Verwerkte gegevens",
+        "body": "De app verwerkt festivalnaam, festivalcode, deelnemersnamen, deelnemerscodes, adminstatus, actieve status, categorieën, uitgebrachte stemmen en technische tijdstippen zoals stem- en exporttijdstippen."
+      },
+      "purpose": {
+        "title": "Doel van de verwerking",
+        "body": "De gegevens worden verwerkt om toegang tot de Festival App mogelijk te maken, deelnemers te beheren, stemmingen uit te voeren, resultaten te tonen, exports te maken en festivalstanden te archiveren."
+      },
+      "legalBasis": {
+        "title": "Rechtsgrond",
+        "body": "De verwerking vindt plaats zodat de Festival App voor de deelnemende personen beschikbaar gesteld en beheerd kan worden."
+      },
+      "retention": {
+        "title": "Bewaartermijn",
+        "body": "De gegevens worden bewaard zolang ze nodig zijn voor de uitvoering, evaluatie of archivering van het festival. Administrators kunnen deelnemers deactiveren, categorieën beheren, JSON-exports maken en festivalstanden archiveren."
+      },
+      "supabase": {
+        "title": "Gebruik van Supabase",
+        "body": "De app gebruikt Supabase als backend voor opslag en verwerking van gegevens. Directe tabeltoegang vanuit de browser is geblokkeerd; de app gebruikt beveiligde serverfuncties."
+      },
+      "rights": {
+        "title": "Rechten van betrokkenen",
+        "body": "Betrokken personen kunnen inzage, correctie of verwijdering van hun persoonsgegevens vragen, voor zover er geen organisatorische redenen zijn voor verdere opslag."
+      },
+      "contact": {
+        "title": "Contactmogelijkheid",
+        "body": "Gebruik voor privacyvragen specht.johannes@gmx.de"
+      }
+    }
+  },
   "festivalAccess": {
     "ariaLabel": "{{festivalName}} festivaltoegang",
     "codeLabel": "Festivalcode",

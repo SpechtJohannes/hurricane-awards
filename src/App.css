@@ -1392,6 +1392,8 @@ h1 {
   position: relative;
   z-index: 1;
   display: flex;
+  flex-wrap: wrap;
+  gap: 14px 22px;
   justify-content: center;
   padding: 24px 20px 32px;
   background: rgba(16, 16, 20, 0.72);
@@ -1460,6 +1462,12 @@ h1 {
   margin: 0;
 }
 
+.legal-page__sections {
+  display: grid;
+  gap: 14px;
+}
+
+.legal-page__section,
 .legal-page__details div {
   display: grid;
   gap: 6px;
@@ -1467,6 +1475,20 @@ h1 {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
+}
+
+.legal-page__section h2 {
+  margin: 0;
+  color: #ffbe0b;
+  font-size: 1.1rem;
+  line-height: 1.15;
+}
+
+.legal-page__section p {
+  margin: 0;
+  color: #f4e7cf;
+  font-weight: 700;
+  line-height: 1.5;
 }
 
 .legal-page__details dt {
