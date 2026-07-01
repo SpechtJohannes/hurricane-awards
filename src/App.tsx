@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+  type MouseEvent,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   createCategory,
@@ -339,6 +345,66 @@ function PwaInstallPrompt() {
   )
 }
 
+function AppFooter() {
+  const { t } = useTranslation()
+
+  return (
+    <footer className="app-footer">
+      <a href="#impressum">{t('legal.link')}</a>
+    </footer>
+  )
+}
+
+type LegalNoticeProps = {
+  festivalName: string
+}
+
+function LegalNotice({ festivalName }: LegalNoticeProps) {
+  const { t } = useTranslation()
+
+  function goBack(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault()
+
+    if (window.history.length > 1) {
+      window.history.back()
+      return
+    }
+
+    window.location.hash = ''
+  }
+
+  return (
+    <main
+      className="home legal-page"
+      aria-label={t('legal.ariaLabel', {
+        festivalName: festivalName || t('common.loading'),
+      })}
+    >
+      <section className="legal-page__content" aria-labelledby="legal-title">
+        <p className="legal-page__eyebrow">{t('legal.eyebrow')}</p>
+        <h1 id="legal-title">{t('legal.title')}</h1>
+        <dl className="legal-page__details">
+          <div>
+            <dt>{t('legal.fields.name')}</dt>
+            <dd>{t('legal.placeholders.name')}</dd>
+          </div>
+          <div>
+            <dt>{t('legal.fields.address')}</dt>
+            <dd>{t('legal.placeholders.address')}</dd>
+          </div>
+          <div>
+            <dt>{t('legal.fields.email')}</dt>
+            <dd>{t('legal.placeholders.email')}</dd>
+          </div>
+        </dl>
+        <a className="legal-page__back" href="#" onClick={goBack}>
+          {t('legal.back')}
+        </a>
+      </section>
+    </main>
+  )
+}
+
 type FestivalAccessProps = {
   festivalName: string
   onUnlock: (code: string) => Promise<boolean>
@@ -434,6 +500,7 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
           <span />
         </div>
       </header>
+      <AppFooter />
     </main>
   )
 }
@@ -441,6 +508,7 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
 function App() {
   const { t } = useTranslation()
   const festivalAccess = useFestivalAccess(activeFestival)
+  const [locationHash, setLocationHash] = useState(() => window.location.hash)
   const [festivalName, setFestivalName] = useState(fallbackFestivalName)
   const [festivalNameError, setFestivalNameError] = useState('')
   const [isSavingFestivalName, setIsSavingFestivalName] = useState(false)
@@ -511,6 +579,18 @@ function App() {
     : 0
   const loginLockRemainingSeconds = Math.ceil(loginLockRemainingMs / 1000)
   const isLoginLocked = loginLockRemainingMs > 0
+
+  useEffect(() => {
+    function handleHashChange() {
+      setLocationHash(window.location.hash)
+    }
+
+    window.addEventListener('hashchange', handleHashChange)
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
+    }
+  }, [])
 
   useEffect(() => {
     let isCurrent = true
@@ -1336,6 +1416,10 @@ function App() {
     }
   }
 
+  if (locationHash === '#impressum') {
+    return <LegalNotice festivalName={displayedFestivalName} />
+  }
+
   if (!festivalAccess.isUnlocked) {
     return (
       <FestivalAccess
@@ -1402,6 +1486,7 @@ function App() {
             <span />
           </div>
         </header>
+        <AppFooter />
       </main>
     )
   }
@@ -1730,6 +1815,7 @@ function App() {
           </div>
         )}
       </section>
+      <AppFooter />
     </main>
   )
 }

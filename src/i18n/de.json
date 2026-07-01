@@ -21,6 +21,23 @@
     "button": "App installieren",
     "iosHelp": "Teilen-Symbol antippen und Zum Home-Bildschirm wählen."
   },
+  "legal": {
+    "link": "Impressum",
+    "ariaLabel": "{{festivalName}} Impressum",
+    "eyebrow": "Rechtliches",
+    "title": "Impressum",
+    "back": "Zurück zur App",
+    "fields": {
+      "name": "Name",
+      "address": "Anschrift",
+      "email": "E-Mail-Adresse"
+    },
+    "placeholders": {
+      "name": "Name Platzhalter",
+      "address": "Anschrift Platzhalter",
+      "email": "E-Mail-Adresse Platzhalter"
+    }
+  },
   "festivalAccess": {
     "ariaLabel": "{{festivalName}} Festivalzugang",
     "codeLabel": "Festivalcode",

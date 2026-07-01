@@ -21,6 +21,23 @@
     "button": "App installeren",
     "iosHelp": "Tik op het deel-symbool en kies Zet op beginscherm."
   },
+  "legal": {
+    "link": "Impressum",
+    "ariaLabel": "{{festivalName}} impressum",
+    "eyebrow": "Juridisch",
+    "title": "Impressum",
+    "back": "Terug naar de app",
+    "fields": {
+      "name": "Naam",
+      "address": "Adres",
+      "email": "E-mailadres"
+    },
+    "placeholders": {
+      "name": "Naam placeholder",
+      "address": "Adres placeholder",
+      "email": "E-mailadres placeholder"
+    }
+  },
   "festivalAccess": {
     "ariaLabel": "{{festivalName}} festivaltoegang",
     "codeLabel": "Festivalcode",
