@@ -562,9 +562,9 @@ describe('Impressum', () => {
     expect(
       await screen.findByRole('heading', { name: /^impressum$/i }),
     ).toBeVisible()
-    expect(screen.getByText('Name Platzhalter')).toBeVisible()
-    expect(screen.getByText('Anschrift Platzhalter')).toBeVisible()
-    expect(screen.getByText('E-Mail-Adresse Platzhalter')).toBeVisible()
+    expect(screen.getByText('Johannes Aaron Specht')).toBeVisible()
+    expect(screen.getByText('Hermannstraße 2, 38114 Braunschweig, Deutschland')).toBeVisible()
+    expect(screen.getByText('specht.johannes@gmx.de')).toBeVisible()
     expect(
       screen.getByRole('link', { name: /zurück zur app/i }),
     ).toBeVisible()
