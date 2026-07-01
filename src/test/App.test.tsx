@@ -441,6 +441,7 @@ function setStandaloneDisplay(isStandalone: boolean) {
 beforeEach(async () => {
   vi.useRealTimers()
   vi.clearAllMocks()
+  window.history.replaceState(null, '', '/')
   setUserAgent(defaultUserAgent)
   setStandaloneDisplay(false)
   localStorage.clear()
@@ -549,6 +550,44 @@ describe('PWA Installation', () => {
     expect(
       screen.queryByRole('button', { name: /app installieren/i }),
     ).not.toBeInTheDocument()
+  })
+})
+
+describe('Impressum', () => {
+  it('ist von der Festivalzugangsansicht erreichbar und zeigt Platzhalterdaten', async () => {
+    await renderLoadedApp()
+
+    await userEvent.click(screen.getByRole('link', { name: /^impressum$/i }))
+
+    expect(
+      await screen.findByRole('heading', { name: /^impressum$/i }),
+    ).toBeVisible()
+    expect(screen.getByText('Name Platzhalter')).toBeVisible()
+    expect(screen.getByText('Anschrift Platzhalter')).toBeVisible()
+    expect(screen.getByText('E-Mail-Adresse Platzhalter')).toBeVisible()
+    expect(
+      screen.getByRole('link', { name: /zurück zur app/i }),
+    ).toBeVisible()
+  })
+
+  it('ruft bei der Ruecknavigation die Browser-Historie auf', async () => {
+    const back = vi.spyOn(window.history, 'back').mockImplementation(() => {})
+
+    window.history.pushState(null, '', '/#impressum')
+    render(<App />)
+
+    await userEvent.click(
+      await screen.findByRole('link', { name: /zurück zur app/i }),
+    )
+
+    expect(back).toHaveBeenCalled()
+  })
+
+  it('ist auch nach dem Login ueber den Footer erreichbar', async () => {
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    expect(screen.getByRole('link', { name: /^impressum$/i })).toBeVisible()
   })
 })
 

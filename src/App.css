@@ -1388,6 +1388,127 @@ h1 {
   text-align: right;
 }
 
+.app-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  padding: 24px 20px 32px;
+  background: rgba(16, 16, 20, 0.72);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.app-footer a {
+  color: #cfc7d4;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.app-footer a:hover,
+.app-footer a:focus-visible {
+  color: #ffbe0b;
+}
+
+.app-footer a:focus-visible {
+  outline: 3px solid #ffbe0b;
+  outline-offset: 4px;
+}
+
+.legal-page {
+  display: grid;
+  min-height: 100svh;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.legal-page__content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(100%, 760px);
+  gap: 24px;
+  margin: 0 auto;
+}
+
+.legal-page__eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 12px;
+  margin: 0;
+  color: #101014;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: #ffbe0b;
+  border-radius: 999px;
+}
+
+.legal-page h1 {
+  max-width: none;
+  font-size: clamp(3rem, 15vw, 7rem);
+}
+
+.legal-page__details {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.legal-page__details div {
+  display: grid;
+  gap: 6px;
+  padding: 18px 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.legal-page__details dt {
+  color: #ffbe0b;
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.legal-page__details dd {
+  margin: 0;
+  color: #f4e7cf;
+  font-size: 1.02rem;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.legal-page__back {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  color: #101014;
+  font-weight: 850;
+  text-decoration: none;
+  background: #ffbe0b;
+  border-radius: 8px;
+}
+
+.legal-page__back:hover,
+.legal-page__back:focus-visible {
+  background: #ffd166;
+}
+
+.legal-page__back:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}
+
 @media (min-width: 720px) {
   .hero {
     padding: 64px;
