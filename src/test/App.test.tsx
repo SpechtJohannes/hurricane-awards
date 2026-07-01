@@ -44,6 +44,12 @@ import {
   loadFestivalName,
   updateFestivalName,
 } from '../data/festival'
+import {
+  festivalExportFileName,
+  loadFestivalExportData,
+  serializeFestivalExport,
+  type FestivalExportData,
+} from '../data/export'
 import i18n from '../i18n'
 
 vi.mock('../data/categories', () => ({
@@ -80,6 +86,12 @@ vi.mock('../data/festival', () => ({
   archiveFestival: vi.fn(),
   loadFestivalName: vi.fn(),
   updateFestivalName: vi.fn(),
+}))
+
+vi.mock('../data/export', () => ({
+  festivalExportFileName: vi.fn(),
+  loadFestivalExportData: vi.fn(),
+  serializeFestivalExport: vi.fn(),
 }))
 
 const participants: Participant[] = [
@@ -148,6 +160,19 @@ const standings: AllTimeStanding[] = [
 
 const festivalAccessStorageKey =
   'hurricane-awards:hurricane-awards-2026:festival-access'
+
+const exportData: FestivalExportData = {
+  formatVersion: 1,
+  exportedAt: '2026-07-01T10:11:12.000Z',
+  festival: {
+    id: 'hurricane-awards-2026',
+    name: 'Hurricane Awards 2026',
+    source: 'active',
+  },
+  participants,
+  categories,
+  votes: [],
+}
 
 function vote(overrides: Partial<Vote> = {}): Vote {
   return {
@@ -291,6 +316,11 @@ function mockLoadedData({
   vi.mocked(updateFestivalName).mockImplementation(async (name) => name)
   vi.mocked(archiveFestival).mockResolvedValue(
     '8e560706-5e2f-4b50-9e41-381625fd8102',
+  )
+  vi.mocked(loadFestivalExportData).mockResolvedValue(exportData)
+  vi.mocked(serializeFestivalExport).mockReturnValue('{\n  "formatVersion": 1\n}\n')
+  vi.mocked(festivalExportFileName).mockReturnValue(
+    'festival-awards-hurricane-awards-2026-2026-07-01.json',
   )
 }
 
@@ -803,11 +833,15 @@ describe('Admin', () => {
     expect(
       screen.queryByRole('button', { name: /festival archivieren/i }),
     ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /json exportieren/i }),
+    ).not.toBeInTheDocument()
     expect(screen.queryByLabelText(/status/i)).not.toBeInTheDocument()
     expect(loadAdminCategories).not.toHaveBeenCalled()
     expect(updateCategory).not.toHaveBeenCalled()
     expect(updateCategoryStatus).not.toHaveBeenCalled()
     expect(archiveFestival).not.toHaveBeenCalled()
+    expect(loadFestivalExportData).not.toHaveBeenCalled()
   })
 
   it('macht Admin-Aktionen erst in der Admin-Ansicht verfuegbar', async () => {
@@ -928,6 +962,61 @@ describe('Admin', () => {
       await within(festivalSection).findByText(
         /archiv id: 8e560706-5e2f-4b50-9e41-381625fd8102/i,
       ),
+    ).toBeVisible()
+  })
+
+  it('exportiert das aktuelle Festival im Adminbereich als JSON', async () => {
+    const createObjectUrl = vi.fn(() => 'blob:festival-export')
+    const revokeObjectUrl = vi.fn()
+    const linkClick = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => {})
+
+    Object.defineProperty(URL, 'createObjectURL', {
+      value: createObjectUrl,
+      configurable: true,
+    })
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      value: revokeObjectUrl,
+      configurable: true,
+    })
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const festivalSection = sectionForHeading(/^festival$/i)
+    await user.click(
+      within(festivalSection).getByRole('button', {
+        name: /json exportieren/i,
+      }),
+    )
+
+    await waitFor(() => {
+      expect(loadFestivalExportData).toHaveBeenCalledWith(
+        { participantAccessCode: 'ALICE42' },
+        {
+          type: 'active',
+          festivalId: 'hurricane-awards-2026',
+        },
+        expect.any(Date),
+      )
+    })
+    expect(festivalExportFileName).toHaveBeenCalledWith(
+      'Hurricane Awards 2026',
+      expect.any(Date),
+    )
+    expect(serializeFestivalExport).toHaveBeenCalledWith(exportData)
+    expect(createObjectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'application/json;charset=utf-8',
+      }),
+    )
+    expect(linkClick).toHaveBeenCalled()
+    expect(revokeObjectUrl).toHaveBeenCalledWith('blob:festival-export')
+    expect(
+      await within(festivalSection).findByText(/json-export wurde erstellt/i),
     ).toBeVisible()
   })
 

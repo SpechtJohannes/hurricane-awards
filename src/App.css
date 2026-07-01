@@ -549,7 +549,7 @@ h1 {
 
 .admin-categories,
 .admin-festival,
-.admin-festival-archive,
+.admin-festival-actions,
 .admin-participants {
   display: grid;
   width: min(100%, 960px);
@@ -598,11 +598,11 @@ h1 {
   outline-offset: 3px;
 }
 
-.admin-festival-archive {
+.admin-festival-actions {
   margin-bottom: 42px;
 }
 
-.admin-festival-archive__success {
+.admin-festival-actions__success {
   margin: 0;
   color: #9ef01a;
   font-weight: 800;

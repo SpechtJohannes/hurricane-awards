@@ -5,22 +5,28 @@ type AdminFestivalProps = {
   festivalName: string
   error: string
   isSaving: boolean
+  isExporting: boolean
   onSave: (name: string) => Promise<void>
   onArchive: () => Promise<string>
+  onExport: () => Promise<void>
 }
 
 export function AdminFestival({
   festivalName,
   error,
   isSaving,
+  isExporting,
   onSave,
   onArchive,
+  onExport,
 }: AdminFestivalProps) {
   const { t } = useTranslation()
   const [name, setName] = useState(festivalName)
   const [formError, setFormError] = useState('')
   const [archiveMessage, setArchiveMessage] = useState('')
   const [archiveError, setArchiveError] = useState('')
+  const [exportMessage, setExportMessage] = useState('')
+  const [exportError, setExportError] = useState('')
   const [isArchiving, setIsArchiving] = useState(false)
 
   async function submitForm(event: FormEvent<HTMLFormElement>) {
@@ -72,6 +78,18 @@ export function AdminFestival({
     }
   }
 
+  async function exportCurrentFestival() {
+    setExportMessage('')
+    setExportError('')
+
+    try {
+      await onExport()
+      setExportMessage(t('admin.festival.exportSuccess'))
+    } catch {
+      setExportError(t('admin.festival.errors.export'))
+    }
+  }
+
   return (
     <>
       <div className="admin__header">
@@ -105,17 +123,36 @@ export function AdminFestival({
         <button
           className="admin-card__reset admin-card__reset--primary"
           type="submit"
-          disabled={isSaving || isArchiving}
+          disabled={isSaving || isArchiving || isExporting}
         >
           {isSaving ? t('common.saving') : t('admin.festival.save')}
         </button>
       </form>
 
-      <div className="admin-festival-archive">
+      <div className="admin-festival-actions">
+        <button
+          className="admin-card__reset admin-card__reset--primary"
+          type="button"
+          disabled={isSaving || isArchiving || isExporting}
+          onClick={exportCurrentFestival}
+        >
+          {isExporting
+            ? t('admin.festival.exporting')
+            : t('admin.festival.export')}
+        </button>
+
+        {exportMessage ? (
+          <p className="admin-festival-actions__success">{exportMessage}</p>
+        ) : null}
+
+        {exportError ? (
+          <p className="admin-participant-form__error">{exportError}</p>
+        ) : null}
+
         <button
           className="admin-card__reset admin-card__reset--secondary"
           type="button"
-          disabled={isSaving || isArchiving}
+          disabled={isSaving || isArchiving || isExporting}
           onClick={archiveCurrentFestival}
         >
           {isArchiving
@@ -124,7 +161,7 @@ export function AdminFestival({
         </button>
 
         {archiveMessage ? (
-          <p className="admin-festival-archive__success">{archiveMessage}</p>
+          <p className="admin-festival-actions__success">{archiveMessage}</p>
         ) : null}
 
         {archiveError ? (

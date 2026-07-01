@@ -37,6 +37,11 @@ import {
   loadFestivalName,
   updateFestivalName,
 } from './data/festival'
+import {
+  festivalExportFileName,
+  loadFestivalExportData,
+  serializeFestivalExport,
+} from './data/export'
 import { activeFestival, festivalStorageKey } from './config/festivals'
 import {
   AdminParticipants,
@@ -309,6 +314,7 @@ function App() {
   const [festivalName, setFestivalName] = useState(fallbackFestivalName)
   const [festivalNameError, setFestivalNameError] = useState('')
   const [isSavingFestivalName, setIsSavingFestivalName] = useState(false)
+  const [isExportingFestival, setIsExportingFestival] = useState(false)
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(
     () => (festivalAccess.isUnlocked ? readStoredParticipant() : null),
   )
@@ -794,6 +800,41 @@ function App() {
     }
 
     return archiveFestival(selectedParticipant.accessCode)
+  }
+
+  async function exportCurrentFestival() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsExportingFestival(true)
+
+    try {
+      const exportedAt = new Date()
+      const exportData = await loadFestivalExportData(
+        adminContext,
+        {
+          type: 'active',
+          festivalId: activeFestival.id,
+        },
+        exportedAt,
+      )
+      const fileName = festivalExportFileName(exportData.festival.name, exportedAt)
+      const blob = new Blob([serializeFestivalExport(exportData)], {
+        type: 'application/json;charset=utf-8',
+      })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+
+      link.href = url
+      link.download = fileName
+      link.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setIsExportingFestival(false)
+    }
   }
 
   async function startCreateParticipant() {
@@ -1287,8 +1328,10 @@ function App() {
             festivalName={festivalName}
             error={festivalNameError}
             isSaving={isSavingFestivalName}
+            isExporting={isExportingFestival}
             onSave={saveFestivalName}
             onArchive={archiveCurrentFestival}
+            onExport={exportCurrentFestival}
           />
 
           {adminError ? <p className="admin__notice">{adminError}</p> : null}
