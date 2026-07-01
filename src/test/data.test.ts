@@ -11,8 +11,12 @@ vi.mock('../lib/supabase', () => ({
 import { loadAllTimeStandings } from '../data/allTimeStandings'
 import {
   archiveFestival,
+  loadFestivalAccessCode,
+  loadFestivalAccessVersion,
   loadFestivalName,
+  updateFestivalAccessCode,
   updateFestivalName,
+  verifyFestivalAccessCode,
 } from '../data/festival'
 import {
   createFestivalExportData,
@@ -98,6 +102,83 @@ describe('Supabase Datenzugriffe', () => {
     expect(rpcMock).toHaveBeenCalledWith('ha_update_festival_name', {
       ...expectedParticipantRpcContext,
       p_name: 'Hurricane Crew Awards',
+    })
+  })
+
+  it('prueft den Festivalcode ohne ihn auszulesen', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          is_valid: true,
+          access_version: '2026-07-01 10:00:00+00',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      verifyFestivalAccessCode(' hurricane2026 '),
+    ).resolves.toEqual({
+      isValid: true,
+      version: '2026-07-01 10:00:00+00',
+    })
+    expect(rpcMock).toHaveBeenCalledWith('ha_verify_festival_access_code', {
+      p_access_code: 'HURRICANE2026',
+    })
+  })
+
+  it('laedt die Festivalcode-Version ohne Codewert', async () => {
+    rpcMock.mockResolvedValue({
+      data: '2026-07-01 10:00:00+00',
+      error: null,
+    })
+
+    await expect(loadFestivalAccessVersion()).resolves.toBe(
+      '2026-07-01 10:00:00+00',
+    )
+    expect(rpcMock).toHaveBeenCalledWith('ha_get_festival_access_version')
+  })
+
+  it('laedt und speichert den Festivalcode ueber Admin RPCs', async () => {
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          access_code: 'HURRICANE2026',
+          access_version: '2026-07-01 10:00:00+00',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(loadFestivalAccessCode(participantContext)).resolves.toEqual({
+      code: 'HURRICANE2026',
+      version: '2026-07-01 10:00:00+00',
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      1,
+      'ha_get_festival_access_code',
+      expectedParticipantRpcContext,
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          access_code: 'NEUERCODE',
+          access_version: '2026-07-01 10:05:00+00',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      updateFestivalAccessCode(' neuercode ', participantContext),
+    ).resolves.toEqual({
+      code: 'NEUERCODE',
+      version: '2026-07-01 10:05:00+00',
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(2, 'ha_update_festival_access_code', {
+      ...expectedParticipantRpcContext,
+      p_access_code: 'NEUERCODE',
     })
   })
 

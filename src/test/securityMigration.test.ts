@@ -67,6 +67,13 @@ const secureParticipantLoginMigration = readFileSync(
   ),
   'utf8',
 )
+const festivalAccessCodeMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260701070000_manage_festival_access_code.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -318,6 +325,39 @@ describe('Supabase Sicherheitsmigration', () => {
     )
   })
 
+  it('verwaltet den Festivalcode ueber geschuetzte Settings RPCs', () => {
+    expect(festivalAccessCodeMigration).toContain(
+      "values ('festival_access_code', 'HURRICANE2026')",
+    )
+
+    for (const functionName of [
+      'ha_get_festival_access_version',
+      'ha_verify_festival_access_code',
+      'ha_get_festival_access_code',
+      'ha_update_festival_access_code',
+    ]) {
+      expect(festivalAccessCodeMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(festivalAccessCodeMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+
+    expect(festivalAccessCodeMigration).toContain(
+      'if not public.ha_has_admin_access(p_participant_access_code)',
+    )
+    expect(festivalAccessCodeMigration).toContain(
+      'festival access code is required',
+    )
+    expect(festivalAccessCodeMigration).toContain(
+      "where s.key = 'festival_access_code'",
+    )
+    expect(festivalAccessCodeMigration).not.toContain(
+      'create table if not exists public.festivals',
+    )
+  })
+
   it('archiviert Festivaldaten in getrennte geschuetzte Archivtabellen', () => {
     for (const table of [
       'festival_archives',
@@ -434,6 +474,7 @@ describe('Supabase Sicherheitsmigration', () => {
       festivalNameMigration,
       festivalArchiveMigration,
       secureParticipantLoginMigration,
+      festivalAccessCodeMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

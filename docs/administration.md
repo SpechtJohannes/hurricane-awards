@@ -42,7 +42,7 @@ Empfohlene Reihenfolge:
 
 2. **Festivalcode festlegen**
 
-   Der Festivalcode schützt den ersten Zugang zur App. Im Adminbereich gibt es aktuell keine Funktion, mit der du den Festivalcode anzeigen oder ändern kannst. Wenn ein neuer Festivalcode benötigt wird, kläre das vor dem Festival mit der Person, die die App bereitstellt.
+   Der Festivalcode schützt den ersten Zugang zur App. Öffne den Adminbereich und lege im Abschnitt **Festival** den gemeinsamen Festivalcode fest. Nach dem Speichern ist der neue Code für den Festivalzugang gültig.
 
 3. **Teilnehmer anlegen**
 
@@ -181,7 +181,12 @@ Der neue Name wird direkt in der App verwendet.
 
 ### Festivalcode ändern
 
-Der Festivalcode kann aktuell nicht im Adminbereich geändert werden. Im Adminbereich gibt es dafür kein Eingabefeld und keine Speichern-Schaltfläche. Wenn der Festivalcode geändert werden muss, wende dich an die Person, die die App bereitstellt.
+1. Öffne den Adminbereich.
+2. Gehe zum Abschnitt **Festival**.
+3. Ändere den Festivalcode.
+4. Klicke auf **Festivalcode speichern**.
+
+Nach dem Speichern ist der neue Festivalcode für den Festivalzugang gültig. Leere Festivalcodes werden nicht akzeptiert.
 
 ### Festival archivieren
 

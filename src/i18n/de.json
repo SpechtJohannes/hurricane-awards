@@ -23,7 +23,8 @@
     "codePlaceholder": "Festivalcode eingeben",
     "submit": "Festival freischalten",
     "errors": {
-      "invalidCode": "Der Festivalcode ist ungültig. Prüfe deine Eingabe und versuche es erneut."
+      "invalidCode": "Der Festivalcode ist ungültig. Prüfe deine Eingabe und versuche es erneut.",
+      "verify": "Der Festivalcode konnte gerade nicht geprüft werden. Versuch es bitte gleich nochmal."
     }
   },
   "festival": {
@@ -63,6 +64,9 @@
       "title": "Festival",
       "nameLabel": "Festivalname",
       "save": "Festivalname speichern",
+      "codeLabel": "Festivalcode",
+      "codeLoading": "Festivalcode wird geladen...",
+      "codeSave": "Festivalcode speichern",
       "export": "JSON exportieren",
       "exporting": "Exportiere...",
       "exportSuccess": "JSON-Export wurde erstellt.",
@@ -73,6 +77,9 @@
       "errors": {
         "save": "Der Festivalname konnte gerade nicht gespeichert werden.",
         "nameRequired": "Der Festivalname ist erforderlich.",
+        "codeLoad": "Der Festivalcode konnte gerade nicht geladen werden.",
+        "codeSave": "Der Festivalcode konnte gerade nicht gespeichert werden.",
+        "codeRequired": "Der Festivalcode ist erforderlich.",
         "export": "Der JSON-Export konnte gerade nicht erstellt werden.",
         "archive": "Das Festival konnte gerade nicht archiviert werden."
       }
