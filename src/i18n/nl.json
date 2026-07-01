@@ -17,6 +17,10 @@
     "loading": "Laden...",
     "saving": "Opslaan..."
   },
+  "installPrompt": {
+    "button": "App installeren",
+    "iosHelp": "Tik op het deel-symbool en kies Zet op beginscherm."
+  },
   "festivalAccess": {
     "ariaLabel": "{{festivalName}} festivaltoegang",
     "codeLabel": "Festivalcode",

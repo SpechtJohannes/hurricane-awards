@@ -17,6 +17,10 @@
     "loading": "Lade...",
     "saving": "Speichere..."
   },
+  "installPrompt": {
+    "button": "App installieren",
+    "iosHelp": "Teilen-Symbol antippen und Zum Home-Bildschirm wählen."
+  },
   "festivalAccess": {
     "ariaLabel": "{{festivalName}} Festivalzugang",
     "codeLabel": "Festivalcode",

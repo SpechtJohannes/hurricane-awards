@@ -61,6 +61,14 @@ type CategoryResult = {
   voteCount: number
 }
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>
+  userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed'
+    platform: string
+  }>
+}
+
 const fallbackFestivalName = ''
 
 const authenticatedParticipantStorageKey = festivalStorageKey(
@@ -238,6 +246,99 @@ function LanguageSwitcher() {
   )
 }
 
+function isStandaloneDisplay() {
+  const navigatorWithStandalone = navigator as Navigator & {
+    standalone?: boolean
+  }
+
+  return (
+    window.matchMedia?.('(display-mode: standalone)').matches === true ||
+    navigatorWithStandalone.standalone === true
+  )
+}
+
+function isIosSafari() {
+  const userAgent = window.navigator.userAgent
+  const isIos = /iphone|ipad|ipod/i.test(userAgent)
+  const isSafari = /safari/i.test(userAgent) && !/crios|fxios|edgios/i.test(userAgent)
+
+  return isIos && isSafari
+}
+
+function PwaInstallPrompt() {
+  const { t } = useTranslation()
+  const [installPrompt, setInstallPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null)
+  const [isInstalled, setIsInstalled] = useState(() => isStandaloneDisplay())
+  const [showIosHelp, setShowIosHelp] = useState(false)
+  const isIos = isIosSafari()
+  const canShowPrompt = Boolean(installPrompt)
+  const shouldShow = !isInstalled && (canShowPrompt || isIos)
+
+  useEffect(() => {
+    function handleBeforeInstallPrompt(event: Event) {
+      event.preventDefault()
+      setInstallPrompt(event as BeforeInstallPromptEvent)
+    }
+
+    function handleAppInstalled() {
+      setIsInstalled(true)
+      setInstallPrompt(null)
+      setShowIosHelp(false)
+    }
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    window.addEventListener('appinstalled', handleAppInstalled)
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener('appinstalled', handleAppInstalled)
+    }
+  }, [])
+
+  async function installApp() {
+    if (isIos) {
+      setShowIosHelp((isVisible) => !isVisible)
+      return
+    }
+
+    if (!installPrompt) {
+      return
+    }
+
+    await installPrompt.prompt()
+    const choice = await installPrompt.userChoice
+
+    if (choice.outcome === 'accepted') {
+      setIsInstalled(true)
+    }
+
+    setInstallPrompt(null)
+  }
+
+  if (!shouldShow) {
+    return null
+  }
+
+  return (
+    <div className="install-prompt">
+      <button
+        className="install-prompt__button"
+        type="button"
+        onClick={installApp}
+        aria-describedby={showIosHelp ? 'install-prompt-help' : undefined}
+      >
+        {t('installPrompt.button')}
+      </button>
+      {showIosHelp ? (
+        <p className="install-prompt__help" id="install-prompt-help">
+          {t('installPrompt.iosHelp')}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
 type FestivalAccessProps = {
   festivalName: string
   onUnlock: (code: string) => Promise<boolean>
@@ -284,6 +385,10 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
       })}
     >
       <header className="hero hero--locked" aria-labelledby="hero-title">
+        <div className="hero__actions">
+          <PwaInstallPrompt />
+        </div>
+
         <div className="hero__content hero__content--locked">
           <h1 id="hero-title">{festivalName || t('common.loading')}</h1>
           <form
@@ -1311,6 +1416,7 @@ function App() {
     >
       <header className="hero" aria-labelledby="hero-title">
         <div className="hero__actions">
+          <PwaInstallPrompt />
           <LanguageSwitcher />
           {selectedParticipant.isAdmin ? (
             <button

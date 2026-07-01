@@ -169,6 +169,7 @@ const standings: AllTimeStanding[] = [
 const festivalAccessStorageKey =
   'hurricane-awards:hurricane-awards-2026:festival-access'
 const festivalAccessVersion = '2026-07-01 10:00:00+00'
+const defaultUserAgent = window.navigator.userAgent
 
 const exportData: FestivalExportData = {
   formatVersion: 1,
@@ -414,9 +415,34 @@ function sectionForHeading(name: RegExp) {
   return section as HTMLElement
 }
 
+function setUserAgent(userAgent: string) {
+  Object.defineProperty(window.navigator, 'userAgent', {
+    value: userAgent,
+    configurable: true,
+  })
+}
+
+function setStandaloneDisplay(isStandalone: boolean) {
+  Object.defineProperty(window, 'matchMedia', {
+    value: vi.fn((query: string) => ({
+      matches: query === '(display-mode: standalone)' && isStandalone,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+    configurable: true,
+  })
+}
+
 beforeEach(async () => {
   vi.useRealTimers()
   vi.clearAllMocks()
+  setUserAgent(defaultUserAgent)
+  setStandaloneDisplay(false)
   localStorage.clear()
   await i18n.changeLanguage('de')
   vi.spyOn(window, 'confirm').mockReturnValue(true)
@@ -459,6 +485,70 @@ describe('Sprachumschaltung', () => {
 
     expect(screen.getByText('Beste Festival-Energie')).toBeVisible()
     expect(screen.getByText('Aktuell offen.')).toBeVisible()
+  })
+})
+
+describe('PWA Installation', () => {
+  it('startet auf unterstuetzten Browsern den nativen Installationsdialog', async () => {
+    const prompt = vi.fn().mockResolvedValue(undefined)
+    const installEvent = new Event('beforeinstallprompt') as Event & {
+      prompt: () => Promise<void>
+      userChoice: Promise<{ outcome: 'accepted'; platform: string }>
+    }
+
+    Object.defineProperty(installEvent, 'prompt', {
+      value: prompt,
+    })
+    Object.defineProperty(installEvent, 'userChoice', {
+      value: Promise.resolve({ outcome: 'accepted', platform: 'web' }),
+    })
+
+    await renderLoadedApp()
+
+    expect(
+      screen.queryByRole('button', { name: /app installieren/i }),
+    ).not.toBeInTheDocument()
+
+    act(() => {
+      window.dispatchEvent(installEvent)
+    })
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: /app installieren/i }),
+    )
+
+    expect(prompt).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('button', { name: /app installieren/i }),
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  it('zeigt auf iOS Safari eine Installationsanleitung', async () => {
+    setUserAgent(
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+    )
+
+    await renderLoadedApp()
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /app installieren/i }),
+    )
+
+    expect(
+      screen.getByText(/teilen-symbol antippen und zum home-bildschirm wählen/i),
+    ).toBeVisible()
+  })
+
+  it('zeigt im Standalone Modus keinen Installationshinweis', async () => {
+    setStandaloneDisplay(true)
+
+    await renderLoadedApp()
+
+    expect(
+      screen.queryByRole('button', { name: /app installieren/i }),
+    ).not.toBeInTheDocument()
   })
 })
 
