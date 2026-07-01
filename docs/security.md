@@ -16,6 +16,7 @@ supabase/migrations/20260630100000_create_category_management_rpcs.sql
 supabase/migrations/20260630110000_create_festival_name_setting.sql
 supabase/migrations/20260630120000_create_festival_archives.sql
 supabase/migrations/20260630130000_secure_participant_login.sql
+supabase/migrations/20260701070000_manage_festival_access_code.sql
 ```
 
 Diese Migration ist auf das aktuelle Live-Schema zugeschnitten:
@@ -24,11 +25,11 @@ Diese Migration ist auf das aktuelle Live-Schema zugeschnitten:
 - `categories(id, title, description, status, sort_order)`
 - `votes(id, voter_id, voted_for_id, category_id, created_at, timestamp)`
 - `archived_votes(id, festival, voter_id, voted_for_id, category_id, created_at, archived_at)`
-- `app_settings(key, value, updated_at)` fuer zentrale App-Einstellungen wie den Festivalnamen
+- `app_settings(key, value, updated_at)` fuer zentrale App-Einstellungen wie Festivalname und Festivalcode
 - `festival_archives(...)` und zugehoerige `festival_archive_*` Tabellen fuer unveraenderliche Festival-Snapshots
 - `participant_login_attempts(festival_id, technical_key, failed_attempts, locked_until, ...)` fuer serverseitige Login-Sperren ohne Klartextcodes
 
-Die Migrationen legen keine `festivals` Tabelle an und ergaenzen keine `festival_id` Spalten. Der editierbare Festivalname liegt stattdessen als einzelner Eintrag `festival_name` in `app_settings`.
+Die Migrationen legen keine `festivals` Tabelle an und ergaenzen keine `festival_id` Spalten. Editierbare Festivaleinstellungen liegen stattdessen als einzelne Eintraege wie `festival_name` und `festival_access_code` in `app_settings`.
 
 Die Admin-Folgemigration ergaenzt die minimale Berechtigungsspalte `participants.is_admin boolean not null default false`. Bestehende Teilnehmer werden dadurch standardmaessig normale Teilnehmer. Admins muessen danach explizit markiert werden.
 
@@ -97,6 +98,8 @@ Adminfunktionen sind von normalen Teilnehmerfunktionen getrennt:
 - `ha_update_category`
 - `ha_delete_category`
 - `ha_update_festival_name`
+- `ha_get_festival_access_code`
+- `ha_update_festival_access_code`
 - `ha_archive_festival`
 
 Adminrechte werden ueber `participants.is_admin` gesteuert. Die App zeigt Adminfunktionen nur fuer Teilnehmer an, deren Login-RPC `is_admin = true` zurueckgibt. Das ist nur Komfort; verbindlich ist die serverseitige Pruefung in `ha_has_admin_access`.
@@ -104,6 +107,8 @@ Adminrechte werden ueber `participants.is_admin` gesteuert. Die App zeigt Adminf
 Die Admin-RPCs rufen `ha_has_admin_access` auf. Manipulierte Requests normaler Teilnehmer werden dadurch mit fehlender Berechtigung abgelehnt.
 
 Der Festivalname wird fuer die Anzeige ueber `ha_get_festival_name` gelesen. Aenderungen laufen ausschliesslich ueber `ha_update_festival_name`, validieren einen nicht-leeren Namen serverseitig und sind Admins vorbehalten.
+
+Der gemeinsame Festivalcode wird ueber `ha_verify_festival_access_code` geprueft, ohne den Codewert oeffentlich auszulesen. Der Code selbst kann nur von Admins ueber `ha_get_festival_access_code` gelesen und ueber `ha_update_festival_access_code` geaendert werden. Leere Codes werden serverseitig abgelehnt.
 
 Festival-Archivierungen laufen ausschliesslich ueber `ha_archive_festival`. Die Funktion kopiert Teilnehmer, Kategorien und Stimmen inklusive Anzeigeinformationen in getrennte Archivtabellen. Diese Archivtabellen haben keine Fremdschluessel auf aktive `participants`, `categories` oder `votes` und sind fuer direkte Browserzugriffe gesperrt.
 
@@ -117,4 +122,4 @@ where access_code = 'PERSOENLICHER_TEILNEHMERCODE';
 
 ## Offene Grenzen
 
-Der gemeinsame Festivalcode liegt weiterhin im statischen Frontend und ist deshalb kein starkes Secret. Der serverseitige Schutz verhindert direkte Tabellenzugriffe ueber den anon Key, ersetzt aber keine echte Benutzer-Authentifizierung mit kurzlebigen Sessions. Fuer hoeheren Schutz sollte spaeter eine Server-/Edge-Function-Schicht Session Tokens ausstellen und Teilnehmercodes nicht dauerhaft im Browser speichern.
+Der gemeinsame Festivalcode ist ein geteilter Zugangscode und deshalb kein Ersatz fuer persoenliche Authentifizierung. Der serverseitige Schutz verhindert direkte Tabellenzugriffe ueber den anon Key, ersetzt aber keine echte Benutzer-Authentifizierung mit kurzlebigen Sessions. Fuer hoeheren Schutz sollte spaeter eine Server-/Edge-Function-Schicht Session Tokens ausstellen und Teilnehmercodes nicht dauerhaft im Browser speichern.

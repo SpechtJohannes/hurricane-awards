@@ -35,7 +35,7 @@ flowchart LR
 - `src/components`: Wiederverwendbare Admin-Komponenten, aktuell fuer Teilnehmer, Kategorien und Festivalaktionen.
 - `src/data`: Supabase-Datenadapter. Diese Dateien kapseln RPC-Aufrufe und mappen Datenbank-Rows auf Frontend-Typen.
 - `src/data/accessContext.ts`: Einheitliche Struktur fuer Teilnehmer-/Admin-Kontext bei RPC-Aufrufen.
-- `src/config/festivals.ts`: Lokale Festivalkonfiguration, unter anderem Storage-Key-Namensraeume und Festivalcode.
+- `src/config/festivals.ts`: Lokale Festivalkonfiguration, unter anderem Storage-Key-Namensraeume.
 - `src/hooks/useFestivalAccess.ts`: Lokale Freischaltung des gemeinsamen Festivalzugangs.
 - `src/i18n`: Uebersetzungen und i18next-Konfiguration. Sichtbare UI-Texte liegen in `de.json` und `nl.json`.
 - `src/test`: Vitest- und React-Testing-Library-Tests fuer UI, Datenadapter, i18n und Migrationen.
@@ -51,7 +51,7 @@ flowchart LR
 
 Es gibt zwei Zugangsebenen:
 
-1. Der gemeinsame Festivalcode wird lokal im Frontend ueber `useFestivalAccess` geprueft und in `localStorage` gespeichert.
+1. Der gemeinsame Festivalcode wird ueber `ha_verify_festival_access_code` geprueft. Die App speichert danach eine technische Access-Version in `localStorage`, nicht den Festivalcode selbst.
 2. Der persoenliche Teilnehmercode wird serverseitig ueber `ha_login_participant` geprueft.
 
 Der Teilnehmerlogin laeuft ueber `loginParticipant` in `src/data/participants.ts`. Bei Erfolg erhaelt das Frontend nur die fuer die Session benoetigten Teilnehmerdaten: `id`, `name`, `displayName`, `isAdmin`, `isActive` sowie den eingegebenen Code fuer weitere RPC-Kontexte.
@@ -94,11 +94,13 @@ Admin-RPCs umfassen unter anderem:
 
 - Teilnehmer: `ha_admin_list_participants`, `ha_suggest_participant_access_code`, `ha_create_participant`, `ha_update_participant`, `ha_deactivate_participant`, `ha_reactivate_participant`
 - Kategorien: `ha_admin_list_categories`, `ha_create_category`, `ha_update_category`, `ha_update_category_status`, `ha_delete_category`, `ha_delete_category_votes`
-- Festival: `ha_update_festival_name`, `ha_archive_festival`
+- Festival: `ha_update_festival_name`, `ha_get_festival_access_code`, `ha_update_festival_access_code`, `ha_archive_festival`
 
 ### Festivaleinstellungen
 
 Der Festivalname liegt zentral in `app_settings` unter dem Key `festival_name`. Das Frontend liest ihn ueber `ha_get_festival_name`. Admins aendern ihn ueber `ha_update_festival_name`; die RPC validiert einen nicht-leeren Namen.
+
+Der gemeinsame Festivalcode liegt ebenfalls in `app_settings` unter dem Key `festival_access_code`. Die App prueft eingegebene Codes ueber `ha_verify_festival_access_code`, ohne den Codewert oeffentlich auszulesen. Admins lesen und aendern den Code ueber `ha_get_festival_access_code` und `ha_update_festival_access_code`; die Update-RPC validiert einen nicht-leeren Code.
 
 Es gibt aktuell keine separate Tabelle `festival_settings`.
 
@@ -121,7 +123,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `categories`: Abstimmungskategorien mit Titel, Beschreibung, Status und Sortierung.
 - `votes`: Aktive Stimmen mit Waehler, nominierter Person, Kategorie und Zeitstempel.
 - `archived_votes`: Aeltere Archivstruktur fuer Stimmen, die in der Sicherheitsdokumentation noch beruecksichtigt wird.
-- `app_settings`: Zentrale App-Einstellungen, aktuell insbesondere `festival_name`.
+- `app_settings`: Zentrale App-Einstellungen, aktuell insbesondere `festival_name` und `festival_access_code`.
 - `all_time_standings`: Quelle fuer das Gesamtclassement, falls als Tabelle, View oder Materialized View vorhanden.
 - `festival_archives`: Metadaten eines archivierten Festival-Snapshots.
 - `festival_archive_participants`: Teilnehmerinformationen zum Archivzeitpunkt.
@@ -146,7 +148,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - Sensible Operationen laufen ueber serverseitige RPCs statt direkte Tabellenzugriffe.
 - RLS und entzogene Tabellenrechte verhindern direkte Browserzugriffe auf geschuetzte Daten.
 - Adminfunktionen sind serverseitig ueber `ha_has_admin_access` abgesichert.
-- Der Festivalname ist zentral in `app_settings` konfigurierbar.
+- Festivalname und Festivalcode sind zentral in `app_settings` konfigurierbar.
 - Archivdaten liegen getrennt von aktiven Daten, damit Snapshots stabil bleiben.
 - Teilnehmerlogin ist gegen Code-Erraten serverseitig geschuetzt; Rate-Limit-Daten speichern keine Klartextcodes.
 - Das Frontend erhaelt beim Login nur die Teilnehmerdaten, die fuer die Session benoetigt werden.

@@ -34,7 +34,9 @@ import {
 } from './data/allTimeStandings'
 import {
   archiveFestival,
+  loadFestivalAccessCode,
   loadFestivalName,
+  updateFestivalAccessCode,
   updateFestivalName,
 } from './data/festival'
 import {
@@ -238,24 +240,40 @@ function LanguageSwitcher() {
 
 type FestivalAccessProps = {
   festivalName: string
-  onUnlock: (code: string) => boolean
+  onUnlock: (code: string) => Promise<boolean>
 }
 
 function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
   const { t } = useTranslation()
   const [festivalCode, setFestivalCode] = useState('')
   const [festivalCodeError, setFestivalCodeError] = useState('')
+  const [isSubmittingFestivalCode, setIsSubmittingFestivalCode] = useState(false)
 
-  function submitFestivalCode(event: FormEvent<HTMLFormElement>) {
+  async function submitFestivalCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!onUnlock(festivalCode)) {
+    const normalizedFestivalCode = festivalCode.trim().toUpperCase()
+
+    if (!normalizedFestivalCode) {
       setFestivalCodeError(t('festivalAccess.errors.invalidCode'))
       return
     }
 
-    setFestivalCode('')
     setFestivalCodeError('')
+    setIsSubmittingFestivalCode(true)
+
+    try {
+      if (!(await onUnlock(normalizedFestivalCode))) {
+        setFestivalCodeError(t('festivalAccess.errors.invalidCode'))
+        return
+      }
+
+      setFestivalCode('')
+    } catch {
+      setFestivalCodeError(t('festivalAccess.errors.verify'))
+    } finally {
+      setIsSubmittingFestivalCode(false)
+    }
   }
 
   return (
@@ -279,6 +297,7 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
               id="festival-access-code"
               type="text"
               value={festivalCode}
+              disabled={isSubmittingFestivalCode}
               onChange={(event) => {
                 setFestivalCode(event.target.value)
                 setFestivalCodeError('')
@@ -292,8 +311,14 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
                 {festivalCodeError}
               </p>
             ) : null}
-            <button className="identity__submit" type="submit">
-              {t('festivalAccess.submit')}
+            <button
+              className="identity__submit"
+              type="submit"
+              disabled={isSubmittingFestivalCode}
+            >
+              {isSubmittingFestivalCode
+                ? t('common.loading')
+                : t('festivalAccess.submit')}
             </button>
           </form>
         </div>
@@ -314,6 +339,10 @@ function App() {
   const [festivalName, setFestivalName] = useState(fallbackFestivalName)
   const [festivalNameError, setFestivalNameError] = useState('')
   const [isSavingFestivalName, setIsSavingFestivalName] = useState(false)
+  const [festivalCode, setFestivalCode] = useState('')
+  const [festivalCodeError, setFestivalCodeError] = useState('')
+  const [isLoadingFestivalCode, setIsLoadingFestivalCode] = useState(false)
+  const [isSavingFestivalCode, setIsSavingFestivalCode] = useState(false)
   const [isExportingFestival, setIsExportingFestival] = useState(false)
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(
     () => (festivalAccess.isUnlocked ? readStoredParticipant() : null),
@@ -610,6 +639,8 @@ function App() {
     setVotesError('')
     setLoginLockedUntil(null)
     setCurrentTimeMs(Date.now())
+    setFestivalCode('')
+    setFestivalCodeError('')
     setParticipantsError('')
     setCategoriesError('')
     setResultsError('')
@@ -647,6 +678,7 @@ function App() {
 
     setIsAdminVisible((isVisible) => {
       if (!isVisible) {
+        void reloadFestivalCode()
         void reloadAdminCategories()
         void reloadAdminParticipants()
 
@@ -715,6 +747,16 @@ function App() {
     return t('admin.festival.errors.save')
   }
 
+  function festivalCodeMutationErrorMessage(error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+
+    if (message.includes('festival access code is required')) {
+      return t('admin.festival.errors.codeRequired')
+    }
+
+    return t('admin.festival.errors.codeSave')
+  }
+
   async function reloadCategoriesForAdminChange() {
     const adminContext = getParticipantAdminContext()
 
@@ -729,6 +771,28 @@ function App() {
 
     setAdminCategories(loadedAdminCategories)
     setCategories(loadedCategories)
+  }
+
+  async function reloadFestivalCode() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsLoadingFestivalCode(true)
+    setFestivalCodeError('')
+
+    try {
+      const loadedFestivalCode = await loadFestivalAccessCode(adminContext)
+
+      setFestivalCode(loadedFestivalCode.code)
+      festivalAccess.rememberAccessVersion(loadedFestivalCode.version)
+    } catch {
+      setFestivalCodeError(t('admin.festival.errors.codeLoad'))
+    } finally {
+      setIsLoadingFestivalCode(false)
+    }
   }
 
   async function reloadAdminCategories() {
@@ -791,6 +855,28 @@ function App() {
       throw new Error(festivalNameMutationErrorMessage(error), { cause: error })
     } finally {
       setIsSavingFestivalName(false)
+    }
+  }
+
+  async function saveFestivalCode(code: string) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsSavingFestivalCode(true)
+    setFestivalCodeError('')
+
+    try {
+      const savedFestivalCode = await updateFestivalAccessCode(code, adminContext)
+
+      setFestivalCode(savedFestivalCode.code)
+      festivalAccess.rememberAccessVersion(savedFestivalCode.version)
+    } catch (error) {
+      throw new Error(festivalCodeMutationErrorMessage(error), { cause: error })
+    } finally {
+      setIsSavingFestivalCode(false)
     }
   }
 
@@ -1324,12 +1410,17 @@ function App() {
       {selectedParticipant.isAdmin && isAdminVisible ? (
         <section className="admin" id="admin" aria-labelledby="admin-title">
           <AdminFestival
-            key={festivalName}
+            key={`${festivalName}-${festivalCode}`}
             festivalName={festivalName}
             error={festivalNameError}
             isSaving={isSavingFestivalName}
+            festivalCode={festivalCode}
+            festivalCodeError={festivalCodeError}
+            isLoadingFestivalCode={isLoadingFestivalCode}
+            isSavingFestivalCode={isSavingFestivalCode}
             isExporting={isExportingFestival}
             onSave={saveFestivalName}
+            onSaveFestivalCode={saveFestivalCode}
             onArchive={archiveCurrentFestival}
             onExport={exportCurrentFestival}
           />

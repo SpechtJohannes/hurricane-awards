@@ -126,9 +126,10 @@ Fremdschluessel: Keine.
 
 Besonderheiten:
 
-- Aktuell wird `festival_name` als zentraler Festivalname gespeichert.
+- Aktuell werden `festival_name` als zentraler Festivalname und `festival_access_code` als gemeinsamer Festivalcode gespeichert.
 - `app_settings_value_not_blank` verhindert leere Werte.
-- Lesen erfolgt ueber `ha_get_festival_name`; Schreiben ueber `ha_update_festival_name` mit Adminschutz.
+- Der Festivalname wird ueber `ha_get_festival_name` gelesen und ueber `ha_update_festival_name` mit Adminschutz geschrieben.
+- Der Festivalcode wird fuer den Zugang ueber `ha_verify_festival_access_code` geprueft. Admins lesen ihn ueber `ha_get_festival_access_code` und schreiben ihn ueber `ha_update_festival_access_code`.
 - Direkte Browserzugriffe sind gesperrt.
 
 ### `festival_archives`
@@ -340,6 +341,10 @@ Dies ist keine vollstaendige API-Referenz, sondern eine Gruppierung der wichtigs
 
 - `ha_get_festival_name`: Liest den zentralen Festivalnamen.
 - `ha_update_festival_name`: Aktualisiert den Festivalnamen mit Adminschutz.
+- `ha_get_festival_access_version`: Liefert eine technische Version des Festivalcodes fuer lokal gespeicherte Freischaltungen.
+- `ha_verify_festival_access_code`: Prueft den gemeinsamen Festivalcode, ohne den gespeicherten Codewert zurueckzugeben.
+- `ha_get_festival_access_code`: Liest den gemeinsamen Festivalcode mit Adminschutz.
+- `ha_update_festival_access_code`: Aktualisiert den gemeinsamen Festivalcode mit Adminschutz.
 - `ha_list_all_time_standings`: Liefert das Gesamtclassement, falls `all_time_standings` vorhanden ist.
 
 ### Archivierung

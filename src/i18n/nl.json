@@ -23,7 +23,8 @@
     "codePlaceholder": "Festivalcode invoeren",
     "submit": "Festival ontgrendelen",
     "errors": {
-      "invalidCode": "De festivalcode is ongeldig. Controleer je invoer en probeer het opnieuw."
+      "invalidCode": "De festivalcode is ongeldig. Controleer je invoer en probeer het opnieuw.",
+      "verify": "De festivalcode kon net niet worden gecontroleerd. Probeer het zo nog eens."
     }
   },
   "festival": {
@@ -63,6 +64,9 @@
       "title": "Festival",
       "nameLabel": "Festivalnaam",
       "save": "Festivalnaam opslaan",
+      "codeLabel": "Festivalcode",
+      "codeLoading": "Festivalcode wordt geladen...",
+      "codeSave": "Festivalcode opslaan",
       "export": "JSON exporteren",
       "exporting": "Exporteren...",
       "exportSuccess": "JSON-export is aangemaakt.",
@@ -73,6 +77,9 @@
       "errors": {
         "save": "De festivalnaam kon net niet worden opgeslagen.",
         "nameRequired": "De festivalnaam is verplicht.",
+        "codeLoad": "De festivalcode kon net niet worden geladen.",
+        "codeSave": "De festivalcode kon net niet worden opgeslagen.",
+        "codeRequired": "De festivalcode is verplicht.",
         "export": "De JSON-export kon net niet worden aangemaakt.",
         "archive": "Het festival kon net niet worden gearchiveerd."
       }

@@ -41,8 +41,12 @@ import {
 } from '../data/allTimeStandings'
 import {
   archiveFestival,
+  loadFestivalAccessCode,
+  loadFestivalAccessVersion,
   loadFestivalName,
+  updateFestivalAccessCode,
   updateFestivalName,
+  verifyFestivalAccessCode,
 } from '../data/festival'
 import {
   festivalExportFileName,
@@ -84,8 +88,12 @@ vi.mock('../data/allTimeStandings', () => ({
 
 vi.mock('../data/festival', () => ({
   archiveFestival: vi.fn(),
+  loadFestivalAccessCode: vi.fn(),
+  loadFestivalAccessVersion: vi.fn(),
   loadFestivalName: vi.fn(),
+  updateFestivalAccessCode: vi.fn(),
   updateFestivalName: vi.fn(),
+  verifyFestivalAccessCode: vi.fn(),
 }))
 
 vi.mock('../data/export', () => ({
@@ -160,6 +168,7 @@ const standings: AllTimeStanding[] = [
 
 const festivalAccessStorageKey =
   'hurricane-awards:hurricane-awards-2026:festival-access'
+const festivalAccessVersion = '2026-07-01 10:00:00+00'
 
 const exportData: FestivalExportData = {
   formatVersion: 1,
@@ -186,6 +195,8 @@ function vote(overrides: Partial<Vote> = {}): Vote {
 
 function mockLoadedData({
   loadedFestivalName = 'Hurricane Awards 2026',
+  loadedFestivalAccessCode = 'HURRICANE2026',
+  loadedFestivalAccessVersion = festivalAccessVersion,
   loadedParticipants = participants,
   loadedAdminParticipants = loadedParticipants,
   loadedCategories = categories,
@@ -194,6 +205,8 @@ function mockLoadedData({
   loadedStandings = standings,
 }: {
   loadedFestivalName?: string
+  loadedFestivalAccessCode?: string
+  loadedFestivalAccessVersion?: string
   loadedParticipants?: Participant[]
   loadedAdminParticipants?: Participant[]
   loadedCategories?: Category[]
@@ -202,6 +215,22 @@ function mockLoadedData({
   loadedStandings?: AllTimeStanding[]
 } = {}) {
   vi.mocked(loadFestivalName).mockResolvedValue(loadedFestivalName)
+  vi.mocked(loadFestivalAccessVersion).mockResolvedValue(
+    loadedFestivalAccessVersion,
+  )
+  vi.mocked(verifyFestivalAccessCode).mockImplementation(async (accessCode) => {
+    const isValid =
+      accessCode.trim().toUpperCase() === loadedFestivalAccessCode.toUpperCase()
+
+    return {
+      isValid,
+      version: isValid ? loadedFestivalAccessVersion : null,
+    }
+  })
+  vi.mocked(loadFestivalAccessCode).mockResolvedValue({
+    code: loadedFestivalAccessCode,
+    version: loadedFestivalAccessVersion,
+  })
   vi.mocked(loadParticipants).mockResolvedValue(loadedParticipants)
   vi.mocked(loadAdminParticipants).mockResolvedValue(loadedAdminParticipants)
   vi.mocked(loginParticipant).mockImplementation(async (accessCode) => {
@@ -314,6 +343,10 @@ function mockLoadedData({
   vi.mocked(deleteCategory).mockResolvedValue()
   vi.mocked(saveVote).mockImplementation(async (savedVote) => savedVote)
   vi.mocked(updateFestivalName).mockImplementation(async (name) => name)
+  vi.mocked(updateFestivalAccessCode).mockImplementation(async (code) => ({
+    code: code.trim().toUpperCase(),
+    version: '2026-07-01 10:05:00+00',
+  }))
   vi.mocked(archiveFestival).mockResolvedValue(
     '8e560706-5e2f-4b50-9e41-381625fd8102',
   )
@@ -342,6 +375,13 @@ async function unlockFestivalWith(code = 'HURRICANE2026') {
     code,
   )
   await user.click(screen.getByRole('button', { name: /festival freischalten/i }))
+
+  await waitFor(() => {
+    expect(
+      screen.queryByRole('textbox', { name: /^teilnehmercode$/i }) ??
+        screen.queryByRole('alert'),
+    ).not.toBeNull()
+  })
 
   return user
 }
@@ -453,7 +493,10 @@ describe('Login', () => {
 
     await unlockFestivalWith(' hurricane2026 ')
 
-    expect(localStorage.getItem(festivalAccessStorageKey)).toBe('unlocked')
+    expect(localStorage.getItem(festivalAccessStorageKey)).toBe(
+      JSON.stringify({ version: festivalAccessVersion }),
+    )
+    expect(verifyFestivalAccessCode).toHaveBeenCalledWith('HURRICANE2026')
     expect(
       await screen.findByRole('textbox', { name: /^teilnehmercode$/i }),
     ).toBeVisible()
@@ -478,7 +521,10 @@ describe('Login', () => {
   })
 
   it('ueberspringt den Festivalcode nach gespeicherter Freischaltung', async () => {
-    localStorage.setItem(festivalAccessStorageKey, 'unlocked')
+    localStorage.setItem(
+      festivalAccessStorageKey,
+      JSON.stringify({ version: festivalAccessVersion }),
+    )
 
     render(<App />)
 
@@ -639,7 +685,10 @@ describe('Login', () => {
   })
 
   it('erhaelt die Anmeldung nach einem Neuladen lokal', async () => {
-    localStorage.setItem(festivalAccessStorageKey, 'unlocked')
+    localStorage.setItem(
+      festivalAccessStorageKey,
+      JSON.stringify({ version: festivalAccessVersion }),
+    )
     localStorage.setItem(
       'hurricane-awards:hurricane-awards-2026:participant',
       JSON.stringify(participants[0]),
@@ -838,10 +887,12 @@ describe('Admin', () => {
     ).not.toBeInTheDocument()
     expect(screen.queryByLabelText(/status/i)).not.toBeInTheDocument()
     expect(loadAdminCategories).not.toHaveBeenCalled()
+    expect(loadFestivalAccessCode).not.toHaveBeenCalled()
     expect(updateCategory).not.toHaveBeenCalled()
     expect(updateCategoryStatus).not.toHaveBeenCalled()
     expect(archiveFestival).not.toHaveBeenCalled()
     expect(loadFestivalExportData).not.toHaveBeenCalled()
+    expect(updateFestivalAccessCode).not.toHaveBeenCalled()
   })
 
   it('macht Admin-Aktionen erst in der Admin-Ansicht verfuegbar', async () => {
@@ -857,6 +908,9 @@ describe('Admin', () => {
       screen.getAllByRole('button', { name: /^löschen$/i }),
     ).toHaveLength(3)
     expect(loadAdminCategories).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+    expect(loadFestivalAccessCode).toHaveBeenCalledWith({
       participantAccessCode: 'ALICE42',
     })
   })
@@ -938,6 +992,61 @@ describe('Admin', () => {
     expect(updateFestivalName).not.toHaveBeenCalled()
     expect(
       await within(festivalSection).findByText(/festivalname ist erforderlich/i),
+    ).toBeVisible()
+  })
+
+  it('zeigt und bearbeitet den Festivalcode im Adminbereich', async () => {
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const festivalSection = sectionForHeading(/^festival$/i)
+    const codeInput = await within(festivalSection).findByLabelText(
+      /^festivalcode$/i,
+    )
+
+    expect(codeInput).toHaveValue('HURRICANE2026')
+
+    await user.clear(codeInput)
+    await user.type(codeInput, 'neuercode')
+    await user.click(
+      within(festivalSection).getByRole('button', {
+        name: /festivalcode speichern/i,
+      }),
+    )
+
+    expect(updateFestivalAccessCode).toHaveBeenCalledWith(
+      'NEUERCODE',
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(codeInput).toHaveValue('NEUERCODE')
+    expect(localStorage.getItem(festivalAccessStorageKey)).toBe(
+      JSON.stringify({ version: '2026-07-01 10:05:00+00' }),
+    )
+  })
+
+  it('validiert einen leeren Festivalcode clientseitig', async () => {
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const festivalSection = sectionForHeading(/^festival$/i)
+    const codeInput = await within(festivalSection).findByLabelText(
+      /^festivalcode$/i,
+    )
+
+    await user.clear(codeInput)
+    await user.click(
+      within(festivalSection).getByRole('button', {
+        name: /festivalcode speichern/i,
+      }),
+    )
+
+    expect(updateFestivalAccessCode).not.toHaveBeenCalled()
+    expect(
+      await within(festivalSection).findByText(/festivalcode ist erforderlich/i),
     ).toBeVisible()
   })
 
