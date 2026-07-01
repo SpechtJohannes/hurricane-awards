@@ -351,6 +351,7 @@ function AppFooter() {
   return (
     <footer className="app-footer">
       <a href="#impressum">{t('legal.link')}</a>
+      <a href="#datenschutz">{t('privacy.link')}</a>
     </footer>
   )
 }
@@ -399,6 +400,56 @@ function LegalNotice({ festivalName }: LegalNoticeProps) {
         </dl>
         <a className="legal-page__back" href="#" onClick={goBack}>
           {t('legal.back')}
+        </a>
+      </section>
+    </main>
+  )
+}
+
+function PrivacyNotice({ festivalName }: LegalNoticeProps) {
+  const { t } = useTranslation()
+  const sections = [
+    'controller',
+    'processedData',
+    'purpose',
+    'legalBasis',
+    'retention',
+    'supabase',
+    'rights',
+    'contact',
+  ]
+
+  function goBack(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault()
+
+    if (window.history.length > 1) {
+      window.history.back()
+      return
+    }
+
+    window.location.hash = ''
+  }
+
+  return (
+    <main
+      className="home legal-page"
+      aria-label={t('privacy.ariaLabel', {
+        festivalName: festivalName || t('common.loading'),
+      })}
+    >
+      <section className="legal-page__content" aria-labelledby="privacy-title">
+        <p className="legal-page__eyebrow">{t('privacy.eyebrow')}</p>
+        <h1 id="privacy-title">{t('privacy.title')}</h1>
+        <div className="legal-page__sections">
+          {sections.map((sectionKey) => (
+            <article className="legal-page__section" key={sectionKey}>
+              <h2>{t(`privacy.sections.${sectionKey}.title`)}</h2>
+              <p>{t(`privacy.sections.${sectionKey}.body`)}</p>
+            </article>
+          ))}
+        </div>
+        <a className="legal-page__back" href="#" onClick={goBack}>
+          {t('privacy.back')}
         </a>
       </section>
     </main>
@@ -1418,6 +1469,10 @@ function App() {
 
   if (locationHash === '#impressum') {
     return <LegalNotice festivalName={displayedFestivalName} />
+  }
+
+  if (locationHash === '#datenschutz') {
+    return <PrivacyNotice festivalName={displayedFestivalName} />
   }
 
   if (!festivalAccess.isUnlocked) {

@@ -591,6 +591,61 @@ describe('Impressum', () => {
   })
 })
 
+describe('Datenschutz', () => {
+  it('ist von der Festivalzugangsansicht erreichbar und zeigt die Pflichtabschnitte', async () => {
+    await renderLoadedApp()
+
+    await userEvent.click(screen.getByRole('link', { name: /^datenschutz$/i }))
+
+    expect(
+      await screen.findByRole('heading', { name: /^datenschutzerklärung$/i }),
+    ).toBeVisible()
+
+    for (const heading of [
+      'Verantwortlicher',
+      'Verarbeitete Daten',
+      'Zweck der Verarbeitung',
+      'Rechtsgrundlage',
+      'Speicherdauer',
+      'Nutzung von Supabase',
+      'Rechte betroffener Personen',
+      'Kontaktmöglichkeit',
+    ]) {
+      expect(
+        screen.getByRole('heading', { name: heading }),
+      ).toBeVisible()
+    }
+
+    expect(screen.getByText(/Johannes Aaron Specht/i)).toBeVisible()
+    expect(screen.getByText(/Hermannstraße 2, 38114 Braunschweig, Deutschland/i)).toBeVisible()
+    expect(screen.getAllByText(/specht.johannes@gmx.de/i).length).toBeGreaterThan(0)
+    expect(screen.getByText(/supabase als backend/i)).toBeVisible()
+    expect(
+      screen.getByRole('link', { name: /zurück zur app/i }),
+    ).toBeVisible()
+  })
+
+  it('ruft bei der Ruecknavigation die Browser-Historie auf', async () => {
+    const back = vi.spyOn(window.history, 'back').mockImplementation(() => {})
+
+    window.history.pushState(null, '', '/#datenschutz')
+    render(<App />)
+
+    await userEvent.click(
+      await screen.findByRole('link', { name: /zurück zur app/i }),
+    )
+
+    expect(back).toHaveBeenCalled()
+  })
+
+  it('ist auch nach dem Login ueber den Footer erreichbar', async () => {
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    expect(screen.getByRole('link', { name: /^datenschutz$/i })).toBeVisible()
+  })
+})
+
 describe('Login', () => {
   it('zeigt vor der Festivalfreischaltung nur Festivalname und Festivalcodeformular', async () => {
     await renderLoadedApp()
