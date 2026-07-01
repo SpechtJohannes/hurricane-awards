@@ -33,9 +33,9 @@
       "email": "E-mailadres"
     },
     "placeholders": {
-      "name": "Naam placeholder",
-      "address": "Adres placeholder",
-      "email": "E-mailadres placeholder"
+     "name": "Johannes Aaron Specht",
+      "address": "Hermannstraße 2, 38114 Braunschweig, Deutschland",
+      "email": "specht.johannes@gmx.de"
     }
   },
   "festivalAccess": {
