@@ -432,6 +432,37 @@ describe('Supabase Sicherheitsmigration', () => {
     )
   })
 
+  it('erzwingt Adminberechtigungen in allen Admin RPC Migrationen', () => {
+    const adminRpcExpectations = [
+      [participantManagementMigration, 'ha_admin_list_participants'],
+      [participantManagementMigration, 'ha_suggest_participant_access_code'],
+      [participantManagementMigration, 'ha_create_participant'],
+      [participantManagementMigration, 'ha_update_participant'],
+      [participantManagementMigration, 'ha_deactivate_participant'],
+      [participantManagementMigration, 'ha_reactivate_participant'],
+      [categoryManagementMigration, 'ha_admin_list_categories'],
+      [categoryManagementMigration, 'ha_create_category'],
+      [categoryManagementMigration, 'ha_update_category'],
+      [categoryManagementMigration, 'ha_delete_category'],
+      [festivalNameMigration, 'ha_update_festival_name'],
+      [festivalArchiveMigration, 'ha_archive_festival'],
+      [festivalAccessCodeMigration, 'ha_get_festival_access_code'],
+      [festivalAccessCodeMigration, 'ha_update_festival_access_code'],
+    ] as const
+
+    for (const [migration, functionName] of adminRpcExpectations) {
+      const functionBody =
+        migration.match(
+          new RegExp(
+            `create or replace function public\\.${functionName}[\\s\\S]*?\\n\\$\\$;`,
+          ),
+        )?.[0] ?? ''
+
+      expect(functionBody, functionName).toContain('ha_has_admin_access')
+      expect(functionBody, functionName).toContain('admin access required')
+    }
+  })
+
   it('archiviert Festivaldaten in getrennte geschuetzte Archivtabellen', () => {
     for (const table of [
       'festival_archives',

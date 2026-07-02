@@ -1326,6 +1326,9 @@ describe('Admin', () => {
           festivalId: 'hurricane-awards-2026',
         },
         expect.any(Date),
+        {
+          includeParticipantAccessCodes: false,
+        },
       )
     })
     expect(festivalExportFileName).toHaveBeenCalledWith(
@@ -1343,6 +1346,56 @@ describe('Admin', () => {
     expect(
       await within(festivalSection).findByText(/json-export wurde erstellt/i),
     ).toBeVisible()
+  })
+
+  it('exportiert Teilnehmercodes nur nach expliziter Warnung', async () => {
+    const createObjectUrl = vi.fn(() => 'blob:festival-export')
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+
+    Object.defineProperty(URL, 'createObjectURL', {
+      value: createObjectUrl,
+      configurable: true,
+    })
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      value: vi.fn(),
+      configurable: true,
+    })
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const festivalSection = sectionForHeading(/^festival$/i)
+    await user.click(
+      within(festivalSection).getByRole('checkbox', {
+        name: /teilnehmercodes in export aufnehmen/i,
+      }),
+    )
+
+    expect(
+      within(festivalSection).getByRole('alert'),
+    ).toHaveTextContent(/enthÃ¤lt teilnehmercodes/i)
+
+    await user.click(
+      within(festivalSection).getByRole('button', {
+        name: /json exportieren/i,
+      }),
+    )
+
+    await waitFor(() => {
+      expect(loadFestivalExportData).toHaveBeenCalledWith(
+        { participantAccessCode: 'ALICE42' },
+        {
+          type: 'active',
+          festivalId: 'hurricane-awards-2026',
+        },
+        expect.any(Date),
+        {
+          includeParticipantAccessCodes: true,
+        },
+      )
+    })
   })
 
   it('legt Teilnehmer im Adminbereich an und aktualisiert die Liste', async () => {

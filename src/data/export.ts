@@ -6,6 +6,10 @@ import type { AdminAccessContext } from './accessContext'
 
 export const festivalExportFormatVersion = 1
 
+export type FestivalExportOptions = {
+  includeParticipantAccessCodes?: boolean
+}
+
 export type FestivalExportSource =
   | {
       type: 'active'
@@ -28,7 +32,7 @@ export type FestivalExportData = {
     archiveId?: string
     archivedAt?: string
   }
-  participants: Participant[]
+  participants: Array<Omit<Participant, 'accessCode'> & { accessCode?: string }>
   categories: Category[]
   votes: Vote[]
 }
@@ -40,12 +44,14 @@ export type CreateFestivalExportInput = {
   categories: Category[]
   votes: Vote[]
   exportedAt?: Date
+  options?: FestivalExportOptions
 }
 
 export async function loadFestivalExportData(
   context: AdminAccessContext,
   festivalSource: FestivalExportSource,
   exportedAt = new Date(),
+  options: FestivalExportOptions = {},
 ): Promise<FestivalExportData> {
   const [festivalName, participants, categories, votes] = await Promise.all([
     loadFestivalName(),
@@ -61,7 +67,25 @@ export async function loadFestivalExportData(
     categories,
     votes,
     exportedAt,
+    options,
   })
+}
+
+function participantForExport(
+  participant: Participant,
+  options: FestivalExportOptions,
+): FestivalExportData['participants'][number] {
+  if (options.includeParticipantAccessCodes === true) {
+    return participant
+  }
+
+  return {
+    id: participant.id,
+    name: participant.name,
+    displayName: participant.displayName,
+    isAdmin: participant.isAdmin,
+    isActive: participant.isActive,
+  }
 }
 
 export function createFestivalExportData({
@@ -71,6 +95,7 @@ export function createFestivalExportData({
   categories,
   votes,
   exportedAt = new Date(),
+  options = {},
 }: CreateFestivalExportInput): FestivalExportData {
   return {
     formatVersion: festivalExportFormatVersion,
@@ -86,7 +111,9 @@ export function createFestivalExportData({
           }
         : {}),
     },
-    participants,
+    participants: participants.map((participant) =>
+      participantForExport(participant, options),
+    ),
     categories,
     votes,
   }

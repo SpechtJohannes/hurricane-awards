@@ -1133,7 +1133,7 @@ function App() {
     return archiveFestival(selectedParticipant.accessCode)
   }
 
-  async function exportCurrentFestival() {
+  async function exportCurrentFestival(includeParticipantAccessCodes: boolean) {
     const adminContext = getParticipantAdminContext()
 
     if (!adminContext) {
@@ -1151,6 +1151,9 @@ function App() {
           festivalId: activeFestival.id,
         },
         exportedAt,
+        {
+          includeParticipantAccessCodes,
+        },
       )
       const fileName = festivalExportFileName(exportData.festival.name, exportedAt)
       const blob = new Blob([serializeFestivalExport(exportData)], {
