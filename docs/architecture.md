@@ -92,6 +92,8 @@ Das Gesamtclassement wird ueber `ha_list_all_time_standings` geladen. Die Funkti
 
 Adminfunktionen sind nur UI-seitig sichtbar, wenn der Login-RPC `is_admin = true` zurueckgibt. Verbindlich ist aber die Datenbank: Admin-RPCs pruefen serverseitig `ha_has_admin_access`.
 
+Langfristig soll dieses Modell durch echte Admin-Sessions ueber Supabase Auth oder eine Edge-Function-Schicht ersetzt werden. In der aktuellen Architektur bleibt die Code-basierte Pruefung bestehen; Tests sichern ab, dass Admin-RPCs ihre interne Adminpruefung behalten.
+
 Admin-RPCs umfassen unter anderem:
 
 - Teilnehmer: `ha_admin_list_participants`, `ha_suggest_participant_access_code`, `ha_create_participant`, `ha_update_participant`, `ha_deactivate_participant`, `ha_reactivate_participant`
@@ -116,6 +118,10 @@ Admins starten die Archivierung ueber `ha_archive_festival`. Die RPC kopiert den
 - `festival_archive_votes`
 
 Archivdaten sind von aktiven Tabellen getrennt und haben keine Fremdschluessel auf aktive Teilnehmer, Kategorien oder Stimmen. Dadurch bleiben historische Snapshots stabil, auch wenn aktive Daten spaeter geaendert werden.
+
+### JSON-Export
+
+Admins koennen den aktuellen Festivalstand als JSON exportieren. Der Standardexport entfernt Teilnehmercodes aus den Teilnehmerdaten. Eine explizite Exportoption kann Codes einschliessen; die UI zeigt dafuer einen Warnhinweis an, weil solche Dateien vertraulich sind.
 
 ## Datenmodell
 
@@ -151,10 +157,12 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - Sensible Operationen laufen ueber serverseitige RPCs statt direkte Tabellenzugriffe.
 - RLS und entzogene Tabellenrechte verhindern direkte Browserzugriffe auf geschuetzte Daten.
 - Adminfunktionen sind serverseitig ueber `ha_has_admin_access` abgesichert.
+- Langfristige Admin-Authentifizierung soll ueber echte Sessions statt weitergebbare Codes erfolgen.
 - Festivalname und Festivalcode sind zentral in `app_settings` konfigurierbar; der initiale Festivalcode wird nicht als allgemein bekannter Default installiert.
 - Archivdaten liegen getrennt von aktiven Daten, damit Snapshots stabil bleiben.
 - Festivalcode und Teilnehmerlogin sind gegen Code-Erraten serverseitig geschuetzt; Rate-Limit-Daten speichern keine Klartextcodes.
 - Das Frontend erhaelt beim Login nur die Teilnehmerdaten, die fuer die Session benoetigt werden, und speichert persoenliche Teilnehmercodes nicht dauerhaft in `localStorage`.
+- JSON-Exporte enthalten Teilnehmercodes nur nach expliziter Admin-Auswahl.
 - Sichtbare UI-Texte werden ueber Uebersetzungsdateien gepflegt und nicht direkt in Komponenten hardcodiert.
 - Datenadapter in `src/data` kapseln Supabase RPC-Aufrufe, damit UI-Komponenten nicht direkt mit RPC-Details arbeiten muessen.
 

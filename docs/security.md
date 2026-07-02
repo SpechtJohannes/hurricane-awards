@@ -115,6 +115,23 @@ Der gemeinsame Festivalcode wird ueber `ha_verify_festival_access_code` geprueft
 
 Frische Deployments installieren keinen allgemein bekannten Festivalcode. Der initiale Code muss projektspezifisch mit privilegiertem Datenbankzugriff in `app_settings` gesetzt werden.
 
+## Export sensibler Daten
+
+Der JSON-Export enthaelt standardmaessig keine Teilnehmercodes. Admins koennen Teilnehmercodes nur ueber eine explizite Exportoption einschliessen; die UI zeigt dafuer einen Warnhinweis an. Dateien mit Teilnehmercodes sind vertraulich zu behandeln und duerfen nicht in Tickets, Chatverlaeufe, Repositories oder ungeschuetzte Ablagen gelangen.
+
+## Langfristiges Admin-Auth-Konzept
+
+Die aktuelle Admin-Autorisierung bleibt bewusst schlank: Admin-RPCs sind fuer Browserrollen ausfuehrbar, pruefen aber intern `ha_has_admin_access` gegen aktive Adminteilnehmer. Das ist fuer diese App funktionsfaehig, aber Code-basierte Adminrechte bleiben kopierbar und haben keine serverseitige Session-Lebensdauer.
+
+Robusteres Zielbild fuer ein spaeteres Issue:
+
+- Supabase Auth oder eine kleine Edge-Function-Schicht fuer echte Admin-Sessions einfuehren.
+- Persoenlichen Teilnehmercode nur noch fuer den initialen Login verwenden und danach kurzlebige, serverseitig pruefbare Session Tokens nutzen.
+- Admin-RPCs nicht mehr direkt fuer `anon` als Adminoberflaeche verwenden, sondern Adminoperationen ueber authentifizierte Claims, Rollen oder Edge Functions absichern.
+- Adminrechte serverseitig an eine stabile Identitaet binden, nicht an weitergebbare Codes.
+- Session-Ablauf, Rotation, Logout und Audit-Logging fuer administrative Aktionen definieren.
+- Tests beibehalten, die sicherstellen, dass Admin-RPCs ohne Adminberechtigung keine Daten liefern und keine Mutation ausfuehren.
+
 Festival-Archivierungen laufen ausschliesslich ueber `ha_archive_festival`. Die Funktion kopiert Teilnehmer, Kategorien und Stimmen inklusive Anzeigeinformationen in getrennte Archivtabellen. Diese Archivtabellen haben keine Fremdschluessel auf aktive `participants`, `categories` oder `votes` und sind fuer direkte Browserzugriffe gesperrt.
 
 Einen Teilnehmer als Admin markieren:

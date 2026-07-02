@@ -132,6 +132,8 @@
       "export": "JSON exporteren",
       "exporting": "Exporteren...",
       "exportSuccess": "JSON-export is aangemaakt.",
+      "exportIncludeAccessCodes": "Deelnemerscodes opnemen in export",
+      "exportAccessCodeWarning": "Waarschuwing: deze export bevat deelnemerscodes en moet vertrouwelijk worden behandeld.",
       "archive": "Festival archiveren",
       "archiving": "Archiveren...",
       "archiveConfirm": "Huidig festival echt archiveren? De actieve gegevens blijven ongewijzigd.",

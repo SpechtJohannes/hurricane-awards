@@ -21,6 +21,13 @@ Die drei hoch priorisierten Findings wurden mit Issue #54 umgesetzt:
 - Bekannter Default-Festivalcode: `HURRICANE2026` wird nicht mehr als frischer Default installiert. Eine neue Migration entfernt diesen Wert, falls er noch aktiv ist. Der initiale Festivalcode muss projektspezifisch per Deployment-/Setup-SQL gesetzt werden.
 - Teilnehmercodes im Browser: Der eingeloggte Teilnehmer wird nicht mehr dauerhaft in `localStorage`, sondern nur noch in `sessionStorage` fuer die aktuelle Browser-Session gespeichert. Alte persistente Teilnehmer-Eintraege werden nicht mehr uebernommen und beim Zugriff entfernt.
 
+## Nachtrag Issue #55
+
+Die mittleren Findings wurden mit Issue #55 bearbeitet:
+
+- Export sensibler Zugangsdaten: Der JSON-Export entfernt Teilnehmercodes standardmaessig. Ein Export inklusive Teilnehmercodes ist nur noch ueber eine explizite Admin-Option moeglich und zeigt eine Warnung an.
+- Langfristige Admin-Absicherung: Die bestehenden Admin-RPCs bleiben in diesem Issue beim Code-basierten Modell, werden aber durch Tests gegen fehlende `ha_has_admin_access`-Pruefungen abgesichert. Ein langfristiges Konzept fuer robuste Admin-Authentifizierung und Autorisierung ist in `docs/security.md` dokumentiert.
+
 ## Pruefbereiche
 
 ### Frontend
@@ -222,7 +229,7 @@ Folgeissue empfohlen: ja
 
 Beschreibung:
 
-Der Festivalexport laedt Admin-Teilnehmerdaten und serialisiert diese inklusive `accessCode`. Das ist fuer Administration nachvollziehbar, erzeugt aber eine besonders schuetzenswerte Datei. Bei Weitergabe des Exports werden alle aktiven Zugangscodes offengelegt.
+Der Festivalexport lud Admin-Teilnehmerdaten urspruenglich inklusive `accessCode`. Mit Issue #55 werden Teilnehmercodes standardmaessig aus dem Export entfernt. Ein Export inklusive Codes bleibt nur als explizit aktivierte vertrauliche Option mit Warnhinweis verfuegbar.
 
 Risikoeinschaetzung: mittel
 
@@ -234,9 +241,9 @@ Betroffene Komponenten:
 
 Handlungsempfehlung:
 
-Exportformat pruefen: entweder Codes standardmaessig ausschliessen, einen separaten "inklusive Zugangscodes"-Export mit Warnhinweis anbieten oder exportierte Codes maskieren. Dokumentieren, dass Exporte vertraulich zu behandeln sind.
+Umgesetzt: Standardexport ohne Teilnehmercodes, explizite Option inklusive Warnung fuer vertrauliche Code-Exporte. Exporte mit Codes muessen weiterhin vertraulich behandelt werden.
 
-Folgeissue empfohlen: ja
+Folgeissue empfohlen: nein
 
 ### 7. Archivtabellen speichern historische Access Codes
 

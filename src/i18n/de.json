@@ -132,6 +132,8 @@
       "export": "JSON exportieren",
       "exporting": "Exportiere...",
       "exportSuccess": "JSON-Export wurde erstellt.",
+      "exportIncludeAccessCodes": "Teilnehmercodes in Export aufnehmen",
+      "exportAccessCodeWarning": "Warnung: Dieser Export enthÃ¤lt Teilnehmercodes und muss vertraulich behandelt werden.",
       "archive": "Festival archivieren",
       "archiving": "Archiviere...",
       "archiveConfirm": "Aktuelles Festival wirklich archivieren? Die aktiven Daten bleiben unverändert.",

@@ -206,7 +206,9 @@ Das Öffnen oder Auswählen archivierter Festivals ist aktuell nicht als Adminfu
 2. Gehe zum Abschnitt **Festival**.
 3. Klicke auf **JSON exportieren**.
 
-Die App lädt eine JSON-Datei herunter. Der Export enthält Rohdaten des aktuellen Festivals, darunter Festivalinformationen, Teilnehmer inklusive Zugangscodes und Adminstatus, Kategorien, abgegebene Stimmen, Exportzeitpunkt und Formatversion.
+Die App lädt eine JSON-Datei herunter. Der Standardexport enthält Rohdaten des aktuellen Festivals, darunter Festivalinformationen, Teilnehmer ohne Zugangscodes, Adminstatus, Kategorien, abgegebene Stimmen, Exportzeitpunkt und Formatversion.
+
+Wenn du Teilnehmercodes fachlich mit exportieren musst, aktiviere vorher die Option **Teilnehmercodes in Export aufnehmen**. Die App zeigt dafür eine Warnung an. Diese Datei enthält Zugangsdaten und muss vertraulich behandelt werden.
 
 Der Export enthält keine berechneten Ranglisten.
 

@@ -13,7 +13,7 @@ type AdminFestivalProps = {
   onSave: (name: string) => Promise<void>
   onSaveFestivalCode: (code: string) => Promise<void>
   onArchive: () => Promise<string>
-  onExport: () => Promise<void>
+  onExport: (includeParticipantAccessCodes: boolean) => Promise<void>
 }
 
 export function AdminFestival({
@@ -39,6 +39,8 @@ export function AdminFestival({
   const [archiveError, setArchiveError] = useState('')
   const [exportMessage, setExportMessage] = useState('')
   const [exportError, setExportError] = useState('')
+  const [includeParticipantAccessCodes, setIncludeParticipantAccessCodes] =
+    useState(false)
   const [isArchiving, setIsArchiving] = useState(false)
 
   async function submitForm(event: FormEvent<HTMLFormElement>) {
@@ -118,7 +120,7 @@ export function AdminFestival({
     setExportError('')
 
     try {
-      await onExport()
+      await onExport(includeParticipantAccessCodes)
       setExportMessage(t('admin.festival.exportSuccess'))
     } catch {
       setExportError(t('admin.festival.errors.export'))
@@ -220,6 +222,30 @@ export function AdminFestival({
       </form>
 
       <div className="admin-festival-actions">
+        <label className="admin-festival-actions__option">
+          <input
+            type="checkbox"
+            checked={includeParticipantAccessCodes}
+            disabled={
+              isSaving ||
+              isArchiving ||
+              isExporting ||
+              isLoadingFestivalCode ||
+              isSavingFestivalCode
+            }
+            onChange={(event) =>
+              setIncludeParticipantAccessCodes(event.target.checked)
+            }
+          />
+          {t('admin.festival.exportIncludeAccessCodes')}
+        </label>
+
+        {includeParticipantAccessCodes ? (
+          <p className="admin-participant-form__error" role="alert">
+            {t('admin.festival.exportAccessCodeWarning')}
+          </p>
+        ) : null}
+
         <button
           className="admin-card__reset admin-card__reset--primary"
           type="button"

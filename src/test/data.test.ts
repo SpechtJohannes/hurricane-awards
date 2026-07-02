@@ -787,7 +787,7 @@ describe('Supabase Datenzugriffe', () => {
     )
   })
 
-  it('laedt Exportdaten ueber bestehende geschuetzte RPC Funktionen', async () => {
+  it('laedt Exportdaten ohne Teilnehmercodes ueber bestehende geschuetzte RPC Funktionen', async () => {
     const exportedAt = new Date('2026-07-01T10:11:12.000Z')
 
     rpcMock
@@ -840,7 +840,15 @@ describe('Supabase Datenzugriffe', () => {
         name: 'Hurricane Awards 2026',
         source: 'active',
       },
-      participants: [mappedParticipant],
+      participants: [
+        {
+          id: 'alice',
+          name: 'alice',
+          displayName: 'Alice',
+          isAdmin: false,
+          isActive: true,
+        },
+      ],
       categories: [
         {
           id: 'cat-1',
@@ -875,6 +883,26 @@ describe('Supabase Datenzugriffe', () => {
       'ha_list_result_votes',
       expectedParticipantRpcContext,
     )
+  })
+
+  it('nimmt Teilnehmercodes nur mit expliziter Exportoption auf', async () => {
+    const exportedAt = new Date('2026-07-01T10:11:12.000Z')
+    const exportData = createFestivalExportData({
+      festivalName: 'Hurricane Crew Awards',
+      festivalSource: {
+        type: 'active',
+        festivalId: 'hurricane-awards-2026',
+      },
+      participants: [mappedParticipant],
+      categories: [],
+      votes: [],
+      exportedAt,
+      options: {
+        includeParticipantAccessCodes: true,
+      },
+    })
+
+    expect(exportData.participants).toEqual([mappedParticipant])
   })
 
   it('formatiert Export JSON lesbar und erzeugt stabile Dateinamen', () => {
