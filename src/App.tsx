@@ -77,12 +77,19 @@ type BeforeInstallPromptEvent = Event & {
 
 const fallbackFestivalName = ''
 
-const authenticatedParticipantStorageKey = festivalStorageKey(
+const authenticatedParticipantSessionStorageKey = festivalStorageKey(
   activeFestival.id,
   'participant',
 )
+const legacyAuthenticatedParticipantStorageKey =
+  authenticatedParticipantSessionStorageKey
+
 function readStoredParticipant(): Participant | null {
-  const storedParticipant = localStorage.getItem(authenticatedParticipantStorageKey)
+  localStorage.removeItem(legacyAuthenticatedParticipantStorageKey)
+
+  const storedParticipant = sessionStorage.getItem(
+    authenticatedParticipantSessionStorageKey,
+  )
 
   if (!storedParticipant) {
     return null
@@ -107,21 +114,23 @@ function readStoredParticipant(): Participant | null {
       }
     }
   } catch {
-    localStorage.removeItem(authenticatedParticipantStorageKey)
+    sessionStorage.removeItem(authenticatedParticipantSessionStorageKey)
   }
 
   return null
 }
 
 function storeAuthenticatedParticipant(participant: Participant) {
-  localStorage.setItem(
-    authenticatedParticipantStorageKey,
+  localStorage.removeItem(legacyAuthenticatedParticipantStorageKey)
+  sessionStorage.setItem(
+    authenticatedParticipantSessionStorageKey,
     JSON.stringify(participant),
   )
 }
 
 function clearStoredParticipant() {
-  localStorage.removeItem(authenticatedParticipantStorageKey)
+  localStorage.removeItem(legacyAuthenticatedParticipantStorageKey)
+  sessionStorage.removeItem(authenticatedParticipantSessionStorageKey)
 }
 
 type ResultCardProps = {

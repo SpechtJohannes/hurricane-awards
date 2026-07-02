@@ -445,6 +445,7 @@ beforeEach(async () => {
   setUserAgent(defaultUserAgent)
   setStandaloneDisplay(false)
   localStorage.clear()
+  sessionStorage.clear()
   await i18n.changeLanguage('de')
   vi.spyOn(window, 'confirm').mockReturnValue(true)
   mockLoadedData()
@@ -732,6 +733,12 @@ describe('Login', () => {
     expect(loadVotesForParticipant).toHaveBeenCalledWith('alice', {
       participantAccessCode: 'ALICE42',
     })
+    expect(
+      localStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
+    ).toBeNull()
+    expect(
+      sessionStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
+    ).toContain('"accessCode":"ALICE42"')
   })
 
   it('verhindert Zugriff mit ungueltigem Teilnehmercode', async () => {
@@ -868,12 +875,12 @@ describe('Login', () => {
     expect(loadVotesForParticipant).not.toHaveBeenCalled()
   })
 
-  it('erhaelt die Anmeldung nach einem Neuladen lokal', async () => {
+  it('erhaelt die Anmeldung nach einem Neuladen innerhalb der Browser-Session', async () => {
     localStorage.setItem(
       festivalAccessStorageKey,
       JSON.stringify({ version: festivalAccessVersion }),
     )
-    localStorage.setItem(
+    sessionStorage.setItem(
       'hurricane-awards:hurricane-awards-2026:participant',
       JSON.stringify(participants[0]),
     )
@@ -889,6 +896,28 @@ describe('Login', () => {
     })
   })
 
+  it('uebernimmt alte dauerhaft gespeicherte Teilnehmercodes nicht mehr', async () => {
+    localStorage.setItem(
+      festivalAccessStorageKey,
+      JSON.stringify({ version: festivalAccessVersion }),
+    )
+    localStorage.setItem(
+      'hurricane-awards:hurricane-awards-2026:participant',
+      JSON.stringify(participants[0]),
+    )
+
+    render(<App />)
+
+    expect(
+      await screen.findByRole('textbox', { name: /^teilnehmercode$/i }),
+    ).toBeVisible()
+    expect(screen.queryByText(/angemeldet als:/i)).not.toBeInTheDocument()
+    expect(
+      localStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
+    ).toBeNull()
+    expect(loadParticipants).not.toHaveBeenCalled()
+  })
+
   it('meldet ab und blendet geschuetzte Inhalte wieder aus', async () => {
     await renderLoadedApp()
     const user = await loginWith('ALICE42')
@@ -901,6 +930,9 @@ describe('Login', () => {
     expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
     expect(
       localStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
+    ).toBeNull()
+    expect(
+      sessionStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
     ).toBeNull()
   })
 })

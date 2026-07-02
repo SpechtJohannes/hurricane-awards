@@ -130,7 +130,31 @@ Besonderheiten:
 - `app_settings_value_not_blank` verhindert leere Werte.
 - Der Festivalname wird ueber `ha_get_festival_name` gelesen und ueber `ha_update_festival_name` mit Adminschutz geschrieben.
 - Der Festivalcode wird fuer den Zugang ueber `ha_verify_festival_access_code` geprueft. Admins lesen ihn ueber `ha_get_festival_access_code` und schreiben ihn ueber `ha_update_festival_access_code`.
+- Frische Deployments setzen keinen bekannten Default-Festivalcode; der initiale Code wird projektspezifisch per Setup-SQL geschrieben.
 - Direkte Browserzugriffe sind gesperrt.
+
+### `festival_access_attempts`
+
+Zweck: Speichert technische Rate-Limit-Daten fuer Fehlversuche beim gemeinsamen Festivalcode.
+
+Wichtigste Spalten:
+
+- `festival_id`: Technischer Kontext, aktuell standardmaessig `current`.
+- `technical_key`: Hash aus Request-Metadaten.
+- `failed_attempts`: Anzahl aktueller Fehlversuche.
+- `locked_until`: Zeitpunkt, bis zu dem weitere Pruefungen blockiert werden.
+- `last_failed_at`: Zeitpunkt des letzten Fehlversuchs.
+- `updated_at`: Zeitpunkt der letzten Aenderung.
+
+Primaerschluessel: `(festival_id, technical_key)`.
+
+Fremdschluessel: Keine.
+
+Besonderheiten:
+
+- Speichert keine Festivalcodes im Klartext.
+- Direkte Browserzugriffe sind gesperrt.
+- Erfolgreiche Festivalcode-Eingaben loeschen den passenden Zaehler.
 
 ### `festival_archives`
 
@@ -342,7 +366,7 @@ Dies ist keine vollstaendige API-Referenz, sondern eine Gruppierung der wichtigs
 - `ha_get_festival_name`: Liest den zentralen Festivalnamen.
 - `ha_update_festival_name`: Aktualisiert den Festivalnamen mit Adminschutz.
 - `ha_get_festival_access_version`: Liefert eine technische Version des Festivalcodes fuer lokal gespeicherte Freischaltungen.
-- `ha_verify_festival_access_code`: Prueft den gemeinsamen Festivalcode, ohne den gespeicherten Codewert zurueckzugeben.
+- `ha_verify_festival_access_code`: Prueft den gemeinsamen Festivalcode mit serverseitigem Rate Limiting, ohne den gespeicherten Codewert zurueckzugeben.
 - `ha_get_festival_access_code`: Liest den gemeinsamen Festivalcode mit Adminschutz.
 - `ha_update_festival_access_code`: Aktualisiert den gemeinsamen Festivalcode mit Adminschutz.
 - `ha_list_all_time_standings`: Liefert das Gesamtclassement, falls `all_time_standings` vorhanden ist.
@@ -358,7 +382,7 @@ Dies ist keine vollstaendige API-Referenz, sondern eine Gruppierung der wichtigs
 - Browserzugriffe laufen ueber gezielte `SECURITY DEFINER` RPC-Funktionen.
 - Adminrechte werden serverseitig ueber `ha_has_admin_access` und aktive Adminteilnehmer geprueft.
 - Teilnehmerzugriffe pruefen den Teilnehmercode serverseitig ueber Hilfsfunktionen wie `ha_participant_id_for_access`.
-- Login-Rate-Limiting laeuft serverseitig ueber `participant_login_attempts`; Klartextcodes werden dort nicht gespeichert.
+- Login-Rate-Limiting laeuft serverseitig ueber `participant_login_attempts`; Festivalcode-Rate-Limiting laeuft ueber `festival_access_attempts`. Klartextcodes werden in diesen Tabellen nicht gespeichert.
 - Der aeltere direkte Login-Lookup `ha_find_participant` ist fuer Browserrollen entzogen.
 
 ## Wartung

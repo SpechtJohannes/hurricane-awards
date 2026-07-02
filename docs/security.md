@@ -17,6 +17,7 @@ supabase/migrations/20260630110000_create_festival_name_setting.sql
 supabase/migrations/20260630120000_create_festival_archives.sql
 supabase/migrations/20260630130000_secure_participant_login.sql
 supabase/migrations/20260701070000_manage_festival_access_code.sql
+supabase/migrations/20260702090000_secure_festival_access_code.sql
 ```
 
 Diese Migration ist auf das aktuelle Live-Schema zugeschnitten:
@@ -28,6 +29,7 @@ Diese Migration ist auf das aktuelle Live-Schema zugeschnitten:
 - `app_settings(key, value, updated_at)` fuer zentrale App-Einstellungen wie Festivalname und Festivalcode
 - `festival_archives(...)` und zugehoerige `festival_archive_*` Tabellen fuer unveraenderliche Festival-Snapshots
 - `participant_login_attempts(festival_id, technical_key, failed_attempts, locked_until, ...)` fuer serverseitige Login-Sperren ohne Klartextcodes
+- `festival_access_attempts(festival_id, technical_key, failed_attempts, locked_until, ...)` fuer serverseitige Festivalcode-Sperren ohne Klartextcodes
 
 Die Migrationen legen keine `festivals` Tabelle an und ergaenzen keine `festival_id` Spalten. Editierbare Festivaleinstellungen liegen stattdessen als einzelne Eintraege wie `festival_name` und `festival_access_code` in `app_settings`.
 
@@ -62,6 +64,7 @@ RLS wird fuer diese Tabellen aktiviert:
 - `votes`
 - `archived_votes`
 - `app_settings`
+- `festival_access_attempts`
 - `festival_archives`
 - `festival_archive_participants`
 - `festival_archive_categories`
@@ -108,7 +111,9 @@ Die Admin-RPCs rufen `ha_has_admin_access` auf. Manipulierte Requests normaler T
 
 Der Festivalname wird fuer die Anzeige ueber `ha_get_festival_name` gelesen. Aenderungen laufen ausschliesslich ueber `ha_update_festival_name`, validieren einen nicht-leeren Namen serverseitig und sind Admins vorbehalten.
 
-Der gemeinsame Festivalcode wird ueber `ha_verify_festival_access_code` geprueft, ohne den Codewert oeffentlich auszulesen. Der Code selbst kann nur von Admins ueber `ha_get_festival_access_code` gelesen und ueber `ha_update_festival_access_code` geaendert werden. Leere Codes werden serverseitig abgelehnt.
+Der gemeinsame Festivalcode wird ueber `ha_verify_festival_access_code` geprueft, ohne den Codewert oeffentlich auszulesen. Fehlversuche werden in `festival_access_attempts` serverseitig gezaehlt und temporaer gesperrt; erfolgreiche Eingaben setzen den passenden Zaehler zurueck. Der Code selbst kann nur von Admins ueber `ha_get_festival_access_code` gelesen und ueber `ha_update_festival_access_code` geaendert werden. Leere Codes werden serverseitig abgelehnt.
+
+Frische Deployments installieren keinen allgemein bekannten Festivalcode. Der initiale Code muss projektspezifisch mit privilegiertem Datenbankzugriff in `app_settings` gesetzt werden.
 
 Festival-Archivierungen laufen ausschliesslich ueber `ha_archive_festival`. Die Funktion kopiert Teilnehmer, Kategorien und Stimmen inklusive Anzeigeinformationen in getrennte Archivtabellen. Diese Archivtabellen haben keine Fremdschluessel auf aktive `participants`, `categories` oder `votes` und sind fuer direkte Browserzugriffe gesperrt.
 
@@ -122,4 +127,4 @@ where access_code = 'PERSOENLICHER_TEILNEHMERCODE';
 
 ## Offene Grenzen
 
-Der gemeinsame Festivalcode ist ein geteilter Zugangscode und deshalb kein Ersatz fuer persoenliche Authentifizierung. Der serverseitige Schutz verhindert direkte Tabellenzugriffe ueber den anon Key, ersetzt aber keine echte Benutzer-Authentifizierung mit kurzlebigen Sessions. Fuer hoeheren Schutz sollte spaeter eine Server-/Edge-Function-Schicht Session Tokens ausstellen und Teilnehmercodes nicht dauerhaft im Browser speichern.
+Der gemeinsame Festivalcode ist ein geteilter Zugangscode und deshalb kein Ersatz fuer persoenliche Authentifizierung. Der serverseitige Schutz verhindert direkte Tabellenzugriffe ueber den anon Key, ersetzt aber keine echte Benutzer-Authentifizierung mit kurzlebigen Sessions. Teilnehmercodes werden nur in `sessionStorage` fuer die aktuelle Browser-Session gehalten; fuer hoeheren Schutz sollte spaeter eine Server-/Edge-Function-Schicht kurzlebige Session Tokens ausstellen.
