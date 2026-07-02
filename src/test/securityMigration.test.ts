@@ -74,6 +74,13 @@ const festivalAccessCodeMigration = readFileSync(
   ),
   'utf8',
 )
+const secureFestivalAccessCodeMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260702090000_secure_festival_access_code.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -326,9 +333,7 @@ describe('Supabase Sicherheitsmigration', () => {
   })
 
   it('verwaltet den Festivalcode ueber geschuetzte Settings RPCs', () => {
-    expect(festivalAccessCodeMigration).toContain(
-      "values ('festival_access_code', 'HURRICANE2026')",
-    )
+    expect(festivalAccessCodeMigration).not.toContain('HURRICANE2026')
 
     for (const functionName of [
       'ha_get_festival_access_version',
@@ -355,6 +360,75 @@ describe('Supabase Sicherheitsmigration', () => {
     )
     expect(festivalAccessCodeMigration).not.toContain(
       'create table if not exists public.festivals',
+    )
+  })
+
+  it('schuetzt den Festivalcode serverseitig gegen Code Erraten', () => {
+    expect(secureFestivalAccessCodeMigration).toContain(
+      "upper(s.value) = 'HURRICANE2026'",
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'create table if not exists public.festival_access_attempts',
+    )
+    expect(secureFestivalAccessCodeMigration).toContain('festival_id text not null')
+    expect(secureFestivalAccessCodeMigration).toContain('technical_key text not null')
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'primary key (festival_id, technical_key)',
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'alter table public.festival_access_attempts enable row level security',
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'revoke all on table public.festival_access_attempts from anon, authenticated',
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'create policy "deny direct festival access attempt access"',
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'create or replace function public.ha_festival_access_rate_limit_key',
+    )
+    expect(secureFestivalAccessCodeMigration).toContain('request.headers')
+    expect(secureFestivalAccessCodeMigration).toContain('digest(')
+    expect(
+      secureFestivalAccessCodeMigration.match(
+        /create table if not exists public\.festival_access_attempts \(([\s\S]*?)\n\);/,
+      )?.[1] ?? '',
+    ).not.toContain('access_code')
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'drop function if exists public.ha_verify_festival_access_code(text)',
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'create or replace function public.ha_verify_festival_access_code',
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'v_max_failed_attempts constant integer := 3',
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      "v_lock_duration constant interval := interval '30 seconds'",
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      "select false, null::text, 'blocked'::text",
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      "select true, v_access_version, 'success'::text",
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      "select false, null::text, 'invalid'::text",
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'v_failed_attempts := coalesce(v_attempt.failed_attempts, 0) + 1',
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'failed_attempts = excluded.failed_attempts',
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'delete from public.festival_access_attempts faa',
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'grant execute on function public.ha_verify_festival_access_code(text, text) to anon, authenticated',
+    )
+    expect(secureFestivalAccessCodeMigration).toContain(
+      'revoke all on function public.ha_festival_access_rate_limit_key(text) from public',
     )
   })
 
@@ -475,6 +549,7 @@ describe('Supabase Sicherheitsmigration', () => {
       festivalArchiveMigration,
       secureParticipantLoginMigration,
       festivalAccessCodeMigration,
+      secureFestivalAccessCodeMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

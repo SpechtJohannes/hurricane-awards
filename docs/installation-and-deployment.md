@@ -126,6 +126,24 @@ Aktuelle Migrationsbereiche:
 - Zentraler Festivalname.
 - Festivalarchivierung.
 - Serverseitiger Login-Schutz gegen Code-Erraten.
+- Serverseitiger Festivalcode-Schutz gegen Code-Erraten.
+
+### Initialer Festivalcode
+
+Die Migrationen installieren keinen allgemein bekannten Festivalcode. Nach einem frischen Deployment muss ein projektspezifischer initialer Festivalcode mit privilegiertem Datenbankzugriff gesetzt werden, bevor die App freigeschaltet werden kann.
+
+Beispiel im Supabase SQL Editor oder in einem geschuetzten Setup-Skript:
+
+```sql
+insert into public.app_settings (key, value, updated_at)
+values ('festival_access_code', 'EIGENER-LANGER-CODE', now())
+on conflict (key) do update
+set
+  value = excluded.value,
+  updated_at = excluded.updated_at;
+```
+
+Der Wert darf nicht in `VITE_*` Variablen, Frontend-Code, Tests oder Dokumentation mit echten Produktionsdaten landen. Wenn noch der alte bekannte Wert `HURRICANE2026` aktiv ist, entfernt die Sicherheitsmigration ihn; danach muss ein neuer Festivalcode gesetzt werden.
 
 Hinweise fuer neue Migrationen:
 

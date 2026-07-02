@@ -52,7 +52,7 @@ flowchart LR
 Es gibt zwei Zugangsebenen:
 
 1. Der gemeinsame Festivalcode wird ueber `ha_verify_festival_access_code` geprueft. Die App speichert danach eine technische Access-Version in `localStorage`, nicht den Festivalcode selbst.
-2. Der persoenliche Teilnehmercode wird serverseitig ueber `ha_login_participant` geprueft.
+2. Der persoenliche Teilnehmercode wird serverseitig ueber `ha_login_participant` geprueft und nur fuer die aktuelle Browser-Session in `sessionStorage` gehalten.
 
 Der Teilnehmerlogin laeuft ueber `loginParticipant` in `src/data/participants.ts`. Bei Erfolg erhaelt das Frontend nur die fuer die Session benoetigten Teilnehmerdaten: `id`, `name`, `displayName`, `isAdmin`, `isActive` sowie den eingegebenen Code fuer weitere RPC-Kontexte.
 
@@ -61,6 +61,8 @@ Der Teilnehmerlogin laeuft ueber `loginParticipant` in `src/data/participants.ts
 `ha_login_participant` prueft den normalisierten Teilnehmercode in PostgreSQL. Inaktive Teilnehmer werden wie ungueltige Codes behandelt. Ungueltige Versuche werden in `participant_login_attempts` gezaehlt. Die Tabelle speichert einen technischen Hash fuer den Rate-Limit-Schluessel, aber keine Teilnehmercodes im Klartext.
 
 Nach zu vielen Fehlversuchen gibt die RPC-Funktion den Status `blocked` und `locked_until` zurueck. Die UI zeigt eine uebersetzte, sichere Sperrmeldung und einen Countdown. Bei erfolgreichem Login wird der relevante Zaehler geloescht.
+
+`ha_verify_festival_access_code` nutzt analog `festival_access_attempts`. Ungueltige Festivalcodes werden serverseitig gezaehlt, nach mehreren Fehlversuchen temporaer blockiert und bei erfolgreicher Eingabe zurueckgesetzt. Auch diese Tabelle speichert nur technische Rate-Limit-Schluessel und keine Klartextcodes.
 
 ### Laden der Kategorien
 
@@ -100,7 +102,7 @@ Admin-RPCs umfassen unter anderem:
 
 Der Festivalname liegt zentral in `app_settings` unter dem Key `festival_name`. Das Frontend liest ihn ueber `ha_get_festival_name`. Admins aendern ihn ueber `ha_update_festival_name`; die RPC validiert einen nicht-leeren Namen.
 
-Der gemeinsame Festivalcode liegt ebenfalls in `app_settings` unter dem Key `festival_access_code`. Die App prueft eingegebene Codes ueber `ha_verify_festival_access_code`, ohne den Codewert oeffentlich auszulesen. Admins lesen und aendern den Code ueber `ha_get_festival_access_code` und `ha_update_festival_access_code`; die Update-RPC validiert einen nicht-leeren Code.
+Der gemeinsame Festivalcode liegt ebenfalls in `app_settings` unter dem Key `festival_access_code`. Die App prueft eingegebene Codes ueber `ha_verify_festival_access_code`, ohne den Codewert oeffentlich auszulesen. Admins lesen und aendern den Code ueber `ha_get_festival_access_code` und `ha_update_festival_access_code`; die Update-RPC validiert einen nicht-leeren Code. Frische Deployments installieren keinen bekannten Default-Code; der initiale Code wird projektspezifisch im Deployment gesetzt.
 
 Es gibt aktuell keine separate Tabelle `festival_settings`.
 
@@ -130,6 +132,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `festival_archive_categories`: Kategorieinformationen zum Archivzeitpunkt.
 - `festival_archive_votes`: Stimmen inklusive Anzeigeinformationen zum Archivzeitpunkt.
 - `participant_login_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Teilnehmerlogin.
+- `festival_access_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Festivalcode.
 
 ## Technologiestack
 
@@ -148,10 +151,10 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - Sensible Operationen laufen ueber serverseitige RPCs statt direkte Tabellenzugriffe.
 - RLS und entzogene Tabellenrechte verhindern direkte Browserzugriffe auf geschuetzte Daten.
 - Adminfunktionen sind serverseitig ueber `ha_has_admin_access` abgesichert.
-- Festivalname und Festivalcode sind zentral in `app_settings` konfigurierbar.
+- Festivalname und Festivalcode sind zentral in `app_settings` konfigurierbar; der initiale Festivalcode wird nicht als allgemein bekannter Default installiert.
 - Archivdaten liegen getrennt von aktiven Daten, damit Snapshots stabil bleiben.
-- Teilnehmerlogin ist gegen Code-Erraten serverseitig geschuetzt; Rate-Limit-Daten speichern keine Klartextcodes.
-- Das Frontend erhaelt beim Login nur die Teilnehmerdaten, die fuer die Session benoetigt werden.
+- Festivalcode und Teilnehmerlogin sind gegen Code-Erraten serverseitig geschuetzt; Rate-Limit-Daten speichern keine Klartextcodes.
+- Das Frontend erhaelt beim Login nur die Teilnehmerdaten, die fuer die Session benoetigt werden, und speichert persoenliche Teilnehmercodes nicht dauerhaft in `localStorage`.
 - Sichtbare UI-Texte werden ueber Uebersetzungsdateien gepflegt und nicht direkt in Komponenten hardcodiert.
 - Datenadapter in `src/data` kapseln Supabase RPC-Aufrufe, damit UI-Komponenten nicht direkt mit RPC-Details arbeiten muessen.
 

@@ -3,9 +3,9 @@
 
 begin;
 
-insert into public.app_settings (key, value)
-values ('festival_access_code', 'HURRICANE2026')
-on conflict (key) do nothing;
+-- The initial festival access code must be set during deployment with a
+-- project-specific value. This migration intentionally does not install a
+-- public default code.
 
 create or replace function public.ha_get_festival_access_version()
 returns text

@@ -13,6 +13,14 @@ Ausgefuehrte Pruefungen:
 - `npm.cmd audit`: erfolgreich, `found 0 vulnerabilities`.
 - `npm audit` ohne `.cmd` war wegen PowerShell Execution Policy blockiert; danach wurde `npm.cmd` verwendet.
 
+## Nachtrag Issue #54
+
+Die drei hoch priorisierten Findings wurden mit Issue #54 umgesetzt:
+
+- Festivalcode-Brute-Force-Schutz: `ha_verify_festival_access_code` wird durch serverseitiges Rate Limiting ueber `festival_access_attempts` geschuetzt. Fehlversuche werden pro technischem Client-Schluessel gezaehlt, temporaer gesperrt und bei erfolgreicher Eingabe geloescht.
+- Bekannter Default-Festivalcode: `HURRICANE2026` wird nicht mehr als frischer Default installiert. Eine neue Migration entfernt diesen Wert, falls er noch aktiv ist. Der initiale Festivalcode muss projektspezifisch per Deployment-/Setup-SQL gesetzt werden.
+- Teilnehmercodes im Browser: Der eingeloggte Teilnehmer wird nicht mehr dauerhaft in `localStorage`, sondern nur noch in `sessionStorage` fuer die aktuelle Browser-Session gespeichert. Alte persistente Teilnehmer-Eintraege werden nicht mehr uebernommen und beim Zugriff entfernt.
+
 ## Pruefbereiche
 
 ### Frontend
@@ -35,7 +43,7 @@ Auffaelligkeiten:
 - Benutzereingaben und DB-Werte werden durch React als Text gerendert, z. B. Festivalname, Kategorien, Teilnehmernamen und Fehlertexte.
 - Formulare normalisieren Zugangscodes mit `trim().toUpperCase()`.
 - Admin-UI wird nur angezeigt, wenn `selectedParticipant.isAdmin` wahr ist; verbindlich ist aber die serverseitige RPC-Pruefung.
-- Der eingeloggte Teilnehmer inklusive `accessCode` wird in `localStorage` gespeichert (`readStoredParticipant`, `storeAuthenticatedParticipant` in `src/App.tsx`).
+- Der eingeloggte Teilnehmer inklusive `accessCode` wird nur in `sessionStorage` gespeichert (`readStoredParticipant`, `storeAuthenticatedParticipant` in `src/App.tsx`); alte `localStorage`-Eintraege werden entfernt.
 - Der Festivalzugang speichert nicht den Festivalcode, sondern eine Access-Version in `localStorage` (`src/hooks/useFestivalAccess.ts`).
 - Fehler werden in der UI meist generisch angezeigt. Einzelne Admin-Formulare zeigen `Error.message` aus RPC-Aufrufen an; das kann interne Validierungsdetails sichtbar machen, aber keine Stacktraces.
 - Umgebungsvariablen im Frontend sind auf `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` beschraenkt. Kein `service_role`-Key wurde im Projekt gefunden.
@@ -64,15 +72,16 @@ Relevante Dateien oder Komponenten:
 
 Auffaelligkeiten:
 
-- RLS ist fuer `participants`, `categories`, `votes`, `archived_votes`, `app_settings`, Archivtabellen und Login-Attempts aktiviert.
+- RLS ist fuer `participants`, `categories`, `votes`, `archived_votes`, `app_settings`, Archivtabellen, Login-Attempts und Festivalcode-Attempts aktiviert.
 - Direkte Tabellenrechte fuer `anon` und `authenticated` werden entzogen; Policies sind restriktiv mit `using (false)` / `with check (false)`.
 - Zugriff erfolgt ueber `SECURITY DEFINER`-RPCs mit `set search_path = public`.
 - Admin-RPCs sind an `anon` und `authenticated` granted, pruefen aber intern `ha_has_admin_access`.
 - Teilnehmerlogin nutzt serverseitiges Rate Limiting ueber `participant_login_attempts`: 3 Fehlversuche, 30 Sekunden Sperre, technische Keys aus Client-Adresse und User-Agent.
+- Festivalcode-Pruefung nutzt serverseitiges Rate Limiting ueber `festival_access_attempts` nach demselben Muster.
 - `ha_find_participant` wird in der spaeteren Login-Migration fuer Browserrollen entzogen.
 - Vote-Integritaet wird serverseitig geprueft: keine Selbstvotes, nur offene Kategorien, Zielteilnehmer muss existieren, Unique Index auf `(voter_id, category_id)`.
 - SQL Injection wurde nicht auffaellig: die Frontend-Aufrufe verwenden Supabase RPC-Parameter, SQL-Funktionen arbeiten ueber Parameter und statische Queries. Das einzige `return query execute` fuer `all_time_standings` verwendet eine konstante SQL-Zeichenkette.
-- Festivalcode wird in `app_settings` gespeichert und per RPC verifiziert. Die Migration setzt initial `HURRICANE2026`.
+- Festivalcode wird in `app_settings` gespeichert und per RPC verifiziert. Es wird kein allgemein bekannter Default-Code mehr installiert.
 - Storage-Konfiguration wurde im Repository nicht gefunden.
 
 Risiko:
