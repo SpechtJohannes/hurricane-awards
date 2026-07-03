@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { getSupabase } from '../lib/supabase'
 import {
   participantRpcParams,
   type AdminAccessContext,
@@ -51,9 +51,7 @@ function mapFestivalAccessVerification(
 }
 
 export async function loadFestivalName(): Promise<string> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc('ha_get_festival_name')
 
@@ -68,9 +66,7 @@ export async function updateFestivalName(
   name: string,
   context: AdminAccessContext,
 ): Promise<string> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc('ha_update_festival_name', {
     ...participantRpcParams(context),
@@ -85,9 +81,7 @@ export async function updateFestivalName(
 }
 
 export async function loadFestivalAccessVersion(): Promise<string> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc('ha_get_festival_access_version')
 
@@ -101,9 +95,7 @@ export async function loadFestivalAccessVersion(): Promise<string> {
 export async function verifyFestivalAccessCode(
   code: string,
 ): Promise<FestivalAccessVerification> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc(
     'ha_verify_festival_access_code',
@@ -122,9 +114,7 @@ export async function verifyFestivalAccessCode(
 export async function loadFestivalAccessCode(
   context: AdminAccessContext,
 ): Promise<FestivalAccessCodeSettings> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc(
     'ha_get_festival_access_code',
@@ -142,9 +132,7 @@ export async function updateFestivalAccessCode(
   code: string,
   context: AdminAccessContext,
 ): Promise<FestivalAccessCodeSettings> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc(
     'ha_update_festival_access_code',
@@ -162,9 +150,7 @@ export async function updateFestivalAccessCode(
 }
 
 export async function archiveFestival(adminAccessCode: string): Promise<string> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc('ha_archive_festival', {
     p_admin_access_code: adminAccessCode,

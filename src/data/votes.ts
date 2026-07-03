@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { getSupabase } from '../lib/supabase'
 import {
   participantRpcParams,
   type AdminAccessContext,
@@ -32,9 +32,7 @@ export async function loadVotesForParticipant(
   voterId: string,
   context: ParticipantAccessContext,
 ): Promise<Vote[]> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc('ha_list_participant_votes', {
     ...participantRpcParams(context),
@@ -51,9 +49,7 @@ export async function loadVotesForParticipant(
 export async function loadVotes(
   context: ParticipantAccessContext,
 ): Promise<Vote[]> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc(
     'ha_list_result_votes',
@@ -71,9 +67,7 @@ export async function deleteVotesForCategory(
   categoryId: string,
   context: AdminAccessContext,
 ): Promise<void> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { error } = await supabase.rpc('ha_delete_category_votes', {
     ...participantRpcParams(context),
@@ -89,9 +83,7 @@ export async function saveVote(
   vote: Vote,
   context: ParticipantAccessContext,
 ): Promise<Vote> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc('ha_save_vote', {
     ...participantRpcParams(context),
