@@ -1,14 +1,17 @@
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   festivalDocumentTypes,
   type FestivalDocument,
   type FestivalDocumentType,
 } from '../data/festivalDocuments'
+import type { MusicPlaylist } from '../data/musicEmbeds'
 
 type FestivalInfoProps = {
   documents: FestivalDocument[]
   campLocationLink: string | null
   campLocationError: string
+  musicPlaylist: MusicPlaylist | null
   error: string
   isLoading: boolean
   onOpenCampLocation: () => void
@@ -29,13 +32,35 @@ export function FestivalInfo({
   documents,
   campLocationLink,
   campLocationError,
+  musicPlaylist,
   error,
   isLoading,
   onOpenCampLocation,
 }: FestivalInfoProps) {
   const { t } = useTranslation()
+  const [musicPlaylistLoadError, setMusicPlaylistLoadError] = useState(false)
+  const musicPlayerRef = useRef<HTMLIFrameElement | null>(null)
   const hasDocuments = documents.length > 0
   const hasCampLocationLink = Boolean(campLocationLink)
+  const hasMusicPlaylist = Boolean(musicPlaylist)
+
+  useEffect(() => {
+    const musicPlayer = musicPlayerRef.current
+
+    if (!musicPlayer) {
+      return
+    }
+
+    function showMusicPlaylistLoadError() {
+      setMusicPlaylistLoadError(true)
+    }
+
+    musicPlayer.addEventListener('error', showMusicPlaylistLoadError)
+
+    return () => {
+      musicPlayer.removeEventListener('error', showMusicPlaylistLoadError)
+    }
+  }, [musicPlaylist?.embedUrl])
 
   return (
     <section
@@ -60,7 +85,7 @@ export function FestivalInfo({
         </p>
       ) : null}
 
-      {!isLoading && !error && !hasDocuments && !hasCampLocationLink ? (
+      {!isLoading && !error && !hasDocuments && !hasCampLocationLink && !hasMusicPlaylist ? (
         <p className="festival-info__notice">{t('info.empty')}</p>
       ) : null}
 
@@ -80,6 +105,38 @@ export function FestivalInfo({
           {campLocationError ? (
             <p className="festival-info__notice festival-info__notice--error" role="alert">
               {campLocationError}
+            </p>
+          ) : null}
+        </article>
+      ) : null}
+
+      {musicPlaylist ? (
+        <article className="festival-info__music">
+          <div className="festival-info__music-header">
+            <div>
+              <p>{t('info.musicPlaylist.eyebrow')}</p>
+              <h3>{t('info.musicPlaylist.title')}</h3>
+            </div>
+            <a
+              className="festival-info__camp-location-link"
+              href={musicPlaylist.externalUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t('info.musicPlaylist.open')}
+            </a>
+          </div>
+          <iframe
+            ref={musicPlayerRef}
+            className="festival-info__music-player"
+            src={musicPlaylist.embedUrl}
+            title={t('info.musicPlaylist.playerTitle')}
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+          />
+          {musicPlaylistLoadError ? (
+            <p className="festival-info__notice festival-info__notice--error" role="alert">
+              {t('info.musicPlaylist.errors.load')}
             </p>
           ) : null}
         </article>

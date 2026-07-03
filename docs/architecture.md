@@ -103,7 +103,7 @@ Admin-RPCs umfassen unter anderem:
 - Teilnehmer: `ha_admin_list_participants`, `ha_suggest_participant_access_code`, `ha_create_participant`, `ha_update_participant`, `ha_deactivate_participant`, `ha_reactivate_participant`
 - Kategorien: `ha_admin_list_categories`, `ha_create_category`, `ha_update_category`, `ha_update_category_status`, `ha_delete_category`, `ha_delete_category_votes`
 - Festival: `ha_update_festival_name`, `ha_get_festival_access_code`, `ha_update_festival_access_code`, `ha_archive_festival`
-- Infos: `ha_admin_list_festival_documents`, `ha_upsert_festival_document`, `ha_delete_festival_document`
+- Infos: `ha_admin_list_festival_documents`, `ha_upsert_festival_document`, `ha_delete_festival_document`, `ha_admin_get_music_playlist`, `ha_update_music_playlist`, `ha_delete_music_playlist`
 
 ### Festivalinfos und Dokumente
 
@@ -112,6 +112,8 @@ Der Infos-Bereich zeigt zentrale Festivaldokumente innerhalb der App an. Die Dok
 Die Dateien liegen im Supabase-Storage-Bucket `festival-documents`. Teilnehmer laden sichtbare Dokumentmetadaten ueber `ha_list_festival_documents`; der Frontend-Adapter `src/data/festivalDocuments.ts` erzeugt daraus signierte Anzeige-URLs. Administratoren verwalten die Metadaten ueber Admin-RPCs und laden PDF- oder Bilddateien in Storage hoch. Vor einem Upload erzeugt `ha_create_festival_document_upload` einen kurzlebig erlaubten Storage-Pfad; die Storage-Policy akzeptiert Uploads nur fuer solche freigegebenen Pfade. Entfernte Dokumente werden aus der App entfernt, indem der Metadatensatz geloescht wird.
 
 Der Campstandort ist kein eigenes Karten- oder GPS-Modell. Er wird als einzelner Link im `app_settings` Key `camp_location_link` gespeichert und ueber `ha_get_camp_location_link` gelesen. Admins koennen den Link ueber `ha_update_camp_location_link` setzen oder ueber `ha_delete_camp_location_link` entfernen. Die Datenbank validiert, dass nur unterstuetzte HTTPS-Links zu Google Maps oder WhatsApp gespeichert werden.
+
+Die Festival Playlist wird als Spotify Playlist ID im `app_settings` Key `music_spotify_playlist_id` gespeichert. Teilnehmer laden die normalisierten Playerdaten ueber `ha_get_music_playlist`; Admins setzen oder entfernen sie ueber `ha_update_music_playlist` und `ha_delete_music_playlist`. Die App verwendet ausschliesslich den offiziellen Spotify Embed Player (`https://open.spotify.com/embed/playlist/...`) und bietet zusaetzlich einen Link zur Playlist auf Spotify an. Es werden keine Spotify-Nutzerdaten, Tokens oder personenbezogenen Spotify-Daten gespeichert.
 
 ### Festivaleinstellungen
 
@@ -148,6 +150,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `archived_votes`: Aeltere Archivstruktur fuer Stimmen, die in der Sicherheitsdokumentation noch beruecksichtigt wird.
 - `app_settings`: Zentrale App-Einstellungen, aktuell insbesondere `festival_name` und `festival_access_code`.
 - `app_settings` Key `camp_location_link`: Optionaler Link zum Campstandort ohne GPS-, Live- oder Bewegungsdaten.
+- `app_settings` Key `music_spotify_playlist_id`: Optionale Spotify Playlist ID fuer den offiziellen Embed Player ohne Spotify-Nutzerdaten oder Tokens.
 - `all_time_standings`: Quelle fuer das Gesamtclassement, falls als Tabelle, View oder Materialized View vorhanden.
 - `festival_archives`: Metadaten eines archivierten Festival-Snapshots.
 - `festival_archive_participants`: Teilnehmerinformationen zum Archivzeitpunkt ohne Teilnehmercodes.

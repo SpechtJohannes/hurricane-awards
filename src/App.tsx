@@ -65,6 +65,16 @@ import {
   type FestivalDocument,
   type FestivalDocumentType,
 } from './data/festivalDocuments'
+import {
+  deleteMusicPlaylist,
+  loadAdminMusicPlaylist,
+  loadMusicPlaylist,
+  updateMusicPlaylist,
+} from './data/festivalMusic'
+import {
+  isSupportedMusicPlaylistLink,
+  type MusicPlaylist,
+} from './data/musicEmbeds'
 import { activeFestival, festivalStorageKey } from './config/festivals'
 import {
   AdminParticipants,
@@ -643,6 +653,7 @@ function App() {
   const [campLocationLink, setCampLocationLink] =
     useState<CampLocationLink>(null)
   const [campLocationOpenError, setCampLocationOpenError] = useState('')
+  const [musicPlaylist, setMusicPlaylist] = useState<MusicPlaylist | null>(null)
   const [festivalDocumentsError, setFestivalDocumentsError] = useState('')
   const [isLoadingFestivalDocuments, setIsLoadingFestivalDocuments] =
     useState(Boolean(selectedParticipant))
@@ -653,6 +664,10 @@ function App() {
     useState<CampLocationLink>(null)
   const [adminCampLocationError, setAdminCampLocationError] = useState('')
   const [isSavingCampLocation, setIsSavingCampLocation] = useState(false)
+  const [adminMusicPlaylist, setAdminMusicPlaylist] =
+    useState<MusicPlaylist | null>(null)
+  const [adminMusicPlaylistError, setAdminMusicPlaylistError] = useState('')
+  const [isSavingMusicPlaylist, setIsSavingMusicPlaylist] = useState(false)
   const [adminFestivalDocumentsError, setAdminFestivalDocumentsError] =
     useState('')
   const [isLoadingAdminFestivalDocuments, setIsLoadingAdminFestivalDocuments] =
@@ -811,12 +826,14 @@ function App() {
           loadedParticipantVotes,
           loadedFestivalDocuments,
           loadedCampLocationLink,
+          loadedMusicPlaylist,
         ] = await Promise.all([
           loadParticipants(accessContext),
           loadCategories(accessContext),
           loadVotesForParticipant(authenticatedParticipant.id, accessContext),
           loadFestivalDocuments(accessContext),
           loadCampLocationLink(accessContext),
+          loadMusicPlaylist(accessContext),
         ])
 
         if (isCurrent) {
@@ -825,6 +842,7 @@ function App() {
           setVotes(loadedParticipantVotes)
           setFestivalDocuments(loadedFestivalDocuments)
           setCampLocationLink(loadedCampLocationLink)
+          setMusicPlaylist(loadedMusicPlaylist)
           setCampLocationOpenError('')
         }
       } catch {
@@ -995,12 +1013,16 @@ function App() {
     setFestivalDocuments([])
     setCampLocationLink(null)
     setCampLocationOpenError('')
+    setMusicPlaylist(null)
     setFestivalDocumentsError('')
     setIsLoadingFestivalDocuments(false)
     setAdminFestivalDocuments([])
     setAdminCampLocationLink(null)
     setAdminCampLocationError('')
     setIsSavingCampLocation(false)
+    setAdminMusicPlaylist(null)
+    setAdminMusicPlaylistError('')
+    setIsSavingMusicPlaylist(false)
     setAdminFestivalDocumentsError('')
     setIsLoadingAdminFestivalDocuments(false)
     setUploadingDocumentType(null)
@@ -1210,13 +1232,16 @@ function App() {
       const [
         loadedAdminFestivalDocuments,
         loadedAdminCampLocationLink,
+        loadedAdminMusicPlaylist,
       ] = await Promise.all([
         loadAdminFestivalDocuments(adminContext),
         loadAdminCampLocationLink(adminContext),
+        loadAdminMusicPlaylist(adminContext),
       ])
 
       setAdminFestivalDocuments(loadedAdminFestivalDocuments)
       setAdminCampLocationLink(loadedAdminCampLocationLink)
+      setAdminMusicPlaylist(loadedAdminMusicPlaylist)
     } catch {
       setAdminFestivalDocumentsError(t('admin.documents.errors.load'))
     } finally {
@@ -1719,6 +1744,68 @@ function App() {
     }
   }
 
+  async function saveAdminMusicPlaylist(link: string) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return false
+    }
+
+    const normalizedLink = link.trim()
+
+    if (!isSupportedMusicPlaylistLink(normalizedLink)) {
+      setAdminMusicPlaylistError(t('admin.musicPlaylist.errors.invalid'))
+      return false
+    }
+
+    setIsSavingMusicPlaylist(true)
+    setAdminMusicPlaylistError('')
+
+    try {
+      const savedPlaylist = await updateMusicPlaylist(normalizedLink, adminContext)
+
+      setAdminMusicPlaylist(savedPlaylist)
+      setMusicPlaylist(savedPlaylist)
+      setFestivalDocumentsError('')
+      return true
+    } catch {
+      setAdminMusicPlaylistError(t('admin.musicPlaylist.errors.save'))
+      return false
+    } finally {
+      setIsSavingMusicPlaylist(false)
+    }
+  }
+
+  async function removeAdminMusicPlaylist() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return false
+    }
+
+    const shouldRemove = window.confirm(t('admin.musicPlaylist.confirmRemove'))
+
+    if (!shouldRemove) {
+      return false
+    }
+
+    setIsSavingMusicPlaylist(true)
+    setAdminMusicPlaylistError('')
+
+    try {
+      await deleteMusicPlaylist(adminContext)
+      setAdminMusicPlaylist(null)
+      setMusicPlaylist(null)
+      setFestivalDocumentsError('')
+      return true
+    } catch {
+      setAdminMusicPlaylistError(t('admin.musicPlaylist.errors.remove'))
+      return false
+    } finally {
+      setIsSavingMusicPlaylist(false)
+    }
+  }
+
   function openCampLocationLink() {
     if (!campLocationLink) {
       return
@@ -2030,14 +2117,20 @@ function App() {
               documents={adminFestivalDocuments}
               campLocationLink={adminCampLocationLink}
               campLocationError={adminCampLocationError}
+              musicPlaylist={adminMusicPlaylist}
+              musicPlaylistError={adminMusicPlaylistError}
               error={adminFestivalDocumentsError}
               isLoading={isLoadingAdminFestivalDocuments}
               isSavingCampLocation={isSavingCampLocation}
+              isSavingMusicPlaylist={isSavingMusicPlaylist}
               uploadingDocumentType={uploadingDocumentType}
               removingDocumentType={removingDocumentType}
               onSaveCampLocation={saveAdminCampLocationLink}
               onRemoveCampLocation={removeAdminCampLocationLink}
               onClearCampLocationError={() => setAdminCampLocationError('')}
+              onSaveMusicPlaylist={saveAdminMusicPlaylist}
+              onRemoveMusicPlaylist={removeAdminMusicPlaylist}
+              onClearMusicPlaylistError={() => setAdminMusicPlaylistError('')}
               onUpload={uploadAdminFestivalDocument}
               onRemove={removeAdminFestivalDocument}
             />
@@ -2107,6 +2200,7 @@ function App() {
           documents={festivalDocuments}
           campLocationLink={campLocationLink}
           campLocationError={campLocationOpenError}
+          musicPlaylist={musicPlaylist}
           error={festivalDocumentsError}
           isLoading={isLoadingFestivalDocuments}
           onOpenCampLocation={openCampLocationLink}

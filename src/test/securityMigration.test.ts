@@ -102,6 +102,13 @@ const campLocationMigration = readFileSync(
   ),
   'utf8',
 )
+const musicPlaylistMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260703130000_create_music_playlist_setting.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -476,6 +483,9 @@ describe('Supabase Sicherheitsmigration', () => {
       [campLocationMigration, 'ha_admin_get_camp_location_link'],
       [campLocationMigration, 'ha_update_camp_location_link'],
       [campLocationMigration, 'ha_delete_camp_location_link'],
+      [musicPlaylistMigration, 'ha_admin_get_music_playlist'],
+      [musicPlaylistMigration, 'ha_update_music_playlist'],
+      [musicPlaylistMigration, 'ha_delete_music_playlist'],
     ] as const
 
     for (const [migration, functionName] of adminRpcExpectations) {
@@ -763,6 +773,45 @@ describe('Supabase Sicherheitsmigration', () => {
     )
   })
 
+  it('speichert genau eine Spotify Playlist ohne personenbezogene Spotify Daten', () => {
+    expect(musicPlaylistMigration).toContain(
+      "where s.key = 'music_spotify_playlist_id'",
+    )
+    expect(musicPlaylistMigration).toContain("'music_spotify_playlist_id'")
+    expect(musicPlaylistMigration).toContain(
+      'delete from public.app_settings s',
+    )
+    expect(musicPlaylistMigration).toContain(
+      "'https://open.spotify.com/embed/playlist/'",
+    )
+    expect(musicPlaylistMigration).toContain(
+      "'https://open.spotify.com/playlist/'",
+    )
+    expect(musicPlaylistMigration).toContain('spotify:playlist:')
+    expect(musicPlaylistMigration).toContain('open\\.spotify\\.com')
+    expect(musicPlaylistMigration).toContain('unsupported music playlist link')
+    expect(musicPlaylistMigration).not.toContain('spotify_user')
+    expect(musicPlaylistMigration).not.toContain('access_token')
+    expect(musicPlaylistMigration).not.toContain('refresh_token')
+
+    for (const functionName of [
+      'ha_spotify_playlist_id',
+      'ha_is_supported_music_playlist_link',
+      'ha_music_playlist_row',
+      'ha_get_music_playlist',
+      'ha_admin_get_music_playlist',
+      'ha_update_music_playlist',
+      'ha_delete_music_playlist',
+    ]) {
+      expect(musicPlaylistMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(musicPlaylistMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -779,6 +828,7 @@ describe('Supabase Sicherheitsmigration', () => {
       hardeningMigration,
       festivalDocumentsMigration,
       campLocationMigration,
+      musicPlaylistMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

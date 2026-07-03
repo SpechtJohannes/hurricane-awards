@@ -71,6 +71,16 @@ import {
   updateCampLocationLink,
   uploadFestivalDocument,
 } from '../data/festivalDocuments'
+import {
+  deleteMusicPlaylist,
+  loadAdminMusicPlaylist,
+  loadMusicPlaylist,
+  updateMusicPlaylist,
+} from '../data/festivalMusic'
+import {
+  isSupportedMusicPlaylistLink,
+  normalizeSpotifyPlaylistLink,
+} from '../data/musicEmbeds'
 
 const participantContext = {
   participantAccessCode: 'ALICE42',
@@ -458,6 +468,116 @@ describe('Supabase Datenzugriffe', () => {
     await expect(
       updateCampLocationLink('https://example.com/camp', participantContext),
     ).rejects.toThrow('unsupported camp location link')
+    expect(rpcMock).not.toHaveBeenCalled()
+  })
+
+  it('validiert und normalisiert Spotify Playlist Links clientseitig', () => {
+    const playlistId = '37i9dQZF1DXcBWIGoYBM5M'
+
+    expect(
+      normalizeSpotifyPlaylistLink(
+        `https://open.spotify.com/playlist/${playlistId}?si=test`,
+      ),
+    ).toEqual({
+      provider: 'spotify',
+      playlistId,
+      externalUrl: `https://open.spotify.com/playlist/${playlistId}`,
+      embedUrl: `https://open.spotify.com/embed/playlist/${playlistId}`,
+    })
+    expect(isSupportedMusicPlaylistLink(`spotify:playlist:${playlistId}`)).toBe(
+      true,
+    )
+    expect(
+      isSupportedMusicPlaylistLink('https://open.spotify.com/album/abc'),
+    ).toBe(false)
+    expect(
+      isSupportedMusicPlaylistLink('https://example.com/playlist/37i9d'),
+    ).toBe(false)
+  })
+
+  it('laedt die Festival Playlist fuer Teilnehmende und Admins', async () => {
+    const playlistRow = {
+      provider: 'spotify',
+      playlist_id: '37i9dQZF1DXcBWIGoYBM5M',
+      external_url: 'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M',
+      embed_url: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M',
+    }
+
+    rpcMock.mockResolvedValueOnce({
+      data: [playlistRow],
+      error: null,
+    })
+
+    await expect(loadMusicPlaylist(participantContext)).resolves.toEqual({
+      provider: 'spotify',
+      playlistId: '37i9dQZF1DXcBWIGoYBM5M',
+      externalUrl: playlistRow.external_url,
+      embedUrl: playlistRow.embed_url,
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      1,
+      'ha_get_music_playlist',
+      expectedParticipantRpcContext,
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: [],
+      error: null,
+    })
+
+    await expect(loadAdminMusicPlaylist(participantContext)).resolves.toBeNull()
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      2,
+      'ha_admin_get_music_playlist',
+      expectedParticipantRpcContext,
+    )
+  })
+
+  it('speichert und loescht die Festival Playlist ueber Admin RPCs', async () => {
+    const playlistId = '37i9dQZF1DXcBWIGoYBM5M'
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          provider: 'spotify',
+          playlist_id: playlistId,
+          external_url: `https://open.spotify.com/playlist/${playlistId}`,
+          embed_url: `https://open.spotify.com/embed/playlist/${playlistId}`,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      updateMusicPlaylist(
+        ` https://open.spotify.com/playlist/${playlistId}?si=abc `,
+        participantContext,
+      ),
+    ).resolves.toMatchObject({
+      provider: 'spotify',
+      playlistId,
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(1, 'ha_update_music_playlist', {
+      ...expectedParticipantRpcContext,
+      p_link: `https://open.spotify.com/playlist/${playlistId}?si=abc`,
+    })
+
+    rpcMock.mockResolvedValueOnce({
+      data: null,
+      error: null,
+    })
+
+    await expect(deleteMusicPlaylist(participantContext)).resolves.toBeUndefined()
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      2,
+      'ha_delete_music_playlist',
+      expectedParticipantRpcContext,
+    )
+  })
+
+  it('sendet ungueltige Spotify Playlist Links nicht an Supabase', async () => {
+    await expect(
+      updateMusicPlaylist('https://open.spotify.com/album/abc', participantContext),
+    ).rejects.toThrow('unsupported music playlist link')
     expect(rpcMock).not.toHaveBeenCalled()
   })
 
