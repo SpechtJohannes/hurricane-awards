@@ -123,6 +123,14 @@
       "timetable": "Timetable",
       "site_map": "Gelaendeplan"
     },
+    "campLocation": {
+      "eyebrow": "Campstandort",
+      "title": "Campstandort",
+      "open": "Standort öffnen",
+      "errors": {
+        "open": "Der Standortlink konnte nicht geöffnet werden. Prüfe bitte deine Browser-Einstellungen."
+      }
+    },
     "errors": {
       "load": "Die Festivalinfos konnten gerade nicht geladen werden."
     }
@@ -185,6 +193,20 @@
         "upload": "Das Dokument konnte gerade nicht hochgeladen werden.",
         "remove": "Das Dokument konnte gerade nicht entfernt werden.",
         "unsupportedFileType": "Bitte waehle eine PDF- oder Bilddatei aus."
+      }
+    },
+    "campLocation": {
+      "eyebrow": "Campstandort",
+      "title": "Campstandort",
+      "linkLabel": "Standortlink",
+      "linkPlaceholder": "Google Maps oder WhatsApp Standortlink",
+      "save": "Standort speichern",
+      "remove": "Standort entfernen",
+      "confirmRemove": "Campstandort wirklich entfernen?",
+      "errors": {
+        "invalid": "Bitte gib einen gültigen Google Maps oder WhatsApp Standortlink ein.",
+        "save": "Der Campstandort konnte gerade nicht gespeichert werden.",
+        "remove": "Der Campstandort konnte gerade nicht entfernt werden."
       }
     },
     "festival": {

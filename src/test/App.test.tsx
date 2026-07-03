@@ -55,9 +55,13 @@ import {
   type FestivalExportData,
 } from '../data/export'
 import {
+  deleteCampLocationLink,
   deleteFestivalDocument,
+  loadAdminCampLocationLink,
   loadAdminFestivalDocuments,
+  loadCampLocationLink,
   loadFestivalDocuments,
+  updateCampLocationLink,
   uploadFestivalDocument,
   type FestivalDocument,
 } from '../data/festivalDocuments'
@@ -115,9 +119,13 @@ vi.mock('../data/festivalDocuments', async (importOriginal) => {
 
   return {
     ...actual,
+    deleteCampLocationLink: vi.fn(),
     deleteFestivalDocument: vi.fn(),
+    loadAdminCampLocationLink: vi.fn(),
     loadAdminFestivalDocuments: vi.fn(),
+    loadCampLocationLink: vi.fn(),
     loadFestivalDocuments: vi.fn(),
+    updateCampLocationLink: vi.fn(),
     uploadFestivalDocument: vi.fn(),
   }
 })
@@ -245,6 +253,8 @@ function mockLoadedData({
   loadedStandings = standings,
   loadedFestivalDocuments = [],
   loadedAdminFestivalDocuments = loadedFestivalDocuments,
+  loadedCampLocationLink = null,
+  loadedAdminCampLocationLink = loadedCampLocationLink,
 }: {
   loadedFestivalName?: string
   loadedFestivalAccessCode?: string
@@ -257,6 +267,8 @@ function mockLoadedData({
   loadedStandings?: AllTimeStanding[]
   loadedFestivalDocuments?: FestivalDocument[]
   loadedAdminFestivalDocuments?: FestivalDocument[]
+  loadedCampLocationLink?: string | null
+  loadedAdminCampLocationLink?: string | null
 } = {}) {
   vi.mocked(loadFestivalName).mockResolvedValue(loadedFestivalName)
   vi.mocked(loadFestivalAccessVersion).mockResolvedValue(
@@ -305,6 +317,12 @@ function mockLoadedData({
   vi.mocked(loadAdminFestivalDocuments).mockResolvedValue(
     loadedAdminFestivalDocuments,
   )
+  vi.mocked(loadCampLocationLink).mockResolvedValue(loadedCampLocationLink)
+  vi.mocked(loadAdminCampLocationLink).mockResolvedValue(
+    loadedAdminCampLocationLink,
+  )
+  vi.mocked(updateCampLocationLink).mockImplementation(async (link) => link.trim())
+  vi.mocked(deleteCampLocationLink).mockResolvedValue()
   vi.mocked(uploadFestivalDocument).mockImplementation(async (input) => ({
     documentType: input.documentType,
     title: input.title,
@@ -883,6 +901,44 @@ describe('Login', () => {
       'src',
       'https://example.test/site-map.png',
     )
+  })
+
+  it('zeigt und oeffnet den Campstandort im Infobereich', async () => {
+    const openMock = vi.spyOn(window, 'open').mockReturnValue(window)
+    mockLoadedData({
+      loadedCampLocationLink: 'https://maps.app.goo.gl/campstandort',
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    await switchMainSection(/^infos$/i)
+    await userEvent.click(screen.getByRole('button', { name: /standort öffnen/i }))
+
+    expect(screen.getByRole('heading', { name: /^campstandort$/i })).toBeVisible()
+    expect(openMock).toHaveBeenCalledWith(
+      'https://maps.app.goo.gl/campstandort',
+      '_blank',
+      'noopener,noreferrer',
+    )
+    expect(loadCampLocationLink).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+  })
+
+  it('zeigt eine verstaendliche Meldung, wenn der Campstandort nicht geoeffnet werden kann', async () => {
+    vi.spyOn(window, 'open').mockReturnValue(null)
+    mockLoadedData({
+      loadedCampLocationLink: 'https://maps.app.goo.gl/campstandort',
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    await switchMainSection(/^infos$/i)
+    await userEvent.click(screen.getByRole('button', { name: /standort öffnen/i }))
+
+    expect(
+      await screen.findByText(/standortlink konnte nicht geöffnet/i),
+    ).toBeVisible()
   })
 
   it('verhindert Zugriff mit ungueltigem Teilnehmercode', async () => {
@@ -1653,6 +1709,72 @@ describe('Admin', () => {
     expect(uploadFestivalDocument).not.toHaveBeenCalled()
     expect(
       await within(adminInfoSection).findByText(/pdf- oder bilddatei/i),
+    ).toBeVisible()
+  })
+
+  it('verwaltet den Campstandort im Adminbereich Infos', async () => {
+    mockLoadedData({
+      loadedCampLocationLink: 'https://maps.app.goo.gl/alter-standort',
+      loadedAdminCampLocationLink: 'https://maps.app.goo.gl/alter-standort',
+    })
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^infos$/i)
+
+    const adminInfoSection = sectionForHeading(/^infos$/i)
+    const linkInput = within(adminInfoSection).getByLabelText(/^standortlink$/i)
+
+    expect(linkInput).toHaveValue('https://maps.app.goo.gl/alter-standort')
+
+    await user.clear(linkInput)
+    await user.type(linkInput, 'https://wa.me/491701234567')
+    await user.click(
+      within(adminInfoSection).getByRole('button', {
+        name: /standort speichern/i,
+      }),
+    )
+
+    expect(updateCampLocationLink).toHaveBeenCalledWith(
+      'https://wa.me/491701234567',
+      { participantAccessCode: 'ALICE42' },
+    )
+
+    await user.click(
+      within(adminInfoSection).getByRole('button', {
+        name: /standort entfernen/i,
+      }),
+    )
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringContaining('Campstandort'),
+    )
+    expect(deleteCampLocationLink).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+  })
+
+  it('speichert ungueltige Campstandort Links nicht', async () => {
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^infos$/i)
+
+    const adminInfoSection = sectionForHeading(/^infos$/i)
+    const linkInput = within(adminInfoSection).getByLabelText(/^standortlink$/i)
+
+    await user.type(linkInput, 'https://example.com/camp')
+    await user.click(
+      within(adminInfoSection).getByRole('button', {
+        name: /standort speichern/i,
+      }),
+    )
+
+    expect(updateCampLocationLink).not.toHaveBeenCalled()
+    expect(
+      await within(adminInfoSection).findByText(/google maps oder whatsapp/i),
     ).toBeVisible()
   })
 

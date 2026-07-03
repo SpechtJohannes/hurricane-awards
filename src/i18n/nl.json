@@ -123,6 +123,14 @@
       "timetable": "Timetable",
       "site_map": "Plattegrond"
     },
+    "campLocation": {
+      "eyebrow": "Campingplek",
+      "title": "Campingplek",
+      "open": "Locatie openen",
+      "errors": {
+        "open": "De locatielink kon niet worden geopend. Controleer je browserinstellingen."
+      }
+    },
     "errors": {
       "load": "De festivalinfo kon net niet worden geladen."
     }
@@ -185,6 +193,20 @@
         "upload": "Het document kon net niet worden geupload.",
         "remove": "Het document kon net niet worden verwijderd.",
         "unsupportedFileType": "Kies een PDF- of afbeeldingsbestand."
+      }
+    },
+    "campLocation": {
+      "eyebrow": "Campingplek",
+      "title": "Campingplek",
+      "linkLabel": "Locatielink",
+      "linkPlaceholder": "Google Maps- of WhatsApp-locatielink",
+      "save": "Locatie opslaan",
+      "remove": "Locatie verwijderen",
+      "confirmRemove": "Campingplek echt verwijderen?",
+      "errors": {
+        "invalid": "Voer een geldige Google Maps- of WhatsApp-locatielink in.",
+        "save": "De campingplek kon net niet worden opgeslagen.",
+        "remove": "De campingplek kon net niet worden verwijderd."
       }
     },
     "festival": {

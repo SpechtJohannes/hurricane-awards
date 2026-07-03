@@ -7,8 +7,11 @@ import {
 
 type FestivalInfoProps = {
   documents: FestivalDocument[]
+  campLocationLink: string | null
+  campLocationError: string
   error: string
   isLoading: boolean
+  onOpenCampLocation: () => void
 }
 
 function documentByType(
@@ -24,11 +27,15 @@ function isImageDocument(document: FestivalDocument) {
 
 export function FestivalInfo({
   documents,
+  campLocationLink,
+  campLocationError,
   error,
   isLoading,
+  onOpenCampLocation,
 }: FestivalInfoProps) {
   const { t } = useTranslation()
   const hasDocuments = documents.length > 0
+  const hasCampLocationLink = Boolean(campLocationLink)
 
   return (
     <section
@@ -53,8 +60,29 @@ export function FestivalInfo({
         </p>
       ) : null}
 
-      {!isLoading && !error && !hasDocuments ? (
+      {!isLoading && !error && !hasDocuments && !hasCampLocationLink ? (
         <p className="festival-info__notice">{t('info.empty')}</p>
+      ) : null}
+
+      {hasCampLocationLink ? (
+        <article className="festival-info__camp-location">
+          <div>
+            <p>{t('info.campLocation.eyebrow')}</p>
+            <h3>{t('info.campLocation.title')}</h3>
+          </div>
+          <button
+            className="festival-info__camp-location-link"
+            type="button"
+            onClick={onOpenCampLocation}
+          >
+            {t('info.campLocation.open')}
+          </button>
+          {campLocationError ? (
+            <p className="festival-info__notice festival-info__notice--error" role="alert">
+              {campLocationError}
+            </p>
+          ) : null}
+        </article>
       ) : null}
 
       {hasDocuments ? (

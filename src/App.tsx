@@ -52,10 +52,16 @@ import {
 } from './data/export'
 import {
   deleteFestivalDocument,
+  deleteCampLocationLink,
   isSupportedFestivalDocumentFile,
+  isSupportedCampLocationLink,
+  loadAdminCampLocationLink,
   loadAdminFestivalDocuments,
+  loadCampLocationLink,
   loadFestivalDocuments,
+  updateCampLocationLink,
   uploadFestivalDocument,
+  type CampLocationLink,
   type FestivalDocument,
   type FestivalDocumentType,
 } from './data/festivalDocuments'
@@ -634,12 +640,19 @@ function App() {
   const [festivalDocuments, setFestivalDocuments] = useState<FestivalDocument[]>(
     [],
   )
+  const [campLocationLink, setCampLocationLink] =
+    useState<CampLocationLink>(null)
+  const [campLocationOpenError, setCampLocationOpenError] = useState('')
   const [festivalDocumentsError, setFestivalDocumentsError] = useState('')
   const [isLoadingFestivalDocuments, setIsLoadingFestivalDocuments] =
     useState(Boolean(selectedParticipant))
   const [adminFestivalDocuments, setAdminFestivalDocuments] = useState<
     FestivalDocument[]
   >([])
+  const [adminCampLocationLink, setAdminCampLocationLink] =
+    useState<CampLocationLink>(null)
+  const [adminCampLocationError, setAdminCampLocationError] = useState('')
+  const [isSavingCampLocation, setIsSavingCampLocation] = useState(false)
   const [adminFestivalDocumentsError, setAdminFestivalDocumentsError] =
     useState('')
   const [isLoadingAdminFestivalDocuments, setIsLoadingAdminFestivalDocuments] =
@@ -797,11 +810,13 @@ function App() {
           loadedCategories,
           loadedParticipantVotes,
           loadedFestivalDocuments,
+          loadedCampLocationLink,
         ] = await Promise.all([
           loadParticipants(accessContext),
           loadCategories(accessContext),
           loadVotesForParticipant(authenticatedParticipant.id, accessContext),
           loadFestivalDocuments(accessContext),
+          loadCampLocationLink(accessContext),
         ])
 
         if (isCurrent) {
@@ -809,6 +824,8 @@ function App() {
           setCategories(loadedCategories)
           setVotes(loadedParticipantVotes)
           setFestivalDocuments(loadedFestivalDocuments)
+          setCampLocationLink(loadedCampLocationLink)
+          setCampLocationOpenError('')
         }
       } catch {
         if (isCurrent) {
@@ -976,9 +993,14 @@ function App() {
     setAdminParticipants([])
     setAdminParticipantsError('')
     setFestivalDocuments([])
+    setCampLocationLink(null)
+    setCampLocationOpenError('')
     setFestivalDocumentsError('')
     setIsLoadingFestivalDocuments(false)
     setAdminFestivalDocuments([])
+    setAdminCampLocationLink(null)
+    setAdminCampLocationError('')
+    setIsSavingCampLocation(false)
     setAdminFestivalDocumentsError('')
     setIsLoadingAdminFestivalDocuments(false)
     setUploadingDocumentType(null)
@@ -1182,12 +1204,19 @@ function App() {
 
     setIsLoadingAdminFestivalDocuments(true)
     setAdminFestivalDocumentsError('')
+    setAdminCampLocationError('')
 
     try {
-      const loadedAdminFestivalDocuments =
-        await loadAdminFestivalDocuments(adminContext)
+      const [
+        loadedAdminFestivalDocuments,
+        loadedAdminCampLocationLink,
+      ] = await Promise.all([
+        loadAdminFestivalDocuments(adminContext),
+        loadAdminCampLocationLink(adminContext),
+      ])
 
       setAdminFestivalDocuments(loadedAdminFestivalDocuments)
+      setAdminCampLocationLink(loadedAdminCampLocationLink)
     } catch {
       setAdminFestivalDocumentsError(t('admin.documents.errors.load'))
     } finally {
@@ -1632,6 +1661,83 @@ function App() {
     }
   }
 
+  async function saveAdminCampLocationLink(link: string) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    const normalizedLink = link.trim()
+
+    if (!isSupportedCampLocationLink(normalizedLink)) {
+      setAdminCampLocationError(t('admin.campLocation.errors.invalid'))
+      return
+    }
+
+    setIsSavingCampLocation(true)
+    setAdminCampLocationError('')
+
+    try {
+      const savedLink = await updateCampLocationLink(normalizedLink, adminContext)
+
+      setAdminCampLocationLink(savedLink)
+      setCampLocationLink(savedLink)
+      setCampLocationOpenError('')
+    } catch {
+      setAdminCampLocationError(t('admin.campLocation.errors.save'))
+    } finally {
+      setIsSavingCampLocation(false)
+    }
+  }
+
+  async function removeAdminCampLocationLink() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    const shouldRemove = window.confirm(t('admin.campLocation.confirmRemove'))
+
+    if (!shouldRemove) {
+      return
+    }
+
+    setIsSavingCampLocation(true)
+    setAdminCampLocationError('')
+
+    try {
+      await deleteCampLocationLink(adminContext)
+      setAdminCampLocationLink(null)
+      setCampLocationLink(null)
+      setCampLocationOpenError('')
+    } catch {
+      setAdminCampLocationError(t('admin.campLocation.errors.remove'))
+    } finally {
+      setIsSavingCampLocation(false)
+    }
+  }
+
+  function openCampLocationLink() {
+    if (!campLocationLink) {
+      return
+    }
+
+    const openedWindow = window.open(
+      campLocationLink,
+      '_blank',
+      'noopener,noreferrer',
+    )
+
+    if (!openedWindow) {
+      setCampLocationOpenError(t('info.campLocation.errors.open'))
+      return
+    }
+
+    setCampLocationOpenError('')
+  }
+
   async function submitVote(categoryId: string) {
     if (!selectedParticipant) {
       return
@@ -1925,11 +2031,18 @@ function App() {
 
           {activeAdminSection === 'info' ? (
             <AdminFestivalDocuments
+              key={`documents-${adminCampLocationLink ?? 'empty'}`}
               documents={adminFestivalDocuments}
+              campLocationLink={adminCampLocationLink}
+              campLocationError={adminCampLocationError}
               error={adminFestivalDocumentsError}
               isLoading={isLoadingAdminFestivalDocuments}
+              isSavingCampLocation={isSavingCampLocation}
               uploadingDocumentType={uploadingDocumentType}
               removingDocumentType={removingDocumentType}
+              onSaveCampLocation={saveAdminCampLocationLink}
+              onRemoveCampLocation={removeAdminCampLocationLink}
+              onClearCampLocationError={() => setAdminCampLocationError('')}
               onUpload={uploadAdminFestivalDocument}
               onRemove={removeAdminFestivalDocument}
             />
@@ -1997,8 +2110,11 @@ function App() {
       {activeMainSection === 'info' ? (
         <FestivalInfo
           documents={festivalDocuments}
+          campLocationLink={campLocationLink}
+          campLocationError={campLocationOpenError}
           error={festivalDocumentsError}
           isLoading={isLoadingFestivalDocuments}
+          onOpenCampLocation={openCampLocationLink}
         />
       ) : null}
 

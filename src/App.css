@@ -647,6 +647,63 @@ h1 {
   gap: 20px;
 }
 
+.festival-info__camp-location {
+  display: grid;
+  width: min(100%, 960px);
+  margin: 0 auto 20px;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.festival-info__camp-location p,
+.festival-info__camp-location h3 {
+  margin: 0;
+}
+
+.festival-info__camp-location > div > p {
+  color: #ffbe0b;
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.festival-info__camp-location h3 {
+  margin-top: 6px;
+  color: #ffffff;
+  font-size: 1.25rem;
+  line-height: 1.15;
+}
+
+.festival-info__camp-location-link {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  color: #101014;
+  font: inherit;
+  font-weight: 850;
+  background: #ffbe0b;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.festival-info__camp-location-link:hover,
+.festival-info__camp-location-link:focus-visible {
+  background: #ffd166;
+}
+
+.festival-info__camp-location-link:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}
+
 .festival-document {
   display: grid;
   overflow: hidden;
@@ -730,6 +787,30 @@ h1 {
   display: grid;
   gap: 8px;
   margin: 0;
+}
+
+.admin-camp-location label {
+  display: grid;
+  gap: 8px;
+  color: #f4e7cf;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.admin-camp-location input {
+  min-height: 46px;
+  padding: 0 12px;
+  color: #ffffff;
+  font: inherit;
+  background: rgba(16, 16, 20, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+}
+
+.admin-camp-location input:focus {
+  outline: 3px solid rgba(255, 190, 11, 0.65);
+  outline-offset: 2px;
+  border-color: #ffbe0b;
 }
 
 .admin-document-card__main dl div {

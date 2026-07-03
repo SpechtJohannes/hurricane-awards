@@ -111,6 +111,8 @@ Der Infos-Bereich zeigt zentrale Festivaldokumente innerhalb der App an. Die Dok
 
 Die Dateien liegen im Supabase-Storage-Bucket `festival-documents`. Teilnehmer laden sichtbare Dokumentmetadaten ueber `ha_list_festival_documents`; der Frontend-Adapter `src/data/festivalDocuments.ts` erzeugt daraus signierte Anzeige-URLs. Administratoren verwalten die Metadaten ueber Admin-RPCs und laden PDF- oder Bilddateien in Storage hoch. Vor einem Upload erzeugt `ha_create_festival_document_upload` einen kurzlebig erlaubten Storage-Pfad; die Storage-Policy akzeptiert Uploads nur fuer solche freigegebenen Pfade. Entfernte Dokumente werden aus der App entfernt, indem der Metadatensatz geloescht wird.
 
+Der Campstandort ist kein eigenes Karten- oder GPS-Modell. Er wird als einzelner Link im `app_settings` Key `camp_location_link` gespeichert und ueber `ha_get_camp_location_link` gelesen. Admins koennen den Link ueber `ha_update_camp_location_link` setzen oder ueber `ha_delete_camp_location_link` entfernen. Die Datenbank validiert, dass nur unterstuetzte HTTPS-Links zu Google Maps oder WhatsApp gespeichert werden.
+
 ### Festivaleinstellungen
 
 Der Festivalname liegt zentral in `app_settings` unter dem Key `festival_name`. Das Frontend liest ihn ueber `ha_get_festival_name`. Admins aendern ihn ueber `ha_update_festival_name`; die RPC validiert einen nicht-leeren Namen.
@@ -145,6 +147,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `votes`: Aktive Stimmen mit Waehler, nominierter Person, Kategorie und Zeitstempel.
 - `archived_votes`: Aeltere Archivstruktur fuer Stimmen, die in der Sicherheitsdokumentation noch beruecksichtigt wird.
 - `app_settings`: Zentrale App-Einstellungen, aktuell insbesondere `festival_name` und `festival_access_code`.
+- `app_settings` Key `camp_location_link`: Optionaler Link zum Campstandort ohne GPS-, Live- oder Bewegungsdaten.
 - `all_time_standings`: Quelle fuer das Gesamtclassement, falls als Tabelle, View oder Materialized View vorhanden.
 - `festival_archives`: Metadaten eines archivierten Festival-Snapshots.
 - `festival_archive_participants`: Teilnehmerinformationen zum Archivzeitpunkt ohne Teilnehmercodes.

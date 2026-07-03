@@ -95,6 +95,13 @@ const festivalDocumentsMigration = readFileSync(
   ),
   'utf8',
 )
+const campLocationMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260703120000_create_camp_location_link.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -466,6 +473,9 @@ describe('Supabase Sicherheitsmigration', () => {
       [festivalDocumentsMigration, 'ha_create_festival_document_upload'],
       [festivalDocumentsMigration, 'ha_upsert_festival_document'],
       [festivalDocumentsMigration, 'ha_delete_festival_document'],
+      [campLocationMigration, 'ha_admin_get_camp_location_link'],
+      [campLocationMigration, 'ha_update_camp_location_link'],
+      [campLocationMigration, 'ha_delete_camp_location_link'],
     ] as const
 
     for (const [migration, functionName] of adminRpcExpectations) {
@@ -663,9 +673,7 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(festivalDocumentsMigration).toContain(
       'create policy "deny direct festival document access"',
     )
-    expect(festivalDocumentsMigration).toContain(
-      "values (\n  'festival-documents'",
-    )
+    expect(festivalDocumentsMigration).toContain("'festival-documents'")
     expect(festivalDocumentsMigration).toContain(
       "allowed_mime_types",
     )
@@ -719,6 +727,44 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(upsertFunctionBody).not.toContain('on conflict (document_type)')
   })
 
+  it('speichert genau einen Campstandort Link in den App Settings', () => {
+    expect(campLocationMigration).toContain(
+      "where s.key = 'camp_location_link'",
+    )
+    expect(campLocationMigration).toContain(
+      "values (\n    'camp_location_link'",
+    )
+    expect(campLocationMigration).toContain(
+      'delete from public.app_settings s',
+    )
+    expect(campLocationMigration).not.toContain('latitude')
+    expect(campLocationMigration).not.toContain('longitude')
+    expect(campLocationMigration).not.toContain('gps')
+
+    for (const functionName of [
+      'ha_is_supported_camp_location_link',
+      'ha_get_camp_location_link',
+      'ha_admin_get_camp_location_link',
+      'ha_update_camp_location_link',
+      'ha_delete_camp_location_link',
+    ]) {
+      expect(campLocationMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(campLocationMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+
+    expect(campLocationMigration).toContain('maps\\.app\\.goo\\.gl')
+    expect(campLocationMigration).toContain('google\\.com/maps')
+    expect(campLocationMigration).toContain('wa\\.me')
+    expect(campLocationMigration).toContain('whatsapp\\.com')
+    expect(campLocationMigration).toContain(
+      'unsupported camp location link',
+    )
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -734,6 +780,7 @@ describe('Supabase Sicherheitsmigration', () => {
       secureFestivalAccessCodeMigration,
       hardeningMigration,
       festivalDocumentsMigration,
+      campLocationMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')
