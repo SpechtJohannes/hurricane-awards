@@ -24,4 +24,16 @@ describe('i18n test infrastructure', () => {
     )
     expect(i18n.t('test.missing.key')).toBe('test.missing.key')
   })
+
+  it('enthaelt Festival Playlist Texte auf Deutsch und Niederlaendisch', async () => {
+    await i18n.changeLanguage('de')
+
+    expect(i18n.t('info.musicPlaylist.open')).toBe('In Spotify öffnen')
+    expect(i18n.t('admin.musicPlaylist.save')).toBe('Playlist speichern')
+
+    await i18n.changeLanguage('nl')
+
+    expect(i18n.t('info.musicPlaylist.open')).toBe('Openen in Spotify')
+    expect(i18n.t('admin.musicPlaylist.save')).toBe('Playlist opslaan')
+  })
 })

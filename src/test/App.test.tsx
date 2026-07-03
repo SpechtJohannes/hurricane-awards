@@ -65,6 +65,13 @@ import {
   uploadFestivalDocument,
   type FestivalDocument,
 } from '../data/festivalDocuments'
+import {
+  deleteMusicPlaylist,
+  loadAdminMusicPlaylist,
+  loadMusicPlaylist,
+  updateMusicPlaylist,
+} from '../data/festivalMusic'
+import type { MusicPlaylist } from '../data/musicEmbeds'
 import i18n from '../i18n'
 
 vi.mock('../data/categories', () => ({
@@ -129,6 +136,13 @@ vi.mock('../data/festivalDocuments', async (importOriginal) => {
     uploadFestivalDocument: vi.fn(),
   }
 })
+
+vi.mock('../data/festivalMusic', () => ({
+  deleteMusicPlaylist: vi.fn(),
+  loadAdminMusicPlaylist: vi.fn(),
+  loadMusicPlaylist: vi.fn(),
+  updateMusicPlaylist: vi.fn(),
+}))
 
 const participants: Participant[] = [
   {
@@ -213,6 +227,13 @@ const festivalDocuments: FestivalDocument[] = [
   },
 ]
 
+const musicPlaylist: MusicPlaylist = {
+  provider: 'spotify',
+  playlistId: '37i9dQZF1DXcBWIGoYBM5M',
+  externalUrl: 'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M',
+  embedUrl: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M',
+}
+
 const festivalAccessStorageKey =
   'hurricane-awards:hurricane-awards-2026:festival-access'
 const festivalAccessVersion = '2026-07-01 10:00:00+00'
@@ -255,6 +276,8 @@ function mockLoadedData({
   loadedAdminFestivalDocuments = loadedFestivalDocuments,
   loadedCampLocationLink = null,
   loadedAdminCampLocationLink = loadedCampLocationLink,
+  loadedMusicPlaylist = null,
+  loadedAdminMusicPlaylist = loadedMusicPlaylist,
 }: {
   loadedFestivalName?: string
   loadedFestivalAccessCode?: string
@@ -269,6 +292,8 @@ function mockLoadedData({
   loadedAdminFestivalDocuments?: FestivalDocument[]
   loadedCampLocationLink?: string | null
   loadedAdminCampLocationLink?: string | null
+  loadedMusicPlaylist?: MusicPlaylist | null
+  loadedAdminMusicPlaylist?: MusicPlaylist | null
 } = {}) {
   vi.mocked(loadFestivalName).mockResolvedValue(loadedFestivalName)
   vi.mocked(loadFestivalAccessVersion).mockResolvedValue(
@@ -321,6 +346,21 @@ function mockLoadedData({
   vi.mocked(loadAdminCampLocationLink).mockResolvedValue(
     loadedAdminCampLocationLink,
   )
+  vi.mocked(loadMusicPlaylist).mockResolvedValue(loadedMusicPlaylist)
+  vi.mocked(loadAdminMusicPlaylist).mockResolvedValue(loadedAdminMusicPlaylist)
+  vi.mocked(updateMusicPlaylist).mockImplementation(async (link) => ({
+    ...musicPlaylist,
+    playlistId: link.includes('0JQ5DAqbMKFz6FAsUtgAab')
+      ? '0JQ5DAqbMKFz6FAsUtgAab'
+      : musicPlaylist.playlistId,
+    externalUrl: link.includes('0JQ5DAqbMKFz6FAsUtgAab')
+      ? 'https://open.spotify.com/playlist/0JQ5DAqbMKFz6FAsUtgAab'
+      : musicPlaylist.externalUrl,
+    embedUrl: link.includes('0JQ5DAqbMKFz6FAsUtgAab')
+      ? 'https://open.spotify.com/embed/playlist/0JQ5DAqbMKFz6FAsUtgAab'
+      : musicPlaylist.embedUrl,
+  }))
+  vi.mocked(deleteMusicPlaylist).mockResolvedValue()
   vi.mocked(updateCampLocationLink).mockImplementation(async (link) => link.trim())
   vi.mocked(deleteCampLocationLink).mockResolvedValue()
   vi.mocked(uploadFestivalDocument).mockImplementation(async (input) => ({
@@ -883,6 +923,7 @@ describe('Login', () => {
     expect(loadFestivalDocuments).toHaveBeenCalledWith({
       participantAccessCode: 'ALICE42',
     })
+    expect(screen.queryByTitle(/spotify festival playlist/i)).not.toBeInTheDocument()
   })
 
   it('zeigt Festivaldokumente im Infobereich innerhalb der App an', async () => {
@@ -926,6 +967,46 @@ describe('Login', () => {
     expect(loadCampLocationLink).toHaveBeenCalledWith({
       participantAccessCode: 'ALICE42',
     })
+  })
+
+  it('zeigt die Spotify Playlist im Infobereich an', async () => {
+    mockLoadedData({
+      loadedMusicPlaylist: musicPlaylist,
+    })
+
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    await switchMainSection(/^infos$/i)
+
+    expect(screen.getByRole('heading', { name: /^festival playlist$/i })).toBeVisible()
+    expect(screen.getByTitle(/spotify festival playlist/i)).toHaveAttribute(
+      'src',
+      musicPlaylist.embedUrl,
+    )
+    expect(screen.getByRole('link', { name: /in spotify/i })).toHaveAttribute(
+      'href',
+      musicPlaylist.externalUrl,
+    )
+    expect(loadMusicPlaylist).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+  })
+
+  it('zeigt einen Hinweis, wenn der Spotify Player nicht geladen werden kann', async () => {
+    mockLoadedData({
+      loadedMusicPlaylist: musicPlaylist,
+    })
+
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^infos$/i)
+
+    fireEvent.error(screen.getByTitle(/spotify festival playlist/i))
+
+    expect(
+      await screen.findByText(/spotify playlist konnte nicht geladen werden/i),
+    ).toBeVisible()
   })
 
   it('verhindert Zugriff mit ungueltigem Teilnehmercode', async () => {
@@ -1740,6 +1821,87 @@ describe('Admin', () => {
     expect(deleteCampLocationLink).toHaveBeenCalledWith({
       participantAccessCode: 'ALICE42',
     })
+  })
+
+  it('speichert, aendert und entfernt die Festival Playlist im Adminbereich Infos', async () => {
+    mockLoadedData({
+      loadedMusicPlaylist: musicPlaylist,
+      loadedAdminMusicPlaylist: musicPlaylist,
+    })
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^infos$/i)
+
+    const adminInfoSection = sectionForHeading(/^infos$/i)
+    const playlistInput = within(adminInfoSection).getByLabelText(
+      /^spotify playlist link$/i,
+    )
+
+    expect(playlistInput).toHaveValue(musicPlaylist.externalUrl)
+
+    await user.clear(playlistInput)
+    await user.type(
+      playlistInput,
+      'https://open.spotify.com/playlist/0JQ5DAqbMKFz6FAsUtgAab?si=abc',
+    )
+    await user.click(
+      within(adminInfoSection).getByRole('button', {
+        name: /playlist speichern/i,
+      }),
+    )
+
+    expect(updateMusicPlaylist).toHaveBeenCalledWith(
+      'https://open.spotify.com/playlist/0JQ5DAqbMKFz6FAsUtgAab?si=abc',
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(
+      await within(adminInfoSection).findByText(/playlist wurde gespeichert/i),
+    ).toBeVisible()
+
+    await user.click(
+      within(adminInfoSection).getByRole('button', {
+        name: /playlist entfernen/i,
+      }),
+    )
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringContaining('Festival Playlist'),
+    )
+    expect(deleteMusicPlaylist).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+    expect(
+      await within(adminInfoSection).findByText(/playlist wurde entfernt/i),
+    ).toBeVisible()
+  })
+
+  it('speichert ungueltige Spotify Playlist Links nicht', async () => {
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^infos$/i)
+
+    const adminInfoSection = sectionForHeading(/^infos$/i)
+    const playlistInput = within(adminInfoSection).getByLabelText(
+      /^spotify playlist link$/i,
+    )
+
+    await user.type(playlistInput, 'https://open.spotify.com/album/abc')
+    await user.click(
+      within(adminInfoSection).getByRole('button', {
+        name: /playlist speichern/i,
+      }),
+    )
+
+    expect(updateMusicPlaylist).not.toHaveBeenCalled()
+    expect(
+      await within(adminInfoSection).findByText(
+        /gültigen spotify playlist link/i,
+      ),
+    ).toBeVisible()
   })
 
   it('speichert ungueltige Campstandort Links nicht', async () => {

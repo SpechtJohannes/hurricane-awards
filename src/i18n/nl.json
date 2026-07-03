@@ -131,6 +131,15 @@
         "open": "De locatielink kon niet worden geopend. Controleer je browserinstellingen."
       }
     },
+    "musicPlaylist": {
+      "eyebrow": "Festivalplaylist",
+      "title": "Festivalplaylist",
+      "open": "Openen in Spotify",
+      "playerTitle": "Spotify festivalplaylist",
+      "errors": {
+        "load": "De Spotify-playlist kon niet worden geladen. Je kunt hem direct in Spotify openen."
+      }
+    },
     "errors": {
       "load": "De festivalinfo kon net niet worden geladen."
     }
@@ -207,6 +216,22 @@
         "invalid": "Voer een geldige Google Maps- of WhatsApp-locatielink in.",
         "save": "De campingplek kon net niet worden opgeslagen.",
         "remove": "De campingplek kon net niet worden verwijderd."
+      }
+    },
+    "musicPlaylist": {
+      "eyebrow": "Muziek",
+      "title": "Festivalplaylist",
+      "linkLabel": "Spotify-playlistlink",
+      "linkPlaceholder": "https://open.spotify.com/playlist/...",
+      "save": "Playlist opslaan",
+      "remove": "Playlist verwijderen",
+      "saveSuccess": "Playlist is opgeslagen.",
+      "removeSuccess": "Playlist is verwijderd.",
+      "confirmRemove": "Festivalplaylist echt verwijderen?",
+      "errors": {
+        "invalid": "Voer een geldige Spotify-playlistlink in.",
+        "save": "De playlist kon net niet worden opgeslagen.",
+        "remove": "De playlist kon net niet worden verwijderd."
       }
     },
     "festival": {

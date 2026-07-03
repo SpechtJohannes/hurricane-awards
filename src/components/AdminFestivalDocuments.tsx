@@ -9,19 +9,26 @@ import {
   type FestivalDocument,
   type FestivalDocumentType,
 } from '../data/festivalDocuments'
+import type { MusicPlaylist } from '../data/musicEmbeds'
 
 type AdminFestivalDocumentsProps = {
   documents: FestivalDocument[]
   campLocationLink: string | null
   campLocationError: string
+  musicPlaylist: MusicPlaylist | null
+  musicPlaylistError: string
   error: string
   isLoading: boolean
   isSavingCampLocation: boolean
+  isSavingMusicPlaylist: boolean
   uploadingDocumentType: FestivalDocumentType | null
   removingDocumentType: FestivalDocumentType | null
   onSaveCampLocation: (link: string) => void
   onRemoveCampLocation: () => void
   onClearCampLocationError: () => void
+  onSaveMusicPlaylist: (link: string) => Promise<boolean>
+  onRemoveMusicPlaylist: () => Promise<boolean>
+  onClearMusicPlaylistError: () => void
   onUpload: (documentType: FestivalDocumentType, file: File) => void
   onRemove: (documentType: FestivalDocumentType) => void
 }
@@ -37,14 +44,20 @@ export function AdminFestivalDocuments({
   documents,
   campLocationLink,
   campLocationError,
+  musicPlaylist,
+  musicPlaylistError,
   error,
   isLoading,
   isSavingCampLocation,
+  isSavingMusicPlaylist,
   uploadingDocumentType,
   removingDocumentType,
   onSaveCampLocation,
   onRemoveCampLocation,
   onClearCampLocationError,
+  onSaveMusicPlaylist,
+  onRemoveMusicPlaylist,
+  onClearMusicPlaylistError,
   onUpload,
   onRemove,
 }: AdminFestivalDocumentsProps) {
@@ -52,10 +65,34 @@ export function AdminFestivalDocuments({
   const [campLocationInput, setCampLocationInput] = useState(
     campLocationLink ?? '',
   )
+  const [musicPlaylistInput, setMusicPlaylistInput] = useState(
+    musicPlaylist?.externalUrl ?? '',
+  )
+  const [musicPlaylistMessage, setMusicPlaylistMessage] = useState('')
 
   function submitCampLocation(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     onSaveCampLocation(campLocationInput)
+  }
+
+  async function submitMusicPlaylist(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setMusicPlaylistMessage('')
+    const wasSaved = await onSaveMusicPlaylist(musicPlaylistInput)
+
+    if (wasSaved) {
+      setMusicPlaylistMessage(t('admin.musicPlaylist.saveSuccess'))
+    }
+  }
+
+  async function removeMusicPlaylist() {
+    setMusicPlaylistMessage('')
+    const wasRemoved = await onRemoveMusicPlaylist()
+
+    if (wasRemoved) {
+      setMusicPlaylistInput('')
+      setMusicPlaylistMessage(t('admin.musicPlaylist.removeSuccess'))
+    }
   }
 
   function changeFile(
@@ -134,6 +171,63 @@ export function AdminFestivalDocuments({
                 onClick={onRemoveCampLocation}
               >
                 {t('admin.campLocation.remove')}
+              </button>
+            ) : null}
+          </div>
+        </form>
+
+        <form
+          className="admin-document-card admin-camp-location"
+          onSubmit={submitMusicPlaylist}
+        >
+          <div className="admin-document-card__main">
+            <p>{t('admin.musicPlaylist.eyebrow')}</p>
+            <h3>{t('admin.musicPlaylist.title')}</h3>
+            <label htmlFor="admin-music-playlist-link">
+              {t('admin.musicPlaylist.linkLabel')}
+              <input
+                id="admin-music-playlist-link"
+                type="text"
+                value={musicPlaylistInput}
+                disabled={isSavingMusicPlaylist}
+                placeholder={t('admin.musicPlaylist.linkPlaceholder')}
+                onChange={(event) => {
+                  setMusicPlaylistInput(event.target.value)
+                  setMusicPlaylistMessage('')
+                  onClearMusicPlaylistError()
+                }}
+              />
+            </label>
+            {musicPlaylistError ? (
+              <p className="admin-participant-form__error" role="alert">
+                {musicPlaylistError}
+              </p>
+            ) : null}
+            {musicPlaylistMessage ? (
+              <p className="admin-festival-actions__success">
+                {musicPlaylistMessage}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="admin-document-card__actions">
+            <button
+              className="admin-card__reset admin-card__reset--primary"
+              type="submit"
+              disabled={isSavingMusicPlaylist}
+            >
+              {isSavingMusicPlaylist
+                ? t('common.saving')
+                : t('admin.musicPlaylist.save')}
+            </button>
+            {musicPlaylist ? (
+              <button
+                className="admin-card__reset admin-card__reset--secondary"
+                type="button"
+                disabled={isSavingMusicPlaylist}
+                onClick={() => void removeMusicPlaylist()}
+              >
+                {t('admin.musicPlaylist.remove')}
               </button>
             ) : null}
           </div>

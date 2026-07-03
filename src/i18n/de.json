@@ -131,6 +131,15 @@
         "open": "Der Standortlink konnte nicht geöffnet werden. Prüfe bitte deine Browser-Einstellungen."
       }
     },
+    "musicPlaylist": {
+      "eyebrow": "Festival Playlist",
+      "title": "Festival Playlist",
+      "open": "In Spotify öffnen",
+      "playerTitle": "Spotify Festival Playlist",
+      "errors": {
+        "load": "Die Spotify Playlist konnte nicht geladen werden. Du kannst sie direkt in Spotify öffnen."
+      }
+    },
     "errors": {
       "load": "Die Festivalinfos konnten gerade nicht geladen werden."
     }
@@ -207,6 +216,22 @@
         "invalid": "Bitte gib einen gültigen Google Maps oder WhatsApp Standortlink ein.",
         "save": "Der Campstandort konnte gerade nicht gespeichert werden.",
         "remove": "Der Campstandort konnte gerade nicht entfernt werden."
+      }
+    },
+    "musicPlaylist": {
+      "eyebrow": "Musik",
+      "title": "Festival Playlist",
+      "linkLabel": "Spotify Playlist Link",
+      "linkPlaceholder": "https://open.spotify.com/playlist/...",
+      "save": "Playlist speichern",
+      "remove": "Playlist entfernen",
+      "saveSuccess": "Playlist wurde gespeichert.",
+      "removeSuccess": "Playlist wurde entfernt.",
+      "confirmRemove": "Festival Playlist wirklich entfernen?",
+      "errors": {
+        "invalid": "Bitte gib einen gültigen Spotify Playlist Link ein.",
+        "save": "Die Playlist konnte gerade nicht gespeichert werden.",
+        "remove": "Die Playlist konnte gerade nicht entfernt werden."
       }
     },
     "festival": {
