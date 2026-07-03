@@ -88,6 +88,13 @@ const hardeningMigration = readFileSync(
   ),
   'utf8',
 )
+const festivalDocumentsMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260703110000_create_festival_documents.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -455,6 +462,10 @@ describe('Supabase Sicherheitsmigration', () => {
       [festivalArchiveMigration, 'ha_archive_festival'],
       [festivalAccessCodeMigration, 'ha_get_festival_access_code'],
       [festivalAccessCodeMigration, 'ha_update_festival_access_code'],
+      [festivalDocumentsMigration, 'ha_admin_list_festival_documents'],
+      [festivalDocumentsMigration, 'ha_create_festival_document_upload'],
+      [festivalDocumentsMigration, 'ha_upsert_festival_document'],
+      [festivalDocumentsMigration, 'ha_delete_festival_document'],
     ] as const
 
     for (const [migration, functionName] of adminRpcExpectations) {
@@ -621,6 +632,93 @@ describe('Supabase Sicherheitsmigration', () => {
     )
   })
 
+  it('legt Festivaldokumente mit geschuetzter Metadatentabelle und Storage Bucket an', () => {
+    expect(festivalDocumentsMigration).toContain(
+      'create table if not exists public.festival_documents',
+    )
+    expect(festivalDocumentsMigration).toContain(
+      'create table if not exists public.festival_document_uploads',
+    )
+    expect(festivalDocumentsMigration).toContain(
+      'document_type text primary key',
+    )
+    expect(festivalDocumentsMigration).toContain(
+      "document_type in ('timetable', 'site_map')",
+    )
+    expect(festivalDocumentsMigration).toContain(
+      "mime_type = 'application/pdf' or mime_type like 'image/%'",
+    )
+    expect(festivalDocumentsMigration).toContain(
+      'alter table public.festival_documents enable row level security',
+    )
+    expect(festivalDocumentsMigration).toContain(
+      'alter table public.festival_document_uploads enable row level security',
+    )
+    expect(festivalDocumentsMigration).toContain(
+      'revoke all on table public.festival_documents from anon, authenticated',
+    )
+    expect(festivalDocumentsMigration).toContain(
+      'revoke all on table public.festival_document_uploads from anon, authenticated',
+    )
+    expect(festivalDocumentsMigration).toContain(
+      'create policy "deny direct festival document access"',
+    )
+    expect(festivalDocumentsMigration).toContain(
+      "values (\n  'festival-documents'",
+    )
+    expect(festivalDocumentsMigration).toContain(
+      "allowed_mime_types",
+    )
+    expect(festivalDocumentsMigration).toContain(
+      'create policy "festival documents can be read"',
+    )
+    expect(festivalDocumentsMigration).toContain(
+      'create policy "festival documents can be uploaded"',
+    )
+    expect(festivalDocumentsMigration).toContain(
+      'public.ha_is_allowed_festival_document_upload(name)',
+    )
+
+    for (const functionName of [
+      'ha_is_allowed_festival_document_upload',
+      'ha_list_festival_documents',
+      'ha_admin_list_festival_documents',
+      'ha_create_festival_document_upload',
+      'ha_upsert_festival_document',
+      'ha_delete_festival_document',
+    ]) {
+      expect(festivalDocumentsMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(festivalDocumentsMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+
+    const upsertFunctionBody =
+      festivalDocumentsMigration.match(
+        /create or replace function public\.ha_upsert_festival_document[\s\S]*?\n\$\$;/,
+      )?.[0] ?? ''
+
+    expect(upsertFunctionBody).toContain(
+      'p_document_type text',
+    )
+    expect(upsertFunctionBody).toContain(
+      'p_title text',
+    )
+    expect(upsertFunctionBody).toContain(
+      'p_file_path text',
+    )
+    expect(upsertFunctionBody).toContain(
+      'p_mime_type text',
+    )
+    expect(upsertFunctionBody).toContain(
+      'on conflict on constraint festival_documents_pkey do update',
+    )
+    expect(upsertFunctionBody).toContain('d.document_type')
+    expect(upsertFunctionBody).not.toContain('on conflict (document_type)')
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -635,6 +733,7 @@ describe('Supabase Sicherheitsmigration', () => {
       festivalAccessCodeMigration,
       secureFestivalAccessCodeMigration,
       hardeningMigration,
+      festivalDocumentsMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

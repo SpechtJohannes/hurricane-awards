@@ -595,6 +595,186 @@ h1 {
   line-height: 1.45;
 }
 
+.festival-info {
+  position: relative;
+  padding: 56px 20px 72px;
+}
+
+.festival-info__header {
+  width: min(100%, 960px);
+  margin: 0 auto 24px;
+}
+
+.festival-info__eyebrow {
+  margin: 0 0 10px;
+  color: #ffbe0b;
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.festival-info h2 {
+  max-width: 11ch;
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2.4rem, 12vw, 5rem);
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.festival-info__notice {
+  width: min(100%, 960px);
+  padding: 18px 20px;
+  margin: 0 auto 18px;
+  color: #f4e7cf;
+  font-weight: 750;
+  line-height: 1.45;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.festival-info__notice--error {
+  color: #ffd6d6;
+  border-color: rgba(255, 0, 110, 0.4);
+}
+
+.festival-info__documents {
+  display: grid;
+  width: min(100%, 960px);
+  margin: 0 auto;
+  gap: 20px;
+}
+
+.festival-document {
+  display: grid;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.festival-document__header {
+  display: grid;
+  gap: 6px;
+  padding: 18px 20px;
+}
+
+.festival-document__header p {
+  margin: 0;
+  color: #ffbe0b;
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.festival-document__header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.25rem;
+  line-height: 1.15;
+}
+
+.festival-document__preview {
+  display: block;
+  width: 100%;
+  height: min(72vh, 640px);
+  min-height: 360px;
+  object-fit: contain;
+  background: rgba(16, 16, 20, 0.7);
+  border: 0;
+}
+
+.admin-documents {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-document-card {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.admin-document-card__main {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-document-card__main p,
+.admin-document-card__main h3,
+.admin-document-card__notice {
+  margin: 0;
+}
+
+.admin-document-card__main > p {
+  color: #ffbe0b;
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.admin-document-card__main h3 {
+  color: #ffffff;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.admin-document-card__main dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.admin-document-card__main dl div {
+  display: grid;
+  gap: 3px;
+}
+
+.admin-document-card__main dt {
+  color: #cfc7d4;
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-document-card__main dd {
+  margin: 0;
+  color: #f4e7cf;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.admin-document-card__notice {
+  color: #f4e7cf;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.admin-document-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-document-card__file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
 .admin-card {
   display: grid;
   gap: 16px;
@@ -1726,6 +1906,11 @@ h1 {
 
   .admin-category-card {
     grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  }
+
+  .admin-document-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
   }
 
   .categories {

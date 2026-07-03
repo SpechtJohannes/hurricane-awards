@@ -114,6 +114,19 @@
     "infoTitle": "Info",
     "infoBody": "Dit onderdeel is voorbereid. Festivalinfo wordt later toegevoegd."
   },
+  "info": {
+    "eyebrow": "Festivalinfo",
+    "title": "Info",
+    "loading": "Festivalinfo wordt geladen...",
+    "empty": "Er is momenteel nog geen festivalinfo beschikbaar.",
+    "documentTypes": {
+      "timetable": "Timetable",
+      "site_map": "Plattegrond"
+    },
+    "errors": {
+      "load": "De festivalinfo kon net niet worden geladen."
+    }
+  },
   "identity": {
     "title": "Voer je deelnemerscode in",
     "loggedInAs": "Aangemeld als:",
@@ -152,6 +165,27 @@
       "gamesBody": "Voor spellen zijn er momenteel nog geen administratieve functies.",
       "infoTitle": "Info",
       "infoBody": "Voor info zijn er momenteel nog geen administratieve functies."
+    },
+    "documents": {
+      "eyebrow": "Beheer",
+      "title": "Info",
+      "loading": "Festivaldocumenten worden geladen...",
+      "emptyDocument": "Nog geen bestand",
+      "missingDocument": "Voor dit documenttype is nog geen bestand beschikbaar.",
+      "fileType": "Bestandstype",
+      "updatedAt": "Bijgewerkt",
+      "upload": "Uploaden",
+      "replace": "Vervangen",
+      "uploading": "Uploaden...",
+      "remove": "Verwijderen",
+      "removing": "Verwijderen...",
+      "confirmRemove": "{{title}} echt verwijderen?",
+      "errors": {
+        "load": "De festivaldocumenten konden net niet worden geladen.",
+        "upload": "Het document kon net niet worden geupload.",
+        "remove": "Het document kon net niet worden verwijderd.",
+        "unsupportedFileType": "Kies een PDF- of afbeeldingsbestand."
+      }
     },
     "festival": {
       "eyebrow": "Admin",
