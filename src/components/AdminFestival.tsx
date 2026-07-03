@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
 type AdminFestivalProps = {
+  mode?: 'settings' | 'archive'
   festivalName: string
   error: string
   isSaving: boolean
@@ -17,6 +18,7 @@ type AdminFestivalProps = {
 }
 
 export function AdminFestival({
+  mode = 'settings',
   festivalName,
   error,
   isSaving,
@@ -127,6 +129,93 @@ export function AdminFestival({
     }
   }
 
+  if (mode === 'archive') {
+    return (
+      <>
+        <div className="admin__header">
+          <p className="admin__eyebrow">{t('admin.archive.eyebrow')}</p>
+          <h2 id="admin-archive-title">{t('admin.archive.title')}</h2>
+        </div>
+
+        <div className="admin-festival-actions">
+          <label className="admin-festival-actions__option">
+            <input
+              type="checkbox"
+              checked={includeParticipantAccessCodes}
+              disabled={
+                isSaving ||
+                isArchiving ||
+                isExporting ||
+                isLoadingFestivalCode ||
+                isSavingFestivalCode
+              }
+              onChange={(event) =>
+                setIncludeParticipantAccessCodes(event.target.checked)
+              }
+            />
+            {t('admin.festival.exportIncludeAccessCodes')}
+          </label>
+
+          {includeParticipantAccessCodes ? (
+            <p className="admin-participant-form__error" role="alert">
+              {t('admin.festival.exportAccessCodeWarning')}
+            </p>
+          ) : null}
+
+          <button
+            className="admin-card__reset admin-card__reset--primary"
+            type="button"
+            disabled={
+              isSaving ||
+              isArchiving ||
+              isExporting ||
+              isLoadingFestivalCode ||
+              isSavingFestivalCode
+            }
+            onClick={exportCurrentFestival}
+          >
+            {isExporting
+              ? t('admin.festival.exporting')
+              : t('admin.festival.export')}
+          </button>
+
+          {exportMessage ? (
+            <p className="admin-festival-actions__success">{exportMessage}</p>
+          ) : null}
+
+          {exportError ? (
+            <p className="admin-participant-form__error">{exportError}</p>
+          ) : null}
+
+          <button
+            className="admin-card__reset admin-card__reset--secondary"
+            type="button"
+            disabled={
+              isSaving ||
+              isArchiving ||
+              isExporting ||
+              isLoadingFestivalCode ||
+              isSavingFestivalCode
+            }
+            onClick={archiveCurrentFestival}
+          >
+            {isArchiving
+              ? t('admin.festival.archiving')
+              : t('admin.festival.archive')}
+          </button>
+
+          {archiveMessage ? (
+            <p className="admin-festival-actions__success">{archiveMessage}</p>
+          ) : null}
+
+          {archiveError ? (
+            <p className="admin-participant-form__error">{archiveError}</p>
+          ) : null}
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       <div className="admin__header">
@@ -220,82 +309,6 @@ export function AdminFestival({
             : t('admin.festival.codeSave')}
         </button>
       </form>
-
-      <div className="admin-festival-actions">
-        <label className="admin-festival-actions__option">
-          <input
-            type="checkbox"
-            checked={includeParticipantAccessCodes}
-            disabled={
-              isSaving ||
-              isArchiving ||
-              isExporting ||
-              isLoadingFestivalCode ||
-              isSavingFestivalCode
-            }
-            onChange={(event) =>
-              setIncludeParticipantAccessCodes(event.target.checked)
-            }
-          />
-          {t('admin.festival.exportIncludeAccessCodes')}
-        </label>
-
-        {includeParticipantAccessCodes ? (
-          <p className="admin-participant-form__error" role="alert">
-            {t('admin.festival.exportAccessCodeWarning')}
-          </p>
-        ) : null}
-
-        <button
-          className="admin-card__reset admin-card__reset--primary"
-          type="button"
-          disabled={
-            isSaving ||
-            isArchiving ||
-            isExporting ||
-            isLoadingFestivalCode ||
-            isSavingFestivalCode
-          }
-          onClick={exportCurrentFestival}
-        >
-          {isExporting
-            ? t('admin.festival.exporting')
-            : t('admin.festival.export')}
-        </button>
-
-        {exportMessage ? (
-          <p className="admin-festival-actions__success">{exportMessage}</p>
-        ) : null}
-
-        {exportError ? (
-          <p className="admin-participant-form__error">{exportError}</p>
-        ) : null}
-
-        <button
-          className="admin-card__reset admin-card__reset--secondary"
-          type="button"
-          disabled={
-            isSaving ||
-            isArchiving ||
-            isExporting ||
-            isLoadingFestivalCode ||
-            isSavingFestivalCode
-          }
-          onClick={archiveCurrentFestival}
-        >
-          {isArchiving
-            ? t('admin.festival.archiving')
-            : t('admin.festival.archive')}
-        </button>
-
-        {archiveMessage ? (
-          <p className="admin-festival-actions__success">{archiveMessage}</p>
-        ) : null}
-
-        {archiveError ? (
-          <p className="admin-participant-form__error">{archiveError}</p>
-        ) : null}
-      </div>
     </>
   )
 }

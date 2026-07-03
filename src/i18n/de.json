@@ -101,6 +101,19 @@
     "subtitle": "Ein entspanntes Wochenende mit Freunden? Nein. Dies ist ein knallharter Wettbewerb.",
     "voteCta": "Zur Abstimmung"
   },
+  "navigation": {
+    "label": "Hauptbereiche",
+    "awards": "Awards",
+    "games": "Spiele",
+    "info": "Infos",
+    "profile": "Profil"
+  },
+  "placeholders": {
+    "gamesTitle": "Spiele",
+    "gamesBody": "Dieser Bereich ist vorbereitet. Konkrete Spiele werden später ergänzt.",
+    "infoTitle": "Infos",
+    "infoBody": "Dieser Bereich ist vorbereitet. Festivalinfos werden später ergänzt."
+  },
   "identity": {
     "title": "Gib deinen Teilnehmercode ein",
     "loggedInAs": "Angemeldet als:",
@@ -121,6 +134,25 @@
     "eyebrow": "Admin",
     "title": "Kategorien",
     "changeStatus": "Status ändern",
+    "navigation": {
+      "label": "Adminbereiche",
+      "festival": "Festival",
+      "participants": "Teilnehmer",
+      "awards": "Awards",
+      "games": "Spiele",
+      "info": "Infos",
+      "archive": "Archiv"
+    },
+    "archive": {
+      "eyebrow": "Admin",
+      "title": "Archiv"
+    },
+    "placeholders": {
+      "gamesTitle": "Spiele",
+      "gamesBody": "Für Spiele gibt es aktuell noch keine administrativen Funktionen.",
+      "infoTitle": "Infos",
+      "infoBody": "Für Infos gibt es aktuell noch keine administrativen Funktionen."
+    },
     "festival": {
       "eyebrow": "Admin",
       "title": "Festival",

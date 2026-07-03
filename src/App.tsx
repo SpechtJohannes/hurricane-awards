@@ -137,10 +137,30 @@ function technicalErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error)
 }
 
+type MainSection = 'awards' | 'games' | 'info' | 'profile'
+type AdminSection = 'festival' | 'participants' | 'awards' | 'games' | 'info' | 'archive'
+
 type ResultCardProps = {
   category: Category
   results: CategoryResult[]
   highestVoteCount: number
+}
+
+type PlaceholderSectionProps = {
+  id: string
+  title: string
+  body: string
+}
+
+function PlaceholderSection({ id, title, body }: PlaceholderSectionProps) {
+  return (
+    <section className="placeholder-section" id={id} aria-labelledby={`${id}-title`}>
+      <div className="placeholder-section__content">
+        <h2 id={`${id}-title`}>{title}</h2>
+        <p>{body}</p>
+      </div>
+    </section>
+  )
 }
 
 function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
@@ -609,6 +629,10 @@ function App() {
   >(null)
   const [updatingCategoryId, setUpdatingCategoryId] = useState<string | null>(null)
   const [isAdminVisible, setIsAdminVisible] = useState(false)
+  const [activeMainSection, setActiveMainSection] =
+    useState<MainSection>('awards')
+  const [activeAdminSection, setActiveAdminSection] =
+    useState<AdminSection>('festival')
   const [isLoadingData, setIsLoadingData] = useState(Boolean(selectedParticipant))
   const [isSubmittingAccessCode, setIsSubmittingAccessCode] = useState(false)
   const [loginLockedUntil, setLoginLockedUntil] = useState<number | null>(null)
@@ -643,6 +667,20 @@ function App() {
     : 0
   const loginLockRemainingSeconds = Math.ceil(loginLockRemainingMs / 1000)
   const isLoginLocked = loginLockRemainingMs > 0
+  const mainNavigationItems: Array<{ section: MainSection; label: string }> = [
+    { section: 'awards', label: t('navigation.awards') },
+    { section: 'games', label: t('navigation.games') },
+    { section: 'info', label: t('navigation.info') },
+    { section: 'profile', label: t('navigation.profile') },
+  ]
+  const adminNavigationItems: Array<{ section: AdminSection; label: string }> = [
+    { section: 'festival', label: t('admin.navigation.festival') },
+    { section: 'participants', label: t('admin.navigation.participants') },
+    { section: 'awards', label: t('admin.navigation.awards') },
+    { section: 'games', label: t('admin.navigation.games') },
+    { section: 'info', label: t('admin.navigation.info') },
+    { section: 'archive', label: t('admin.navigation.archive') },
+  ]
 
   useEffect(() => {
     function handleHashChange() {
@@ -902,6 +940,8 @@ function App() {
     setParticipantForm(null)
     setParticipantFormError('')
     setIsAdminVisible(false)
+    setActiveMainSection('awards')
+    setActiveAdminSection('festival')
     setSelectedVotesByCategory({})
 
     if (window.location.hash) {
@@ -1599,9 +1639,13 @@ function App() {
           <p className="hero__eyebrow">{t('hero.eyebrow')}</p>
           <h1 id="hero-title">{displayedFestivalName}</h1>
           <p className="hero__subtitle">{t('hero.subtitle')}</p>
-          <a className="hero__button" href="#abstimmung">
+          <button
+            className="hero__button"
+            type="button"
+            onClick={() => setActiveMainSection('awards')}
+          >
             {t('hero.voteCta')}
-          </a>
+          </button>
         </div>
 
         <div className="stage-lights" aria-hidden="true">
@@ -1611,15 +1655,157 @@ function App() {
         </div>
       </header>
 
-      <section
-        className="identity"
-        id="person-auswahl"
-        aria-labelledby="identity-title"
+      <nav
+        className="app-navigation"
+        aria-label={t('navigation.label')}
       >
-        <div className="identity__content">
-          <h2 id="identity-title">{t('identity.title')}</h2>
+        <div className="app-navigation__items">
+          {mainNavigationItems.map((item) => (
+            <button
+              className="app-navigation__button"
+              type="button"
+              key={item.section}
+              aria-current={
+                activeMainSection === item.section ? 'page' : undefined
+              }
+              aria-controls={`main-${item.section}`}
+              onClick={() => setActiveMainSection(item.section)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </nav>
 
-          {selectedParticipant ? (
+      {selectedParticipant.isAdmin && isAdminVisible ? (
+        <section
+          className="admin"
+          id="admin"
+          aria-label={t('admin.navigation.label')}
+        >
+          <nav
+            className="admin-navigation"
+            aria-label={t('admin.navigation.label')}
+          >
+            {adminNavigationItems.map((item) => (
+              <button
+                className="admin-navigation__button"
+                type="button"
+                key={item.section}
+                aria-current={
+                  activeAdminSection === item.section ? 'page' : undefined
+                }
+                onClick={() => setActiveAdminSection(item.section)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+
+          {activeAdminSection === 'festival' ? (
+            <AdminFestival
+              key={`festival-${festivalName}-${festivalCode}`}
+              mode="settings"
+              festivalName={festivalName}
+              error={festivalNameError}
+              isSaving={isSavingFestivalName}
+              festivalCode={festivalCode}
+              festivalCodeError={festivalCodeError}
+              isLoadingFestivalCode={isLoadingFestivalCode}
+              isSavingFestivalCode={isSavingFestivalCode}
+              isExporting={isExportingFestival}
+              onSave={saveFestivalName}
+              onSaveFestivalCode={saveFestivalCode}
+              onArchive={archiveCurrentFestival}
+              onExport={exportCurrentFestival}
+            />
+          ) : null}
+
+          {activeAdminSection === 'participants' ? (
+            <AdminParticipants
+              participants={adminParticipants}
+              error={adminParticipantsError}
+              isLoading={isLoadingAdminParticipants}
+              form={participantForm}
+              formError={participantFormError}
+              isSaving={isSavingParticipant}
+              togglingParticipantId={togglingParticipantId}
+              onCreate={startCreateParticipant}
+              onEdit={startEditParticipant}
+              onCancelForm={cancelParticipantForm}
+              onSubmitForm={submitParticipantForm}
+              onChangeForm={setParticipantForm}
+              onClearFormError={() => setParticipantFormError('')}
+              onDeactivate={deactivateAdminParticipant}
+              onReactivate={reactivateAdminParticipant}
+            />
+          ) : null}
+
+          {activeAdminSection === 'awards' ? (
+            <>
+              {adminError ? <p className="admin__notice">{adminError}</p> : null}
+              {categoriesError ? (
+                <p className="admin__notice">{categoriesError}</p>
+              ) : null}
+
+              <AdminCategories
+                categories={adminCategories}
+                error={adminCategoriesError}
+                isLoading={isLoadingAdminCategories}
+                updatingCategoryId={updatingCategoryId}
+                deletingCategoryId={deletingCategoryId}
+                onCreate={createAdminCategory}
+                onUpdate={updateAdminCategory}
+                onChangeStatus={changeCategoryStatus}
+                onDelete={deleteAdminCategory}
+              />
+            </>
+          ) : null}
+
+          {activeAdminSection === 'games' ? (
+            <div className="admin-placeholder">
+              <h2>{t('admin.placeholders.gamesTitle')}</h2>
+              <p>{t('admin.placeholders.gamesBody')}</p>
+            </div>
+          ) : null}
+
+          {activeAdminSection === 'info' ? (
+            <div className="admin-placeholder">
+              <h2>{t('admin.placeholders.infoTitle')}</h2>
+              <p>{t('admin.placeholders.infoBody')}</p>
+            </div>
+          ) : null}
+
+          {activeAdminSection === 'archive' ? (
+            <AdminFestival
+              key={`archive-${festivalName}-${festivalCode}`}
+              mode="archive"
+              festivalName={festivalName}
+              error={festivalNameError}
+              isSaving={isSavingFestivalName}
+              festivalCode={festivalCode}
+              festivalCodeError={festivalCodeError}
+              isLoadingFestivalCode={isLoadingFestivalCode}
+              isSavingFestivalCode={isSavingFestivalCode}
+              isExporting={isExportingFestival}
+              onSave={saveFestivalName}
+              onSaveFestivalCode={saveFestivalCode}
+              onArchive={archiveCurrentFestival}
+              onExport={exportCurrentFestival}
+            />
+          ) : null}
+        </section>
+      ) : null}
+
+      {activeMainSection === 'profile' ? (
+        <section
+          className="identity"
+          id="main-profile"
+          aria-labelledby="identity-title"
+        >
+          <div className="identity__content">
+            <h2 id="identity-title">{t('identity.title')}</h2>
+
             <div className="identity__selected">
               <p>
                 {t('identity.loggedInAs')}{' '}
@@ -1633,259 +1819,195 @@ function App() {
                 {t('identity.logout')}
               </button>
             </div>
-          ) : (
-            <form className="identity__form" onSubmit={submitAccessCode}>
-              <label htmlFor="participant-access-code">
-                {t('identity.participantCodeLabel')}
-              </label>
-              <input
-                id="participant-access-code"
-                type="text"
-                value={accessCode}
-                disabled={isLoadingData || Boolean(participantsError)}
-                onChange={(event) => {
-                  setAccessCode(event.target.value)
-                  setAccessCodeError('')
-                }}
-                autoComplete="off"
-                inputMode="text"
-                placeholder={t('identity.participantCodePlaceholder')}
-              />
-              {accessCodeError ? (
-                <p className="identity__error">{accessCodeError}</p>
-              ) : null}
-              {participantsError ? (
-                <p className="identity__error">{participantsError}</p>
-              ) : null}
-              <button
-                className="identity__submit"
-                type="submit"
-                disabled={isLoadingData || Boolean(participantsError)}
-              >
-                {isLoadingData ? t('common.loading') : t('identity.submit')}
-              </button>
-            </form>
-          )}
-        </div>
-      </section>
 
-      {selectedParticipant.isAdmin && isAdminVisible ? (
-        <section className="admin" id="admin" aria-labelledby="admin-title">
-          <AdminFestival
-            key={`${festivalName}-${festivalCode}`}
-            festivalName={festivalName}
-            error={festivalNameError}
-            isSaving={isSavingFestivalName}
-            festivalCode={festivalCode}
-            festivalCodeError={festivalCodeError}
-            isLoadingFestivalCode={isLoadingFestivalCode}
-            isSavingFestivalCode={isSavingFestivalCode}
-            isExporting={isExportingFestival}
-            onSave={saveFestivalName}
-            onSaveFestivalCode={saveFestivalCode}
-            onArchive={archiveCurrentFestival}
-            onExport={exportCurrentFestival}
-          />
-
-          {adminError ? <p className="admin__notice">{adminError}</p> : null}
-          {categoriesError ? (
-            <p className="admin__notice">{categoriesError}</p>
-          ) : null}
-
-          <AdminCategories
-            categories={adminCategories}
-            error={adminCategoriesError}
-            isLoading={isLoadingAdminCategories}
-            updatingCategoryId={updatingCategoryId}
-            deletingCategoryId={deletingCategoryId}
-            onCreate={createAdminCategory}
-            onUpdate={updateAdminCategory}
-            onChangeStatus={changeCategoryStatus}
-            onDelete={deleteAdminCategory}
-          />
-
-          <AdminParticipants
-            participants={adminParticipants}
-            error={adminParticipantsError}
-            isLoading={isLoadingAdminParticipants}
-            form={participantForm}
-            formError={participantFormError}
-            isSaving={isSavingParticipant}
-            togglingParticipantId={togglingParticipantId}
-            onCreate={startCreateParticipant}
-            onEdit={startEditParticipant}
-            onCancelForm={cancelParticipantForm}
-            onSubmitForm={submitParticipantForm}
-            onChangeForm={setParticipantForm}
-            onClearFormError={() => setParticipantFormError('')}
-            onDeactivate={deactivateAdminParticipant}
-            onReactivate={reactivateAdminParticipant}
-          />
+            {participantsError ? (
+              <p className="identity__error">{participantsError}</p>
+            ) : null}
+          </div>
         </section>
       ) : null}
 
-      <section className="categories" id="abstimmung" aria-labelledby="categories-title">
-        <div className="categories__header">
-          <p className="categories__eyebrow">
-            {t('categories.eyebrow', { count: participantCount })}
-          </p>
-          <h2 id="categories-title">{t('categories.title')}</h2>
-        </div>
+      {activeMainSection === 'games' ? (
+        <PlaceholderSection
+          id="main-games"
+          title={t('placeholders.gamesTitle')}
+          body={t('placeholders.gamesBody')}
+        />
+      ) : null}
 
-        {votesError ? <p className="categories__notice">{votesError}</p> : null}
-        {categoriesError ? (
-          <p className="categories__notice">{categoriesError}</p>
-        ) : null}
+      {activeMainSection === 'info' ? (
+        <PlaceholderSection
+          id="main-info"
+          title={t('placeholders.infoTitle')}
+          body={t('placeholders.infoBody')}
+        />
+      ) : null}
 
-        {!selectedParticipant ? (
-          <p className="categories__notice">
-            {t('categories.loginRequired')}
-          </p>
-        ) : (
-          <div className="categories__grid">
-            {openCategories.map((category) => {
-              const eligibleParticipants = participants.filter(
-                (participant) => participant.id !== selectedParticipant.id,
-              )
-              const selectedVote = selectedVotesByCategory[category.id] ?? ''
-              const hasAlreadyVoted = votes.some(
-                (vote) =>
-                  vote.voterId === selectedParticipant.id &&
-                  vote.categoryId === category.id,
-              )
-
-              return (
-                <article className="category-card" key={category.id}>
-                  <div className="category-card__topline">
-                    <span
-                      className={`category-card__status category-card__status--${category.status}`}
-                    >
-                      {statusLabels[category.status]}
-                    </span>
-                  </div>
-                  <h3>{category.title}</h3>
-                  <p>{category.description}</p>
-
-                  {hasAlreadyVoted ? (
-                    <p className="category-card__voted">
-                      {t('categories.alreadyVoted')}
-                    </p>
-                  ) : (
-                    <div className="category-card__vote">
-                      <label htmlFor={`vote-${category.id}`}>
-                        {t('categories.voteTargetLabel')}
-                      </label>
-                      <select
-                        id={`vote-${category.id}`}
-                        value={selectedVote}
-                        onChange={(event) =>
-                          selectVote(category.id, event.target.value)
-                        }
-                      >
-                        <option value="">{t('categories.selectPerson')}</option>
-                        {eligibleParticipants.map((participant) => (
-                          <option key={participant.id} value={participant.id}>
-                            {participant.displayName}
-                          </option>
-                        ))}
-                      </select>
-
-                      {selectedVote ? (
-                        <button
-                          className="category-card__submit"
-                          type="button"
-                          disabled={submittingCategoryId === category.id}
-                          onClick={() => submitVote(category.id)}
-                        >
-                          {submittingCategoryId === category.id
-                            ? t('common.saving')
-                            : t('categories.submitVote')}
-                        </button>
-                      ) : null}
-                    </div>
-                  )}
-                </article>
-              )
-            })}
-          </div>
-        )}
-      </section>
-
-      <section className="results" id="ergebnisse" aria-labelledby="results-title">
-        <div className="results__header">
-          <p className="results__eyebrow">{t('results.eyebrow')}</p>
-          <h2 id="results-title">{t('results.title')}</h2>
-        </div>
-
-        {resultsError ? <p className="results__notice">{resultsError}</p> : null}
-
-        {!hasVotes ? (
-          <p className="results__notice">{t('results.empty')}</p>
-        ) : (
-          <div className="results__grid">
-            {resultsByCategory.map(({ category, results, highestVoteCount }) => (
-              <ResultCard
-                category={category}
-                results={results}
-                highestVoteCount={highestVoteCount}
-                key={`${category.id}-${category.status}`}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section
-        className="standings"
-        id="gesamtclassement"
-        aria-labelledby="standings-title"
-      >
-        <div className="standings__header">
-          <p className="standings__eyebrow">{t('standings.eyebrow')}</p>
-          <h2 id="standings-title">{t('standings.title')}</h2>
-        </div>
-
-        {isStandingsLoading ? (
-          <p className="standings__notice" role="status">
-            {t('standings.loading')}
-          </p>
-        ) : standingsError ? (
-          <p className="standings__notice standings__notice--error" role="alert">
-            {standingsError}
-          </p>
-        ) : allTimeStandings.length === 0 ? (
-          <p className="standings__notice">{t('standings.empty')}</p>
-        ) : (
-          <div
-            className="standings__table"
-            role="table"
-            aria-label={t('standings.title')}
-          >
-            <div className="standings__columns" role="row">
-              <span role="columnheader">{t('standings.columns.rank')}</span>
-              <span role="columnheader">{t('standings.columns.name')}</span>
-              <span role="columnheader">{t('standings.columns.points')}</span>
+      {activeMainSection === 'awards' ? (
+        <div id="main-awards">
+          <section className="categories" id="abstimmung" aria-labelledby="categories-title">
+            <div className="categories__header">
+              <p className="categories__eyebrow">
+                {t('categories.eyebrow', { count: participantCount })}
+              </p>
+              <h2 id="categories-title">{t('categories.title')}</h2>
             </div>
-            <ol>
-              {allTimeStandings.map((standing, index) => (
-                <li key={standing.participantId} role="row">
-                  <span
-                    className="standings__rank"
-                    role="cell"
-                    aria-label={t('standings.rankLabel', { rank: index + 1 })}
-                  >
-                    {index + 1}
-                  </span>
-                  <strong role="cell">{standing.participantName}</strong>
-                  <span className="standings__points" role="cell">
-                    {standing.totalPoints}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        )}
-      </section>
+
+            {votesError ? <p className="categories__notice">{votesError}</p> : null}
+            {isLoadingData ? (
+              <p className="categories__notice" role="status">
+                {t('common.loading')}
+              </p>
+            ) : null}
+            {categoriesError ? (
+              <p className="categories__notice">{categoriesError}</p>
+            ) : null}
+
+            <div className="categories__grid">
+              {openCategories.map((category) => {
+                const eligibleParticipants = participants.filter(
+                  (participant) => participant.id !== selectedParticipant.id,
+                )
+                const selectedVote = selectedVotesByCategory[category.id] ?? ''
+                const hasAlreadyVoted = votes.some(
+                  (vote) =>
+                    vote.voterId === selectedParticipant.id &&
+                    vote.categoryId === category.id,
+                )
+
+                return (
+                  <article className="category-card" key={category.id}>
+                    <div className="category-card__topline">
+                      <span
+                        className={`category-card__status category-card__status--${category.status}`}
+                      >
+                        {statusLabels[category.status]}
+                      </span>
+                    </div>
+                    <h3>{category.title}</h3>
+                    <p>{category.description}</p>
+
+                    {hasAlreadyVoted ? (
+                      <p className="category-card__voted">
+                        {t('categories.alreadyVoted')}
+                      </p>
+                    ) : (
+                      <div className="category-card__vote">
+                        <label htmlFor={`vote-${category.id}`}>
+                          {t('categories.voteTargetLabel')}
+                        </label>
+                        <select
+                          id={`vote-${category.id}`}
+                          value={selectedVote}
+                          onChange={(event) =>
+                            selectVote(category.id, event.target.value)
+                          }
+                        >
+                          <option value="">{t('categories.selectPerson')}</option>
+                          {eligibleParticipants.map((participant) => (
+                            <option key={participant.id} value={participant.id}>
+                              {participant.displayName}
+                            </option>
+                          ))}
+                        </select>
+
+                        {selectedVote ? (
+                          <button
+                            className="category-card__submit"
+                            type="button"
+                            disabled={submittingCategoryId === category.id}
+                            onClick={() => submitVote(category.id)}
+                          >
+                            {submittingCategoryId === category.id
+                              ? t('common.saving')
+                              : t('categories.submitVote')}
+                          </button>
+                        ) : null}
+                      </div>
+                    )}
+                  </article>
+                )
+              })}
+            </div>
+          </section>
+
+          <section className="results" id="ergebnisse" aria-labelledby="results-title">
+            <div className="results__header">
+              <p className="results__eyebrow">{t('results.eyebrow')}</p>
+              <h2 id="results-title">{t('results.title')}</h2>
+            </div>
+
+            {resultsError ? <p className="results__notice">{resultsError}</p> : null}
+
+            {!hasVotes ? (
+              <p className="results__notice">{t('results.empty')}</p>
+            ) : (
+              <div className="results__grid">
+                {resultsByCategory.map(({ category, results, highestVoteCount }) => (
+                  <ResultCard
+                    category={category}
+                    results={results}
+                    highestVoteCount={highestVoteCount}
+                    key={`${category.id}-${category.status}`}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section
+            className="standings"
+            id="gesamtclassement"
+            aria-labelledby="standings-title"
+          >
+            <div className="standings__header">
+              <p className="standings__eyebrow">{t('standings.eyebrow')}</p>
+              <h2 id="standings-title">{t('standings.title')}</h2>
+            </div>
+
+            {isStandingsLoading ? (
+              <p className="standings__notice" role="status">
+                {t('standings.loading')}
+              </p>
+            ) : standingsError ? (
+              <p className="standings__notice standings__notice--error" role="alert">
+                {standingsError}
+              </p>
+            ) : allTimeStandings.length === 0 ? (
+              <p className="standings__notice">{t('standings.empty')}</p>
+            ) : (
+              <div
+                className="standings__table"
+                role="table"
+                aria-label={t('standings.title')}
+              >
+                <div className="standings__columns" role="row">
+                  <span role="columnheader">{t('standings.columns.rank')}</span>
+                  <span role="columnheader">{t('standings.columns.name')}</span>
+                  <span role="columnheader">{t('standings.columns.points')}</span>
+                </div>
+                <ol>
+                  {allTimeStandings.map((standing, index) => (
+                    <li key={standing.participantId} role="row">
+                      <span
+                        className="standings__rank"
+                        role="cell"
+                        aria-label={t('standings.rankLabel', { rank: index + 1 })}
+                      >
+                        {index + 1}
+                      </span>
+                      <strong role="cell">{standing.participantName}</strong>
+                      <span className="standings__points" role="cell">
+                        {standing.totalPoints}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+          </section>
+        </div>
+      ) : null}
       <AppFooter />
     </main>
   )

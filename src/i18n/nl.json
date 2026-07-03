@@ -101,6 +101,19 @@
     "subtitle": "Een ontspannen weekend met vrienden? Nee. Dit is een keiharde competitie.",
     "voteCta": "Naar de stemming"
   },
+  "navigation": {
+    "label": "Hoofdonderdelen",
+    "awards": "Awards",
+    "games": "Spellen",
+    "info": "Info",
+    "profile": "Profiel"
+  },
+  "placeholders": {
+    "gamesTitle": "Spellen",
+    "gamesBody": "Dit onderdeel is voorbereid. Concrete spellen worden later toegevoegd.",
+    "infoTitle": "Info",
+    "infoBody": "Dit onderdeel is voorbereid. Festivalinfo wordt later toegevoegd."
+  },
   "identity": {
     "title": "Voer je deelnemerscode in",
     "loggedInAs": "Aangemeld als:",
@@ -121,6 +134,25 @@
     "eyebrow": "Admin",
     "title": "Categorieën",
     "changeStatus": "Status wijzigen",
+    "navigation": {
+      "label": "Adminonderdelen",
+      "festival": "Festival",
+      "participants": "Deelnemers",
+      "awards": "Awards",
+      "games": "Spellen",
+      "info": "Info",
+      "archive": "Archief"
+    },
+    "archive": {
+      "eyebrow": "Admin",
+      "title": "Archief"
+    },
+    "placeholders": {
+      "gamesTitle": "Spellen",
+      "gamesBody": "Voor spellen zijn er momenteel nog geen administratieve functies.",
+      "infoTitle": "Info",
+      "infoBody": "Voor info zijn er momenteel nog geen administratieve functies."
+    },
     "festival": {
       "eyebrow": "Admin",
       "title": "Festival",

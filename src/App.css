@@ -245,6 +245,7 @@ h1 {
   padding: 0 24px;
   margin-top: 34px;
   color: #101014;
+  font: inherit;
   font-weight: 850;
   text-decoration: none;
   background: linear-gradient(135deg, #ffbe0b, #fb5607 48%, #ff006e);
@@ -264,6 +265,68 @@ h1 {
 .hero__button:focus-visible {
   outline: 3px solid #ffffff;
   outline-offset: 4px;
+}
+
+.app-navigation {
+  position: sticky;
+  z-index: 4;
+  top: 0;
+  padding: 12px 20px;
+  background: rgba(16, 16, 20, 0.9);
+  border-block: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+}
+
+.app-navigation__items {
+  display: flex;
+  width: min(100%, 960px);
+  margin: 0 auto;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.app-navigation__button,
+.admin-navigation__button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  color: rgba(255, 255, 255, 0.78);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 850;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.app-navigation__button:hover,
+.app-navigation__button:focus-visible,
+.admin-navigation__button:hover,
+.admin-navigation__button:focus-visible {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.app-navigation__button:focus-visible,
+.admin-navigation__button:focus-visible {
+  outline: 3px solid #ffbe0b;
+  outline-offset: 3px;
+}
+
+.app-navigation__button[aria-current="page"],
+.admin-navigation__button[aria-current="page"] {
+  color: #101014;
+  background: #ffbe0b;
+  border-color: #ffbe0b;
 }
 
 .stage-lights {
@@ -448,6 +511,14 @@ h1 {
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
+.admin-navigation {
+  display: flex;
+  width: min(100%, 960px);
+  margin: 0 auto 28px;
+  gap: 8px;
+  overflow-x: auto;
+}
+
 .admin__header {
   width: min(100%, 960px);
   margin: 0 auto 24px;
@@ -492,6 +563,36 @@ h1 {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
+}
+
+.admin-placeholder,
+.placeholder-section__content {
+  display: grid;
+  width: min(100%, 960px);
+  margin: 0 auto;
+  gap: 12px;
+  padding: 20px;
+  color: #f4e7cf;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+}
+
+.admin-placeholder h2,
+.placeholder-section h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2rem, 10vw, 4rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+}
+
+.admin-placeholder p,
+.placeholder-section p {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.45;
 }
 
 .admin-card {
@@ -1266,6 +1367,14 @@ h1 {
   background:
     radial-gradient(circle at 85% 15%, rgba(255, 190, 11, 0.14), transparent 20rem),
     rgba(16, 16, 20, 0.72);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.placeholder-section {
+  position: relative;
+  z-index: 1;
+  padding: 56px 20px 72px;
+  background: rgba(16, 16, 20, 0.72);
   border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
