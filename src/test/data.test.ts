@@ -1,13 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const rpcMock = vi.hoisted(() => vi.fn())
+const storageFromMock = vi.hoisted(() => vi.fn())
+const uploadMock = vi.hoisted(() => vi.fn())
+const createSignedUrlMock = vi.hoisted(() => vi.fn())
 
 vi.mock('../lib/supabase', () => ({
   supabase: {
     rpc: rpcMock,
+    storage: {
+      from: storageFromMock,
+    },
   },
   getSupabase: () => ({
     rpc: rpcMock,
+    storage: {
+      from: storageFromMock,
+    },
   }),
 }))
 
@@ -51,6 +60,12 @@ import {
   loadVotesForParticipant,
   saveVote,
 } from '../data/votes'
+import {
+  deleteFestivalDocument,
+  loadAdminFestivalDocuments,
+  loadFestivalDocuments,
+  uploadFestivalDocument,
+} from '../data/festivalDocuments'
 
 const participantContext = {
   participantAccessCode: 'ALICE42',
@@ -80,6 +95,21 @@ const mappedParticipant = {
 
 beforeEach(() => {
   rpcMock.mockReset()
+  uploadMock.mockReset()
+  createSignedUrlMock.mockReset()
+  storageFromMock.mockReset()
+  storageFromMock.mockReturnValue({
+    upload: uploadMock,
+    createSignedUrl: createSignedUrlMock,
+  })
+  uploadMock.mockResolvedValue({
+    data: { path: 'current/timetable/file.pdf' },
+    error: null,
+  })
+  createSignedUrlMock.mockResolvedValue({
+    data: { signedUrl: 'https://example.test/document.pdf' },
+    error: null,
+  })
 })
 
 describe('Supabase Datenzugriffe', () => {
@@ -196,6 +226,161 @@ describe('Supabase Datenzugriffe', () => {
     )
     expect(rpcMock).toHaveBeenCalledWith('ha_archive_festival', {
       p_admin_access_code: 'ALICE42',
+    })
+  })
+
+  it('laedt Festivaldokumente mit signierter Anzeige URL', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          document_type: 'timetable',
+          title: 'Timetable',
+          file_path: 'current/timetable/file.pdf',
+          mime_type: 'application/pdf',
+          updated_at: '2026-07-03T10:00:00.000Z',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(loadFestivalDocuments(participantContext)).resolves.toEqual([
+      {
+        documentType: 'timetable',
+        title: 'Timetable',
+        filePath: 'current/timetable/file.pdf',
+        mimeType: 'application/pdf',
+        updatedAt: '2026-07-03T10:00:00.000Z',
+        displayUrl: 'https://example.test/document.pdf',
+      },
+    ])
+    expect(rpcMock).toHaveBeenCalledWith(
+      'ha_list_festival_documents',
+      expectedParticipantRpcContext,
+    )
+    expect(storageFromMock).toHaveBeenCalledWith('festival-documents')
+    expect(createSignedUrlMock).toHaveBeenCalledWith(
+      'current/timetable/file.pdf',
+      3600,
+    )
+  })
+
+  it('laedt Festivaldokumente fuer die Adminverwaltung', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          document_type: 'site_map',
+          title: 'Gelaendeplan',
+          file_path: 'current/site_map/map.png',
+          mime_type: 'image/png',
+          updated_at: '2026-07-03T10:00:00.000Z',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      loadAdminFestivalDocuments(participantContext),
+    ).resolves.toMatchObject([
+      {
+        documentType: 'site_map',
+        title: 'Gelaendeplan',
+        filePath: 'current/site_map/map.png',
+        mimeType: 'image/png',
+      },
+    ])
+    expect(rpcMock).toHaveBeenCalledWith(
+      'ha_admin_list_festival_documents',
+      expectedParticipantRpcContext,
+    )
+  })
+
+  it('laedt Festivaldokumente in Storage hoch und speichert Metadaten', async () => {
+    const file = new File(['pdf'], 'Plan 2026.pdf', {
+      type: 'application/pdf',
+    })
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          document_type: 'timetable',
+          title: 'Timetable',
+          file_path: 'current/timetable/generated-plan-2026.pdf',
+          mime_type: 'application/pdf',
+          expires_at: '2026-07-03T10:10:00.000Z',
+        },
+      ],
+      error: null,
+    })
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          document_type: 'timetable',
+          title: 'Timetable',
+          file_path: 'current/timetable/generated-plan-2026.pdf',
+          mime_type: 'application/pdf',
+          updated_at: '2026-07-03T10:00:00.000Z',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      uploadFestivalDocument(
+        {
+          documentType: 'timetable',
+          title: 'Timetable',
+          file,
+        },
+        participantContext,
+      ),
+    ).resolves.toMatchObject({
+      documentType: 'timetable',
+      title: 'Timetable',
+      mimeType: 'application/pdf',
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      1,
+      'ha_create_festival_document_upload',
+      {
+        ...expectedParticipantRpcContext,
+        p_document_type: 'timetable',
+        p_title: 'Timetable',
+        p_file_name: 'plan-2026.pdf',
+        p_mime_type: 'application/pdf',
+      },
+    )
+    expect(uploadMock).toHaveBeenCalledWith(
+      'current/timetable/generated-plan-2026.pdf',
+      file,
+      {
+        contentType: 'application/pdf',
+        upsert: false,
+      },
+    )
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      2,
+      'ha_upsert_festival_document',
+      expect.objectContaining({
+        ...expectedParticipantRpcContext,
+        p_document_type: 'timetable',
+        p_title: 'Timetable',
+        p_file_path: 'current/timetable/generated-plan-2026.pdf',
+        p_mime_type: 'application/pdf',
+      }),
+    )
+  })
+
+  it('loescht Festivaldokumente ueber Admin RPC', async () => {
+    rpcMock.mockResolvedValue({
+      data: null,
+      error: null,
+    })
+
+    await expect(
+      deleteFestivalDocument('site_map', participantContext),
+    ).resolves.toBeUndefined()
+    expect(rpcMock).toHaveBeenCalledWith('ha_delete_festival_document', {
+      ...expectedParticipantRpcContext,
+      p_document_type: 'site_map',
     })
   })
 

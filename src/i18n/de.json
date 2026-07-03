@@ -114,6 +114,19 @@
     "infoTitle": "Infos",
     "infoBody": "Dieser Bereich ist vorbereitet. Festivalinfos werden später ergänzt."
   },
+  "info": {
+    "eyebrow": "Festivalinfos",
+    "title": "Infos",
+    "loading": "Festivalinfos werden geladen...",
+    "empty": "Aktuell sind noch keine Festivalinfos hinterlegt.",
+    "documentTypes": {
+      "timetable": "Timetable",
+      "site_map": "Gelaendeplan"
+    },
+    "errors": {
+      "load": "Die Festivalinfos konnten gerade nicht geladen werden."
+    }
+  },
   "identity": {
     "title": "Gib deinen Teilnehmercode ein",
     "loggedInAs": "Angemeldet als:",
@@ -152,6 +165,27 @@
       "gamesBody": "Für Spiele gibt es aktuell noch keine administrativen Funktionen.",
       "infoTitle": "Infos",
       "infoBody": "Für Infos gibt es aktuell noch keine administrativen Funktionen."
+    },
+    "documents": {
+      "eyebrow": "Verwaltung",
+      "title": "Infos",
+      "loading": "Festivaldokumente werden geladen...",
+      "emptyDocument": "Noch keine Datei",
+      "missingDocument": "Fuer diesen Dokumenttyp ist noch keine Datei hinterlegt.",
+      "fileType": "Dateityp",
+      "updatedAt": "Aktualisiert",
+      "upload": "Hochladen",
+      "replace": "Ersetzen",
+      "uploading": "Lade hoch...",
+      "remove": "Entfernen",
+      "removing": "Entferne...",
+      "confirmRemove": "{{title}} wirklich entfernen?",
+      "errors": {
+        "load": "Die Festivaldokumente konnten gerade nicht geladen werden.",
+        "upload": "Das Dokument konnte gerade nicht hochgeladen werden.",
+        "remove": "Das Dokument konnte gerade nicht entfernt werden.",
+        "unsupportedFileType": "Bitte waehle eine PDF- oder Bilddatei aus."
+      }
     },
     "festival": {
       "eyebrow": "Admin",

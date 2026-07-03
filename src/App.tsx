@@ -50,6 +50,15 @@ import {
   loadFestivalExportData,
   serializeFestivalExport,
 } from './data/export'
+import {
+  deleteFestivalDocument,
+  isSupportedFestivalDocumentFile,
+  loadAdminFestivalDocuments,
+  loadFestivalDocuments,
+  uploadFestivalDocument,
+  type FestivalDocument,
+  type FestivalDocumentType,
+} from './data/festivalDocuments'
 import { activeFestival, festivalStorageKey } from './config/festivals'
 import {
   AdminParticipants,
@@ -57,6 +66,8 @@ import {
 } from './components/AdminParticipants'
 import { AdminFestival } from './components/AdminFestival'
 import { AdminCategories } from './components/AdminCategories'
+import { AdminFestivalDocuments } from './components/AdminFestivalDocuments'
+import { FestivalInfo } from './components/FestivalInfo'
 import { useFestivalAccess } from './hooks/useFestivalAccess'
 import i18n from './i18n'
 import { supportedLanguages, type SupportedLanguage } from './i18n'
@@ -620,6 +631,23 @@ function App() {
   const [adminParticipantsError, setAdminParticipantsError] = useState('')
   const [isLoadingAdminParticipants, setIsLoadingAdminParticipants] =
     useState(false)
+  const [festivalDocuments, setFestivalDocuments] = useState<FestivalDocument[]>(
+    [],
+  )
+  const [festivalDocumentsError, setFestivalDocumentsError] = useState('')
+  const [isLoadingFestivalDocuments, setIsLoadingFestivalDocuments] =
+    useState(Boolean(selectedParticipant))
+  const [adminFestivalDocuments, setAdminFestivalDocuments] = useState<
+    FestivalDocument[]
+  >([])
+  const [adminFestivalDocumentsError, setAdminFestivalDocumentsError] =
+    useState('')
+  const [isLoadingAdminFestivalDocuments, setIsLoadingAdminFestivalDocuments] =
+    useState(false)
+  const [uploadingDocumentType, setUploadingDocumentType] =
+    useState<FestivalDocumentType | null>(null)
+  const [removingDocumentType, setRemovingDocumentType] =
+    useState<FestivalDocumentType | null>(null)
   const [participantForm, setParticipantForm] =
     useState<ParticipantFormState | null>(null)
   const [participantFormError, setParticipantFormError] = useState('')
@@ -755,27 +783,32 @@ function App() {
 
       setIsLoadingData(true)
       setIsStandingsLoading(true)
+      setIsLoadingFestivalDocuments(true)
       setParticipantsError('')
       setCategoriesError('')
       setVotesError('')
       setResultsError('')
       setStandingsError('')
+      setFestivalDocumentsError('')
 
       try {
         const [
           loadedParticipants,
           loadedCategories,
           loadedParticipantVotes,
+          loadedFestivalDocuments,
         ] = await Promise.all([
           loadParticipants(accessContext),
           loadCategories(accessContext),
           loadVotesForParticipant(authenticatedParticipant.id, accessContext),
+          loadFestivalDocuments(accessContext),
         ])
 
         if (isCurrent) {
           setParticipants(loadedParticipants)
           setCategories(loadedCategories)
           setVotes(loadedParticipantVotes)
+          setFestivalDocuments(loadedFestivalDocuments)
         }
       } catch {
         if (isCurrent) {
@@ -786,6 +819,11 @@ function App() {
             i18n.t('admin.errors.categoriesLoad'),
           )
           setVotesError(i18n.t('identity.errors.participantVotesLoad'))
+          setFestivalDocumentsError(i18n.t('info.errors.load'))
+        }
+      } finally {
+        if (isCurrent) {
+          setIsLoadingFestivalDocuments(false)
         }
       }
 
@@ -937,6 +975,14 @@ function App() {
     setAdminCategoriesError('')
     setAdminParticipants([])
     setAdminParticipantsError('')
+    setFestivalDocuments([])
+    setFestivalDocumentsError('')
+    setIsLoadingFestivalDocuments(false)
+    setAdminFestivalDocuments([])
+    setAdminFestivalDocumentsError('')
+    setIsLoadingAdminFestivalDocuments(false)
+    setUploadingDocumentType(null)
+    setRemovingDocumentType(null)
     setParticipantForm(null)
     setParticipantFormError('')
     setIsAdminVisible(false)
@@ -970,6 +1016,7 @@ function App() {
         void reloadFestivalCode()
         void reloadAdminCategories()
         void reloadAdminParticipants()
+        void reloadAdminFestivalDocuments()
 
         window.setTimeout(() => {
           document.getElementById('admin')?.scrollIntoView({ behavior: 'smooth' })
@@ -1123,6 +1170,28 @@ function App() {
       setAdminParticipantsError(t('admin.participants.errors.load'))
     } finally {
       setIsLoadingAdminParticipants(false)
+    }
+  }
+
+  async function reloadAdminFestivalDocuments() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsLoadingAdminFestivalDocuments(true)
+    setAdminFestivalDocumentsError('')
+
+    try {
+      const loadedAdminFestivalDocuments =
+        await loadAdminFestivalDocuments(adminContext)
+
+      setAdminFestivalDocuments(loadedAdminFestivalDocuments)
+    } catch {
+      setAdminFestivalDocumentsError(t('admin.documents.errors.load'))
+    } finally {
+      setIsLoadingAdminFestivalDocuments(false)
     }
   }
 
@@ -1478,6 +1547,91 @@ function App() {
     }
   }
 
+  async function uploadAdminFestivalDocument(
+    documentType: FestivalDocumentType,
+    file: File,
+  ) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    if (!isSupportedFestivalDocumentFile(file)) {
+      setAdminFestivalDocumentsError(
+        t('admin.documents.errors.unsupportedFileType'),
+      )
+      return
+    }
+
+    setUploadingDocumentType(documentType)
+    setAdminFestivalDocumentsError('')
+
+    try {
+      await uploadFestivalDocument(
+        {
+          documentType,
+          title: t(`info.documentTypes.${documentType}`),
+          file,
+        },
+        adminContext,
+      )
+
+      const [loadedAdminDocuments, loadedDocuments] = await Promise.all([
+        loadAdminFestivalDocuments(adminContext),
+        loadFestivalDocuments(adminContext),
+      ])
+
+      setAdminFestivalDocuments(loadedAdminDocuments)
+      setFestivalDocuments(loadedDocuments)
+      setFestivalDocumentsError('')
+    } catch {
+      setAdminFestivalDocumentsError(t('admin.documents.errors.upload'))
+    } finally {
+      setUploadingDocumentType(null)
+    }
+  }
+
+  async function removeAdminFestivalDocument(
+    documentType: FestivalDocumentType,
+  ) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    const shouldRemove = window.confirm(
+      t('admin.documents.confirmRemove', {
+        title: t(`info.documentTypes.${documentType}`),
+      }),
+    )
+
+    if (!shouldRemove) {
+      return
+    }
+
+    setRemovingDocumentType(documentType)
+    setAdminFestivalDocumentsError('')
+
+    try {
+      await deleteFestivalDocument(documentType, adminContext)
+
+      const [loadedAdminDocuments, loadedDocuments] = await Promise.all([
+        loadAdminFestivalDocuments(adminContext),
+        loadFestivalDocuments(adminContext),
+      ])
+
+      setAdminFestivalDocuments(loadedAdminDocuments)
+      setFestivalDocuments(loadedDocuments)
+      setFestivalDocumentsError('')
+    } catch {
+      setAdminFestivalDocumentsError(t('admin.documents.errors.remove'))
+    } finally {
+      setRemovingDocumentType(null)
+    }
+  }
+
   async function submitVote(categoryId: string) {
     if (!selectedParticipant) {
       return
@@ -1770,10 +1924,15 @@ function App() {
           ) : null}
 
           {activeAdminSection === 'info' ? (
-            <div className="admin-placeholder">
-              <h2>{t('admin.placeholders.infoTitle')}</h2>
-              <p>{t('admin.placeholders.infoBody')}</p>
-            </div>
+            <AdminFestivalDocuments
+              documents={adminFestivalDocuments}
+              error={adminFestivalDocumentsError}
+              isLoading={isLoadingAdminFestivalDocuments}
+              uploadingDocumentType={uploadingDocumentType}
+              removingDocumentType={removingDocumentType}
+              onUpload={uploadAdminFestivalDocument}
+              onRemove={removeAdminFestivalDocument}
+            />
           ) : null}
 
           {activeAdminSection === 'archive' ? (
@@ -1836,10 +1995,10 @@ function App() {
       ) : null}
 
       {activeMainSection === 'info' ? (
-        <PlaceholderSection
-          id="main-info"
-          title={t('placeholders.infoTitle')}
-          body={t('placeholders.infoBody')}
+        <FestivalInfo
+          documents={festivalDocuments}
+          error={festivalDocumentsError}
+          isLoading={isLoadingFestivalDocuments}
         />
       ) : null}
 

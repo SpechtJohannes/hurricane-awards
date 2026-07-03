@@ -54,6 +54,13 @@ import {
   serializeFestivalExport,
   type FestivalExportData,
 } from '../data/export'
+import {
+  deleteFestivalDocument,
+  loadAdminFestivalDocuments,
+  loadFestivalDocuments,
+  uploadFestivalDocument,
+  type FestivalDocument,
+} from '../data/festivalDocuments'
 import i18n from '../i18n'
 
 vi.mock('../data/categories', () => ({
@@ -101,6 +108,19 @@ vi.mock('../data/export', () => ({
   loadFestivalExportData: vi.fn(),
   serializeFestivalExport: vi.fn(),
 }))
+
+vi.mock('../data/festivalDocuments', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('../data/festivalDocuments')>()
+
+  return {
+    ...actual,
+    deleteFestivalDocument: vi.fn(),
+    loadAdminFestivalDocuments: vi.fn(),
+    loadFestivalDocuments: vi.fn(),
+    uploadFestivalDocument: vi.fn(),
+  }
+})
 
 const participants: Participant[] = [
   {
@@ -166,6 +186,25 @@ const standings: AllTimeStanding[] = [
   },
 ]
 
+const festivalDocuments: FestivalDocument[] = [
+  {
+    documentType: 'timetable',
+    title: 'Timetable',
+    filePath: 'current/timetable/timetable.pdf',
+    mimeType: 'application/pdf',
+    updatedAt: '2026-07-03T10:00:00.000Z',
+    displayUrl: 'https://example.test/timetable.pdf',
+  },
+  {
+    documentType: 'site_map',
+    title: 'Gelaendeplan',
+    filePath: 'current/site_map/site-map.png',
+    mimeType: 'image/png',
+    updatedAt: '2026-07-03T11:00:00.000Z',
+    displayUrl: 'https://example.test/site-map.png',
+  },
+]
+
 const festivalAccessStorageKey =
   'hurricane-awards:hurricane-awards-2026:festival-access'
 const festivalAccessVersion = '2026-07-01 10:00:00+00'
@@ -204,6 +243,8 @@ function mockLoadedData({
   loadedVotes = [],
   participantVotes = [],
   loadedStandings = standings,
+  loadedFestivalDocuments = [],
+  loadedAdminFestivalDocuments = loadedFestivalDocuments,
 }: {
   loadedFestivalName?: string
   loadedFestivalAccessCode?: string
@@ -214,6 +255,8 @@ function mockLoadedData({
   loadedVotes?: Vote[]
   participantVotes?: Vote[]
   loadedStandings?: AllTimeStanding[]
+  loadedFestivalDocuments?: FestivalDocument[]
+  loadedAdminFestivalDocuments?: FestivalDocument[]
 } = {}) {
   vi.mocked(loadFestivalName).mockResolvedValue(loadedFestivalName)
   vi.mocked(loadFestivalAccessVersion).mockResolvedValue(
@@ -258,6 +301,19 @@ function mockLoadedData({
   vi.mocked(loadVotes).mockResolvedValue(loadedVotes)
   vi.mocked(loadVotesForParticipant).mockResolvedValue(participantVotes)
   vi.mocked(loadAllTimeStandings).mockResolvedValue(loadedStandings)
+  vi.mocked(loadFestivalDocuments).mockResolvedValue(loadedFestivalDocuments)
+  vi.mocked(loadAdminFestivalDocuments).mockResolvedValue(
+    loadedAdminFestivalDocuments,
+  )
+  vi.mocked(uploadFestivalDocument).mockImplementation(async (input) => ({
+    documentType: input.documentType,
+    title: input.title,
+    filePath: `current/${input.documentType}/uploaded-${input.file.name}`,
+    mimeType: input.file.type,
+    updatedAt: '2026-07-03T12:00:00.000Z',
+    displayUrl: `https://example.test/uploaded-${input.file.name}`,
+  }))
+  vi.mocked(deleteFestivalDocument).mockResolvedValue()
   vi.mocked(suggestParticipantAccessCode).mockResolvedValue('NEU23456')
   vi.mocked(createParticipant).mockImplementation(async (input) => ({
     id: input.displayName.toLowerCase().replace(/\s+/g, '-'),
@@ -794,6 +850,39 @@ describe('Login', () => {
       within(navigation).getByRole('button', { name: /^profil$/i }),
     ).toHaveAttribute('aria-current', 'page')
     expect(screen.getByText(/angemeldet als:/i)).toBeVisible()
+  })
+
+  it('zeigt im Infobereich einen Hinweis, wenn keine Dokumente vorhanden sind', async () => {
+    mockLoadedData({ loadedFestivalDocuments: [] })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    await switchMainSection(/^infos$/i)
+
+    expect(
+      screen.getByText(/noch keine festivalinfos hinterlegt/i),
+    ).toBeVisible()
+    expect(loadFestivalDocuments).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+  })
+
+  it('zeigt Festivaldokumente im Infobereich innerhalb der App an', async () => {
+    mockLoadedData({ loadedFestivalDocuments: festivalDocuments })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    await switchMainSection(/^infos$/i)
+
+    expect(screen.getByRole('heading', { name: /^infos$/i })).toBeVisible()
+    expect(screen.getByTitle('Timetable')).toHaveAttribute(
+      'src',
+      'https://example.test/timetable.pdf',
+    )
+    expect(screen.getByRole('img', { name: /gelaendeplan/i })).toHaveAttribute(
+      'src',
+      'https://example.test/site-map.png',
+    )
   })
 
   it('verhindert Zugriff mit ungueltigem Teilnehmercode', async () => {
@@ -1491,6 +1580,80 @@ describe('Admin', () => {
         },
       )
     })
+  })
+
+  it('verwaltet Festivaldokumente im Adminbereich Infos', async () => {
+    mockLoadedData({
+      loadedFestivalDocuments: festivalDocuments,
+      loadedAdminFestivalDocuments: festivalDocuments,
+    })
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^infos$/i)
+
+    const adminInfoSection = sectionForHeading(/^infos$/i)
+    const timetableFile = new File(['pdf'], 'timetable-new.pdf', {
+      type: 'application/pdf',
+    })
+
+    await user.upload(
+      within(adminInfoSection).getAllByLabelText(/ersetzen/i)[0],
+      timetableFile,
+    )
+
+    expect(uploadFestivalDocument).toHaveBeenCalledWith(
+      {
+        documentType: 'timetable',
+        title: 'Timetable',
+        file: timetableFile,
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(loadAdminFestivalDocuments).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+    expect(loadFestivalDocuments).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+
+    await user.click(
+      within(adminInfoSection).getAllByRole('button', {
+        name: /entfernen/i,
+      })[0],
+    )
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringContaining('Timetable'),
+    )
+    expect(deleteFestivalDocument).toHaveBeenCalledWith('timetable', {
+      participantAccessCode: 'ALICE42',
+    })
+  })
+
+  it('validiert Festivaldokument Uploads clientseitig auf PDF und Bilder', async () => {
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^infos$/i)
+
+    const adminInfoSection = sectionForHeading(/^infos$/i)
+    const unsupportedFile = new File(['text'], 'notizen.txt', {
+      type: 'text/plain',
+    })
+
+    fireEvent.change(within(adminInfoSection).getAllByLabelText(/hochladen/i)[0], {
+      target: {
+        files: [unsupportedFile],
+      },
+    })
+
+    expect(uploadFestivalDocument).not.toHaveBeenCalled()
+    expect(
+      await within(adminInfoSection).findByText(/pdf- oder bilddatei/i),
+    ).toBeVisible()
   })
 
   it('legt Teilnehmer im Adminbereich an und aktualisiert die Liste', async () => {

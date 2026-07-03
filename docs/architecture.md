@@ -11,18 +11,22 @@ flowchart LR
   Browser[Browser / React App]
   Data[src/data Adapter]
   RPC[Supabase RPC Funktionen]
+  Storage[(Supabase Storage)]
   DB[(PostgreSQL Tabellen)]
 
   Browser --> Data
   Data --> RPC
+  Data --> Storage
   RPC --> DB
   DB --> RPC
   RPC --> Data
+  Storage --> Data
   Data --> Browser
 ```
 
 - Frontend: React, TypeScript und Vite. `src/App.tsx` steuert die Hauptansicht, Login, Abstimmung, Ergebnisse und Adminbereiche.
 - Supabase: Stellt den PostgREST RPC-Zugriff mit anon Key bereit. Direkte Tabellenrechte fuer Browserrollen sind fuer geschuetzte Tabellen entzogen.
+- Supabase Storage: Speichert Festivaldokumente fuer den Infos-Bereich. Metadaten und Berechtigungen laufen ueber RPCs; Dateien werden aus dem Frontend in einen dedizierten Bucket geladen.
 - Datenbank: PostgreSQL Tabellen, RLS Policies und `security definer` RPC-Funktionen in `supabase/migrations`.
 - Hosting: Das Vite-Build-Ergebnis in `dist` kann als statische Website gehostet werden. Supabase hostet Datenbank und RPC-Schicht getrennt vom Frontend.
 - Zusammenspiel: UI-Aktionen rufen Funktionen aus `src/data/*` auf. Diese Adapter rufen Supabase RPCs auf. Die RPCs pruefen Berechtigungen, lesen oder schreiben Tabellen und geben nur die fuer die UI benoetigten Daten zurueck.
@@ -99,6 +103,13 @@ Admin-RPCs umfassen unter anderem:
 - Teilnehmer: `ha_admin_list_participants`, `ha_suggest_participant_access_code`, `ha_create_participant`, `ha_update_participant`, `ha_deactivate_participant`, `ha_reactivate_participant`
 - Kategorien: `ha_admin_list_categories`, `ha_create_category`, `ha_update_category`, `ha_update_category_status`, `ha_delete_category`, `ha_delete_category_votes`
 - Festival: `ha_update_festival_name`, `ha_get_festival_access_code`, `ha_update_festival_access_code`, `ha_archive_festival`
+- Infos: `ha_admin_list_festival_documents`, `ha_upsert_festival_document`, `ha_delete_festival_document`
+
+### Festivalinfos und Dokumente
+
+Der Infos-Bereich zeigt zentrale Festivaldokumente innerhalb der App an. Die Dokumentmetadaten liegen in `festival_documents` mit `document_type`, `title`, `file_path`, `mime_type` und `updated_at`. Aktuell sind die Typen `timetable` und `site_map` vorgesehen; die Struktur ist so gehalten, dass weitere Typen spaeter ergaenzt werden koennen.
+
+Die Dateien liegen im Supabase-Storage-Bucket `festival-documents`. Teilnehmer laden sichtbare Dokumentmetadaten ueber `ha_list_festival_documents`; der Frontend-Adapter `src/data/festivalDocuments.ts` erzeugt daraus signierte Anzeige-URLs. Administratoren verwalten die Metadaten ueber Admin-RPCs und laden PDF- oder Bilddateien in Storage hoch. Vor einem Upload erzeugt `ha_create_festival_document_upload` einen kurzlebig erlaubten Storage-Pfad; die Storage-Policy akzeptiert Uploads nur fuer solche freigegebenen Pfade. Entfernte Dokumente werden aus der App entfernt, indem der Metadatensatz geloescht wird.
 
 ### Festivaleinstellungen
 
@@ -139,6 +150,8 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `festival_archive_participants`: Teilnehmerinformationen zum Archivzeitpunkt ohne Teilnehmercodes.
 - `festival_archive_categories`: Kategorieinformationen zum Archivzeitpunkt.
 - `festival_archive_votes`: Stimmen inklusive Anzeigeinformationen zum Archivzeitpunkt.
+- `festival_documents`: Metadaten der Festivaldokumente fuer den Infos-Bereich.
+- `festival_document_uploads`: Kurzlebige, serverseitig freigegebene Storage-Uploadpfade fuer Festivaldokumente.
 - `participant_login_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Teilnehmerlogin.
 - `festival_access_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Festivalcode.
 
@@ -148,6 +161,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - TypeScript: Typisierung fuer Komponenten, Datenadapter und Tests.
 - Vite: Entwicklungsserver, Build-System und Testintegration.
 - Supabase: Browserseitiger RPC-Zugriff mit anon Key und gehostete PostgreSQL-Datenbank.
+- Supabase Storage: Dateiablage fuer Festivaldokumente wie Timetable und Gelaendeplan.
 - PostgreSQL: Tabellen, Constraints, RLS und `security definer` Funktionen.
 - RPC-Funktionen: Zentrale Schnittstelle zwischen Frontend und Datenbank fuer geschuetzte Operationen.
 - Internationalisierung: i18next und react-i18next mit `de.json` und `nl.json`.
@@ -167,6 +181,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - JSON-Exporte enthalten Teilnehmercodes nur nach expliziter Admin-Auswahl.
 - Sichtbare UI-Texte werden ueber Uebersetzungsdateien gepflegt und nicht direkt in Komponenten hardcodiert.
 - Datenadapter in `src/data` kapseln Supabase RPC-Aufrufe, damit UI-Komponenten nicht direkt mit RPC-Details arbeiten muessen.
+- Festivaldokumente trennen Dateiinhalt und Metadaten: Storage enthaelt die Dateien, PostgreSQL/RPCs steuern die sichtbaren Dokumenteintraege.
 
 ## Wartung und Erweiterung
 
