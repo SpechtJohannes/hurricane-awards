@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { getSupabase } from '../lib/supabase'
 import {
   participantRpcParams,
   type ParticipantAccessContext,
@@ -27,9 +27,7 @@ function mapAllTimeStanding(row: AllTimeStandingRow): AllTimeStanding {
 export async function loadAllTimeStandings(
   context: ParticipantAccessContext,
 ): Promise<AllTimeStanding[]> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc(
     'ha_list_all_time_standings',

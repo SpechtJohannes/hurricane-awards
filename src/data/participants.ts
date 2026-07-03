@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { getSupabase } from '../lib/supabase'
 import {
   participantRpcParams,
   type AdminAccessContext,
@@ -71,9 +71,7 @@ function mapParticipantResult(data: unknown): Participant {
 export async function loadParticipants(
   context: ParticipantAccessContext,
 ): Promise<Participant[]> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc(
     'ha_list_participants',
@@ -90,9 +88,7 @@ export async function loadParticipants(
 export async function loginParticipant(
   accessCode: string,
 ): Promise<ParticipantLoginResult> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const normalizedAccessCode = accessCode.trim().toUpperCase()
   const { data, error } = await supabase.rpc('ha_login_participant', {
@@ -136,9 +132,7 @@ export async function loginParticipant(
 export async function loadAdminParticipants(
   context: AdminAccessContext,
 ): Promise<Participant[]> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc(
     'ha_admin_list_participants',
@@ -155,9 +149,7 @@ export async function loadAdminParticipants(
 export async function suggestParticipantAccessCode(
   context: AdminAccessContext,
 ): Promise<string> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc(
     'ha_suggest_participant_access_code',
@@ -175,9 +167,7 @@ export async function createParticipant(
   input: CreateParticipantInput,
   context: AdminAccessContext,
 ): Promise<Participant> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc('ha_create_participant', {
     ...participantRpcParams(context),
@@ -196,9 +186,7 @@ export async function updateParticipant(
   input: UpdateParticipantInput,
   context: AdminAccessContext,
 ): Promise<Participant> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc('ha_update_participant', {
     ...participantRpcParams(context),
@@ -218,9 +206,7 @@ export async function deactivateParticipant(
   participantId: string,
   context: AdminAccessContext,
 ): Promise<Participant> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc('ha_deactivate_participant', {
     ...participantRpcParams(context),
@@ -238,9 +224,7 @@ export async function reactivateParticipant(
   participantId: string,
   context: AdminAccessContext,
 ): Promise<Participant> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc('ha_reactivate_participant', {
     ...participantRpcParams(context),

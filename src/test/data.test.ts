@@ -6,6 +6,9 @@ vi.mock('../lib/supabase', () => ({
   supabase: {
     rpc: rpcMock,
   },
+  getSupabase: () => ({
+    rpc: rpcMock,
+  }),
 }))
 
 import { loadAllTimeStandings } from '../data/allTimeStandings'

@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { getSupabase } from '../lib/supabase'
 import {
   participantRpcParams,
   type AdminAccessContext,
@@ -62,9 +62,7 @@ function mapCategoryResult(data: unknown): Category {
 export async function loadCategories(
   context: ParticipantAccessContext,
 ): Promise<Category[]> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc(
     'ha_list_categories',
@@ -81,9 +79,7 @@ export async function loadCategories(
 export async function loadAdminCategories(
   context: AdminAccessContext,
 ): Promise<Category[]> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc(
     'ha_admin_list_categories',
@@ -101,9 +97,7 @@ export async function createCategory(
   input: CreateCategoryInput,
   context: AdminAccessContext,
 ): Promise<Category> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc('ha_create_category', {
     ...participantRpcParams(context),
@@ -125,9 +119,7 @@ export async function updateCategoryStatus(
   status: CategoryStatus,
   context: AdminAccessContext,
 ): Promise<Category> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc('ha_update_category_status', {
     ...participantRpcParams(context),
@@ -148,9 +140,7 @@ export async function updateCategory(
   input: UpdateCategoryInput,
   context: AdminAccessContext,
 ): Promise<Category> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { data, error } = await supabase.rpc('ha_update_category', {
     ...participantRpcParams(context),
@@ -172,9 +162,7 @@ export async function deleteCategory(
   categoryId: string,
   context: AdminAccessContext,
 ): Promise<void> {
-  if (!supabase) {
-    throw new Error('Supabase ist noch nicht konfiguriert.')
-  }
+  const supabase = getSupabase()
 
   const { error } = await supabase.rpc('ha_delete_category', {
     ...participantRpcParams(context),
