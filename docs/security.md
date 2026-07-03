@@ -134,6 +134,8 @@ Robusteres Zielbild fuer ein spaeteres Issue:
 
 Festival-Archivierungen laufen ausschliesslich ueber `ha_archive_festival`. Die Funktion kopiert Teilnehmer, Kategorien und Stimmen inklusive Anzeigeinformationen in getrennte Archivtabellen. Diese Archivtabellen haben keine Fremdschluessel auf aktive `participants`, `categories` oder `votes` und sind fuer direkte Browserzugriffe gesperrt.
 
+Archivierte Teilnehmerdaten enthalten keine Teilnehmercodes. Eine Sicherheits-Folgemigration entfernt die alte Archivspalte `festival_archive_participants.access_code`, falls sie in einem bestehenden Deployment bereits angelegt wurde.
+
 Einen Teilnehmer als Admin markieren:
 
 ```sql
