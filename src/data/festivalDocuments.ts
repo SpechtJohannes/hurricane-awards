@@ -23,6 +23,8 @@ export type UploadFestivalDocumentInput = {
   file: File
 }
 
+export type CampLocationLink = string | null
+
 type FestivalDocumentRow = {
   document_type: FestivalDocumentType
   title: string
@@ -41,6 +43,16 @@ type FestivalDocumentUploadRow = {
 
 const festivalDocumentsBucket = 'festival-documents'
 const signedUrlLifetimeSeconds = 60 * 60
+const supportedCampLocationHosts = new Set([
+  'maps.app.goo.gl',
+  'maps.google.com',
+  'google.com',
+  'www.google.com',
+  'wa.me',
+  'api.whatsapp.com',
+  'whatsapp.com',
+  'www.whatsapp.com',
+])
 
 function isSupportedFestivalDocumentType(
   documentType: string,
@@ -50,6 +62,31 @@ function isSupportedFestivalDocumentType(
 
 export function isSupportedFestivalDocumentFile(file: File) {
   return file.type === 'application/pdf' || file.type.startsWith('image/')
+}
+
+export function isSupportedCampLocationLink(link: string) {
+  try {
+    const url = new URL(link.trim())
+
+    if (url.protocol !== 'https:') {
+      return false
+    }
+
+    if (!supportedCampLocationHosts.has(url.hostname.toLowerCase())) {
+      return false
+    }
+
+    if (
+      url.hostname === 'google.com' ||
+      url.hostname === 'www.google.com'
+    ) {
+      return url.pathname.startsWith('/maps')
+    }
+
+    return true
+  } catch {
+    return false
+  }
 }
 
 function sanitizeFileName(fileName: string) {
@@ -200,6 +237,75 @@ export async function deleteFestivalDocument(
     ...participantRpcParams(context),
     p_document_type: documentType,
   })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function loadCampLocationLink(
+  context: ParticipantAccessContext,
+): Promise<CampLocationLink> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc(
+    'ha_get_camp_location_link',
+    participantRpcParams(context),
+  )
+
+  if (error) {
+    throw error
+  }
+
+  return typeof data === 'string' && data.trim() ? data : null
+}
+
+export async function loadAdminCampLocationLink(
+  context: AdminAccessContext,
+): Promise<CampLocationLink> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc(
+    'ha_admin_get_camp_location_link',
+    participantRpcParams(context),
+  )
+
+  if (error) {
+    throw error
+  }
+
+  return typeof data === 'string' && data.trim() ? data : null
+}
+
+export async function updateCampLocationLink(
+  link: string,
+  context: AdminAccessContext,
+): Promise<string> {
+  const normalizedLink = link.trim()
+
+  if (!isSupportedCampLocationLink(normalizedLink)) {
+    throw new Error('unsupported camp location link')
+  }
+
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc('ha_update_camp_location_link', {
+    ...participantRpcParams(context),
+    p_link: normalizedLink,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return String(data ?? '')
+}
+
+export async function deleteCampLocationLink(
+  context: AdminAccessContext,
+): Promise<void> {
+  const supabase = getSupabase()
+  const { error } = await supabase.rpc(
+    'ha_delete_camp_location_link',
+    participantRpcParams(context),
+  )
 
   if (error) {
     throw error

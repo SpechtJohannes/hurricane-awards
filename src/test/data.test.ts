@@ -61,9 +61,14 @@ import {
   saveVote,
 } from '../data/votes'
 import {
+  deleteCampLocationLink,
   deleteFestivalDocument,
+  isSupportedCampLocationLink,
+  loadAdminCampLocationLink,
   loadAdminFestivalDocuments,
+  loadCampLocationLink,
   loadFestivalDocuments,
+  updateCampLocationLink,
   uploadFestivalDocument,
 } from '../data/festivalDocuments'
 
@@ -382,6 +387,78 @@ describe('Supabase Datenzugriffe', () => {
       ...expectedParticipantRpcContext,
       p_document_type: 'site_map',
     })
+  })
+
+  it('validiert unterstuetzte Campstandort Links clientseitig', () => {
+    expect(isSupportedCampLocationLink('https://maps.app.goo.gl/camp')).toBe(true)
+    expect(
+      isSupportedCampLocationLink('https://www.google.com/maps/place/camp'),
+    ).toBe(true)
+    expect(isSupportedCampLocationLink('https://wa.me/491701234567')).toBe(true)
+    expect(isSupportedCampLocationLink('https://example.com/camp')).toBe(false)
+    expect(isSupportedCampLocationLink('http://maps.app.goo.gl/camp')).toBe(false)
+  })
+
+  it('laedt den Campstandort fuer Teilnehmende und Admins', async () => {
+    rpcMock.mockResolvedValueOnce({
+      data: 'https://maps.app.goo.gl/camp',
+      error: null,
+    })
+
+    await expect(loadCampLocationLink(participantContext)).resolves.toBe(
+      'https://maps.app.goo.gl/camp',
+    )
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      1,
+      'ha_get_camp_location_link',
+      expectedParticipantRpcContext,
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: null,
+      error: null,
+    })
+
+    await expect(loadAdminCampLocationLink(participantContext)).resolves.toBeNull()
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      2,
+      'ha_admin_get_camp_location_link',
+      expectedParticipantRpcContext,
+    )
+  })
+
+  it('speichert und loescht den Campstandort ueber Admin RPCs', async () => {
+    rpcMock.mockResolvedValueOnce({
+      data: 'https://wa.me/491701234567',
+      error: null,
+    })
+
+    await expect(
+      updateCampLocationLink(' https://wa.me/491701234567 ', participantContext),
+    ).resolves.toBe('https://wa.me/491701234567')
+    expect(rpcMock).toHaveBeenNthCalledWith(1, 'ha_update_camp_location_link', {
+      ...expectedParticipantRpcContext,
+      p_link: 'https://wa.me/491701234567',
+    })
+
+    rpcMock.mockResolvedValueOnce({
+      data: null,
+      error: null,
+    })
+
+    await expect(deleteCampLocationLink(participantContext)).resolves.toBeUndefined()
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      2,
+      'ha_delete_camp_location_link',
+      expectedParticipantRpcContext,
+    )
+  })
+
+  it('sendet ungueltige Campstandort Links nicht an Supabase', async () => {
+    await expect(
+      updateCampLocationLink('https://example.com/camp', participantContext),
+    ).rejects.toThrow('unsupported camp location link')
+    expect(rpcMock).not.toHaveBeenCalled()
   })
 
   it('laedt Kategorien ueber eine geschuetzte RPC Funktion', async () => {

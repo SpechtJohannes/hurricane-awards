@@ -1,4 +1,8 @@
-import { type ChangeEvent } from 'react'
+import {
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   festivalDocumentTypes,
@@ -8,10 +12,16 @@ import {
 
 type AdminFestivalDocumentsProps = {
   documents: FestivalDocument[]
+  campLocationLink: string | null
+  campLocationError: string
   error: string
   isLoading: boolean
+  isSavingCampLocation: boolean
   uploadingDocumentType: FestivalDocumentType | null
   removingDocumentType: FestivalDocumentType | null
+  onSaveCampLocation: (link: string) => void
+  onRemoveCampLocation: () => void
+  onClearCampLocationError: () => void
   onUpload: (documentType: FestivalDocumentType, file: File) => void
   onRemove: (documentType: FestivalDocumentType) => void
 }
@@ -25,14 +35,28 @@ function documentByType(
 
 export function AdminFestivalDocuments({
   documents,
+  campLocationLink,
+  campLocationError,
   error,
   isLoading,
+  isSavingCampLocation,
   uploadingDocumentType,
   removingDocumentType,
+  onSaveCampLocation,
+  onRemoveCampLocation,
+  onClearCampLocationError,
   onUpload,
   onRemove,
 }: AdminFestivalDocumentsProps) {
   const { t } = useTranslation()
+  const [campLocationInput, setCampLocationInput] = useState(
+    campLocationLink ?? '',
+  )
+
+  function submitCampLocation(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    onSaveCampLocation(campLocationInput)
+  }
 
   function changeFile(
     documentType: FestivalDocumentType,
@@ -64,6 +88,57 @@ export function AdminFestivalDocuments({
       ) : null}
 
       <div className="admin-documents">
+        <form
+          className="admin-document-card admin-camp-location"
+          onSubmit={submitCampLocation}
+        >
+          <div className="admin-document-card__main">
+            <p>{t('admin.campLocation.eyebrow')}</p>
+            <h3>{t('admin.campLocation.title')}</h3>
+            <label htmlFor="admin-camp-location-link">
+              {t('admin.campLocation.linkLabel')}
+              <input
+                id="admin-camp-location-link"
+                type="url"
+                value={campLocationInput}
+                disabled={isSavingCampLocation}
+                placeholder={t('admin.campLocation.linkPlaceholder')}
+                onChange={(event) => {
+                  setCampLocationInput(event.target.value)
+                  onClearCampLocationError()
+                }}
+              />
+            </label>
+            {campLocationError ? (
+              <p className="admin-participant-form__error">
+                {campLocationError}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="admin-document-card__actions">
+            <button
+              className="admin-card__reset admin-card__reset--primary"
+              type="submit"
+              disabled={isSavingCampLocation}
+            >
+              {isSavingCampLocation
+                ? t('common.saving')
+                : t('admin.campLocation.save')}
+            </button>
+            {campLocationLink ? (
+              <button
+                className="admin-card__reset admin-card__reset--secondary"
+                type="button"
+                disabled={isSavingCampLocation}
+                onClick={onRemoveCampLocation}
+              >
+                {t('admin.campLocation.remove')}
+              </button>
+            ) : null}
+          </div>
+        </form>
+
         {festivalDocumentTypes.map((documentType) => {
           const document = documentByType(documents, documentType)
           const inputId = `admin-document-${documentType}`
