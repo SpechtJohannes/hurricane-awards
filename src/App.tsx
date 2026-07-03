@@ -1724,18 +1724,13 @@ function App() {
       return
     }
 
-    const openedWindow = window.open(
+    setCampLocationOpenError('')
+
+    window.open(
       campLocationLink,
       '_blank',
       'noopener,noreferrer',
     )
-
-    if (!openedWindow) {
-      setCampLocationOpenError(t('info.campLocation.errors.open'))
-      return
-    }
-
-    setCampLocationOpenError('')
   }
 
   async function submitVote(categoryId: string) {

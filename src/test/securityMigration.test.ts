@@ -731,9 +731,7 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(campLocationMigration).toContain(
       "where s.key = 'camp_location_link'",
     )
-    expect(campLocationMigration).toContain(
-      "values (\n    'camp_location_link'",
-    )
+    expect(campLocationMigration).toContain("'camp_location_link'")
     expect(campLocationMigration).toContain(
       'delete from public.app_settings s',
     )

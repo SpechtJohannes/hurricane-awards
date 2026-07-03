@@ -904,10 +904,12 @@ describe('Login', () => {
   })
 
   it('zeigt und oeffnet den Campstandort im Infobereich', async () => {
-    const openMock = vi.spyOn(window, 'open').mockReturnValue(window)
+    const openMock = vi.spyOn(window, 'open').mockReturnValue(null)
+
     mockLoadedData({
       loadedCampLocationLink: 'https://maps.app.goo.gl/campstandort',
     })
+
     await renderLoadedApp()
     await loginWith('ALICE42')
 
@@ -920,25 +922,10 @@ describe('Login', () => {
       '_blank',
       'noopener,noreferrer',
     )
+    expect(screen.queryByText(/konnte nicht geöffnet werden/i)).not.toBeInTheDocument()
     expect(loadCampLocationLink).toHaveBeenCalledWith({
       participantAccessCode: 'ALICE42',
     })
-  })
-
-  it('zeigt eine verstaendliche Meldung, wenn der Campstandort nicht geoeffnet werden kann', async () => {
-    vi.spyOn(window, 'open').mockReturnValue(null)
-    mockLoadedData({
-      loadedCampLocationLink: 'https://maps.app.goo.gl/campstandort',
-    })
-    await renderLoadedApp()
-    await loginWith('ALICE42')
-
-    await switchMainSection(/^infos$/i)
-    await userEvent.click(screen.getByRole('button', { name: /standort öffnen/i }))
-
-    expect(
-      await screen.findByText(/standortlink konnte nicht geöffnet/i),
-    ).toBeVisible()
   })
 
   it('verhindert Zugriff mit ungueltigem Teilnehmercode', async () => {
