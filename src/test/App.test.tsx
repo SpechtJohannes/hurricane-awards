@@ -415,6 +415,24 @@ function sectionForHeading(name: RegExp) {
   return section as HTMLElement
 }
 
+async function switchMainSection(name: RegExp) {
+  const user = userEvent.setup()
+  const navigation = screen.getByRole('navigation', { name: /hauptbereiche/i })
+
+  await user.click(within(navigation).getByRole('button', { name }))
+
+  return user
+}
+
+async function switchAdminSection(name: RegExp) {
+  const user = userEvent.setup()
+  const navigation = screen.getByRole('navigation', { name: /adminbereiche/i })
+
+  await user.click(within(navigation).getByRole('button', { name }))
+
+  return user
+}
+
 function setUserAgent(userAgent: string) {
   Object.defineProperty(window.navigator, 'userAgent', {
     value: userAgent,
@@ -725,6 +743,7 @@ describe('Login', () => {
     await renderLoadedApp()
 
     await loginWith(' alice42 ')
+    await switchMainSection(/profil/i)
 
     const identitySection = sectionForHeading(/teilnehmercode/i)
     expect(await within(identitySection).findByText(/angemeldet als:/i)).toBeVisible()
@@ -739,6 +758,42 @@ describe('Login', () => {
     expect(
       sessionStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
     ).toContain('"accessCode":"ALICE42"')
+  })
+
+  it('wechselt zwischen den Hauptbereichen und markiert den aktiven Bereich', async () => {
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    const navigation = screen.getByRole('navigation', { name: /hauptbereiche/i })
+
+    expect(
+      within(navigation).getByRole('button', { name: /^awards$/i }),
+    ).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('heading', { name: /abstimmung/i })).toBeVisible()
+
+    await switchMainSection(/^spiele$/i)
+
+    expect(
+      within(navigation).getByRole('button', { name: /^spiele$/i }),
+    ).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('heading', { name: /^spiele$/i })).toBeVisible()
+    expect(
+      screen.queryByRole('heading', { name: /abstimmung/i }),
+    ).not.toBeInTheDocument()
+
+    await switchMainSection(/^infos$/i)
+
+    expect(
+      within(navigation).getByRole('button', { name: /^infos$/i }),
+    ).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('heading', { name: /^infos$/i })).toBeVisible()
+
+    await switchMainSection(/^profil$/i)
+
+    expect(
+      within(navigation).getByRole('button', { name: /^profil$/i }),
+    ).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByText(/angemeldet als:/i)).toBeVisible()
   })
 
   it('verhindert Zugriff mit ungueltigem Teilnehmercode', async () => {
@@ -850,6 +905,7 @@ describe('Login', () => {
     await user.clear(screen.getByRole('textbox', { name: /^teilnehmercode$/i }))
     await user.type(screen.getByRole('textbox', { name: /^teilnehmercode$/i }), 'ALICE42')
     await user.click(screen.getByRole('button', { name: /code/i }))
+    await switchMainSection(/profil/i)
 
     const identitySection = sectionForHeading(/teilnehmercode/i)
     expect(await within(identitySection).findByText(/angemeldet als:/i)).toBeVisible()
@@ -887,6 +943,8 @@ describe('Login', () => {
 
     render(<App />)
 
+    await switchMainSection(/profil/i)
+
     expect(await screen.findByText(/angemeldet als:/i)).toBeVisible()
     const identitySection = sectionForHeading(/teilnehmercode/i)
     expect(within(identitySection).getByText('Alice')).toBeVisible()
@@ -922,6 +980,7 @@ describe('Login', () => {
     await renderLoadedApp()
     const user = await loginWith('ALICE42')
 
+    await user.click(screen.getByRole('button', { name: /profil/i }))
     await user.click(screen.getByRole('button', { name: /abmelden/i }))
 
     expect(
@@ -1118,6 +1177,7 @@ describe('Admin', () => {
     expect(screen.queryByLabelText(/status/i)).not.toBeInTheDocument()
 
     await userEvent.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^awards$/i)
 
     expect(await screen.findAllByLabelText(/status/i)).toHaveLength(3)
     expect(
@@ -1142,6 +1202,7 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^teilnehmer$/i)
 
     const participantsSection = sectionForHeading(/^teilnehmer$/i)
 
@@ -1302,8 +1363,9 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^archiv$/i)
 
-    const festivalSection = sectionForHeading(/^festival$/i)
+    const festivalSection = sectionForHeading(/^archiv$/i)
     await user.click(
       within(festivalSection).getByRole('button', {
         name: /festival archivieren/i,
@@ -1341,8 +1403,9 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^archiv$/i)
 
-    const festivalSection = sectionForHeading(/^festival$/i)
+    const festivalSection = sectionForHeading(/^archiv$/i)
     await user.click(
       within(festivalSection).getByRole('button', {
         name: /json exportieren/i,
@@ -1396,8 +1459,9 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^archiv$/i)
 
-    const festivalSection = sectionForHeading(/^festival$/i)
+    const festivalSection = sectionForHeading(/^archiv$/i)
     await user.click(
       within(festivalSection).getByRole('checkbox', {
         name: /teilnehmercodes in export aufnehmen/i,
@@ -1449,6 +1513,7 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^teilnehmer$/i)
     await user.click(
       await screen.findByRole('button', { name: /teilnehmer anlegen/i }),
     )
@@ -1485,6 +1550,7 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^teilnehmer$/i)
 
     const participantsSection = sectionForHeading(/^teilnehmer$/i)
     const bobCard = (await within(participantsSection).findByText('Bob')).closest(
@@ -1523,6 +1589,7 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^teilnehmer$/i)
 
     const participantsSection = sectionForHeading(/^teilnehmer$/i)
     const bobCard = (await within(participantsSection).findByText('Bob')).closest(
@@ -1560,6 +1627,7 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^teilnehmer$/i)
 
     const participantsSection = sectionForHeading(/^teilnehmer$/i)
     const bobCard = (await within(participantsSection).findByText('Bob')).closest(
@@ -1595,6 +1663,7 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^teilnehmer$/i)
 
     expect(
       await screen.findByText(/teilnehmerverwaltung konnte gerade nicht geladen/i),
@@ -1614,6 +1683,7 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^awards$/i)
     const statusSelects = await screen.findAllByLabelText(/status/i)
 
     await user.selectOptions(statusSelects[0], 'open')
@@ -1653,6 +1723,7 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^awards$/i)
     await user.click(
       await screen.findByRole('button', { name: /kategorie anlegen/i }),
     )
@@ -1696,6 +1767,7 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^awards$/i)
 
     const adminSection = sectionForHeading(/^kategorien$/i)
     const categoryCard = (
@@ -1747,6 +1819,7 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^awards$/i)
 
     const adminSection = sectionForHeading(/^kategorien$/i)
     const categoryCard = (
@@ -1788,6 +1861,7 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^awards$/i)
 
     const adminSection = sectionForHeading(/^kategorien$/i)
     const categoryCard = (
@@ -1815,6 +1889,7 @@ describe('Admin', () => {
     await loginWith('ALICE42')
 
     await userEvent.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^awards$/i)
     await userEvent.click(
       screen.getAllByRole('button', { name: /^löschen$/i })[1],
     )
