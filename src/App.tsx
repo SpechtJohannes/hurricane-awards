@@ -133,6 +133,10 @@ function clearStoredParticipant() {
   sessionStorage.removeItem(authenticatedParticipantSessionStorageKey)
 }
 
+function technicalErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error)
+}
+
 type ResultCardProps = {
   category: Category
   results: CategoryResult[]
@@ -947,7 +951,7 @@ function App() {
   }
 
   function participantMutationErrorMessage(error: unknown) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = technicalErrorMessage(error)
 
     if (message.includes('participant access code already exists')) {
       return t('admin.participants.errors.duplicateCode')
@@ -965,7 +969,7 @@ function App() {
   }
 
   function categoryMutationErrorMessage(error: unknown) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = technicalErrorMessage(error)
 
     if (message.includes('category title is required')) {
       return t('admin.categories.errors.titleRequired')
@@ -983,7 +987,7 @@ function App() {
   }
 
   function festivalNameMutationErrorMessage(error: unknown) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = technicalErrorMessage(error)
 
     if (message.includes('festival name is required')) {
       return t('admin.festival.errors.nameRequired')
@@ -993,7 +997,7 @@ function App() {
   }
 
   function festivalCodeMutationErrorMessage(error: unknown) {
-    const message = error instanceof Error ? error.message : String(error)
+    const message = technicalErrorMessage(error)
 
     if (message.includes('festival access code is required')) {
       return t('admin.festival.errors.codeRequired')

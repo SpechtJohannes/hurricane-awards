@@ -81,6 +81,13 @@ const secureFestivalAccessCodeMigration = readFileSync(
   ),
   'utf8',
 )
+const hardeningMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260703100000_harden_security_infrastructure.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -568,6 +575,52 @@ describe('Supabase Sicherheitsmigration', () => {
     )
   })
 
+  it('haertet Archivdaten und interne RPC Helper in einer Folgemigration', () => {
+    expect(hardeningMigration).toContain(
+      'alter table public.festival_archive_participants',
+    )
+    expect(hardeningMigration).toContain('drop column if exists access_code')
+    expect(hardeningMigration).toContain(
+      'create or replace function public.ha_archive_festival',
+    )
+    expect(
+      hardeningMigration.match(
+        /insert into public\.festival_archive_participants \(([\s\S]*?)\n {2}\)\n {2}select/,
+      )?.[1] ?? '',
+    ).not.toContain('access_code')
+
+    for (const helperSignature of [
+      'public.ha_participant_id_for_access(text)',
+      'public.ha_has_admin_access(text)',
+      'public.ha_normalize_participant_access_code(text)',
+      'public.ha_generate_participant_access_code()',
+      'public.ha_admin_participant_row(text)',
+      'public.ha_admin_category_row(text)',
+      'public.ha_login_rate_limit_key(text)',
+      'public.ha_festival_access_rate_limit_key(text)',
+    ]) {
+      expect(hardeningMigration).toContain(
+        `revoke all on function ${helperSignature} from anon, authenticated`,
+      )
+    }
+
+    expect(hardeningMigration).toContain(
+      "v_festival_id text := coalesce(nullif(left(trim(p_festival_id), 64), ''), 'current')",
+    )
+    expect(hardeningMigration).toContain(
+      "public.ha_normalize_participant_access_code(left(coalesce(p_access_code, ''), 128))",
+    )
+    expect(hardeningMigration).toContain(
+      "upper(nullif(trim(left(coalesce(p_access_code, ''), 128)), ''))",
+    )
+    expect(hardeningMigration).toContain(
+      'grant execute on function public.ha_login_participant(text, text) to anon, authenticated',
+    )
+    expect(hardeningMigration).toContain(
+      'grant execute on function public.ha_verify_festival_access_code(text, text) to anon, authenticated',
+    )
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -581,6 +634,7 @@ describe('Supabase Sicherheitsmigration', () => {
       secureParticipantLoginMigration,
       festivalAccessCodeMigration,
       secureFestivalAccessCodeMigration,
+      hardeningMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

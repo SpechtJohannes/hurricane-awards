@@ -1211,6 +1211,37 @@ describe('Admin', () => {
     ).toBeVisible()
   })
 
+  it('zeigt technische RPC Fehler im Adminbereich nicht im Klartext', async () => {
+    vi.mocked(updateFestivalName).mockRejectedValueOnce(
+      new Error('relation "public.participants" does not exist'),
+    )
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+
+    const festivalSection = sectionForHeading(/^festival$/i)
+    const nameInput = within(festivalSection).getByLabelText(/^festivalname$/i)
+
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Hurricane Crew Awards')
+    await user.click(
+      within(festivalSection).getByRole('button', {
+        name: /festivalname speichern/i,
+      }),
+    )
+
+    expect(
+      await within(festivalSection).findByText(
+        /festivalname konnte gerade nicht gespeichert werden/i,
+      ),
+    ).toBeVisible()
+    expect(
+      within(festivalSection).queryByText(/public\.participants/i),
+    ).not.toBeInTheDocument()
+  })
+
   it('zeigt und bearbeitet den Festivalcode im Adminbereich', async () => {
     await renderLoadedApp()
     const user = await loginWith('ALICE42')

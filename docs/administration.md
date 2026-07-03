@@ -190,7 +190,7 @@ Nach dem Speichern ist der neue Festivalcode für den Festivalzugang gültig. Le
 
 ### Festival archivieren
 
-Mit **Festival archivieren** erstellt die App einen Snapshot des aktuellen Festivalstands. Dazu gehören Teilnehmer, Kategorien und Stimmen zum Zeitpunkt der Archivierung.
+Mit **Festival archivieren** erstellt die App einen Snapshot des aktuellen Festivalstands. Dazu gehören Teilnehmer, Kategorien und Stimmen zum Zeitpunkt der Archivierung. Teilnehmercodes werden dabei nicht im Archiv gespeichert.
 
 Die Archivierung setzt die laufende App nicht zurück. Der aktuelle Festivalstand bleibt nach der Archivierung unverändert.
 

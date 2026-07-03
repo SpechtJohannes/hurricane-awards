@@ -119,6 +119,8 @@ Admins starten die Archivierung ueber `ha_archive_festival`. Die RPC kopiert den
 
 Archivdaten sind von aktiven Tabellen getrennt und haben keine Fremdschluessel auf aktive Teilnehmer, Kategorien oder Stimmen. Dadurch bleiben historische Snapshots stabil, auch wenn aktive Daten spaeter geaendert werden.
 
+Teilnehmercodes werden nicht in `festival_archive_participants` gespeichert. Archivierte Teilnehmer enthalten nur die fuer historische Auswertung benoetigten Anzeige- und Statusdaten.
+
 ### JSON-Export
 
 Admins koennen den aktuellen Festivalstand als JSON exportieren. Der Standardexport entfernt Teilnehmercodes aus den Teilnehmerdaten. Eine explizite Exportoption kann Codes einschliessen; die UI zeigt dafuer einen Warnhinweis an, weil solche Dateien vertraulich sind.
@@ -134,7 +136,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `app_settings`: Zentrale App-Einstellungen, aktuell insbesondere `festival_name` und `festival_access_code`.
 - `all_time_standings`: Quelle fuer das Gesamtclassement, falls als Tabelle, View oder Materialized View vorhanden.
 - `festival_archives`: Metadaten eines archivierten Festival-Snapshots.
-- `festival_archive_participants`: Teilnehmerinformationen zum Archivzeitpunkt.
+- `festival_archive_participants`: Teilnehmerinformationen zum Archivzeitpunkt ohne Teilnehmercodes.
 - `festival_archive_categories`: Kategorieinformationen zum Archivzeitpunkt.
 - `festival_archive_votes`: Stimmen inklusive Anzeigeinformationen zum Archivzeitpunkt.
 - `participant_login_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Teilnehmerlogin.
