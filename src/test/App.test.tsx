@@ -28,6 +28,7 @@ import {
   suggestParticipantAccessCode,
   type Participant,
   updateParticipant,
+  updateParticipantAvatar,
 } from '../data/participants'
 import {
   loadVotes,
@@ -92,6 +93,7 @@ vi.mock('../data/participants', () => ({
   reactivateParticipant: vi.fn(),
   suggestParticipantAccessCode: vi.fn(),
   updateParticipant: vi.fn(),
+  updateParticipantAvatar: vi.fn(),
 }))
 
 vi.mock('../data/votes', () => ({
@@ -395,6 +397,20 @@ function mockLoadedData({
       ...participant,
       displayName: input.displayName ?? participant.displayName,
       accessCode: input.accessCode ?? participant.accessCode,
+    }
+  })
+  vi.mocked(updateParticipantAvatar).mockImplementation(async (input) => {
+    const participant = loadedParticipants.find(
+      (currentParticipant) => currentParticipant.id === input.participantId,
+    )
+
+    if (!participant) {
+      throw new Error('Unknown participant')
+    }
+
+    return {
+      ...participant,
+      avatarId: input.avatarId,
     }
   })
   vi.mocked(deactivateParticipant).mockImplementation(async (participantId) => {
@@ -999,6 +1015,79 @@ describe('Login', () => {
     expect(
       sessionStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
     ).toContain('"accessCode":"ALICE42"')
+  })
+
+  it('zeigt fuer Teilnehmer ohne gespeicherten Avatar den Default Avatar', async () => {
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/profil/i)
+
+    expect(
+      screen.getByRole('img', { name: 'Alice: Camp Sunrise' }),
+    ).toBeVisible()
+    expect(
+      screen.getByRole('button', { name: /avatar camp sunrise ausw/i }),
+    ).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('zeigt die Avatar Auswahl im Profil', async () => {
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/profil/i)
+
+    expect(screen.getByRole('heading', { name: /avatar ausw/i })).toBeVisible()
+    expect(
+      screen.getAllByRole('button', { name: /avatar .* ausw/i }).length,
+    ).toBeGreaterThanOrEqual(50)
+    expect(
+      screen.getAllByRole('img', { name: /: / }).length,
+    ).toBeGreaterThanOrEqual(50)
+  })
+
+  it('speichert einen geaenderten Avatar und hebt ihn hervor', async () => {
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+    await switchMainSection(/profil/i)
+
+    await user.click(
+      screen.getByRole('button', { name: /avatar neon tent ausw/i }),
+    )
+
+    expect(updateParticipantAvatar).toHaveBeenCalledWith(
+      { participantId: 'alice', avatarId: 'neon-tent' },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(
+      await screen.findByRole('button', {
+        name: /avatar neon tent ausw/i,
+        pressed: true,
+      }),
+    ).toBeVisible()
+    expect(
+      sessionStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
+    ).toContain('"avatarId":"neon-tent"')
+  })
+
+  it('zeigt Avatare zusammen mit Teilnehmernamen in Ergebnislisten', async () => {
+    mockLoadedData({
+      loadedParticipants: [
+        participants[0],
+        { ...participants[1], avatarId: 'neon-tent' },
+        participants[2],
+      ],
+      loadedVotes: [vote({ votedForId: 'bob' })],
+    })
+
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    const resultsSection = sectionForHeading(/ergebnisse/i)
+
+    expect(
+      within(resultsSection).getAllByRole('img', {
+        name: 'Bob: Neon Tent',
+      }).length,
+    ).toBeGreaterThan(0)
   })
 
   it('wechselt zwischen den Hauptbereichen und markiert den aktiven Bereich', async () => {
@@ -1810,7 +1899,7 @@ describe('Admin', () => {
 
     expect(
       within(festivalSection).getByRole('alert'),
-    ).toHaveTextContent(/enthÃ¤lt teilnehmercodes/i)
+    ).toHaveTextContent(/enthält teilnehmercodes/i)
 
     await user.click(
       within(festivalSection).getByRole('button', {

@@ -171,6 +171,15 @@
       "invalidAccessCode": "Der Code konnte nicht bestätigt werden. Prüfe deine Eingabe und versuche es erneut.",
       "loginLocked": "Der Code konnte gerade nicht geprüft werden. Bitte warte kurz und versuche es dann erneut.",
       "participantVotesLoad": "Deine bisherigen Stimmen konnten nicht geladen werden."
+    },
+    "avatar": {
+      "title": "Avatar auswählen",
+      "description": "Wähle einen Avatar aus der festen Bibliothek. Du kannst ihn jederzeit ändern.",
+      "selectLabel": "Avatar {{avatar}} auswählen",
+      "saving": "Avatar wird gespeichert...",
+      "errors": {
+        "save": "Der Avatar konnte gerade nicht gespeichert werden. Versuch es bitte gleich nochmal."
+      }
     }
   },
   "admin": {
@@ -259,7 +268,7 @@
       "exporting": "Exportiere...",
       "exportSuccess": "JSON-Export wurde erstellt.",
       "exportIncludeAccessCodes": "Teilnehmercodes in Export aufnehmen",
-      "exportAccessCodeWarning": "Warnung: Dieser Export enthÃ¤lt Teilnehmercodes und muss vertraulich behandelt werden.",
+      "exportAccessCodeWarning": "Warnung: Dieser Export enthält Teilnehmercodes und muss vertraulich behandelt werden.",
       "archive": "Festival archivieren",
       "archiving": "Archiviere...",
       "archiveConfirm": "Aktuelles Festival wirklich archivieren? Die aktiven Daten bleiben unverändert.",

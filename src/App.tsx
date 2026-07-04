@@ -28,6 +28,7 @@ import {
   reactivateParticipant,
   suggestParticipantAccessCode,
   updateParticipant,
+  updateParticipantAvatar,
   type Participant,
 } from './data/participants'
 import {
@@ -86,7 +87,9 @@ import { AdminFestival } from './components/AdminFestival'
 import { AdminCategories } from './components/AdminCategories'
 import { AdminFestivalDocuments } from './components/AdminFestivalDocuments'
 import { FestivalInfo } from './components/FestivalInfo'
+import { Avatar, ParticipantName } from './components/Avatar'
 import { useFestivalAccess } from './hooks/useFestivalAccess'
+import { avatars } from './config/avatars'
 import i18n from './i18n'
 import { supportedLanguages, type SupportedLanguage } from './i18n'
 import './App.css'
@@ -155,6 +158,9 @@ function readStoredParticipant(): Participant | null {
         id: parsedParticipant.id,
         name: parsedParticipant.name,
         displayName: parsedParticipant.displayName,
+        ...(typeof parsedParticipant.avatarId === 'string'
+          ? { avatarId: parsedParticipant.avatarId }
+          : {}),
         accessCode: parsedParticipant.accessCode,
         isAdmin: parsedParticipant.isAdmin === true,
         isActive: parsedParticipant.isActive !== false,
@@ -262,7 +268,12 @@ function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
             <ul>
               {leaders.map(({ participant, voteCount }) => (
                 <li key={participant.id}>
-                  <strong>{participant.displayName}</strong>
+                  <strong>
+                    <ParticipantName
+                      avatarId={participant.avatarId}
+                      name={participant.displayName}
+                    />
+                  </strong>
                   <span>{voteCount}</span>
                 </li>
               ))}
@@ -290,7 +301,10 @@ function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
               key={participant.id}
             >
               <div className="result-card__label">
-                <span>{participant.displayName}</span>
+                <ParticipantName
+                  avatarId={participant.avatarId}
+                  name={participant.displayName}
+                />
                 <strong>{voteCount}</strong>
               </div>
               <div className="result-card__bar" aria-hidden="true">
@@ -900,6 +914,8 @@ function App() {
     useState<ParticipantFormState | null>(null)
   const [participantFormError, setParticipantFormError] = useState('')
   const [isSavingParticipant, setIsSavingParticipant] = useState(false)
+  const [avatarError, setAvatarError] = useState('')
+  const [savingAvatarId, setSavingAvatarId] = useState<string | null>(null)
   const [togglingParticipantId, setTogglingParticipantId] = useState<
     string | null
   >(null)
@@ -1249,6 +1265,8 @@ function App() {
     setRemovingDocumentType(null)
     setParticipantForm(null)
     setParticipantFormError('')
+    setAvatarError('')
+    setSavingAvatarId(null)
     setIsAdminVisible(false)
     setActiveMainSection('awards')
     setActiveAdminSection('festival')
@@ -1268,6 +1286,54 @@ function App() {
       ...currentVotes,
       [categoryId]: votedForId,
     }))
+  }
+
+  async function saveParticipantAvatar(avatarId: string) {
+    if (!selectedParticipant || savingAvatarId) {
+      return
+    }
+
+    setSavingAvatarId(avatarId)
+    setAvatarError('')
+
+    try {
+      const updatedParticipant = await updateParticipantAvatar(
+        {
+          participantId: selectedParticipant.id,
+          avatarId,
+        },
+        {
+          participantAccessCode: selectedParticipant.accessCode,
+        },
+      )
+
+      storeAuthenticatedParticipant(updatedParticipant)
+      setSelectedParticipant(updatedParticipant)
+      setParticipants((currentParticipants) =>
+        currentParticipants.map((participant) =>
+          participant.id === updatedParticipant.id
+            ? {
+                ...participant,
+                avatarId: updatedParticipant.avatarId,
+              }
+            : participant,
+        ),
+      )
+      setAdminParticipants((currentParticipants) =>
+        currentParticipants.map((participant) =>
+          participant.id === updatedParticipant.id
+            ? {
+                ...participant,
+                avatarId: updatedParticipant.avatarId,
+              }
+            : participant,
+        ),
+      )
+    } catch {
+      setAvatarError(t('identity.avatar.errors.save'))
+    } finally {
+      setSavingAvatarId(null)
+    }
   }
 
   function toggleAdminView() {
@@ -2389,7 +2455,13 @@ function App() {
             <div className="identity__selected">
               <p>
                 {t('identity.loggedInAs')}{' '}
-                <strong>{selectedParticipant.displayName}</strong>
+                <strong>
+                  <ParticipantName
+                    avatarId={selectedParticipant.avatarId}
+                    name={selectedParticipant.displayName}
+                    size="medium"
+                  />
+                </strong>
               </p>
               <button
                 className="identity__change"
@@ -2398,6 +2470,55 @@ function App() {
               >
                 {t('identity.logout')}
               </button>
+            </div>
+
+            <div className="avatar-picker" aria-labelledby="avatar-picker-title">
+              <div className="avatar-picker__header">
+                <h3 id="avatar-picker-title">{t('identity.avatar.title')}</h3>
+                <p>{t('identity.avatar.description')}</p>
+              </div>
+              <div className="avatar-picker__grid">
+                {avatars.map((avatar) => {
+                  const isSelected =
+                    avatar.id ===
+                    (selectedParticipant.avatarId ?? avatars[0]?.id)
+
+                  return (
+                    <button
+                      className={`avatar-picker__option${
+                        isSelected ? ' is-selected' : ''
+                      }`}
+                      type="button"
+                      key={avatar.id}
+                      onClick={() => {
+                        void saveParticipantAvatar(avatar.id)
+                      }}
+                      disabled={savingAvatarId !== null}
+                      aria-pressed={isSelected}
+                      aria-label={t('identity.avatar.selectLabel', {
+                        avatar: avatar.label,
+                      })}
+                    >
+                      <Avatar
+                        avatarId={avatar.id}
+                        name={avatar.label}
+                        size="large"
+                      />
+                      <span>{avatar.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              {savingAvatarId ? (
+                <p className="identity__error" role="status">
+                  {t('identity.avatar.saving')}
+                </p>
+              ) : null}
+              {avatarError ? (
+                <p className="identity__error" role="alert">
+                  {avatarError}
+                </p>
+              ) : null}
             </div>
 
             {participantsError ? (
@@ -2458,6 +2579,9 @@ function App() {
                     vote.voterId === selectedParticipant.id &&
                     vote.categoryId === category.id,
                 )
+                const selectedParticipantForVote = eligibleParticipants.find(
+                  (participant) => participant.id === selectedVote,
+                )
 
                 return (
                   <article className="category-card" key={category.id}>
@@ -2494,6 +2618,15 @@ function App() {
                             </option>
                           ))}
                         </select>
+
+                        {selectedVote ? (
+                          <p className="category-card__selected-vote">
+                            <ParticipantName
+                              avatarId={selectedParticipantForVote?.avatarId}
+                              name={selectedParticipantForVote?.displayName ?? ''}
+                            />
+                          </p>
+                        ) : null}
 
                         {selectedVote ? (
                           <button

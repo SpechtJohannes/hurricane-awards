@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { readdirSync } from 'node:fs'
 
 const rpcMock = vi.hoisted(() => vi.fn())
 const storageFromMock = vi.hoisted(() => vi.fn())
@@ -53,7 +54,9 @@ import {
   reactivateParticipant,
   suggestParticipantAccessCode,
   updateParticipant,
+  updateParticipantAvatar,
 } from '../data/participants'
+import { avatarById, avatars, defaultAvatarId } from '../data/avatars'
 import {
   deleteVotesForCategory,
   loadVotes,
@@ -805,6 +808,22 @@ describe('Supabase Datenzugriffe', () => {
     )
   })
 
+  it('enthaelt eine feste Avatarbibliothek mit Default Avatar', () => {
+    const avatarFiles = readdirSync('src/assets/avatars').filter((fileName) =>
+      /^avatar-\d{3}\.svg$/.test(fileName),
+    )
+
+    expect(avatarFiles.length).toBeGreaterThanOrEqual(50)
+    expect(avatars).toHaveLength(52)
+    expect(avatars.length).toBeGreaterThanOrEqual(50)
+    expect(avatars.every((avatar) => avatar.imageSrc.length > 0)).toBe(true)
+    expect(new Set(avatars.map((avatar) => avatar.imageSrc)).size).toBe(
+      avatars.length,
+    )
+    expect(avatarById()).toEqual(avatarById(defaultAvatarId))
+    expect(avatarById('unbekannt')).toEqual(avatarById(defaultAvatarId))
+  })
+
   it('meldet Teilnehmer ueber geschuetzten Login RPC an', async () => {
     rpcMock.mockResolvedValue({
       data: [
@@ -994,6 +1013,33 @@ describe('Supabase Datenzugriffe', () => {
       p_participant_id: 'alice',
       p_display_name: 'Alice Neu',
       p_access_code: 'NEU42',
+    })
+  })
+
+  it('speichert den eigenen Avatar ueber Teilnehmer RPC', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          ...participantRow,
+          avatar_id: 'neon-tent',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      updateParticipantAvatar(
+        { participantId: 'alice', avatarId: 'neon-tent' },
+        participantContext,
+      ),
+    ).resolves.toEqual({
+      ...mappedParticipant,
+      avatarId: 'neon-tent',
+    })
+    expect(rpcMock).toHaveBeenCalledWith('ha_update_participant_avatar', {
+      ...expectedParticipantRpcContext,
+      p_participant_id: 'alice',
+      p_avatar_id: 'neon-tent',
     })
   })
 

@@ -33,7 +33,7 @@
       "email": "E-mailadres"
     },
     "placeholders": {
-     "name": "Johannes Aaron Specht",
+      "name": "Johannes Aaron Specht",
       "address": "Hermannstraße 2, 38114 Braunschweig, Deutschland",
       "email": "specht.johannes@gmx.de"
     }
@@ -171,6 +171,15 @@
       "invalidAccessCode": "De code kon niet worden bevestigd. Controleer je invoer en probeer het opnieuw.",
       "loginLocked": "De code kon net niet worden gecontroleerd. Wacht even en probeer het daarna opnieuw.",
       "participantVotesLoad": "Je eerdere stemmen konden niet worden geladen."
+    },
+    "avatar": {
+      "title": "Avatar kiezen",
+      "description": "Kies een avatar uit de vaste bibliotheek. Je kunt hem op elk moment wijzigen.",
+      "selectLabel": "Avatar {{avatar}} kiezen",
+      "saving": "Avatar wordt opgeslagen...",
+      "errors": {
+        "save": "De avatar kon net niet worden opgeslagen. Probeer het zo nog eens."
+      }
     }
   },
   "admin": {
