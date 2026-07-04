@@ -9,6 +9,10 @@
     "build:analyze": "tsc -b && vite build --mode analyze",
     "lint": "eslint .",
     "preview": "vite preview",
+    "supabase:version": "supabase --version",
+    "supabase:link": "supabase link",
+    "db:push": "supabase db push",
+    "migration:new": "supabase migration new",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
@@ -36,6 +40,7 @@
     "globals": "^17.6.0",
     "jsdom": "^29.1.1",
     "rollup-plugin-visualizer": "^7.0.1",
+    "supabase": "^2.109.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12",

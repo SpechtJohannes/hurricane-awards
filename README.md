@@ -12,6 +12,40 @@ Die technische Referenz zum aktuellen Datenbankschema steht in `docs/database-sc
 
 Installations- und Deployment-Hinweise stehen in `docs/installation-and-deployment.md`.
 
+### Supabase CLI und Migrationen
+
+Die Supabase CLI ist als Dev Dependency eingerichtet. Neue Entwickler installieren sie zusammen mit den anderen Projektabhaengigkeiten:
+
+```bash
+npm install
+```
+
+Vor dem ersten Zugriff auf ein Supabase-Projekt ist ein Login erforderlich:
+
+```bash
+npx supabase login
+```
+
+Das lokale Repository wird danach manuell mit dem passenden Supabase-Projekt verknuepft. Die Project Ref ist projektspezifisch und wird nicht im Repository dokumentiert oder committet:
+
+```bash
+npx supabase link --project-ref <PROJECT_REF>
+```
+
+Vorhandene Migrationen werden mit dem npm Script angewendet:
+
+```bash
+npm run db:push
+```
+
+Neue Migrationen werden ebenfalls ueber das Script erstellt. Der Name wird nach `--` an die Supabase CLI weitergereicht:
+
+```bash
+npm run migration:new -- <migration_name>
+```
+
+Eine lokale Supabase Umgebung ist optional. Sie benoetigt Docker und kann bei Bedarf ueber die Supabase CLI gestartet werden.
+
 ## Tests
 
 Die Unit Tests werden mit Vitest, React Testing Library, jest-dom, jsdom und dem V8 Coverage Provider ausgeführt.
