@@ -1,9 +1,10 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     VitePWA({
@@ -35,6 +36,14 @@ export default defineConfig({
         ],
       },
     }),
+    mode === 'analyze'
+      ? visualizer({
+          filename: 'dist/bundle-analysis.html',
+          gzipSize: true,
+          brotliSize: true,
+          template: 'treemap',
+        })
+      : null,
   ],
   test: {
     environment: 'jsdom',
@@ -50,4 +59,4 @@ export default defineConfig({
       ],
     },
   },
-})
+}))
