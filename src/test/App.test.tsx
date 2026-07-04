@@ -72,6 +72,15 @@ import {
   loadMusicPlaylist,
   updateMusicPlaylist,
 } from '../data/festivalMusic'
+import {
+  closeBingoRound,
+  loadAdminBingoRound,
+  loadOrCreateBingoCard,
+  setBingoMark,
+  startBingoRound,
+  type BingoCard,
+  type BingoRound,
+} from '../data/bingo'
 import type { MusicPlaylist } from '../data/musicEmbeds'
 import i18n from '../i18n'
 
@@ -144,6 +153,14 @@ vi.mock('../data/festivalMusic', () => ({
   loadAdminMusicPlaylist: vi.fn(),
   loadMusicPlaylist: vi.fn(),
   updateMusicPlaylist: vi.fn(),
+}))
+
+vi.mock('../data/bingo', () => ({
+  closeBingoRound: vi.fn(),
+  loadAdminBingoRound: vi.fn(),
+  loadOrCreateBingoCard: vi.fn(),
+  setBingoMark: vi.fn(),
+  startBingoRound: vi.fn(),
 }))
 
 const participants: Participant[] = [
@@ -236,6 +253,18 @@ const musicPlaylist: MusicPlaylist = {
   embedUrl: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M',
 }
 
+const bingoRound: BingoRound = {
+  id: 'bingo-round-1',
+  startedAt: '2026-07-04T12:00:00.000Z',
+}
+
+const bingoCard: BingoCard = {
+  ...bingoRound,
+  cardId: 'bingo-card-1',
+  numbers: Array.from({ length: 25 }, (_, index) => index + 1),
+  markedNumbers: [1, 7],
+}
+
 const festivalAccessStorageKey =
   'hurricane-awards:hurricane-awards-2026:festival-access'
 const festivalAccessVersion = '2026-07-01 10:00:00+00'
@@ -281,6 +310,8 @@ function mockLoadedData({
   loadedAdminCampLocationLink = loadedCampLocationLink,
   loadedMusicPlaylist = null,
   loadedAdminMusicPlaylist = loadedMusicPlaylist,
+  loadedBingoCard = null,
+  loadedAdminBingoRound = loadedBingoCard,
 }: {
   loadedFestivalName?: string
   loadedFestivalAccessCode?: string
@@ -297,6 +328,8 @@ function mockLoadedData({
   loadedAdminCampLocationLink?: string | null
   loadedMusicPlaylist?: MusicPlaylist | null
   loadedAdminMusicPlaylist?: MusicPlaylist | null
+  loadedBingoCard?: BingoCard | null
+  loadedAdminBingoRound?: BingoRound | null
 } = {}) {
   vi.mocked(loadFestivalName).mockResolvedValue(loadedFestivalName)
   vi.mocked(loadFestivalAccessVersion).mockResolvedValue(
@@ -351,6 +384,21 @@ function mockLoadedData({
   )
   vi.mocked(loadMusicPlaylist).mockResolvedValue(loadedMusicPlaylist)
   vi.mocked(loadAdminMusicPlaylist).mockResolvedValue(loadedAdminMusicPlaylist)
+  vi.mocked(loadOrCreateBingoCard).mockResolvedValue(loadedBingoCard)
+  vi.mocked(loadAdminBingoRound).mockResolvedValue(loadedAdminBingoRound)
+  vi.mocked(startBingoRound).mockResolvedValue(bingoRound)
+  vi.mocked(closeBingoRound).mockResolvedValue()
+  vi.mocked(setBingoMark).mockImplementation(async (number, isMarked) => {
+    const markedNumbers = new Set(loadedBingoCard?.markedNumbers ?? [])
+
+    if (isMarked) {
+      markedNumbers.add(number)
+    } else {
+      markedNumbers.delete(number)
+    }
+
+    return Array.from(markedNumbers).sort((a, b) => a - b)
+  })
   vi.mocked(updateMusicPlaylist).mockImplementation(async (link) => ({
     ...musicPlaylist,
     playlistId: link.includes('0JQ5DAqbMKFz6FAsUtgAab')
@@ -1091,6 +1139,7 @@ describe('Login', () => {
   })
 
   it('wechselt zwischen den Hauptbereichen und markiert den aktiven Bereich', async () => {
+    mockLoadedData({ loadedBingoCard: bingoCard })
     await renderLoadedApp()
     await loginWith('ALICE42')
 
@@ -1101,12 +1150,12 @@ describe('Login', () => {
     ).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('heading', { name: /abstimmung/i })).toBeVisible()
 
-    await switchMainSection(/^spiele$/i)
+    await switchMainSection(/^bingo$/i)
 
     expect(
-      within(navigation).getByRole('button', { name: /^spiele$/i }),
+      within(navigation).getByRole('button', { name: /^bingo$/i }),
     ).toHaveAttribute('aria-current', 'page')
-    expect(screen.getByRole('heading', { name: /^spiele$/i })).toBeVisible()
+    expect(screen.getByRole('heading', { name: /^bingo$/i })).toBeVisible()
     expect(
       screen.queryByRole('heading', { name: /abstimmung/i }),
     ).not.toBeInTheDocument()
@@ -1124,6 +1173,40 @@ describe('Login', () => {
       within(navigation).getByRole('button', { name: /^profil$/i }),
     ).toHaveAttribute('aria-current', 'page')
     expect(screen.getByText(/angemeldet als:/i)).toBeVisible()
+  })
+
+  it('blendet Bingo ohne aktive Runde aus', async () => {
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    const navigation = screen.getByRole('navigation', { name: /hauptbereiche/i })
+
+    expect(
+      within(navigation).queryByRole('button', { name: /^bingo$/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('zeigt die individuelle Bingokarte und speichert Markierungen', async () => {
+    mockLoadedData({ loadedBingoCard: bingoCard })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^bingo$/i)
+
+    const bingoSection = sectionForHeading(/^bingo$/i)
+    const markedButton = within(bingoSection).getByRole('button', { name: '1' })
+    const unmarkedButton = within(bingoSection).getByRole('button', { name: '2' })
+
+    expect(markedButton).toHaveAttribute('aria-pressed', 'true')
+    expect(unmarkedButton).toHaveAttribute('aria-pressed', 'false')
+
+    await userEvent.click(unmarkedButton)
+
+    expect(setBingoMark).toHaveBeenCalledWith(2, true, {
+      participantAccessCode: 'ALICE42',
+    })
+    await waitFor(() => {
+      expect(unmarkedButton).toHaveAttribute('aria-pressed', 'true')
+    })
   })
 
   it('zeigt im Infobereich einen Hinweis, wenn keine Dokumente vorhanden sind', async () => {
@@ -1919,6 +2002,60 @@ describe('Admin', () => {
           includeParticipantAccessCodes: true,
         },
       )
+    })
+  })
+
+  it('startet und beendet eine Bingorunde im Adminbereich', async () => {
+    mockLoadedData()
+    vi.mocked(loadOrCreateBingoCard).mockResolvedValueOnce(null)
+    vi.mocked(loadOrCreateBingoCard).mockResolvedValueOnce(bingoCard)
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^bingo$/i)
+
+    const adminBingoSection = sectionForHeading(/^bingo$/i)
+
+    expect(
+      within(adminBingoSection).getByText(/keine bingorunde/i),
+    ).toBeVisible()
+
+    await user.click(
+      within(adminBingoSection).getByRole('button', {
+        name: /bingorunde starten/i,
+      }),
+    )
+
+    expect(startBingoRound).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+    expect(loadOrCreateBingoCard).toHaveBeenLastCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+    expect(
+      await within(adminBingoSection).findByText(/aktive bingorunde/i),
+    ).toBeVisible()
+
+    await switchMainSection(/^bingo$/i)
+    expect(screen.getByRole('button', { name: '1' })).toBeVisible()
+
+    await switchAdminSection(/^bingo$/i)
+    await user.click(
+      within(adminBingoSection).getByRole('button', {
+        name: /bingorunde beenden/i,
+      }),
+    )
+
+    expect(closeBingoRound).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+    await waitFor(() => {
+      expect(
+        within(screen.getByRole('navigation', { name: /hauptbereiche/i }))
+          .getByRole('button', { name: /^awards$/i }),
+      ).toHaveAttribute('aria-current', 'page')
     })
   })
 

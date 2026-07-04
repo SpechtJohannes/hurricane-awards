@@ -117,7 +117,7 @@
   "navigation": {
     "label": "Hoofdonderdelen",
     "awards": "Awards",
-    "games": "Spellen",
+    "bingo": "Bingo",
     "info": "Info",
     "profile": "Profiel"
   },
@@ -192,6 +192,7 @@
       "participants": "Deelnemers",
       "awards": "Awards",
       "games": "Spellen",
+      "bingo": "Bingo",
       "info": "Info",
       "archive": "Archief"
     },
@@ -254,6 +255,21 @@
         "invalid": "Voer een geldige Spotify-playlistlink in.",
         "save": "De playlist kon net niet worden opgeslagen.",
         "remove": "De playlist kon net niet worden verwijderd."
+      }
+    },
+    "bingo": {
+      "eyebrow": "Spellen",
+      "title": "Bingo",
+      "loading": "Bingo wordt geladen...",
+      "inactive": "Er is momenteel geen bingoronde vrijgegeven.",
+      "active": "Actieve bingoronde sinds {{startedAt}}.",
+      "start": "Bingoronde starten",
+      "close": "Bingoronde beeindigen",
+      "confirmClose": "Actieve bingoronde echt beeindigen? De bingonavigatie wordt daarna voor deelnemers verborgen.",
+      "errors": {
+        "load": "De bingoronde kon net niet worden geladen.",
+        "start": "De bingoronde kon net niet worden gestart.",
+        "close": "De bingoronde kon net niet worden beeindigd."
       }
     },
     "festival": {
@@ -349,6 +365,16 @@
     "errors": {
       "categoriesLoad": "De categorieën konden net niet worden geladen.",
       "statusSave": "De status kon net niet worden opgeslagen."
+    }
+  },
+  "bingo": {
+    "eyebrow": "Bingoronde",
+    "title": "Bingo",
+    "description": "De nummers worden analoog getrokken. Markeer hier je getrokken nummers of verwijder een markering.",
+    "cardLabel": "Je bingokaart",
+    "errors": {
+      "load": "Je bingokaart kon net niet worden geladen.",
+      "mark": "De markering kon net niet worden opgeslagen."
     }
   },
   "categories": {

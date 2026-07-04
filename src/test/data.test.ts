@@ -81,6 +81,13 @@ import {
   updateMusicPlaylist,
 } from '../data/festivalMusic'
 import {
+  closeBingoRound,
+  loadAdminBingoRound,
+  loadOrCreateBingoCard,
+  setBingoMark,
+  startBingoRound,
+} from '../data/bingo'
+import {
   isSupportedMusicPlaylistLink,
   normalizeSpotifyPlaylistLink,
 } from '../data/musicEmbeds'
@@ -582,6 +589,113 @@ describe('Supabase Datenzugriffe', () => {
       updateMusicPlaylist('https://open.spotify.com/album/abc', participantContext),
     ).rejects.toThrow('unsupported music playlist link')
     expect(rpcMock).not.toHaveBeenCalled()
+  })
+
+  it('laedt oder erstellt eine Bingokarte fuer eine aktive Runde', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          id: 'round-1',
+          started_at: '2026-07-04T12:00:00.000Z',
+          card_id: 'card-1',
+          numbers: Array.from({ length: 25 }, (_, index) => index + 1),
+          marked_numbers: [1, 7, 25],
+        },
+      ],
+      error: null,
+    })
+
+    await expect(loadOrCreateBingoCard(participantContext)).resolves.toEqual({
+      id: 'round-1',
+      startedAt: '2026-07-04T12:00:00.000Z',
+      cardId: 'card-1',
+      numbers: Array.from({ length: 25 }, (_, index) => index + 1),
+      markedNumbers: [1, 7, 25],
+    })
+    expect(rpcMock).toHaveBeenCalledWith(
+      'ha_get_or_create_bingo_card',
+      expectedParticipantRpcContext,
+    )
+  })
+
+  it('gibt null zurueck, wenn keine aktive Bingorunde existiert', async () => {
+    rpcMock.mockResolvedValue({
+      data: [],
+      error: null,
+    })
+
+    await expect(loadOrCreateBingoCard(participantContext)).resolves.toBeNull()
+  })
+
+  it('speichert und entfernt Bingo Markierungen ueber RPC', async () => {
+    rpcMock.mockResolvedValue({
+      data: [3, 17],
+      error: null,
+    })
+
+    await expect(setBingoMark(17, true, participantContext)).resolves.toEqual([
+      3,
+      17,
+    ])
+    expect(rpcMock).toHaveBeenCalledWith('ha_set_bingo_mark', {
+      ...expectedParticipantRpcContext,
+      p_number: 17,
+      p_is_marked: true,
+    })
+  })
+
+  it('verwaltet Bingorunden ueber Admin RPCs', async () => {
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'round-1',
+          started_at: '2026-07-04T12:00:00.000Z',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(loadAdminBingoRound(participantContext)).resolves.toEqual({
+      id: 'round-1',
+      startedAt: '2026-07-04T12:00:00.000Z',
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      1,
+      'ha_admin_get_bingo_round',
+      expectedParticipantRpcContext,
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'round-2',
+          started_at: '2026-07-04T12:10:00.000Z',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(startBingoRound(participantContext)).resolves.toEqual({
+      id: 'round-2',
+      startedAt: '2026-07-04T12:10:00.000Z',
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      2,
+      'ha_start_bingo_round',
+      expectedParticipantRpcContext,
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: null,
+      error: null,
+    })
+
+    await expect(closeBingoRound(participantContext)).resolves.toBeUndefined()
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      3,
+      'ha_close_bingo_round',
+      expectedParticipantRpcContext,
+    )
   })
 
   it('laedt Kategorien ueber eine geschuetzte RPC Funktion', async () => {

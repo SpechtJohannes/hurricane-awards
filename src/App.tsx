@@ -75,6 +75,15 @@ import {
   updateMusicPlaylist,
 } from './data/festivalMusic'
 import {
+  closeBingoRound,
+  loadAdminBingoRound,
+  loadOrCreateBingoCard,
+  setBingoMark,
+  startBingoRound,
+  type BingoCard,
+  type BingoRound,
+} from './data/bingo'
+import {
   isSupportedMusicPlaylistLink,
   type MusicPlaylist,
 } from './data/musicEmbeds'
@@ -86,6 +95,8 @@ import {
 import { AdminFestival } from './components/AdminFestival'
 import { AdminCategories } from './components/AdminCategories'
 import { AdminFestivalDocuments } from './components/AdminFestivalDocuments'
+import { AdminBingo } from './components/AdminBingo'
+import { Bingo } from './components/Bingo'
 import { FestivalInfo } from './components/FestivalInfo'
 import { Avatar, ParticipantName } from './components/Avatar'
 import { useFestivalAccess } from './hooks/useFestivalAccess'
@@ -190,30 +201,13 @@ function technicalErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error)
 }
 
-type MainSection = 'awards' | 'games' | 'info' | 'profile'
+type MainSection = 'awards' | 'bingo' | 'info' | 'profile'
 type AdminSection = 'festival' | 'participants' | 'awards' | 'games' | 'info' | 'archive'
 
 type ResultCardProps = {
   category: Category
   results: CategoryResult[]
   highestVoteCount: number
-}
-
-type PlaceholderSectionProps = {
-  id: string
-  title: string
-  body: string
-}
-
-function PlaceholderSection({ id, title, body }: PlaceholderSectionProps) {
-  return (
-    <section className="placeholder-section" id={id} aria-labelledby={`${id}-title`}>
-      <div className="placeholder-section__content">
-        <h2 id={`${id}-title`}>{title}</h2>
-        <p>{body}</p>
-      </div>
-    </section>
-  )
 }
 
 function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
@@ -902,6 +896,15 @@ function App() {
     useState<MusicPlaylist | null>(null)
   const [adminMusicPlaylistError, setAdminMusicPlaylistError] = useState('')
   const [isSavingMusicPlaylist, setIsSavingMusicPlaylist] = useState(false)
+  const [bingoCard, setBingoCard] = useState<BingoCard | null>(null)
+  const [bingoError, setBingoError] = useState('')
+  const [togglingBingoNumber, setTogglingBingoNumber] = useState<number | null>(
+    null,
+  )
+  const [adminBingoRound, setAdminBingoRound] = useState<BingoRound | null>(null)
+  const [adminBingoError, setAdminBingoError] = useState('')
+  const [isLoadingAdminBingo, setIsLoadingAdminBingo] = useState(false)
+  const [isSavingBingoRound, setIsSavingBingoRound] = useState(false)
   const [adminFestivalDocumentsError, setAdminFestivalDocumentsError] =
     useState('')
   const [isLoadingAdminFestivalDocuments, setIsLoadingAdminFestivalDocuments] =
@@ -961,7 +964,7 @@ function App() {
   const isLoginLocked = loginLockRemainingMs > 0
   const mainNavigationItems: Array<{ section: MainSection; label: string }> = [
     { section: 'awards', label: t('navigation.awards') },
-    { section: 'games', label: t('navigation.games') },
+    ...(bingoCard ? [{ section: 'bingo' as const, label: t('navigation.bingo') }] : []),
     { section: 'info', label: t('navigation.info') },
     { section: 'profile', label: t('navigation.profile') },
   ]
@@ -969,7 +972,7 @@ function App() {
     { section: 'festival', label: t('admin.navigation.festival') },
     { section: 'participants', label: t('admin.navigation.participants') },
     { section: 'awards', label: t('admin.navigation.awards') },
-    { section: 'games', label: t('admin.navigation.games') },
+    { section: 'games', label: t('admin.navigation.bingo') },
     { section: 'info', label: t('admin.navigation.info') },
     { section: 'archive', label: t('admin.navigation.archive') },
   ]
@@ -1054,6 +1057,7 @@ function App() {
       setResultsError('')
       setStandingsError('')
       setFestivalDocumentsError('')
+      setBingoError('')
 
       try {
         const [
@@ -1063,6 +1067,7 @@ function App() {
           loadedFestivalDocuments,
           loadedCampLocationLink,
           loadedMusicPlaylist,
+          loadedBingoCard,
         ] = await Promise.all([
           loadParticipants(accessContext),
           loadCategories(accessContext),
@@ -1070,6 +1075,7 @@ function App() {
           loadFestivalDocuments(accessContext),
           loadCampLocationLink(accessContext),
           loadMusicPlaylist(accessContext),
+          loadOrCreateBingoCard(accessContext),
         ])
 
         if (isCurrent) {
@@ -1079,6 +1085,7 @@ function App() {
           setFestivalDocuments(loadedFestivalDocuments)
           setCampLocationLink(loadedCampLocationLink)
           setMusicPlaylist(loadedMusicPlaylist)
+          setBingoCard(loadedBingoCard)
           setCampLocationOpenError('')
         }
       } catch {
@@ -1091,6 +1098,7 @@ function App() {
           )
           setVotesError(i18n.t('identity.errors.participantVotesLoad'))
           setFestivalDocumentsError(i18n.t('info.errors.load'))
+          setBingoError(i18n.t('bingo.errors.load'))
         }
       } finally {
         if (isCurrent) {
@@ -1259,6 +1267,13 @@ function App() {
     setAdminMusicPlaylist(null)
     setAdminMusicPlaylistError('')
     setIsSavingMusicPlaylist(false)
+    setBingoCard(null)
+    setBingoError('')
+    setTogglingBingoNumber(null)
+    setAdminBingoRound(null)
+    setAdminBingoError('')
+    setIsLoadingAdminBingo(false)
+    setIsSavingBingoRound(false)
     setAdminFestivalDocumentsError('')
     setIsLoadingAdminFestivalDocuments(false)
     setUploadingDocumentType(null)
@@ -1347,6 +1362,7 @@ function App() {
         void reloadAdminCategories()
         void reloadAdminParticipants()
         void reloadAdminFestivalDocuments()
+        void reloadAdminBingoRound()
 
         window.setTimeout(() => {
           document.getElementById('admin')?.scrollIntoView({ behavior: 'smooth' })
@@ -1500,6 +1516,27 @@ function App() {
       setAdminParticipantsError(t('admin.participants.errors.load'))
     } finally {
       setIsLoadingAdminParticipants(false)
+    }
+  }
+
+  async function reloadAdminBingoRound() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsLoadingAdminBingo(true)
+    setAdminBingoError('')
+
+    try {
+      const loadedBingoRound = await loadAdminBingoRound(adminContext)
+
+      setAdminBingoRound(loadedBingoRound)
+    } catch {
+      setAdminBingoError(t('admin.bingo.errors.load'))
+    } finally {
+      setIsLoadingAdminBingo(false)
     }
   }
 
@@ -2092,6 +2129,78 @@ function App() {
     }
   }
 
+  async function startAdminBingoRound() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsSavingBingoRound(true)
+    setAdminBingoError('')
+
+    try {
+      const startedRound = await startBingoRound(adminContext)
+      const loadedBingoCard = await loadOrCreateBingoCard(adminContext)
+
+      setAdminBingoRound(startedRound)
+      setBingoCard(loadedBingoCard)
+      setBingoError('')
+    } finally {
+      setIsSavingBingoRound(false)
+    }
+  }
+
+  async function closeAdminBingoRound() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsSavingBingoRound(true)
+    setAdminBingoError('')
+
+    try {
+      await closeBingoRound(adminContext)
+      setAdminBingoRound(null)
+      setBingoCard(null)
+      setBingoError('')
+
+      if (activeMainSection === 'bingo') {
+        setActiveMainSection('awards')
+      }
+    } finally {
+      setIsSavingBingoRound(false)
+    }
+  }
+
+  async function toggleBingoNumber(number: number) {
+    if (!selectedParticipant || !bingoCard) {
+      return
+    }
+
+    const isMarked = bingoCard.markedNumbers.includes(number)
+
+    setTogglingBingoNumber(number)
+    setBingoError('')
+
+    try {
+      const markedNumbers = await setBingoMark(number, !isMarked, {
+        participantAccessCode: selectedParticipant.accessCode,
+      })
+
+      setBingoCard({
+        ...bingoCard,
+        markedNumbers,
+      })
+    } catch {
+      setBingoError(t('bingo.errors.mark'))
+    } finally {
+      setTogglingBingoNumber(null)
+    }
+  }
+
   function openCampLocationLink() {
     if (!campLocationLink) {
       return
@@ -2391,10 +2500,14 @@ function App() {
           ) : null}
 
           {activeAdminSection === 'games' ? (
-            <div className="admin-placeholder">
-              <h2>{t('admin.placeholders.gamesTitle')}</h2>
-              <p>{t('admin.placeholders.gamesBody')}</p>
-            </div>
+            <AdminBingo
+              round={adminBingoRound}
+              error={adminBingoError}
+              isLoading={isLoadingAdminBingo}
+              isSaving={isSavingBingoRound}
+              onStart={startAdminBingoRound}
+              onClose={closeAdminBingoRound}
+            />
           ) : null}
 
           {activeAdminSection === 'info' ? (
@@ -2528,11 +2641,12 @@ function App() {
         </section>
       ) : null}
 
-      {activeMainSection === 'games' ? (
-        <PlaceholderSection
-          id="main-games"
-          title={t('placeholders.gamesTitle')}
-          body={t('placeholders.gamesBody')}
+      {activeMainSection === 'bingo' && bingoCard ? (
+        <Bingo
+          card={bingoCard}
+          error={bingoError}
+          togglingNumber={togglingBingoNumber}
+          onToggleNumber={toggleBingoNumber}
         />
       ) : null}
 

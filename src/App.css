@@ -792,6 +792,122 @@ h1 {
   line-height: 1.45;
 }
 
+.admin-bingo {
+  display: grid;
+  width: min(100%, 960px);
+  margin: 0 auto;
+  gap: 14px;
+  padding: 20px;
+  color: #f4e7cf;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+}
+
+.admin-bingo__status {
+  margin: 0;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.bingo {
+  position: relative;
+  padding: 56px 20px 72px;
+}
+
+.bingo__header {
+  width: min(100%, 760px);
+  margin: 0 auto 24px;
+}
+
+.bingo__eyebrow {
+  margin: 0 0 10px;
+  color: #ffbe0b;
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.bingo h2 {
+  margin: 0 0 12px;
+  color: #ffffff;
+  font-size: clamp(2.4rem, 12vw, 5rem);
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.bingo__header p {
+  margin: 0;
+  color: #f4e7cf;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.bingo__notice {
+  width: min(100%, 760px);
+  margin: 0 auto 18px;
+  padding: 18px 20px;
+  color: #f4e7cf;
+  font-weight: 750;
+  line-height: 1.45;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.bingo__notice--error {
+  color: #ffd6d6;
+  border-color: rgba(255, 0, 110, 0.4);
+}
+
+.bingo-card {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  width: min(100%, 760px);
+  margin: 0 auto;
+  gap: 8px;
+}
+
+.bingo-card__number {
+  aspect-ratio: 1;
+  min-width: 0;
+  color: #ffffff;
+  font-size: clamp(1rem, 7vw, 2rem);
+  font-weight: 900;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.bingo-card__number:hover,
+.bingo-card__number:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(255, 190, 11, 0.7);
+}
+
+.bingo-card__number:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.bingo-card__number.is-marked {
+  color: #101014;
+  background: #ffbe0b;
+  border-color: #ffbe0b;
+}
+
+.bingo-card__number:disabled {
+  cursor: wait;
+  opacity: 0.8;
+  transform: none;
+}
+
 .festival-info {
   position: relative;
   padding: 56px 20px 72px;
