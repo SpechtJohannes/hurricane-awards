@@ -4,6 +4,32 @@ All notable changes between releases of this project are documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.2.0
+
+### Features
+
+* Appnavigation für Hauptbereiche eingeführt
+* Bereich Festivalinfos ergänzt
+* Campstandort für Teilnehmende bereitgestellt
+* Festival Playlist über Spotify eingebunden
+* Festivalcode per QR Code scanbar gemacht
+* Avatarauswahl für Teilnehmende ergänzt
+* Bingo Bereich integriert
+
+### Administration
+
+* Admins können Festivalinfos verwalten
+* Admins können Campstandort und Spotify Playlist hinterlegen
+* Admins können eine Bingorunde starten und schließen
+
+### Technik
+
+* Supabase CLI Workflow für Migrationen eingeführt
+* Neue Datenmodelle und Migrationen für Festivalinfos, Avatare und Bingo ergänzt
+* Architektur Dokumentation aktualisiert
+* Testabdeckung erweitert
+* Build Größe analysiert und optimiert
+
 ## [1.1.0]
 
 ### Authentication & Security
