@@ -117,7 +117,7 @@
   "navigation": {
     "label": "Hauptbereiche",
     "awards": "Awards",
-    "games": "Spiele",
+    "bingo": "Bingo",
     "info": "Infos",
     "profile": "Profil"
   },
@@ -192,6 +192,7 @@
       "participants": "Teilnehmer",
       "awards": "Awards",
       "games": "Spiele",
+      "bingo": "Bingo",
       "info": "Infos",
       "archive": "Archiv"
     },
@@ -254,6 +255,21 @@
         "invalid": "Bitte gib einen gültigen Spotify Playlist Link ein.",
         "save": "Die Playlist konnte gerade nicht gespeichert werden.",
         "remove": "Die Playlist konnte gerade nicht entfernt werden."
+      }
+    },
+    "bingo": {
+      "eyebrow": "Spiele",
+      "title": "Bingo",
+      "loading": "Bingo wird geladen...",
+      "inactive": "Aktuell ist keine Bingorunde freigeschaltet.",
+      "active": "Aktive Bingorunde seit {{startedAt}}.",
+      "start": "Bingorunde starten",
+      "close": "Bingorunde beenden",
+      "confirmClose": "Aktive Bingorunde wirklich beenden? Die Bingo Navigation wird danach fuer Teilnehmende ausgeblendet.",
+      "errors": {
+        "load": "Die Bingorunde konnte gerade nicht geladen werden.",
+        "start": "Die Bingorunde konnte gerade nicht gestartet werden.",
+        "close": "Die Bingorunde konnte gerade nicht beendet werden."
       }
     },
     "festival": {
@@ -349,6 +365,16 @@
     "errors": {
       "categoriesLoad": "Die Kategorien konnten gerade nicht geladen werden.",
       "statusSave": "Der Status konnte gerade nicht gespeichert werden."
+    }
+  },
+  "bingo": {
+    "eyebrow": "Bingorunde",
+    "title": "Bingo",
+    "description": "Die Zahlen werden analog gezogen. Markiere hier deine gezogenen Zahlen oder entferne eine Markierung.",
+    "cardLabel": "Deine Bingokarte",
+    "errors": {
+      "load": "Deine Bingokarte konnte gerade nicht geladen werden.",
+      "mark": "Die Markierung konnte gerade nicht gespeichert werden."
     }
   },
   "categories": {

@@ -109,6 +109,20 @@ const musicPlaylistMigration = readFileSync(
   ),
   'utf8',
 )
+const bingoMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260704110000_create_bingo.sql',
+  ),
+  'utf8',
+)
+const bingoFixMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260704120000_fix_bingo_round_deactivation.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -486,6 +500,9 @@ describe('Supabase Sicherheitsmigration', () => {
       [musicPlaylistMigration, 'ha_admin_get_music_playlist'],
       [musicPlaylistMigration, 'ha_update_music_playlist'],
       [musicPlaylistMigration, 'ha_delete_music_playlist'],
+      [bingoMigration, 'ha_admin_get_bingo_round'],
+      [bingoMigration, 'ha_start_bingo_round'],
+      [bingoMigration, 'ha_close_bingo_round'],
     ] as const
 
     for (const [migration, functionName] of adminRpcExpectations) {
@@ -812,6 +829,95 @@ describe('Supabase Sicherheitsmigration', () => {
     }
   })
 
+  it('legt Bingo mit geschuetzten Tabellen und serverseitiger Kartengenerierung an', () => {
+    for (const table of ['bingo_rounds', 'bingo_cards', 'bingo_marks']) {
+      expect(bingoMigration).toContain(
+        `create table if not exists public.${table}`,
+      )
+      expect(bingoMigration).toContain(
+        `alter table public.${table} enable row level security`,
+      )
+      expect(bingoMigration).toContain(
+        `revoke all on table public.${table} from anon, authenticated`,
+      )
+    }
+
+    expect(bingoMigration).toContain('bingo_rounds_single_active')
+    expect(bingoMigration).toContain("status in ('active', 'closed')")
+    expect(bingoMigration).toContain("where status = 'active'")
+    expect(bingoMigration).toContain(
+      'constraint bingo_cards_round_participant_unique unique (round_id, participant_id)',
+    )
+    expect(bingoMigration).toContain(
+      'constraint bingo_cards_numbers_valid check (public.ha_bingo_numbers_are_valid(numbers))',
+    )
+    expect(bingoMigration).toContain('cardinality(p_numbers) = 25')
+    expect(bingoMigration).toContain('number < 1 or number > 75')
+    expect(bingoMigration).toContain('count(distinct number)')
+    expect(bingoMigration).toContain('generate_series(1, 75)')
+    expect(bingoMigration).toContain('order by random()')
+    expect(bingoMigration).toContain('limit 25')
+    expect(bingoMigration).toContain(
+      'public.ha_generate_bingo_card_numbers()',
+    )
+    expect(bingoMigration).toContain(
+      'on conflict on constraint bingo_cards_round_participant_unique do nothing',
+    )
+    expect(bingoMigration).toContain('p_number is null or not p_number = any(v_numbers)')
+    expect(bingoMigration).toContain('number is not on bingo card')
+    expect(bingoMigration).toContain('insert into public.bingo_marks')
+    expect(bingoMigration).toContain('delete from public.bingo_marks')
+
+    for (const functionName of [
+      'ha_get_active_bingo_round',
+      'ha_admin_get_bingo_round',
+      'ha_start_bingo_round',
+      'ha_close_bingo_round',
+      'ha_get_or_create_bingo_card',
+      'ha_set_bingo_mark',
+    ]) {
+      expect(bingoMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(bingoMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+
+    expect(bingoMigration).toContain(
+      'revoke all on function public.ha_generate_bingo_card_numbers() from anon, authenticated',
+    )
+    expect(bingoMigration).toContain('update public.bingo_rounds br')
+    expect(bingoMigration).toContain("set status = 'closed'")
+    expect(bingoMigration).toContain("where br.status = 'active'")
+    expect(bingoMigration).not.toContain('delete from public.bingo_rounds;')
+    expect(bingoMigration).not.toContain('bingo_history')
+  })
+
+  it('korrigiert angewendete Bingo RPCs ohne unsichere DELETE Statements', () => {
+    expect(bingoFixMigration).toContain(
+      'drop constraint if exists bingo_rounds_status_check',
+    )
+    expect(bingoFixMigration).toContain("status in ('active', 'closed')")
+
+    for (const functionName of [
+      'ha_start_bingo_round',
+      'ha_close_bingo_round',
+    ]) {
+      expect(bingoFixMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(bingoFixMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+
+    expect(bingoFixMigration).toContain('update public.bingo_rounds br')
+    expect(bingoFixMigration).toContain("set status = 'closed'")
+    expect(bingoFixMigration).toContain("where br.status = 'active'")
+    expect(bingoFixMigration).not.toContain('delete from public.bingo_rounds;')
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -829,6 +935,8 @@ describe('Supabase Sicherheitsmigration', () => {
       festivalDocumentsMigration,
       campLocationMigration,
       musicPlaylistMigration,
+      bingoMigration,
+      bingoFixMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

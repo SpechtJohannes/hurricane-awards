@@ -28,7 +28,7 @@ Die App hat zwei Zugangsschritte:
 2. Gib den Festivalcode ein, wenn die App danach fragt.
 3. Gib deinen persönlichen Teilnehmercode ein.
 
-Wenn dein Teilnehmerkonto Administratorrechte hat, erscheint oben rechts die Schaltfläche **Admin**. Über diese Schaltfläche öffnest du den Adminbereich. Dort kannst du Festivalname, Teilnehmer und Kategorien verwalten, das Festival archivieren und einen JSON-Export erstellen.
+Wenn dein Teilnehmerkonto Administratorrechte hat, erscheint oben rechts die Schaltfläche **Admin**. Über diese Schaltfläche öffnest du den Adminbereich. Dort kannst du Festivalname, Teilnehmer, Kategorien und Bingo verwalten, das Festival archivieren und einen JSON-Export erstellen.
 
 Wenn die Schaltfläche **Admin** nicht sichtbar ist, bist du entweder nicht angemeldet, dein Teilnehmercode gehört nicht zu einem Administrator, oder dein Teilnehmerkonto ist deaktiviert.
 
@@ -212,6 +212,26 @@ Wenn du Teilnehmercodes fachlich mit exportieren musst, aktiviere vorher die Opt
 
 Der Export enthält keine berechneten Ranglisten.
 
+## Bingo verwalten
+
+Bingo ist ein optionaler Spielebereich. Die Ziehung der Zahlen bleibt analog und wird nicht in der App erfasst. Die App prueft auch kein Bingo automatisch.
+
+### Bingorunde starten
+
+1. Öffne den Adminbereich.
+2. Gehe zum Abschnitt **Bingo**.
+3. Klicke auf **Bingorunde starten**.
+
+Ab diesem Zeitpunkt sehen angemeldete Teilnehmer den Hauptbereich **Bingo**. Beim ersten Öffnen oder Laden der App erhalten sie automatisch eine individuelle, serverseitig erzeugte Bingokarte. Jeder Teilnehmer bekommt pro aktiver Runde genau eine Karte.
+
+### Bingorunde beenden
+
+1. Öffne den Adminbereich.
+2. Gehe zum Abschnitt **Bingo**.
+3. Klicke auf **Bingorunde beenden** und bestätige die Rückfrage.
+
+Danach wird der Bingo-Bereich für Teilnehmer ausgeblendet. Es gibt keine Historie vergangener Bingorunden.
+
 ## Während des Festivals
 
 Typische administrative Aufgaben während des Festivals:
@@ -221,6 +241,7 @@ Typische administrative Aufgaben während des Festivals:
 - Neue Teilnehmer anlegen, falls kurzfristig jemand hinzukommt.
 - Kategorien zum richtigen Zeitpunkt auf **Offen** setzen.
 - Beendete Kategorien auf **Geschlossen** setzen.
+- Bei Bedarf eine Bingorunde starten oder beenden.
 - Ergebnisse prüfen, sobald Stimmen abgegeben wurden.
 - Kategorien nur dann löschen, wenn sicher noch keine Stimmen vorhanden sind.
 

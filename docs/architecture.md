@@ -104,6 +104,7 @@ Admin-RPCs umfassen unter anderem:
 - Kategorien: `ha_admin_list_categories`, `ha_create_category`, `ha_update_category`, `ha_update_category_status`, `ha_delete_category`, `ha_delete_category_votes`
 - Festival: `ha_update_festival_name`, `ha_get_festival_access_code`, `ha_update_festival_access_code`, `ha_archive_festival`
 - Infos: `ha_admin_list_festival_documents`, `ha_upsert_festival_document`, `ha_delete_festival_document`, `ha_admin_get_music_playlist`, `ha_update_music_playlist`, `ha_delete_music_playlist`
+- Bingo: `ha_admin_get_bingo_round`, `ha_start_bingo_round`, `ha_close_bingo_round`
 
 ### Festivalinfos und Dokumente
 
@@ -114,6 +115,12 @@ Die Dateien liegen im Supabase-Storage-Bucket `festival-documents`. Teilnehmer l
 Der Campstandort ist kein eigenes Karten- oder GPS-Modell. Er wird als einzelner Link im `app_settings` Key `camp_location_link` gespeichert und ueber `ha_get_camp_location_link` gelesen. Admins koennen den Link ueber `ha_update_camp_location_link` setzen oder ueber `ha_delete_camp_location_link` entfernen. Die Datenbank validiert, dass nur unterstuetzte HTTPS-Links zu Google Maps oder WhatsApp gespeichert werden.
 
 Die Festival Playlist wird als Spotify Playlist ID im `app_settings` Key `music_spotify_playlist_id` gespeichert. Teilnehmer laden die normalisierten Playerdaten ueber `ha_get_music_playlist`; Admins setzen oder entfernen sie ueber `ha_update_music_playlist` und `ha_delete_music_playlist`. Die App verwendet ausschliesslich den offiziellen Spotify Embed Player (`https://open.spotify.com/embed/playlist/...`) und bietet zusaetzlich einen Link zur Playlist auf Spotify an. Es werden keine Spotify-Nutzerdaten, Tokens oder personenbezogenen Spotify-Daten gespeichert.
+
+### Bingo
+
+Der Bingo-Bereich ist nur sichtbar, wenn eine aktive Bingorunde existiert. Admins starten oder beenden diese Runde im Adminbereich unter Bingo. Die Ziehung bleibt analog; die App speichert nur individuelle Karten und Markierungen.
+
+Teilnehmer laden ihre Karte ueber `ha_get_or_create_bingo_card`. Die RPC erzeugt serverseitig genau eine Karte pro Teilnehmer und aktiver Runde, falls noch keine Karte existiert. Die Karte enthaelt 25 eindeutige Zahlen aus dem Bereich 1 bis 75. Markierungen werden ueber `ha_set_bingo_mark` gespeichert oder entfernt und beim erneuten Laden wieder angezeigt. Die App prueft kein Bingo automatisch.
 
 ### Festivaleinstellungen
 
@@ -160,6 +167,9 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `festival_archive_votes`: Stimmen inklusive Anzeigeinformationen zum Archivzeitpunkt.
 - `festival_documents`: Metadaten der Festivaldokumente fuer den Infos-Bereich.
 - `festival_document_uploads`: Kurzlebige, serverseitig freigegebene Storage-Uploadpfade fuer Festivaldokumente.
+- `bingo_rounds`: Bingorunden mit Status. Es darf nur eine aktive Runde geben; beim Start einer neuen Runde werden alte aktive Runden geschlossen. Es gibt keine UI-Historie.
+- `bingo_cards`: Serverseitig generierte Bingokarten, eindeutig pro Teilnehmer und aktiver Runde.
+- `bingo_marks`: Persistierte Markierungen fuer Zahlen auf einer Bingokarte.
 - `participant_login_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Teilnehmerlogin.
 - `festival_access_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Festivalcode.
 
@@ -187,6 +197,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - Festivalcode und Teilnehmerlogin sind gegen Code-Erraten serverseitig geschuetzt; Rate-Limit-Daten speichern keine Klartextcodes.
 - Das Frontend erhaelt beim Login nur die Teilnehmerdaten, die fuer die Session benoetigt werden, und speichert persoenliche Teilnehmercodes nicht dauerhaft in `localStorage`.
 - JSON-Exporte enthalten Teilnehmercodes nur nach expliziter Admin-Auswahl.
+- Bingo speichert keine gezogenen Zahlen, prueft kein Bingo automatisch und fuehrt keine Historie vergangener Runden.
 - Sichtbare UI-Texte werden ueber Uebersetzungsdateien gepflegt und nicht direkt in Komponenten hardcodiert.
 - Datenadapter in `src/data` kapseln Supabase RPC-Aufrufe, damit UI-Komponenten nicht direkt mit RPC-Details arbeiten muessen.
 - Festivaldokumente trennen Dateiinhalt und Metadaten: Storage enthaelt die Dateien, PostgreSQL/RPCs steuern die sichtbaren Dokumenteintraege.
