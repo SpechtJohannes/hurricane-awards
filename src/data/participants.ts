@@ -9,6 +9,7 @@ type ParticipantRow = {
   id: string
   name: string
   display_name: string
+  avatar_id?: string | null
   access_code?: string
   is_admin?: boolean
   is_active?: boolean
@@ -18,6 +19,7 @@ export type Participant = {
   id: string
   name: string
   displayName: string
+  avatarId?: string | null
   accessCode: string
   isAdmin: boolean
   isActive: boolean
@@ -51,11 +53,17 @@ export type UpdateParticipantInput = {
   accessCode?: string
 }
 
+export type UpdateParticipantAvatarInput = {
+  participantId: string
+  avatarId: string
+}
+
 function mapParticipant(row: ParticipantRow, accessCode = ''): Participant {
   return {
     id: row.id,
     name: row.name,
     displayName: row.display_name,
+    ...(row.avatar_id ? { avatarId: row.avatar_id } : {}),
     accessCode: row.access_code ?? accessCode,
     isAdmin: row.is_admin ?? false,
     isActive: row.is_active ?? true,
@@ -193,6 +201,25 @@ export async function updateParticipant(
     p_participant_id: input.id,
     p_display_name: input.displayName ?? null,
     p_access_code: input.accessCode ?? null,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return mapParticipantResult(data)
+}
+
+export async function updateParticipantAvatar(
+  input: UpdateParticipantAvatarInput,
+  context: ParticipantAccessContext,
+): Promise<Participant> {
+  const supabase = getSupabase()
+
+  const { data, error } = await supabase.rpc('ha_update_participant_avatar', {
+    ...participantRpcParams(context),
+    p_participant_id: input.participantId,
+    p_avatar_id: input.avatarId,
   })
 
   if (error) {

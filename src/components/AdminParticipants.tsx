@@ -1,5 +1,6 @@
 import { type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ParticipantName } from './Avatar'
 import { type Participant } from '../data/participants'
 
 export type ParticipantFormState = {
@@ -149,7 +150,13 @@ export function AdminParticipants({
                 key={participant.id}
               >
                 <div className="admin-participant-card__main">
-                  <h3>{participant.displayName}</h3>
+                  <h3>
+                    <ParticipantName
+                      avatarId={participant.avatarId}
+                      name={participant.displayName}
+                      size="medium"
+                    />
+                  </h3>
                   <dl>
                     <div>
                       <dt>{t('admin.participants.codeLabel')}</dt>

@@ -58,7 +58,7 @@ Es gibt zwei Zugangsebenen:
 1. Der gemeinsame Festivalcode wird ueber `ha_verify_festival_access_code` geprueft. Die App speichert danach eine technische Access-Version in `localStorage`, nicht den Festivalcode selbst.
 2. Der persoenliche Teilnehmercode wird serverseitig ueber `ha_login_participant` geprueft und nur fuer die aktuelle Browser-Session in `sessionStorage` gehalten.
 
-Der Teilnehmerlogin laeuft ueber `loginParticipant` in `src/data/participants.ts`. Bei Erfolg erhaelt das Frontend nur die fuer die Session benoetigten Teilnehmerdaten: `id`, `name`, `displayName`, `isAdmin`, `isActive` sowie den eingegebenen Code fuer weitere RPC-Kontexte.
+Der Teilnehmerlogin laeuft ueber `loginParticipant` in `src/data/participants.ts`. Bei Erfolg erhaelt das Frontend nur die fuer die Session benoetigten Teilnehmerdaten: `id`, `name`, `displayName`, `avatarId`, `isAdmin`, `isActive` sowie den eingegebenen Code fuer weitere RPC-Kontexte.
 
 ### Serverseitige Loginpruefung
 
@@ -140,11 +140,13 @@ Teilnehmercodes werden nicht in `festival_archive_participants` gespeichert. Arc
 
 Admins koennen den aktuellen Festivalstand als JSON exportieren. Der Standardexport entfernt Teilnehmercodes aus den Teilnehmerdaten. Eine explizite Exportoption kann Codes einschliessen; die UI zeigt dafuer einen Warnhinweis an, weil solche Dateien vertraulich sind.
 
+Teilnehmer koennen ihren Avatar ueber `ha_update_participant_avatar` selbst aendern. Die RPC prueft, dass der uebergebene Teilnehmercode zum bearbeiteten Teilnehmer passt, und speichert nur die stabile Avatar-ID aus der App-Bibliothek. Die Avatarbilder liegen als versionierte SVG-Dateien in `src/assets/avatars`; `src/config/avatars.ts` ordnet stabile IDs den lokal gebuendelten Bildpfaden zu.
+
 ## Datenmodell
 
 Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt keine vollstaendige Datenbankreferenz.
 
-- `participants`: Teilnehmerdaten, Anzeigenamen, persoenliche Codes, Adminstatus und Aktivstatus.
+- `participants`: Teilnehmerdaten, Anzeigenamen, Avatar-ID, persoenliche Codes, Adminstatus und Aktivstatus.
 - `categories`: Abstimmungskategorien mit Titel, Beschreibung, Status und Sortierung.
 - `votes`: Aktive Stimmen mit Waehler, nominierter Person, Kategorie und Zeitstempel.
 - `archived_votes`: Aeltere Archivstruktur fuer Stimmen, die in der Sicherheitsdokumentation noch beruecksichtigt wird.
