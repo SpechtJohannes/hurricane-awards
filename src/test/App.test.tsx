@@ -238,6 +238,7 @@ const festivalAccessStorageKey =
   'hurricane-awards:hurricane-awards-2026:festival-access'
 const festivalAccessVersion = '2026-07-01 10:00:00+00'
 const defaultUserAgent = window.navigator.userAgent
+const stopCameraTrack = vi.fn()
 
 const exportData: FestivalExportData = {
   formatVersion: 1,
@@ -570,16 +571,59 @@ function setStandaloneDisplay(isStandalone: boolean) {
   })
 }
 
+function setQrScannerSupport(scannedValues: string[] = []) {
+  const detect = vi.fn(async () => {
+    const scannedValue = scannedValues.shift()
+
+    return scannedValue === undefined ? [] : [{ rawValue: scannedValue }]
+  })
+  class MockBarcodeDetector {
+    static getSupportedFormats = vi.fn(async () => ['qr_code'])
+
+    detect = detect
+  }
+
+  Object.defineProperty(window, 'BarcodeDetector', {
+    value: MockBarcodeDetector,
+    configurable: true,
+  })
+  Object.defineProperty(navigator, 'mediaDevices', {
+    value: {
+      getUserMedia: vi.fn(async () => ({
+        getTracks: () => [{ stop: stopCameraTrack }],
+      })),
+    },
+    configurable: true,
+  })
+
+  return {
+    detect,
+    getUserMedia: navigator.mediaDevices.getUserMedia as ReturnType<
+      typeof vi.fn
+    >,
+  }
+}
+
 beforeEach(async () => {
   vi.useRealTimers()
   vi.clearAllMocks()
+  stopCameraTrack.mockClear()
   window.history.replaceState(null, '', '/')
   setUserAgent(defaultUserAgent)
   setStandaloneDisplay(false)
+  Object.defineProperty(window, 'BarcodeDetector', {
+    value: undefined,
+    configurable: true,
+  })
+  Object.defineProperty(navigator, 'mediaDevices', {
+    value: undefined,
+    configurable: true,
+  })
   localStorage.clear()
   sessionStorage.clear()
   await i18n.changeLanguage('de')
   vi.spyOn(window, 'confirm').mockReturnValue(true)
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined)
   mockLoadedData()
 })
 
@@ -819,6 +863,89 @@ describe('Login', () => {
     ).toBeVisible()
     expect(loadParticipants).not.toHaveBeenCalled()
     expect(loadVotes).not.toHaveBeenCalled()
+  })
+
+  it('behaelt die manuelle Festivalcode Eingabe neben der Scan-Funktion bei', async () => {
+    setQrScannerSupport()
+    await renderLoadedApp()
+
+    expect(screen.getByRole('textbox', { name: /^festivalcode$/i })).toBeVisible()
+    expect(
+      await screen.findByRole('button', { name: /qr-code scannen/i }),
+    ).toBeEnabled()
+
+    await unlockFestivalWith('HURRICANE2026')
+
+    expect(
+      await screen.findByRole('textbox', { name: /^teilnehmercode$/i }),
+    ).toBeVisible()
+  })
+
+  it('behandelt nicht verfuegbare QR-Scan-Unterstuetzung verstaendlich', async () => {
+    await renderLoadedApp()
+
+    expect(
+      await screen.findByRole('button', { name: /qr-code scannen/i }),
+    ).toBeDisabled()
+    expect(
+      screen.getByText(/qr-code scannen ist auf diesem ger/i),
+    ).toBeVisible()
+    expect(screen.getByRole('textbox', { name: /^festivalcode$/i })).toBeVisible()
+  })
+
+  it('uebernimmt einen gueltigen QR-Scan als Festivalcode', async () => {
+    const qrScanner = setQrScannerSupport(['HURRICANE2026'])
+    await renderLoadedApp()
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: /qr-code scannen/i }),
+    )
+
+    expect(qrScanner.getUserMedia).toHaveBeenCalledWith({
+      video: { facingMode: 'environment' },
+      audio: false,
+    })
+    expect(
+      await screen.findByRole('textbox', { name: /^teilnehmercode$/i }),
+    ).toBeVisible()
+    expect(verifyFestivalAccessCode).toHaveBeenCalledWith('HURRICANE2026')
+    expect(stopCameraTrack).toHaveBeenCalled()
+  })
+
+  it('zeigt bei ungueltigem QR-Scan eine Fehlermeldung und erlaubt neue Eingaben', async () => {
+    setQrScannerSupport(['FALSCH'])
+    await renderLoadedApp()
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: /qr-code scannen/i }),
+    )
+
+    expect(
+      await screen.findByText(/qr-code enth/i),
+    ).toBeVisible()
+    expect(
+      screen.queryByRole('textbox', { name: /^teilnehmercode$/i }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /^festivalcode$/i })).toHaveValue(
+      'FALSCH',
+    )
+    expect(screen.getByRole('button', { name: /qr-code scannen/i })).toBeEnabled()
+  })
+
+  it('macht nach erfolgreichem QR-Scan die Teilnehmercode Eingabe erreichbar', async () => {
+    setQrScannerSupport([' hurricane2026 '])
+    await renderLoadedApp()
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: /qr-code scannen/i }),
+    )
+
+    const participantCodeInput = await screen.findByRole('textbox', {
+      name: /^teilnehmercode$/i,
+    })
+
+    expect(participantCodeInput).toBeVisible()
+    expect(loadParticipants).not.toHaveBeenCalled()
   })
 
   it('verhindert Zugriff mit ungueltigem Festivalcode', async () => {

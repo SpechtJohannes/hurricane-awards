@@ -84,6 +84,19 @@
     "codeLabel": "Festivalcode",
     "codePlaceholder": "Festivalcode invoeren",
     "submit": "Festival ontgrendelen",
+    "qr": {
+      "label": "QR-codescanner",
+      "start": "QR-code scannen",
+      "scanning": "Scanner actief...",
+      "stop": "Scan annuleren",
+      "videoLabel": "Camerabeeld om de QR-code te scannen",
+      "errors": {
+        "unsupported": "QR-code scannen is op dit apparaat niet beschikbaar. Je kunt de festivalcode handmatig invoeren.",
+        "camera": "De camera kon niet worden gestart. Je kunt de festivalcode handmatig invoeren of opnieuw scannen.",
+        "scan": "De QR-code kon niet worden gelezen. Probeer het opnieuw of voer de festivalcode handmatig in.",
+        "invalidCode": "Deze QR-code bevat geen geldige festivalcode. Probeer het opnieuw of voer de festivalcode handmatig in."
+      }
+    },
     "errors": {
       "invalidCode": "De festivalcode is ongeldig. Controleer je invoer en probeer het opnieuw.",
       "verify": "De festivalcode kon net niet worden gecontroleerd. Probeer het zo nog eens."

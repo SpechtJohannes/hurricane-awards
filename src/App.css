@@ -503,6 +503,81 @@ h1 {
   outline-offset: 3px;
 }
 
+.qr-access {
+  display: grid;
+  width: min(100%, 520px);
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.qr-access__button,
+.qr-access__stop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 18px;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  background: rgba(16, 16, 20, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.qr-access__button:hover,
+.qr-access__button:focus-visible,
+.qr-access__stop:hover,
+.qr-access__stop:focus-visible {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 190, 11, 0.7);
+}
+
+.qr-access__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+  transform: none;
+}
+
+.qr-access__status {
+  margin: 0;
+  color: #fff7ed;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.qr-access__camera {
+  display: grid;
+  gap: 10px;
+}
+
+.qr-access__camera[hidden] {
+  display: none;
+}
+
+.qr-access__camera video {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: min(54vh, 360px);
+  object-fit: cover;
+  background: rgba(16, 16, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+}
+
+.qr-access__button:focus-visible,
+.qr-access__stop:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}
+
 .admin {
   position: relative;
   z-index: 1;
