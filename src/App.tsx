@@ -1,6 +1,8 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type FormEvent,
   type MouseEvent,
@@ -101,6 +103,24 @@ type BeforeInstallPromptEvent = Event & {
     platform: string
   }>
 }
+
+type DetectedBarcode = {
+  rawValue?: string
+}
+
+type BarcodeDetectorInstance = {
+  detect: (source: HTMLVideoElement) => Promise<DetectedBarcode[]>
+}
+
+type BarcodeDetectorConstructor = {
+  new (options: { formats: string[] }): BarcodeDetectorInstance
+  getSupportedFormats?: () => Promise<string[]>
+}
+
+type WindowWithBarcodeDetector = Window &
+  typeof globalThis & {
+    BarcodeDetector?: BarcodeDetectorConstructor
+  }
 
 const fallbackFestivalName = ''
 
@@ -526,15 +546,83 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
   const [festivalCode, setFestivalCode] = useState('')
   const [festivalCodeError, setFestivalCodeError] = useState('')
   const [isSubmittingFestivalCode, setIsSubmittingFestivalCode] = useState(false)
+  const [qrScannerSupport, setQrScannerSupport] = useState<
+    'checking' | 'supported' | 'unsupported'
+  >('checking')
+  const [isScanningQrCode, setIsScanningQrCode] = useState(false)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const cameraStreamRef = useRef<MediaStream | null>(null)
+  const scanAnimationFrameRef = useRef<number | null>(null)
+  const isScanningQrCodeRef = useRef(false)
 
-  async function submitFestivalCode(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  const stopQrScanner = useCallback(() => {
+    isScanningQrCodeRef.current = false
+    setIsScanningQrCode(false)
 
-    const normalizedFestivalCode = festivalCode.trim().toUpperCase()
+    if (scanAnimationFrameRef.current !== null) {
+      window.cancelAnimationFrame(scanAnimationFrameRef.current)
+      scanAnimationFrameRef.current = null
+    }
+
+    cameraStreamRef.current?.getTracks().forEach((track) => track.stop())
+    cameraStreamRef.current = null
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
+  }, [])
+
+  useEffect(() => {
+    let isCurrent = true
+
+    async function checkQrScannerSupport() {
+      const BarcodeDetector = (window as WindowWithBarcodeDetector)
+        .BarcodeDetector
+      const hasCameraSupport =
+        typeof navigator.mediaDevices?.getUserMedia === 'function'
+
+      if (!BarcodeDetector || !hasCameraSupport) {
+        if (isCurrent) {
+          setQrScannerSupport('unsupported')
+        }
+
+        return
+      }
+
+      try {
+        const supportedFormats = BarcodeDetector.getSupportedFormats
+          ? await BarcodeDetector.getSupportedFormats()
+          : ['qr_code']
+
+        if (isCurrent) {
+          setQrScannerSupport(
+            supportedFormats.includes('qr_code') ? 'supported' : 'unsupported',
+          )
+        }
+      } catch {
+        if (isCurrent) {
+          setQrScannerSupport('unsupported')
+        }
+      }
+    }
+
+    void checkQrScannerSupport()
+
+    return () => {
+      isCurrent = false
+      stopQrScanner()
+    }
+  }, [stopQrScanner])
+
+  async function unlockFestivalCode(
+    code: string,
+    invalidMessage: string,
+  ): Promise<boolean> {
+    const normalizedFestivalCode = code.trim().toUpperCase()
 
     if (!normalizedFestivalCode) {
-      setFestivalCodeError(t('festivalAccess.errors.invalidCode'))
-      return
+      setFestivalCodeError(invalidMessage)
+      return false
     }
 
     setFestivalCodeError('')
@@ -542,15 +630,109 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
 
     try {
       if (!(await onUnlock(normalizedFestivalCode))) {
-        setFestivalCodeError(t('festivalAccess.errors.invalidCode'))
-        return
+        setFestivalCodeError(invalidMessage)
+        return false
       }
 
       setFestivalCode('')
+      return true
     } catch {
       setFestivalCodeError(t('festivalAccess.errors.verify'))
+      return false
     } finally {
       setIsSubmittingFestivalCode(false)
+    }
+  }
+
+  async function submitFestivalCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    await unlockFestivalCode(
+      festivalCode,
+      t('festivalAccess.errors.invalidCode'),
+    )
+  }
+
+  async function unlockScannedFestivalCode(code: string) {
+    const normalizedFestivalCode = code.trim().toUpperCase()
+
+    setFestivalCode(normalizedFestivalCode)
+    stopQrScanner()
+
+    await unlockFestivalCode(
+      normalizedFestivalCode,
+      t('festivalAccess.qr.errors.invalidCode'),
+    )
+  }
+
+  async function startQrScanner() {
+    const BarcodeDetector = (window as WindowWithBarcodeDetector).BarcodeDetector
+
+    if (
+      !BarcodeDetector ||
+      typeof navigator.mediaDevices?.getUserMedia !== 'function' ||
+      qrScannerSupport !== 'supported'
+    ) {
+      setFestivalCodeError(t('festivalAccess.qr.errors.unsupported'))
+      return
+    }
+
+    setFestivalCodeError('')
+    setIsScanningQrCode(true)
+    isScanningQrCodeRef.current = true
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+        audio: false,
+      })
+      const video = videoRef.current
+
+      if (!video) {
+        stream.getTracks().forEach((track) => track.stop())
+        setFestivalCodeError(t('festivalAccess.qr.errors.camera'))
+        setIsScanningQrCode(false)
+        isScanningQrCodeRef.current = false
+        return
+      }
+
+      cameraStreamRef.current = stream
+      video.srcObject = stream
+      await video.play()
+
+      const detector = new BarcodeDetector({ formats: ['qr_code'] })
+
+      async function scanFrame() {
+        if (!isScanningQrCodeRef.current || !videoRef.current) {
+          return
+        }
+
+        try {
+          const barcodes = await detector.detect(videoRef.current)
+          const scannedCode = barcodes.find((barcode) =>
+            Boolean(barcode.rawValue?.trim()),
+          )?.rawValue
+
+          if (scannedCode) {
+            await unlockScannedFestivalCode(scannedCode)
+            return
+          }
+
+          scanAnimationFrameRef.current = window.requestAnimationFrame(() => {
+            void scanFrame()
+          })
+        } catch {
+          setFestivalCodeError(t('festivalAccess.qr.errors.scan'))
+          stopQrScanner()
+        }
+      }
+
+      scanAnimationFrameRef.current = window.requestAnimationFrame(() => {
+        void scanFrame()
+      })
+    } catch {
+      setFestivalCodeError(t('festivalAccess.qr.errors.camera'))
+      stopQrScanner()
     }
   }
 
@@ -603,6 +785,44 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
                 : t('festivalAccess.submit')}
             </button>
           </form>
+          <div className="qr-access" aria-label={t('festivalAccess.qr.label')}>
+            <button
+              className="qr-access__button"
+              type="button"
+              onClick={startQrScanner}
+              disabled={
+                isSubmittingFestivalCode ||
+                isScanningQrCode ||
+                qrScannerSupport !== 'supported'
+              }
+            >
+              {isScanningQrCode
+                ? t('festivalAccess.qr.scanning')
+                : t('festivalAccess.qr.start')}
+            </button>
+            {qrScannerSupport === 'unsupported' ? (
+              <p className="qr-access__status" role="status">
+                {t('festivalAccess.qr.errors.unsupported')}
+              </p>
+            ) : null}
+            <div className="qr-access__camera" hidden={!isScanningQrCode}>
+              <video
+                ref={videoRef}
+                muted
+                playsInline
+                aria-label={t('festivalAccess.qr.videoLabel')}
+              />
+              {isScanningQrCode ? (
+                <button
+                  className="qr-access__stop"
+                  type="button"
+                  onClick={stopQrScanner}
+                >
+                  {t('festivalAccess.qr.stop')}
+                </button>
+              ) : null}
+            </div>
+          </div>
         </div>
 
         <div className="stage-lights" aria-hidden="true">

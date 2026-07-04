@@ -84,6 +84,19 @@
     "codeLabel": "Festivalcode",
     "codePlaceholder": "Festivalcode eingeben",
     "submit": "Festival freischalten",
+    "qr": {
+      "label": "QR-Code Scanner",
+      "start": "QR-Code scannen",
+      "scanning": "Scanner aktiv...",
+      "stop": "Scan abbrechen",
+      "videoLabel": "Kamerabild zum Scannen des QR-Codes",
+      "errors": {
+        "unsupported": "QR-Code Scannen ist auf diesem Gerät nicht verfügbar. Du kannst den Festivalcode manuell eingeben.",
+        "camera": "Die Kamera konnte nicht gestartet werden. Du kannst den Festivalcode manuell eingeben oder den Scan erneut versuchen.",
+        "scan": "Der QR-Code konnte nicht gelesen werden. Bitte versuche es erneut oder gib den Festivalcode manuell ein.",
+        "invalidCode": "Dieser QR-Code enthält keinen gültigen Festivalcode. Bitte versuche es erneut oder gib den Festivalcode manuell ein."
+      }
+    },
     "errors": {
       "invalidCode": "Der Festivalcode ist ungültig. Prüfe deine Eingabe und versuche es erneut.",
       "verify": "Der Festivalcode konnte gerade nicht geprüft werden. Versuch es bitte gleich nochmal."
