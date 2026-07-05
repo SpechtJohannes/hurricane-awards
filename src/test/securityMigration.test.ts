@@ -165,6 +165,13 @@ const timetableFavoritesMigration = readFileSync(
   ),
   'utf8',
 )
+const timetableSharedFavoritesMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260705160000_show_timetable_favorite_participants.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -1232,6 +1239,41 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(timetableFavoritesMigration).not.toContain('ha_admin')
   })
 
+  it('stellt gemeinsame Timetable Favoriten als reine Lesedaten bereit', () => {
+    expect(timetableSharedFavoritesMigration).toContain(
+      'drop function if exists public.ha_get_timetable(text)',
+    )
+    expect(timetableSharedFavoritesMigration).toContain(
+      'create or replace function public.ha_get_timetable',
+    )
+    expect(timetableSharedFavoritesMigration).toContain(
+      'performance_favorites jsonb',
+    )
+    expect(timetableSharedFavoritesMigration).toContain(
+      'from public.participant_timetable_favorites ptf',
+    )
+    expect(timetableSharedFavoritesMigration).toContain(
+      'join public.participants p on p.id = ptf.participant_id',
+    )
+    expect(timetableSharedFavoritesMigration).toContain(
+      "'display_name', p.display_name",
+    )
+    expect(timetableSharedFavoritesMigration).toContain(
+      "'avatar_id', p.avatar_id",
+    )
+    expect(timetableSharedFavoritesMigration).toContain('where p.is_active = true')
+    expect(timetableSharedFavoritesMigration).not.toContain(
+      'create table if not exists',
+    )
+    expect(timetableSharedFavoritesMigration).not.toContain(
+      'ha_add_timetable_favorite',
+    )
+    expect(timetableSharedFavoritesMigration).not.toContain(
+      'ha_remove_timetable_favorite',
+    )
+    expect(timetableSharedFavoritesMigration).not.toContain('ha_admin')
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -1257,6 +1299,7 @@ describe('Supabase Sicherheitsmigration', () => {
       timetableActsManagementMigration,
       timetablePerformancesManagementMigration,
       timetableFavoritesMigration,
+      timetableSharedFavoritesMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

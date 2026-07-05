@@ -756,6 +756,18 @@ describe('Supabase Datenzugriffe', () => {
             },
           ],
           favorite_performance_ids: ['performance-1'],
+          performance_favorites: [
+            {
+              performance_id: 'performance-1',
+              participants: [
+                {
+                  participant_id: 'alice',
+                  display_name: 'Alice',
+                  avatar_id: 'camp-sunrise',
+                },
+              ],
+            },
+          ],
         },
       ],
       error: null,
@@ -795,6 +807,18 @@ describe('Supabase Datenzugriffe', () => {
         },
       ],
       favoritePerformanceIds: ['performance-1'],
+      performanceFavorites: [
+        {
+          performanceId: 'performance-1',
+          participants: [
+            {
+              participantId: 'alice',
+              displayName: 'Alice',
+              avatarId: 'camp-sunrise',
+            },
+          ],
+        },
+      ],
     })
     expect(rpcMock).toHaveBeenCalledWith(
       'ha_get_timetable',
