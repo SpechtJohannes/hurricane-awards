@@ -84,6 +84,10 @@ import {
   type BingoRound,
 } from './data/bingo'
 import {
+  loadTimetable,
+  type Timetable,
+} from './data/timetable'
+import {
   isSupportedMusicPlaylistLink,
   type MusicPlaylist,
 } from './data/musicEmbeds'
@@ -201,7 +205,7 @@ function technicalErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error)
 }
 
-type MainSection = 'awards' | 'bingo' | 'info' | 'profile'
+type MainSection = 'awards' | 'timetable' | 'bingo' | 'info' | 'profile'
 type AdminSection = 'festival' | 'participants' | 'awards' | 'games' | 'info' | 'archive'
 
 type ResultCardProps = {
@@ -541,6 +545,49 @@ function PrivacyNotice({ festivalName }: LegalNoticeProps) {
         </a>
       </section>
     </main>
+  )
+}
+
+type TimetableSectionProps = {
+  timetable: Timetable | null
+  error: string
+  isLoading: boolean
+}
+
+function TimetableSection({ timetable, error, isLoading }: TimetableSectionProps) {
+  const { t } = useTranslation()
+  const hasTimetableData = timetable
+    ? timetable.festivalDays.length > 0 ||
+      timetable.stages.length > 0 ||
+      timetable.acts.length > 0 ||
+      timetable.performances.length > 0
+    : false
+
+  return (
+    <section
+      className="timetable"
+      id="main-timetable"
+      aria-labelledby="timetable-title"
+    >
+      <div className="timetable__header">
+        <p className="timetable__eyebrow">{t('timetable.eyebrow')}</p>
+        <h2 id="timetable-title">{t('timetable.title')}</h2>
+      </div>
+
+      {isLoading ? (
+        <p className="timetable__notice" role="status">
+          {t('timetable.loading')}
+        </p>
+      ) : null}
+      {error ? (
+        <p className="timetable__notice timetable__notice--error" role="alert">
+          {error}
+        </p>
+      ) : null}
+      {!isLoading && !error && !hasTimetableData ? (
+        <p className="timetable__notice">{t('timetable.empty')}</p>
+      ) : null}
+    </section>
   )
 }
 
@@ -898,6 +945,11 @@ function App() {
   const [isSavingMusicPlaylist, setIsSavingMusicPlaylist] = useState(false)
   const [bingoCard, setBingoCard] = useState<BingoCard | null>(null)
   const [bingoError, setBingoError] = useState('')
+  const [timetable, setTimetable] = useState<Timetable | null>(null)
+  const [timetableError, setTimetableError] = useState('')
+  const [isLoadingTimetable, setIsLoadingTimetable] = useState(
+    Boolean(selectedParticipant),
+  )
   const [togglingBingoNumber, setTogglingBingoNumber] = useState<number | null>(
     null,
   )
@@ -964,6 +1016,7 @@ function App() {
   const isLoginLocked = loginLockRemainingMs > 0
   const mainNavigationItems: Array<{ section: MainSection; label: string }> = [
     { section: 'awards', label: t('navigation.awards') },
+    { section: 'timetable', label: t('navigation.timetable') },
     ...(bingoCard ? [{ section: 'bingo' as const, label: t('navigation.bingo') }] : []),
     { section: 'info', label: t('navigation.info') },
     { section: 'profile', label: t('navigation.profile') },
@@ -1051,6 +1104,7 @@ function App() {
       setIsLoadingData(true)
       setIsStandingsLoading(true)
       setIsLoadingFestivalDocuments(true)
+      setIsLoadingTimetable(true)
       setParticipantsError('')
       setCategoriesError('')
       setVotesError('')
@@ -1058,6 +1112,7 @@ function App() {
       setStandingsError('')
       setFestivalDocumentsError('')
       setBingoError('')
+      setTimetableError('')
 
       try {
         const [
@@ -1068,6 +1123,7 @@ function App() {
           loadedCampLocationLink,
           loadedMusicPlaylist,
           loadedBingoCard,
+          loadedTimetable,
         ] = await Promise.all([
           loadParticipants(accessContext),
           loadCategories(accessContext),
@@ -1076,6 +1132,7 @@ function App() {
           loadCampLocationLink(accessContext),
           loadMusicPlaylist(accessContext),
           loadOrCreateBingoCard(accessContext),
+          loadTimetable(accessContext),
         ])
 
         if (isCurrent) {
@@ -1086,6 +1143,7 @@ function App() {
           setCampLocationLink(loadedCampLocationLink)
           setMusicPlaylist(loadedMusicPlaylist)
           setBingoCard(loadedBingoCard)
+          setTimetable(loadedTimetable)
           setCampLocationOpenError('')
         }
       } catch {
@@ -1099,10 +1157,12 @@ function App() {
           setVotesError(i18n.t('identity.errors.participantVotesLoad'))
           setFestivalDocumentsError(i18n.t('info.errors.load'))
           setBingoError(i18n.t('bingo.errors.load'))
+          setTimetableError(i18n.t('timetable.errors.load'))
         }
       } finally {
         if (isCurrent) {
           setIsLoadingFestivalDocuments(false)
+          setIsLoadingTimetable(false)
         }
       }
 
@@ -2647,6 +2707,14 @@ function App() {
           error={bingoError}
           togglingNumber={togglingBingoNumber}
           onToggleNumber={toggleBingoNumber}
+        />
+      ) : null}
+
+      {activeMainSection === 'timetable' ? (
+        <TimetableSection
+          timetable={timetable}
+          error={timetableError}
+          isLoading={isLoadingTimetable}
         />
       ) : null}
 

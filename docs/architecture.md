@@ -122,6 +122,12 @@ Der Bingo-Bereich ist nur sichtbar, wenn eine aktive Bingorunde existiert. Admin
 
 Teilnehmer laden ihre Karte ueber `ha_get_or_create_bingo_card`. Die RPC erzeugt serverseitig genau eine Karte pro Teilnehmer und aktiver Runde, falls noch keine Karte existiert. Die Karte enthaelt 25 eindeutige Zahlen aus dem Bereich 1 bis 75. Markierungen werden ueber `ha_set_bingo_mark` gespeichert oder entfernt und beim erneuten Laden wieder angezeigt. Die App prueft kein Bingo automatisch.
 
+### Timetable
+
+Der Timetable-Bereich ist als technische Basis vorbereitet. Die App zeigt einen eigenen Hauptbereich und laedt strukturierte Basisdaten ueber `src/data/timetable.ts` und die RPC `ha_get_timetable`.
+
+Das Datenmodell trennt Festivaltage (`festival_days`), Buehnen (`timetable_stages`), Acts (`timetable_acts`) und Auftritte (`timetable_performances`). Ein Auftritt referenziert genau einen Festivaltag, genau eine Buehne und genau einen Act. Es gibt noch keine Adminoberflaeche, keine editierbare Timetable-Ansicht, keine Favoritenlogik und keine komplexe Darstellung nach Buehnen oder Zeiten.
+
 ### Festivaleinstellungen
 
 Der Festivalname liegt zentral in `app_settings` unter dem Key `festival_name`. Das Frontend liest ihn ueber `ha_get_festival_name`. Admins aendern ihn ueber `ha_update_festival_name`; die RPC validiert einen nicht-leeren Namen.
@@ -167,6 +173,10 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `festival_archive_votes`: Stimmen inklusive Anzeigeinformationen zum Archivzeitpunkt.
 - `festival_documents`: Metadaten der Festivaldokumente fuer den Infos-Bereich.
 - `festival_document_uploads`: Kurzlebige, serverseitig freigegebene Storage-Uploadpfade fuer Festivaldokumente.
+- `festival_days`: Festivaltage fuer den strukturierten Timetable.
+- `timetable_stages`: Buehnen fuer den strukturierten Timetable.
+- `timetable_acts`: Acts fuer den strukturierten Timetable.
+- `timetable_performances`: Auftritte, die je einen Festivaltag, eine Buehne und einen Act verbinden.
 - `bingo_rounds`: Bingorunden mit Status. Es darf nur eine aktive Runde geben; beim Start einer neuen Runde werden alte aktive Runden geschlossen. Es gibt keine UI-Historie.
 - `bingo_cards`: Serverseitig generierte Bingokarten, eindeutig pro Teilnehmer und aktiver Runde.
 - `bingo_marks`: Persistierte Markierungen fuer Zahlen auf einer Bingokarte.
@@ -201,6 +211,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - Sichtbare UI-Texte werden ueber Uebersetzungsdateien gepflegt und nicht direkt in Komponenten hardcodiert.
 - Datenadapter in `src/data` kapseln Supabase RPC-Aufrufe, damit UI-Komponenten nicht direkt mit RPC-Details arbeiten muessen.
 - Festivaldokumente trennen Dateiinhalt und Metadaten: Storage enthaelt die Dateien, PostgreSQL/RPCs steuern die sichtbaren Dokumenteintraege.
+- Der strukturierte Timetable startet mit getrennten Kernentitaeten und einem Lese-RPC; Verwaltung, Favoriten und komplexe Darstellungen werden bewusst spaeter ergaenzt.
 
 ## Wartung und Erweiterung
 

@@ -81,6 +81,10 @@ import {
   type BingoCard,
   type BingoRound,
 } from '../data/bingo'
+import {
+  loadTimetable,
+  type Timetable,
+} from '../data/timetable'
 import type { MusicPlaylist } from '../data/musicEmbeds'
 import i18n from '../i18n'
 
@@ -161,6 +165,10 @@ vi.mock('../data/bingo', () => ({
   loadOrCreateBingoCard: vi.fn(),
   setBingoMark: vi.fn(),
   startBingoRound: vi.fn(),
+}))
+
+vi.mock('../data/timetable', () => ({
+  loadTimetable: vi.fn(),
 }))
 
 const participants: Participant[] = [
@@ -265,6 +273,13 @@ const bingoCard: BingoCard = {
   markedNumbers: [1, 7],
 }
 
+const emptyTimetable: Timetable = {
+  festivalDays: [],
+  stages: [],
+  acts: [],
+  performances: [],
+}
+
 const festivalAccessStorageKey =
   'hurricane-awards:hurricane-awards-2026:festival-access'
 const festivalAccessVersion = '2026-07-01 10:00:00+00'
@@ -312,6 +327,7 @@ function mockLoadedData({
   loadedAdminMusicPlaylist = loadedMusicPlaylist,
   loadedBingoCard = null,
   loadedAdminBingoRound = loadedBingoCard,
+  loadedTimetable = emptyTimetable,
 }: {
   loadedFestivalName?: string
   loadedFestivalAccessCode?: string
@@ -330,6 +346,7 @@ function mockLoadedData({
   loadedAdminMusicPlaylist?: MusicPlaylist | null
   loadedBingoCard?: BingoCard | null
   loadedAdminBingoRound?: BingoRound | null
+  loadedTimetable?: Timetable
 } = {}) {
   vi.mocked(loadFestivalName).mockResolvedValue(loadedFestivalName)
   vi.mocked(loadFestivalAccessVersion).mockResolvedValue(
@@ -386,6 +403,7 @@ function mockLoadedData({
   vi.mocked(loadAdminMusicPlaylist).mockResolvedValue(loadedAdminMusicPlaylist)
   vi.mocked(loadOrCreateBingoCard).mockResolvedValue(loadedBingoCard)
   vi.mocked(loadAdminBingoRound).mockResolvedValue(loadedAdminBingoRound)
+  vi.mocked(loadTimetable).mockResolvedValue(loadedTimetable)
   vi.mocked(startBingoRound).mockResolvedValue(bingoRound)
   vi.mocked(closeBingoRound).mockResolvedValue()
   vi.mocked(setBingoMark).mockImplementation(async (number, isMarked) => {
@@ -1150,6 +1168,13 @@ describe('Login', () => {
     ).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('heading', { name: /abstimmung/i })).toBeVisible()
 
+    await switchMainSection(/^timetable$/i)
+
+    expect(
+      within(navigation).getByRole('button', { name: /^timetable$/i }),
+    ).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('heading', { name: /^timetable$/i })).toBeVisible()
+
     await switchMainSection(/^bingo$/i)
 
     expect(
@@ -1184,6 +1209,21 @@ describe('Login', () => {
     expect(
       within(navigation).queryByRole('button', { name: /^bingo$/i }),
     ).not.toBeInTheDocument()
+  })
+
+  it('laedt die Timetable Basisdaten und zeigt einen leeren vorbereiteten Bereich', async () => {
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    expect(loadTimetable).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+
+    await switchMainSection(/^timetable$/i)
+
+    expect(
+      screen.getByText(/noch keine auftritte hinterlegt/i),
+    ).toBeVisible()
   })
 
   it('zeigt die individuelle Bingokarte und speichert Markierungen', async () => {

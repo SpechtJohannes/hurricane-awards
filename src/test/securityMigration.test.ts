@@ -123,6 +123,13 @@ const bingoFixMigration = readFileSync(
   ),
   'utf8',
 )
+const timetableMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260705100000_create_timetable.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -918,6 +925,49 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(bingoFixMigration).not.toContain('delete from public.bingo_rounds;')
   })
 
+  it('legt die technische Timetable Basis mit getrennten Entitaeten an', () => {
+    for (const table of [
+      'festival_days',
+      'timetable_stages',
+      'timetable_acts',
+      'timetable_performances',
+    ]) {
+      expect(timetableMigration).toContain(
+        `create table if not exists public.${table}`,
+      )
+      expect(timetableMigration).toContain(
+        `alter table public.${table} enable row level security`,
+      )
+      expect(timetableMigration).toContain(
+        `revoke all on table public.${table} from anon, authenticated`,
+      )
+    }
+
+    expect(timetableMigration).toContain(
+      'festival_day_id uuid not null references public.festival_days(id)',
+    )
+    expect(timetableMigration).toContain(
+      'stage_id uuid not null references public.timetable_stages(id)',
+    )
+    expect(timetableMigration).toContain(
+      'act_id uuid not null references public.timetable_acts(id)',
+    )
+    expect(timetableMigration).toContain(
+      'constraint timetable_performances_time_order',
+    )
+    expect(timetableMigration).toContain(
+      'create or replace function public.ha_get_timetable',
+    )
+    expect(timetableMigration).toContain(
+      'grant execute on function public.ha_get_timetable(text) to anon, authenticated',
+    )
+    expect(timetableMigration).toContain(
+      'public.ha_participant_id_for_access(p_participant_access_code) is null',
+    )
+    expect(timetableMigration).not.toContain('favorite')
+    expect(timetableMigration).not.toContain('admin_get_timetable')
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -937,6 +987,7 @@ describe('Supabase Sicherheitsmigration', () => {
       musicPlaylistMigration,
       bingoMigration,
       bingoFixMigration,
+      timetableMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')
