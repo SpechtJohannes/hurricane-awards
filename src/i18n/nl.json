@@ -117,6 +117,7 @@
   "navigation": {
     "label": "Hoofdonderdelen",
     "awards": "Awards",
+    "timetable": "Timetable",
     "bingo": "Bingo",
     "info": "Info",
     "profile": "Profiel"
@@ -375,6 +376,15 @@
     "errors": {
       "load": "Je bingokaart kon net niet worden geladen.",
       "mark": "De markering kon net niet worden opgeslagen."
+    }
+  },
+  "timetable": {
+    "eyebrow": "Festival",
+    "title": "Timetable",
+    "loading": "Timetable wordt geladen...",
+    "empty": "De timetable is voorbereid. Er zijn nog geen optredens beschikbaar.",
+    "errors": {
+      "load": "De timetable kon net niet worden geladen."
     }
   },
   "categories": {

@@ -36,4 +36,16 @@ describe('i18n test infrastructure', () => {
     expect(i18n.t('info.musicPlaylist.open')).toBe('Openen in Spotify')
     expect(i18n.t('admin.musicPlaylist.save')).toBe('Playlist opslaan')
   })
+
+  it('enthaelt Timetable Texte auf Deutsch und Niederlaendisch', async () => {
+    await i18n.changeLanguage('de')
+
+    expect(i18n.t('navigation.timetable')).toBe('Timetable')
+    expect(i18n.t('timetable.empty')).toContain('noch keine Auftritte')
+
+    await i18n.changeLanguage('nl')
+
+    expect(i18n.t('navigation.timetable')).toBe('Timetable')
+    expect(i18n.t('timetable.empty')).toContain('nog geen optredens')
+  })
 })

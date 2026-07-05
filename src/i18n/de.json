@@ -117,6 +117,7 @@
   "navigation": {
     "label": "Hauptbereiche",
     "awards": "Awards",
+    "timetable": "Timetable",
     "bingo": "Bingo",
     "info": "Infos",
     "profile": "Profil"
@@ -375,6 +376,15 @@
     "errors": {
       "load": "Deine Bingokarte konnte gerade nicht geladen werden.",
       "mark": "Die Markierung konnte gerade nicht gespeichert werden."
+    }
+  },
+  "timetable": {
+    "eyebrow": "Festival",
+    "title": "Timetable",
+    "loading": "Timetable wird geladen...",
+    "empty": "Der Timetable ist vorbereitet. Es sind noch keine Auftritte hinterlegt.",
+    "errors": {
+      "load": "Der Timetable konnte gerade nicht geladen werden."
     }
   },
   "categories": {

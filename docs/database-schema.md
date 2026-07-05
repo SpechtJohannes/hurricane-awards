@@ -11,6 +11,7 @@ Das Schema besteht aus:
 - aktiven Festivaldaten: `participants`, `categories`, `votes`
 - historisch/kompatibel beruecksichtigten Daten: `archived_votes`
 - zentralen Einstellungen: `app_settings`
+- strukturierter Timetable-Basis: `festival_days`, `timetable_stages`, `timetable_acts`, `timetable_performances`
 - unveraenderlichen Festival-Snapshots: `festival_archives` und `festival_archive_*`
 - technischem Login-Schutz: `participant_login_attempts`
 - optionaler Ergebnisrelation: `all_time_standings`, falls in der Umgebung vorhanden
@@ -133,6 +134,82 @@ Besonderheiten:
 - Frische Deployments setzen keinen bekannten Default-Festivalcode; der initiale Code wird projektspezifisch per Setup-SQL geschrieben.
 - Die Spotify Playlist wird nur als Playlist ID gespeichert. Embed- und Open-URL werden daraus abgeleitet; Spotify-Nutzerdaten, Access Tokens oder Refresh Tokens werden nicht gespeichert.
 - Direkte Browserzugriffe sind gesperrt.
+
+### `festival_days`
+
+Zweck: Speichert eigenstaendige Festivaltage fuer den strukturierten Timetable.
+
+Wichtigste Spalten:
+
+- `id`: Festivaltag-ID.
+- `date`: Kalendertag des Festivals.
+- `label`: Anzeigename des Tages.
+- `sort_order`: Sortierung fuer spaetere Anzeigen.
+
+Primaerschluessel: `id`.
+
+Besonderheiten:
+
+- `date` ist eindeutig.
+- Direkte Browserzugriffe sind gesperrt; Lesen laeuft ueber `ha_get_timetable`.
+
+### `timetable_stages`
+
+Zweck: Speichert Buehnen fuer den strukturierten Timetable.
+
+Wichtigste Spalten:
+
+- `id`: Buehnen-ID.
+- `name`: Buehnenname.
+- `sort_order`: Sortierung fuer spaetere Anzeigen.
+
+Primaerschluessel: `id`.
+
+Besonderheiten:
+
+- Direkte Browserzugriffe sind gesperrt; Lesen laeuft ueber `ha_get_timetable`.
+
+### `timetable_acts`
+
+Zweck: Speichert Acts fuer den strukturierten Timetable.
+
+Wichtigste Spalten:
+
+- `id`: Act-ID.
+- `name`: Act-Name.
+- `description`: Optionale Beschreibung.
+
+Primaerschluessel: `id`.
+
+Besonderheiten:
+
+- Direkte Browserzugriffe sind gesperrt; Lesen laeuft ueber `ha_get_timetable`.
+
+### `timetable_performances`
+
+Zweck: Verbindet genau einen Festivaltag, genau eine Buehne und genau einen Act zu einem Auftritt.
+
+Wichtigste Spalten:
+
+- `id`: Auftritt-ID.
+- `festival_day_id`: Zugehoeriger Festivaltag.
+- `stage_id`: Zugehoerige Buehne.
+- `act_id`: Zugehoeriger Act.
+- `starts_at`: Startzeitpunkt.
+- `ends_at`: Optionaler Endzeitpunkt.
+
+Primaerschluessel: `id`.
+
+Fremdschluessel:
+
+- `festival_day_id` referenziert `festival_days(id)`.
+- `stage_id` referenziert `timetable_stages(id)`.
+- `act_id` referenziert `timetable_acts(id)`.
+
+Besonderheiten:
+
+- `ends_at` muss, falls gesetzt, nach `starts_at` liegen.
+- Direkte Browserzugriffe sind gesperrt; Lesen laeuft ueber `ha_get_timetable`.
 
 ### `festival_access_attempts`
 
@@ -289,6 +366,7 @@ Die aktiven Daten bilden fachlich diesen Kern:
 - Ein Teilnehmer kann in vielen Stimmen nominiert werden: `participants.id` zu `votes.voted_for_id`.
 - Eine Kategorie kann viele Stimmen enthalten: `categories.id` zu `votes.category_id`.
 - Ein Festivalarchiv hat viele archivierte Teilnehmer, Kategorien und Stimmen ueber `archive_id`.
+- Ein Auftritt verbindet einen Festivaltag, eine Buehne und einen Act.
 - Archivtabellen speichern urspruengliche IDs als Werte, referenzieren aber bewusst keine aktiven Tabellen.
 - `participant_login_attempts` ist technisch isoliert und hat keine fachlichen Beziehungen.
 
@@ -297,6 +375,9 @@ erDiagram
   PARTICIPANTS ||--o{ VOTES : voter
   PARTICIPANTS ||--o{ VOTES : nominee
   CATEGORIES ||--o{ VOTES : category
+  FESTIVAL_DAYS ||--o{ TIMETABLE_PERFORMANCES : day
+  TIMETABLE_STAGES ||--o{ TIMETABLE_PERFORMANCES : stage
+  TIMETABLE_ACTS ||--o{ TIMETABLE_PERFORMANCES : act
 
   FESTIVAL_ARCHIVES ||--o{ FESTIVAL_ARCHIVE_PARTICIPANTS : contains
   FESTIVAL_ARCHIVES ||--o{ FESTIVAL_ARCHIVE_CATEGORIES : contains
@@ -371,6 +452,10 @@ Dies ist keine vollstaendige API-Referenz, sondern eine Gruppierung der wichtigs
 - `ha_get_festival_access_code`: Liest den gemeinsamen Festivalcode mit Adminschutz.
 - `ha_update_festival_access_code`: Aktualisiert den gemeinsamen Festivalcode mit Adminschutz.
 - `ha_list_all_time_standings`: Liefert das Gesamtclassement, falls `all_time_standings` vorhanden ist.
+
+### Timetable
+
+- `ha_get_timetable`: Liefert Festivaltage, Buehnen, Acts und Auftritte fuer angemeldete Teilnehmer als technische Basisdaten.
 
 ### Archivierung
 

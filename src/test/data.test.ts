@@ -87,6 +87,7 @@ import {
   setBingoMark,
   startBingoRound,
 } from '../data/bingo'
+import { loadTimetable } from '../data/timetable'
 import {
   isSupportedMusicPlaylistLink,
   normalizeSpotifyPlaylistLink,
@@ -694,6 +695,87 @@ describe('Supabase Datenzugriffe', () => {
     expect(rpcMock).toHaveBeenNthCalledWith(
       3,
       'ha_close_bingo_round',
+      expectedParticipantRpcContext,
+    )
+  })
+
+  it('laedt die Timetable Basisdaten ueber eine geschuetzte RPC Funktion', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          festival_days: [
+            {
+              id: 'day-1',
+              date: '2026-06-19',
+              label: 'Freitag',
+              sort_order: 1,
+            },
+          ],
+          stages: [
+            {
+              id: 'stage-1',
+              name: 'Mainstage',
+              sort_order: 1,
+            },
+          ],
+          acts: [
+            {
+              id: 'act-1',
+              name: 'The Headliners',
+              description: null,
+            },
+          ],
+          performances: [
+            {
+              id: 'performance-1',
+              festival_day_id: 'day-1',
+              stage_id: 'stage-1',
+              act_id: 'act-1',
+              starts_at: '2026-06-19T20:00:00.000Z',
+              ends_at: '2026-06-19T21:00:00.000Z',
+            },
+          ],
+        },
+      ],
+      error: null,
+    })
+
+    await expect(loadTimetable(participantContext)).resolves.toEqual({
+      festivalDays: [
+        {
+          id: 'day-1',
+          date: '2026-06-19',
+          label: 'Freitag',
+          sortOrder: 1,
+        },
+      ],
+      stages: [
+        {
+          id: 'stage-1',
+          name: 'Mainstage',
+          sortOrder: 1,
+        },
+      ],
+      acts: [
+        {
+          id: 'act-1',
+          name: 'The Headliners',
+          description: null,
+        },
+      ],
+      performances: [
+        {
+          id: 'performance-1',
+          festivalDayId: 'day-1',
+          stageId: 'stage-1',
+          actId: 'act-1',
+          startsAt: '2026-06-19T20:00:00.000Z',
+          endsAt: '2026-06-19T21:00:00.000Z',
+        },
+      ],
+    })
+    expect(rpcMock).toHaveBeenCalledWith(
+      'ha_get_timetable',
       expectedParticipantRpcContext,
     )
   })
