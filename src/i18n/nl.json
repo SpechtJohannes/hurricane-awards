@@ -503,6 +503,13 @@
     "empty": "Er zijn nog geen optredens beschikbaar.",
     "emptyDay": "Voor deze dag zijn nog geen optredens beschikbaar.",
     "unknownAct": "Onbekende act",
+    "favorite": {
+      "add": "Als favoriet markeren",
+      "remove": "Favoriet verwijderen",
+      "errors": {
+        "save": "De favoriet kon net niet worden opgeslagen."
+      }
+    },
     "errors": {
       "load": "De timetable kon net niet worden geladen."
     }

@@ -503,6 +503,13 @@
     "empty": "Es sind noch keine Auftritte hinterlegt.",
     "emptyDay": "An diesem Tag sind noch keine Auftritte hinterlegt.",
     "unknownAct": "Unbekannter Act",
+    "favorite": {
+      "add": "Als Favorit markieren",
+      "remove": "Favorit entfernen",
+      "errors": {
+        "save": "Der Favorit konnte gerade nicht gespeichert werden."
+      }
+    },
     "errors": {
       "load": "Der Timetable konnte gerade nicht geladen werden."
     }

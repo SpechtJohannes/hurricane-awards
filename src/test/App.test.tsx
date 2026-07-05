@@ -82,6 +82,7 @@ import {
   type BingoRound,
 } from '../data/bingo'
 import {
+  addTimetableFavorite,
   createFestivalDay,
   createTimetableAct,
   createTimetablePerformance,
@@ -95,6 +96,7 @@ import {
   loadAdminTimetablePerformances,
   loadAdminTimetableStages,
   loadTimetable,
+  removeTimetableFavorite,
   updateFestivalDay,
   updateTimetableAct,
   updateTimetablePerformance,
@@ -188,6 +190,7 @@ vi.mock('../data/bingo', () => ({
 }))
 
 vi.mock('../data/timetable', () => ({
+  addTimetableFavorite: vi.fn(),
   createFestivalDay: vi.fn(),
   createTimetableAct: vi.fn(),
   createTimetablePerformance: vi.fn(),
@@ -201,6 +204,7 @@ vi.mock('../data/timetable', () => ({
   loadAdminTimetablePerformances: vi.fn(),
   loadAdminTimetableStages: vi.fn(),
   loadTimetable: vi.fn(),
+  removeTimetableFavorite: vi.fn(),
   updateFestivalDay: vi.fn(),
   updateTimetableAct: vi.fn(),
   updateTimetablePerformance: vi.fn(),
@@ -314,6 +318,7 @@ const emptyTimetable: Timetable = {
   stages: [],
   acts: [],
   performances: [],
+  favoritePerformanceIds: [],
 }
 
 const festivalDays: FestivalDay[] = [
@@ -558,6 +563,8 @@ function mockLoadedData({
     endsAt: input.endsAt,
   }))
   vi.mocked(deleteTimetablePerformance).mockResolvedValue()
+  vi.mocked(addTimetableFavorite).mockResolvedValue()
+  vi.mocked(removeTimetableFavorite).mockResolvedValue()
   vi.mocked(startBingoRound).mockResolvedValue(bingoRound)
   vi.mocked(closeBingoRound).mockResolvedValue()
   vi.mocked(setBingoMark).mockImplementation(async (number, isMarked) => {
@@ -1387,6 +1394,7 @@ describe('Login', () => {
         stages: timetableStages,
         acts: timetableActs,
         performances: timetablePerformances,
+        favoritePerformanceIds: [],
       },
     })
     await renderLoadedApp()
@@ -1426,6 +1434,58 @@ describe('Login', () => {
     expect(
       within(timetableSection).getByText(/Gro.e Gitarren und gro.e Gef.hle/i),
     ).toBeVisible()
+  })
+
+  it('markiert und entfernt Timetable Auftritte als Favoriten', async () => {
+    mockLoadedData({
+      loadedTimetable: {
+        festivalDays,
+        stages: timetableStages,
+        acts: timetableActs,
+        performances: timetablePerformances,
+        favoritePerformanceIds: [],
+      },
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^timetable$/i)
+
+    const timetableSection = sectionForHeading(/^timetable$/i)
+    const addFavoriteButton = within(timetableSection).getByRole('button', {
+      name: /als favorit markieren/i,
+    })
+
+    expect(addFavoriteButton).toHaveAttribute('aria-pressed', 'false')
+
+    await userEvent.click(addFavoriteButton)
+
+    expect(addTimetableFavorite).toHaveBeenCalledWith('performance-1', {
+      participantAccessCode: 'ALICE42',
+    })
+    await waitFor(() => {
+      expect(
+        within(timetableSection).getByRole('button', {
+          name: /favorit entfernen/i,
+        }),
+      ).toHaveAttribute('aria-pressed', 'true')
+    })
+
+    const removeFavoriteButton = within(timetableSection).getByRole('button', {
+      name: /favorit entfernen/i,
+    })
+
+    await userEvent.click(removeFavoriteButton)
+
+    expect(removeTimetableFavorite).toHaveBeenCalledWith('performance-1', {
+      participantAccessCode: 'ALICE42',
+    })
+    await waitFor(() => {
+      expect(
+        within(timetableSection).getByRole('button', {
+          name: /als favorit markieren/i,
+        }),
+      ).toHaveAttribute('aria-pressed', 'false')
+    })
   })
 
   it('zeigt die individuelle Bingokarte und speichert Markierungen', async () => {
