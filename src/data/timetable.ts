@@ -38,6 +38,7 @@ export type Timetable = {
   stages: TimetableStage[]
   acts: TimetableAct[]
   performances: TimetablePerformance[]
+  favoritePerformanceIds: string[]
 }
 
 export type CreateFestivalDayInput = {
@@ -169,6 +170,7 @@ export async function loadTimetable(
     stages: TimetableStageRow[]
     acts: TimetableActRow[]
     performances: TimetablePerformanceRow[]
+    favorite_performance_ids: string[]
   }> | null
 
   return {
@@ -176,6 +178,37 @@ export async function loadTimetable(
     stages: (row?.stages ?? []).map(mapStage),
     acts: (row?.acts ?? []).map(mapAct),
     performances: (row?.performances ?? []).map(mapPerformance),
+    favoritePerformanceIds: row?.favorite_performance_ids ?? [],
+  }
+}
+
+export async function addTimetableFavorite(
+  performanceId: string,
+  context: ParticipantAccessContext,
+): Promise<void> {
+  const supabase = getSupabase()
+  const { error } = await supabase.rpc('ha_add_timetable_favorite', {
+    ...participantRpcParams(context),
+    p_performance_id: performanceId,
+  })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function removeTimetableFavorite(
+  performanceId: string,
+  context: ParticipantAccessContext,
+): Promise<void> {
+  const supabase = getSupabase()
+  const { error } = await supabase.rpc('ha_remove_timetable_favorite', {
+    ...participantRpcParams(context),
+    p_performance_id: performanceId,
+  })
+
+  if (error) {
+    throw error
   }
 }
 

@@ -88,6 +88,7 @@ import {
   startBingoRound,
 } from '../data/bingo'
 import {
+  addTimetableFavorite,
   createFestivalDay,
   createTimetableAct,
   createTimetablePerformance,
@@ -101,6 +102,7 @@ import {
   loadAdminTimetablePerformances,
   loadAdminTimetableStages,
   loadTimetable,
+  removeTimetableFavorite,
   updateFestivalDay,
   updateTimetableAct,
   updateTimetablePerformance,
@@ -753,6 +755,7 @@ describe('Supabase Datenzugriffe', () => {
               ends_at: '2026-06-19T21:00:00.000Z',
             },
           ],
+          favorite_performance_ids: ['performance-1'],
         },
       ],
       error: null,
@@ -791,11 +794,34 @@ describe('Supabase Datenzugriffe', () => {
           endsAt: '2026-06-19T21:00:00.000Z',
         },
       ],
+      favoritePerformanceIds: ['performance-1'],
     })
     expect(rpcMock).toHaveBeenCalledWith(
       'ha_get_timetable',
       expectedParticipantRpcContext,
     )
+  })
+
+  it('verwaltet Timetable Favoriten ueber Teilnehmer RPCs', async () => {
+    rpcMock.mockResolvedValueOnce({ data: null, error: null })
+
+    await expect(
+      addTimetableFavorite('performance-1', participantContext),
+    ).resolves.toBeUndefined()
+    expect(rpcMock).toHaveBeenNthCalledWith(1, 'ha_add_timetable_favorite', {
+      ...expectedParticipantRpcContext,
+      p_performance_id: 'performance-1',
+    })
+
+    rpcMock.mockResolvedValueOnce({ data: null, error: null })
+
+    await expect(
+      removeTimetableFavorite('performance-1', participantContext),
+    ).resolves.toBeUndefined()
+    expect(rpcMock).toHaveBeenNthCalledWith(2, 'ha_remove_timetable_favorite', {
+      ...expectedParticipantRpcContext,
+      p_performance_id: 'performance-1',
+    })
   })
 
   it('verwaltet Festivaltage ueber Admin RPCs', async () => {

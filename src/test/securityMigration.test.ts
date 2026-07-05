@@ -158,6 +158,13 @@ const timetablePerformancesManagementMigration = readFileSync(
   ),
   'utf8',
 )
+const timetableFavoritesMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260705150000_create_timetable_favorites.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -1179,6 +1186,52 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(timetablePerformancesManagementMigration).not.toContain('favorite')
   })
 
+  it('speichert Timetable Favoriten pro Teilnehmer und Auftritt geschuetzt', () => {
+    expect(timetableFavoritesMigration).toContain(
+      'create table if not exists public.participant_timetable_favorites',
+    )
+    expect(timetableFavoritesMigration).toContain(
+      'participant_id text not null references public.participants(id) on delete cascade',
+    )
+    expect(timetableFavoritesMigration).toContain(
+      'performance_id uuid not null references public.timetable_performances(id) on delete cascade',
+    )
+    expect(timetableFavoritesMigration).toContain(
+      'primary key (participant_id, performance_id)',
+    )
+    expect(timetableFavoritesMigration).toContain(
+      'alter table public.participant_timetable_favorites enable row level security',
+    )
+    expect(timetableFavoritesMigration).toContain(
+      'revoke all on table public.participant_timetable_favorites from anon, authenticated',
+    )
+    expect(timetableFavoritesMigration).toContain(
+      'create policy "deny direct timetable favorite access"',
+    )
+    expect(timetableFavoritesMigration).toContain(
+      'favorite_performance_ids jsonb',
+    )
+    expect(timetableFavoritesMigration).toContain(
+      'drop function if exists public.ha_get_timetable(text)',
+    )
+    expect(timetableFavoritesMigration).toContain(
+      'create or replace function public.ha_add_timetable_favorite',
+    )
+    expect(timetableFavoritesMigration).toContain(
+      'create or replace function public.ha_remove_timetable_favorite',
+    )
+    expect(timetableFavoritesMigration).toContain(
+      'on conflict (participant_id, performance_id) do nothing',
+    )
+    expect(timetableFavoritesMigration).toContain(
+      'grant execute on function public.ha_add_timetable_favorite(text, uuid) to anon, authenticated',
+    )
+    expect(timetableFavoritesMigration).toContain(
+      'grant execute on function public.ha_remove_timetable_favorite(text, uuid) to anon, authenticated',
+    )
+    expect(timetableFavoritesMigration).not.toContain('ha_admin')
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -1203,6 +1256,7 @@ describe('Supabase Sicherheitsmigration', () => {
       timetableStagesManagementMigration,
       timetableActsManagementMigration,
       timetablePerformancesManagementMigration,
+      timetableFavoritesMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

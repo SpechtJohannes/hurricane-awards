@@ -104,7 +104,7 @@ Admin-RPCs umfassen unter anderem:
 - Kategorien: `ha_admin_list_categories`, `ha_create_category`, `ha_update_category`, `ha_update_category_status`, `ha_delete_category`, `ha_delete_category_votes`
 - Festival: `ha_update_festival_name`, `ha_get_festival_access_code`, `ha_update_festival_access_code`, `ha_archive_festival`
 - Infos: `ha_admin_list_festival_documents`, `ha_upsert_festival_document`, `ha_delete_festival_document`, `ha_admin_get_music_playlist`, `ha_update_music_playlist`, `ha_delete_music_playlist`
-- Timetable: `ha_admin_list_festival_days`, `ha_create_festival_day`, `ha_update_festival_day`, `ha_delete_festival_day`, `ha_admin_list_timetable_stages`, `ha_create_timetable_stage`, `ha_update_timetable_stage`, `ha_delete_timetable_stage`, `ha_admin_list_timetable_acts`, `ha_create_timetable_act`, `ha_update_timetable_act`, `ha_delete_timetable_act`, `ha_admin_list_timetable_performances`, `ha_create_timetable_performance`, `ha_update_timetable_performance`, `ha_delete_timetable_performance`
+- Timetable: `ha_get_timetable`, `ha_add_timetable_favorite`, `ha_remove_timetable_favorite`, `ha_admin_list_festival_days`, `ha_create_festival_day`, `ha_update_festival_day`, `ha_delete_festival_day`, `ha_admin_list_timetable_stages`, `ha_create_timetable_stage`, `ha_update_timetable_stage`, `ha_delete_timetable_stage`, `ha_admin_list_timetable_acts`, `ha_create_timetable_act`, `ha_update_timetable_act`, `ha_delete_timetable_act`, `ha_admin_list_timetable_performances`, `ha_create_timetable_performance`, `ha_update_timetable_performance`, `ha_delete_timetable_performance`
 - Bingo: `ha_admin_get_bingo_round`, `ha_start_bingo_round`, `ha_close_bingo_round`
 
 ### Festivalinfos und Dokumente
@@ -125,13 +125,15 @@ Teilnehmer laden ihre Karte ueber `ha_get_or_create_bingo_card`. Die RPC erzeugt
 
 ### Timetable
 
-Der Timetable-Bereich ist als eigener Hauptbereich erreichbar. Teilnehmende sehen dort den vollstaendigen Festival-Timetable, getrennt nach Festivaltagen, mit Buehnen als Spalten, Uhrzeiten als Zeilen und Auftritten an ihrer jeweiligen Position. Die Darstellung bleibt eine reine Leseansicht und nutzt fuer schmale Viewports horizontales Scrollen innerhalb der Buehnenspalten. Die Daten werden ueber `src/data/timetable.ts` und die RPC `ha_get_timetable` geladen.
+Der Timetable-Bereich ist als eigener Hauptbereich erreichbar. Teilnehmende sehen dort den vollstaendigen Festival-Timetable, getrennt nach Festivaltagen, mit Buehnen als Spalten, Uhrzeiten als Zeilen und Auftritten an ihrer jeweiligen Position. Die Darstellung nutzt fuer schmale Viewports horizontales Scrollen innerhalb der Buehnenspalten. Die Daten werden ueber `src/data/timetable.ts` und die RPC `ha_get_timetable` geladen.
 
-Das Datenmodell trennt Festivaltage (`festival_days`), Buehnen (`timetable_stages`), Acts (`timetable_acts`) und Auftritte (`timetable_performances`). Ein Auftritt referenziert genau einen Festivaltag, genau eine Buehne und genau einen Act. Es gibt keine Favoritenlogik in der Teilnehmeransicht.
+Das Datenmodell trennt Festivaltage (`festival_days`), Buehnen (`timetable_stages`), Acts (`timetable_acts`) und Auftritte (`timetable_performances`). Ein Auftritt referenziert genau einen Festivaltag, genau eine Buehne und genau einen Act. Persoenliche Favoriten werden pro Teilnehmer und konkretem Auftritt in `participant_timetable_favorites` gespeichert. Der Primaerschluessel auf `(participant_id, performance_id)` verhindert doppelte Favoriteneintraege.
 
 Admins koennen im Adminbereich `Timetable` Festivaltage, Buehnen, Acts und Auftritte anlegen, bearbeiten und loeschen. Festivaltage und Buehnen lassen sich zusaetzlich ueber die Sortierung bzw. Hoch-/Runter-Aktionen umordnen. Acts sind unabhaengig von Auftritten und koennen mehreren Auftritten zugeordnet werden. Jeder Auftritt referenziert genau einen Festivaltag, genau eine Buehne und genau einen Act und hat Start- und Endzeit.
 
 Die Datenbank erzwingt, dass die Endzeit nach der Startzeit liegt und dass sich Auftritte auf derselben Buehne zeitlich nicht ueberschneiden. Die Ueberschneidungsregel ist als Exclusion Constraint auf `timetable_performances` abgesichert und gilt dadurch auch beim Bearbeiten, ohne dass ein Auftritt mit sich selbst kollidiert.
+
+Teilnehmende markieren und entfernen Favoriten direkt in der Timetable-Leseansicht ueber `ha_add_timetable_favorite` und `ha_remove_timetable_favorite`. Beide RPCs ermitteln den Teilnehmer serverseitig aus dem Teilnehmercode. Direkte Browserrechte auf die Favoritentabelle sind entzogen.
 
 ### Festivaleinstellungen
 
@@ -182,6 +184,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `timetable_stages`: Buehnen fuer den strukturierten Timetable.
 - `timetable_acts`: Acts fuer den strukturierten Timetable.
 - `timetable_performances`: Auftritte, die je einen Festivaltag, eine Buehne und einen Act verbinden.
+- `participant_timetable_favorites`: Persoenliche Favoriten einzelner Teilnehmer fuer konkrete Timetable-Auftritte.
 - `bingo_rounds`: Bingorunden mit Status. Es darf nur eine aktive Runde geben; beim Start einer neuen Runde werden alte aktive Runden geschlossen. Es gibt keine UI-Historie.
 - `bingo_cards`: Serverseitig generierte Bingokarten, eindeutig pro Teilnehmer und aktiver Runde.
 - `bingo_marks`: Persistierte Markierungen fuer Zahlen auf einer Bingokarte.
@@ -216,7 +219,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - Sichtbare UI-Texte werden ueber Uebersetzungsdateien gepflegt und nicht direkt in Komponenten hardcodiert.
 - Datenadapter in `src/data` kapseln Supabase RPC-Aufrufe, damit UI-Komponenten nicht direkt mit RPC-Details arbeiten muessen.
 - Festivaldokumente trennen Dateiinhalt und Metadaten: Storage enthaelt die Dateien, PostgreSQL/RPCs steuern die sichtbaren Dokumenteintraege.
-- Der strukturierte Timetable nutzt getrennte Kernentitaeten, einen Lese-RPC, eine Adminverwaltung fuer Festivaltage, Buehnen, Acts und Auftritte sowie eine nach Tagen, Buehnen und Zeiten gruppierte Teilnehmer-Leseansicht; Favoriten werden bewusst spaeter ergaenzt.
+- Der strukturierte Timetable nutzt getrennte Kernentitaeten, einen Lese-RPC, eine Adminverwaltung fuer Festivaltage, Buehnen, Acts und Auftritte sowie eine nach Tagen, Buehnen und Zeiten gruppierte Teilnehmeransicht mit persoenlichen Auftrittsfavoriten.
 
 ## Wartung und Erweiterung
 

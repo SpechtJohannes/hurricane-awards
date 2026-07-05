@@ -84,6 +84,7 @@ import {
   type BingoRound,
 } from './data/bingo'
 import {
+  addTimetableFavorite,
   createFestivalDay,
   createTimetableAct,
   createTimetablePerformance,
@@ -97,6 +98,7 @@ import {
   loadAdminTimetablePerformances,
   loadAdminTimetableStages,
   loadTimetable,
+  removeTimetableFavorite,
   updateFestivalDay,
   updateTimetableAct,
   updateTimetablePerformance,
@@ -591,16 +593,25 @@ type TimetableSectionProps = {
   timetable: Timetable | null
   error: string
   isLoading: boolean
+  togglingPerformanceId: string | null
+  onToggleFavorite: (performanceId: string, isFavorite: boolean) => void
 }
 
 function timeLabel(value: string) {
   return value.slice(11, 16)
 }
 
-function TimetableSection({ timetable, error, isLoading }: TimetableSectionProps) {
+function TimetableSection({
+  timetable,
+  error,
+  isLoading,
+  togglingPerformanceId,
+  onToggleFavorite,
+}: TimetableSectionProps) {
   const { t } = useTranslation()
   const hasTimetableData = Boolean(timetable?.performances.length)
   const actById = new Map(timetable?.acts.map((act) => [act.id, act]) ?? [])
+  const favoritePerformanceIds = new Set(timetable?.favoritePerformanceIds ?? [])
   const performancesByDay = new Map<string, Timetable['performances']>()
 
   for (const performance of timetable?.performances ?? []) {
@@ -718,6 +729,11 @@ function TimetableSection({ timetable, error, isLoading }: TimetableSectionProps
                           ? timeSlots.indexOf(performance.endsAt)
                           : startsAtIndex + 1
                         const act = actById.get(performance.actId)
+                        const isFavorite = favoritePerformanceIds.has(
+                          performance.id,
+                        )
+                        const isToggling =
+                          togglingPerformanceId === performance.id
 
                         if (stageIndex < 0 || startsAtIndex < 0 || endsAtIndex < 0) {
                           return null
@@ -742,6 +758,19 @@ function TimetableSection({ timetable, error, isLoading }: TimetableSectionProps
                               {act?.name ?? t('timetable.unknownAct')}
                             </h4>
                             {act?.description ? <p>{act.description}</p> : null}
+                            <button
+                              className="timetable-performance__favorite"
+                              type="button"
+                              aria-pressed={isFavorite}
+                              disabled={isToggling}
+                              onClick={() =>
+                                onToggleFavorite(performance.id, isFavorite)
+                              }
+                            >
+                              {isFavorite
+                                ? t('timetable.favorite.remove')
+                                : t('timetable.favorite.add')}
+                            </button>
                           </article>
                         )
                       })}
@@ -1116,6 +1145,8 @@ function App() {
   const [isLoadingTimetable, setIsLoadingTimetable] = useState(
     Boolean(selectedParticipant),
   )
+  const [togglingFavoritePerformanceId, setTogglingFavoritePerformanceId] =
+    useState<string | null>(null)
   const [adminFestivalDays, setAdminFestivalDays] = useState<FestivalDay[]>([])
   const [adminFestivalDaysError, setAdminFestivalDaysError] = useState('')
   const [isLoadingAdminFestivalDays, setIsLoadingAdminFestivalDays] =
@@ -1534,6 +1565,7 @@ function App() {
     setTimetable(null)
     setTimetableError('')
     setIsLoadingTimetable(false)
+    setTogglingFavoritePerformanceId(null)
     setAdminFestivalDays([])
     setAdminFestivalDaysError('')
     setIsLoadingAdminFestivalDays(false)
@@ -3076,6 +3108,51 @@ function App() {
     }
   }
 
+  async function toggleTimetableFavorite(
+    performanceId: string,
+    isFavorite: boolean,
+  ) {
+    if (!selectedParticipant || !timetable) {
+      return
+    }
+
+    const previousFavoritePerformanceIds = timetable.favoritePerformanceIds
+    const nextFavoritePerformanceIds = isFavorite
+      ? previousFavoritePerformanceIds.filter((id) => id !== performanceId)
+      : Array.from(new Set([...previousFavoritePerformanceIds, performanceId]))
+
+    setTogglingFavoritePerformanceId(performanceId)
+    setTimetableError('')
+    setTimetable({
+      ...timetable,
+      favoritePerformanceIds: nextFavoritePerformanceIds,
+    })
+
+    try {
+      if (isFavorite) {
+        await removeTimetableFavorite(performanceId, {
+          participantAccessCode: selectedParticipant.accessCode,
+        })
+      } else {
+        await addTimetableFavorite(performanceId, {
+          participantAccessCode: selectedParticipant.accessCode,
+        })
+      }
+    } catch {
+      setTimetable((currentTimetable) =>
+        currentTimetable
+          ? {
+              ...currentTimetable,
+              favoritePerformanceIds: previousFavoritePerformanceIds,
+            }
+          : currentTimetable,
+      )
+      setTimetableError(t('timetable.favorite.errors.save'))
+    } finally {
+      setTogglingFavoritePerformanceId(null)
+    }
+  }
+
   function openCampLocationLink() {
     if (!campLocationLink) {
       return
@@ -3578,6 +3655,8 @@ function App() {
           timetable={timetable}
           error={timetableError}
           isLoading={isLoadingTimetable}
+          togglingPerformanceId={togglingFavoritePerformanceId}
+          onToggleFavorite={toggleTimetableFavorite}
         />
       ) : null}
 
