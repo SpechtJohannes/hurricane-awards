@@ -87,7 +87,13 @@ import {
   setBingoMark,
   startBingoRound,
 } from '../data/bingo'
-import { loadTimetable } from '../data/timetable'
+import {
+  createFestivalDay,
+  deleteFestivalDay,
+  loadAdminFestivalDays,
+  loadTimetable,
+  updateFestivalDay,
+} from '../data/timetable'
 import {
   isSupportedMusicPlaylistLink,
   normalizeSpotifyPlaylistLink,
@@ -778,6 +784,117 @@ describe('Supabase Datenzugriffe', () => {
       'ha_get_timetable',
       expectedParticipantRpcContext,
     )
+  })
+
+  it('verwaltet Festivaltage ueber Admin RPCs', async () => {
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'day-1',
+          date: '2026-06-19',
+          label: 'Freitag',
+          sort_order: 1,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(loadAdminFestivalDays(participantContext)).resolves.toEqual([
+      {
+        id: 'day-1',
+        date: '2026-06-19',
+        label: 'Freitag',
+        sortOrder: 1,
+      },
+    ])
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      1,
+      'ha_admin_list_festival_days',
+      expectedParticipantRpcContext,
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'day-2',
+          date: '2026-06-20',
+          label: 'Samstag',
+          sort_order: 2,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      createFestivalDay(
+        {
+          date: '2026-06-20',
+          label: 'Samstag',
+          sortOrder: 2,
+        },
+        participantContext,
+      ),
+    ).resolves.toEqual({
+      id: 'day-2',
+      date: '2026-06-20',
+      label: 'Samstag',
+      sortOrder: 2,
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(2, 'ha_create_festival_day', {
+      ...expectedParticipantRpcContext,
+      p_date: '2026-06-20',
+      p_label: 'Samstag',
+      p_sort_order: 2,
+    })
+
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'day-2',
+          date: '2026-06-21',
+          label: 'Sonntag',
+          sort_order: 3,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      updateFestivalDay(
+        {
+          id: 'day-2',
+          date: '2026-06-21',
+          label: 'Sonntag',
+          sortOrder: 3,
+        },
+        participantContext,
+      ),
+    ).resolves.toEqual({
+      id: 'day-2',
+      date: '2026-06-21',
+      label: 'Sonntag',
+      sortOrder: 3,
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(3, 'ha_update_festival_day', {
+      ...expectedParticipantRpcContext,
+      p_festival_day_id: 'day-2',
+      p_date: '2026-06-21',
+      p_label: 'Sonntag',
+      p_sort_order: 3,
+    })
+
+    rpcMock.mockResolvedValueOnce({
+      data: null,
+      error: null,
+    })
+
+    await expect(
+      deleteFestivalDay('day-2', participantContext),
+    ).resolves.toBeUndefined()
+    expect(rpcMock).toHaveBeenNthCalledWith(4, 'ha_delete_festival_day', {
+      ...expectedParticipantRpcContext,
+      p_festival_day_id: 'day-2',
+    })
   })
 
   it('laedt Kategorien ueber eine geschuetzte RPC Funktion', async () => {

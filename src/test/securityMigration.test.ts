@@ -130,6 +130,13 @@ const timetableMigration = readFileSync(
   ),
   'utf8',
 )
+const festivalDaysManagementMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260705110000_manage_festival_days.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -510,6 +517,10 @@ describe('Supabase Sicherheitsmigration', () => {
       [bingoMigration, 'ha_admin_get_bingo_round'],
       [bingoMigration, 'ha_start_bingo_round'],
       [bingoMigration, 'ha_close_bingo_round'],
+      [festivalDaysManagementMigration, 'ha_admin_list_festival_days'],
+      [festivalDaysManagementMigration, 'ha_create_festival_day'],
+      [festivalDaysManagementMigration, 'ha_update_festival_day'],
+      [festivalDaysManagementMigration, 'ha_delete_festival_day'],
     ] as const
 
     for (const [migration, functionName] of adminRpcExpectations) {
@@ -968,6 +979,48 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(timetableMigration).not.toContain('admin_get_timetable')
   })
 
+  it('stellt Admin RPCs fuer die Festivaltag Verwaltung bereit', () => {
+    for (const functionName of [
+      'ha_admin_list_festival_days',
+      'ha_create_festival_day',
+      'ha_update_festival_day',
+      'ha_delete_festival_day',
+    ]) {
+      expect(festivalDaysManagementMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(festivalDaysManagementMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+
+    expect(festivalDaysManagementMigration).toContain(
+      'if not public.ha_has_admin_access(p_participant_access_code)',
+    )
+    expect(festivalDaysManagementMigration).toContain(
+      'festival day date already exists',
+    )
+    expect(festivalDaysManagementMigration).toContain(
+      'festival day date is required',
+    )
+    expect(festivalDaysManagementMigration).toContain(
+      'festival day label is required',
+    )
+    expect(festivalDaysManagementMigration).toContain(
+      'festival day sort order is invalid',
+    )
+    expect(festivalDaysManagementMigration).toContain(
+      'order by fd.sort_order, fd.date',
+    )
+    expect(festivalDaysManagementMigration).not.toContain(
+      'ha_create_timetable_stage',
+    )
+    expect(festivalDaysManagementMigration).not.toContain('ha_create_timetable_act')
+    expect(festivalDaysManagementMigration).not.toContain(
+      'ha_create_timetable_performance',
+    )
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -988,6 +1041,7 @@ describe('Supabase Sicherheitsmigration', () => {
       bingoMigration,
       bingoFixMigration,
       timetableMigration,
+      festivalDaysManagementMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

@@ -82,7 +82,12 @@ import {
   type BingoRound,
 } from '../data/bingo'
 import {
+  createFestivalDay,
+  deleteFestivalDay,
+  loadAdminFestivalDays,
   loadTimetable,
+  updateFestivalDay,
+  type FestivalDay,
   type Timetable,
 } from '../data/timetable'
 import type { MusicPlaylist } from '../data/musicEmbeds'
@@ -168,7 +173,11 @@ vi.mock('../data/bingo', () => ({
 }))
 
 vi.mock('../data/timetable', () => ({
+  createFestivalDay: vi.fn(),
+  deleteFestivalDay: vi.fn(),
+  loadAdminFestivalDays: vi.fn(),
   loadTimetable: vi.fn(),
+  updateFestivalDay: vi.fn(),
 }))
 
 const participants: Participant[] = [
@@ -280,6 +289,21 @@ const emptyTimetable: Timetable = {
   performances: [],
 }
 
+const festivalDays: FestivalDay[] = [
+  {
+    id: 'day-1',
+    date: '2026-06-19',
+    label: 'Freitag',
+    sortOrder: 1,
+  },
+  {
+    id: 'day-2',
+    date: '2026-06-20',
+    label: 'Samstag',
+    sortOrder: 2,
+  },
+]
+
 const festivalAccessStorageKey =
   'hurricane-awards:hurricane-awards-2026:festival-access'
 const festivalAccessVersion = '2026-07-01 10:00:00+00'
@@ -328,6 +352,7 @@ function mockLoadedData({
   loadedBingoCard = null,
   loadedAdminBingoRound = loadedBingoCard,
   loadedTimetable = emptyTimetable,
+  loadedAdminFestivalDays = loadedTimetable.festivalDays,
 }: {
   loadedFestivalName?: string
   loadedFestivalAccessCode?: string
@@ -347,6 +372,7 @@ function mockLoadedData({
   loadedBingoCard?: BingoCard | null
   loadedAdminBingoRound?: BingoRound | null
   loadedTimetable?: Timetable
+  loadedAdminFestivalDays?: FestivalDay[]
 } = {}) {
   vi.mocked(loadFestivalName).mockResolvedValue(loadedFestivalName)
   vi.mocked(loadFestivalAccessVersion).mockResolvedValue(
@@ -404,6 +430,20 @@ function mockLoadedData({
   vi.mocked(loadOrCreateBingoCard).mockResolvedValue(loadedBingoCard)
   vi.mocked(loadAdminBingoRound).mockResolvedValue(loadedAdminBingoRound)
   vi.mocked(loadTimetable).mockResolvedValue(loadedTimetable)
+  vi.mocked(loadAdminFestivalDays).mockResolvedValue(loadedAdminFestivalDays)
+  vi.mocked(createFestivalDay).mockImplementation(async (input) => ({
+    id: input.label.toLowerCase(),
+    date: input.date,
+    label: input.label,
+    sortOrder: input.sortOrder,
+  }))
+  vi.mocked(updateFestivalDay).mockImplementation(async (input) => ({
+    id: input.id,
+    date: input.date,
+    label: input.label,
+    sortOrder: input.sortOrder,
+  }))
+  vi.mocked(deleteFestivalDay).mockResolvedValue()
   vi.mocked(startBingoRound).mockResolvedValue(bingoRound)
   vi.mocked(closeBingoRound).mockResolvedValue()
   vi.mocked(setBingoMark).mockImplementation(async (number, isMarked) => {
@@ -2043,6 +2083,174 @@ describe('Admin', () => {
         },
       )
     })
+  })
+
+  it('verwaltet Festivaltage im Adminbereich Timetable', async () => {
+    mockLoadedData({
+      loadedTimetable: {
+        ...emptyTimetable,
+        festivalDays,
+      },
+      loadedAdminFestivalDays: festivalDays,
+    })
+    vi.mocked(loadAdminFestivalDays)
+      .mockResolvedValueOnce(festivalDays)
+      .mockResolvedValueOnce([
+        ...festivalDays,
+        {
+          id: 'day-3',
+          date: '2026-06-21',
+          label: 'Sonntag',
+          sortOrder: 3,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          ...festivalDays[0],
+          label: 'Freitag neu',
+        },
+        festivalDays[1],
+      ])
+      .mockResolvedValueOnce([
+        {
+          ...festivalDays[1],
+          sortOrder: 1,
+        },
+        {
+          ...festivalDays[0],
+          sortOrder: 2,
+        },
+      ])
+      .mockResolvedValueOnce([festivalDays[1]])
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^timetable$/i)
+
+    expect(loadAdminFestivalDays).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+
+    await user.click(
+      screen.getByRole('button', { name: /festivaltag anlegen/i }),
+    )
+    await user.type(screen.getByLabelText(/^datum$/i), '2026-06-21')
+    await user.type(screen.getByLabelText(/^bezeichnung$/i), 'Sonntag')
+    await user.clear(screen.getByLabelText(/^sortierung$/i))
+    await user.type(screen.getByLabelText(/^sortierung$/i), '3')
+    await user.click(screen.getByRole('button', { name: /^speichern$/i }))
+
+    expect(createFestivalDay).toHaveBeenCalledWith(
+      {
+        date: '2026-06-21',
+        label: 'Sonntag',
+        sortOrder: 3,
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(await screen.findByText('Sonntag')).toBeVisible()
+
+    const fridayCard = screen.getByRole('heading', { name: 'Freitag' })
+      .closest('article')
+
+    expect(fridayCard).not.toBeNull()
+
+    await user.click(
+      within(fridayCard as HTMLElement).getByRole('button', {
+        name: /bearbeiten/i,
+      }),
+    )
+    await user.clear(screen.getByLabelText(/^bezeichnung$/i))
+    await user.type(screen.getByLabelText(/^bezeichnung$/i), 'Freitag neu')
+    await user.click(screen.getByRole('button', { name: /^speichern$/i }))
+
+    expect(updateFestivalDay).toHaveBeenCalledWith(
+      {
+        id: 'day-1',
+        date: '2026-06-19',
+        label: 'Freitag neu',
+        sortOrder: 1,
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(await screen.findByText('Freitag neu')).toBeVisible()
+
+    const updatedFridayCard = screen.getByRole('heading', {
+      name: 'Freitag neu',
+    }).closest('article')
+
+    expect(updatedFridayCard).not.toBeNull()
+
+    await user.click(
+      within(updatedFridayCard as HTMLElement).getByRole('button', {
+        name: /nach unten/i,
+      }),
+    )
+
+    expect(updateFestivalDay).toHaveBeenCalledWith(
+      {
+        id: 'day-1',
+        date: '2026-06-19',
+        label: 'Freitag neu',
+        sortOrder: 2,
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(updateFestivalDay).toHaveBeenCalledWith(
+      {
+        id: 'day-2',
+        date: '2026-06-20',
+        label: 'Samstag',
+        sortOrder: 1,
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+
+    const movedFridayCard = await screen.findByRole('heading', {
+      name: 'Freitag',
+    })
+
+    const movedFridayArticle = movedFridayCard.closest('article')
+
+    expect(movedFridayArticle).not.toBeNull()
+
+    await user.click(
+      within(movedFridayArticle as HTMLElement).getByRole('button', {
+        name: /löschen/i,
+      }),
+    )
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringContaining('Freitag'),
+    )
+    expect(deleteFestivalDay).toHaveBeenCalledWith('day-1', {
+      participantAccessCode: 'ALICE42',
+    })
+  })
+
+  it('zeigt doppelte Festivaltag-Daten verstaendlich an', async () => {
+    mockLoadedData({ loadedAdminFestivalDays: festivalDays })
+    vi.mocked(createFestivalDay).mockRejectedValueOnce(
+      new Error('festival day date already exists'),
+    )
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^timetable$/i)
+    await user.click(
+      screen.getByRole('button', { name: /festivaltag anlegen/i }),
+    )
+    await user.type(screen.getByLabelText(/^datum$/i), '2026-06-19')
+    await user.type(screen.getByLabelText(/^bezeichnung$/i), 'Freitag')
+    await user.click(screen.getByRole('button', { name: /^speichern$/i }))
+
+    expect(
+      await screen.findByText(/bereits einen festivaltag/i),
+    ).toBeVisible()
   })
 
   it('startet und beendet eine Bingorunde im Adminbereich', async () => {

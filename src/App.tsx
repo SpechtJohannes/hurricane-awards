@@ -84,8 +84,15 @@ import {
   type BingoRound,
 } from './data/bingo'
 import {
+  createFestivalDay,
+  deleteFestivalDay,
+  loadAdminFestivalDays,
   loadTimetable,
+  updateFestivalDay,
+  type CreateFestivalDayInput,
+  type FestivalDay,
   type Timetable,
+  type UpdateFestivalDayInput,
 } from './data/timetable'
 import {
   isSupportedMusicPlaylistLink,
@@ -100,6 +107,7 @@ import { AdminFestival } from './components/AdminFestival'
 import { AdminCategories } from './components/AdminCategories'
 import { AdminFestivalDocuments } from './components/AdminFestivalDocuments'
 import { AdminBingo } from './components/AdminBingo'
+import { AdminTimetableDays } from './components/AdminTimetableDays'
 import { Bingo } from './components/Bingo'
 import { FestivalInfo } from './components/FestivalInfo'
 import { Avatar, ParticipantName } from './components/Avatar'
@@ -206,7 +214,14 @@ function technicalErrorMessage(error: unknown) {
 }
 
 type MainSection = 'awards' | 'timetable' | 'bingo' | 'info' | 'profile'
-type AdminSection = 'festival' | 'participants' | 'awards' | 'games' | 'info' | 'archive'
+type AdminSection =
+  | 'festival'
+  | 'participants'
+  | 'awards'
+  | 'timetable'
+  | 'games'
+  | 'info'
+  | 'archive'
 
 type ResultCardProps = {
   category: Category
@@ -950,6 +965,16 @@ function App() {
   const [isLoadingTimetable, setIsLoadingTimetable] = useState(
     Boolean(selectedParticipant),
   )
+  const [adminFestivalDays, setAdminFestivalDays] = useState<FestivalDay[]>([])
+  const [adminFestivalDaysError, setAdminFestivalDaysError] = useState('')
+  const [isLoadingAdminFestivalDays, setIsLoadingAdminFestivalDays] =
+    useState(false)
+  const [savingFestivalDayId, setSavingFestivalDayId] = useState<string | null>(
+    null,
+  )
+  const [deletingFestivalDayId, setDeletingFestivalDayId] = useState<
+    string | null
+  >(null)
   const [togglingBingoNumber, setTogglingBingoNumber] = useState<number | null>(
     null,
   )
@@ -1025,6 +1050,7 @@ function App() {
     { section: 'festival', label: t('admin.navigation.festival') },
     { section: 'participants', label: t('admin.navigation.participants') },
     { section: 'awards', label: t('admin.navigation.awards') },
+    { section: 'timetable', label: t('admin.navigation.timetable') },
     { section: 'games', label: t('admin.navigation.bingo') },
     { section: 'info', label: t('admin.navigation.info') },
     { section: 'archive', label: t('admin.navigation.archive') },
@@ -1329,6 +1355,14 @@ function App() {
     setIsSavingMusicPlaylist(false)
     setBingoCard(null)
     setBingoError('')
+    setTimetable(null)
+    setTimetableError('')
+    setIsLoadingTimetable(false)
+    setAdminFestivalDays([])
+    setAdminFestivalDaysError('')
+    setIsLoadingAdminFestivalDays(false)
+    setSavingFestivalDayId(null)
+    setDeletingFestivalDayId(null)
     setTogglingBingoNumber(null)
     setAdminBingoRound(null)
     setAdminBingoError('')
@@ -1421,6 +1455,7 @@ function App() {
         void reloadFestivalCode()
         void reloadAdminCategories()
         void reloadAdminParticipants()
+        void reloadAdminFestivalDays()
         void reloadAdminFestivalDocuments()
         void reloadAdminBingoRound()
 
@@ -1479,6 +1514,28 @@ function App() {
     return t('admin.categories.errors.save')
   }
 
+  function festivalDayMutationErrorMessage(error: unknown) {
+    const message = technicalErrorMessage(error)
+
+    if (message.includes('festival day date already exists')) {
+      return t('admin.timetable.days.errors.duplicateDate')
+    }
+
+    if (message.includes('festival day date is required')) {
+      return t('admin.timetable.days.errors.dateRequired')
+    }
+
+    if (message.includes('festival day label is required')) {
+      return t('admin.timetable.days.errors.labelRequired')
+    }
+
+    if (message.includes('festival day sort order is invalid')) {
+      return t('admin.timetable.days.errors.sortOrderInvalid')
+    }
+
+    return t('admin.timetable.days.errors.save')
+  }
+
   function festivalNameMutationErrorMessage(error: unknown) {
     const message = technicalErrorMessage(error)
 
@@ -1513,6 +1570,22 @@ function App() {
 
     setAdminCategories(loadedAdminCategories)
     setCategories(loadedCategories)
+  }
+
+  async function reloadTimetableForAdminChange() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    const [loadedAdminFestivalDays, loadedTimetable] = await Promise.all([
+      loadAdminFestivalDays(adminContext),
+      loadTimetable(adminContext),
+    ])
+
+    setAdminFestivalDays(loadedAdminFestivalDays)
+    setTimetable(loadedTimetable)
   }
 
   async function reloadFestivalCode() {
@@ -1555,6 +1628,27 @@ function App() {
       setAdminCategoriesError(t('admin.categories.errors.load'))
     } finally {
       setIsLoadingAdminCategories(false)
+    }
+  }
+
+  async function reloadAdminFestivalDays() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsLoadingAdminFestivalDays(true)
+    setAdminFestivalDaysError('')
+
+    try {
+      const loadedFestivalDays = await loadAdminFestivalDays(adminContext)
+
+      setAdminFestivalDays(loadedFestivalDays)
+    } catch {
+      setAdminFestivalDaysError(t('admin.timetable.days.errors.load'))
+    } finally {
+      setIsLoadingAdminFestivalDays(false)
     }
   }
 
@@ -1981,6 +2075,121 @@ function App() {
       setAdminCategoriesError(categoryMutationErrorMessage(error))
     } finally {
       setDeletingCategoryId(null)
+    }
+  }
+
+  async function createAdminFestivalDay(input: CreateFestivalDayInput) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setAdminFestivalDaysError('')
+
+    try {
+      await createFestivalDay(input, adminContext)
+      await reloadTimetableForAdminChange()
+    } catch (error) {
+      throw new Error(festivalDayMutationErrorMessage(error), { cause: error })
+    }
+  }
+
+  async function updateAdminFestivalDay(input: UpdateFestivalDayInput) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setAdminFestivalDaysError('')
+
+    try {
+      await updateFestivalDay(input, adminContext)
+      await reloadTimetableForAdminChange()
+    } catch (error) {
+      throw new Error(festivalDayMutationErrorMessage(error), { cause: error })
+    }
+  }
+
+  async function moveAdminFestivalDay(
+    festivalDay: FestivalDay,
+    direction: 'up' | 'down',
+  ) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    const orderedFestivalDays = [...adminFestivalDays].sort(
+      (firstDay, secondDay) =>
+        firstDay.sortOrder - secondDay.sortOrder ||
+        firstDay.date.localeCompare(secondDay.date),
+    )
+    const currentIndex = orderedFestivalDays.findIndex(
+      (currentDay) => currentDay.id === festivalDay.id,
+    )
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+    const targetDay = orderedFestivalDays[targetIndex]
+
+    if (currentIndex < 0 || !targetDay) {
+      return
+    }
+
+    setSavingFestivalDayId(festivalDay.id)
+    setAdminFestivalDaysError('')
+
+    try {
+      await updateFestivalDay(
+        {
+          ...festivalDay,
+          sortOrder: targetDay.sortOrder,
+        },
+        adminContext,
+      )
+      await updateFestivalDay(
+        {
+          ...targetDay,
+          sortOrder: festivalDay.sortOrder,
+        },
+        adminContext,
+      )
+      await reloadTimetableForAdminChange()
+    } catch {
+      setAdminFestivalDaysError(t('admin.timetable.days.errors.reorder'))
+    } finally {
+      setSavingFestivalDayId(null)
+    }
+  }
+
+  async function deleteAdminFestivalDay(festivalDay: FestivalDay) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    const shouldDelete = window.confirm(
+      t('admin.timetable.days.confirmDelete', {
+        label: festivalDay.label,
+      }),
+    )
+
+    if (!shouldDelete) {
+      return
+    }
+
+    setDeletingFestivalDayId(festivalDay.id)
+    setAdminFestivalDaysError('')
+
+    try {
+      await deleteFestivalDay(festivalDay.id, adminContext)
+      await reloadTimetableForAdminChange()
+    } catch {
+      setAdminFestivalDaysError(t('admin.timetable.days.errors.delete'))
+    } finally {
+      setDeletingFestivalDayId(null)
     }
   }
 
@@ -2557,6 +2766,20 @@ function App() {
                 onDelete={deleteAdminCategory}
               />
             </>
+          ) : null}
+
+          {activeAdminSection === 'timetable' ? (
+            <AdminTimetableDays
+              festivalDays={adminFestivalDays}
+              error={adminFestivalDaysError}
+              isLoading={isLoadingAdminFestivalDays}
+              savingFestivalDayId={savingFestivalDayId}
+              deletingFestivalDayId={deletingFestivalDayId}
+              onCreate={createAdminFestivalDay}
+              onUpdate={updateAdminFestivalDay}
+              onDelete={deleteAdminFestivalDay}
+              onMove={moveAdminFestivalDay}
+            />
           ) : null}
 
           {activeAdminSection === 'games' ? (

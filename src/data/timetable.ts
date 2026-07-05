@@ -1,6 +1,7 @@
 import { getSupabase } from '../lib/supabase'
 import {
   participantRpcParams,
+  type AdminAccessContext,
   type ParticipantAccessContext,
 } from './accessContext'
 
@@ -37,6 +38,19 @@ export type Timetable = {
   stages: TimetableStage[]
   acts: TimetableAct[]
   performances: TimetablePerformance[]
+}
+
+export type CreateFestivalDayInput = {
+  date: string
+  label: string
+  sortOrder: number
+}
+
+export type UpdateFestivalDayInput = {
+  id: string
+  date: string
+  label: string
+  sortOrder: number
 }
 
 type FestivalDayRow = {
@@ -128,5 +142,75 @@ export async function loadTimetable(
     stages: (row?.stages ?? []).map(mapStage),
     acts: (row?.acts ?? []).map(mapAct),
     performances: (row?.performances ?? []).map(mapPerformance),
+  }
+}
+
+export async function loadAdminFestivalDays(
+  context: AdminAccessContext,
+): Promise<FestivalDay[]> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc(
+    'ha_admin_list_festival_days',
+    participantRpcParams(context),
+  )
+
+  if (error) {
+    throw error
+  }
+
+  return ((data ?? []) as FestivalDayRow[]).map(mapFestivalDay)
+}
+
+export async function createFestivalDay(
+  input: CreateFestivalDayInput,
+  context: AdminAccessContext,
+): Promise<FestivalDay> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc('ha_create_festival_day', {
+    ...participantRpcParams(context),
+    p_date: input.date,
+    p_label: input.label,
+    p_sort_order: input.sortOrder,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return mapFestivalDay((Array.isArray(data) ? data[0] : data) as FestivalDayRow)
+}
+
+export async function updateFestivalDay(
+  input: UpdateFestivalDayInput,
+  context: AdminAccessContext,
+): Promise<FestivalDay> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc('ha_update_festival_day', {
+    ...participantRpcParams(context),
+    p_festival_day_id: input.id,
+    p_date: input.date,
+    p_label: input.label,
+    p_sort_order: input.sortOrder,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return mapFestivalDay((Array.isArray(data) ? data[0] : data) as FestivalDayRow)
+}
+
+export async function deleteFestivalDay(
+  festivalDayId: string,
+  context: AdminAccessContext,
+): Promise<void> {
+  const supabase = getSupabase()
+  const { error } = await supabase.rpc('ha_delete_festival_day', {
+    ...participantRpcParams(context),
+    p_festival_day_id: festivalDayId,
+  })
+
+  if (error) {
+    throw error
   }
 }
