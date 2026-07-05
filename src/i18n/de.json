@@ -316,6 +316,28 @@
           "nameRequired": "Der Bühnenname ist erforderlich.",
           "sortOrderInvalid": "Die Sortierung muss eine ganze Zahl ab 0 sein."
         }
+      },
+      "acts": {
+        "title": "Acts",
+        "loading": "Acts werden geladen...",
+        "empty": "Noch keine Acts angelegt.",
+        "createButton": "Act anlegen",
+        "createTitle": "Act anlegen",
+        "editTitle": "Act bearbeiten",
+        "nameLabel": "Name",
+        "descriptionLabel": "Beschreibung",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "deleting": "Lösche...",
+        "confirmDelete": "Act \"{{name}}\" wirklich löschen?",
+        "errors": {
+          "load": "Die Acts konnten gerade nicht geladen werden.",
+          "save": "Der Act konnte gerade nicht gespeichert werden.",
+          "deleteHasPerformances": "Dieser Act kann nicht gelöscht werden, solange Auftritte zugeordnet sind.",
+          "nameRequired": "Der Name ist erforderlich."
+        }
       }
     },
     "bingo": {

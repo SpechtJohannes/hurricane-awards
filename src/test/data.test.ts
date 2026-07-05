@@ -89,13 +89,17 @@ import {
 } from '../data/bingo'
 import {
   createFestivalDay,
+  createTimetableAct,
   createTimetableStage,
   deleteFestivalDay,
+  deleteTimetableAct,
   deleteTimetableStage,
   loadAdminFestivalDays,
+  loadAdminTimetableActs,
   loadAdminTimetableStages,
   loadTimetable,
   updateFestivalDay,
+  updateTimetableAct,
   updateTimetableStage,
 } from '../data/timetable'
 import {
@@ -999,6 +1003,107 @@ describe('Supabase Datenzugriffe', () => {
     expect(rpcMock).toHaveBeenNthCalledWith(4, 'ha_delete_timetable_stage', {
       ...expectedParticipantRpcContext,
       p_stage_id: 'stage-2',
+    })
+  })
+
+  it('verwaltet Timetable Acts ueber Admin RPCs', async () => {
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'act-1',
+          name: 'The Headliners',
+          description: 'Gitarren.',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(loadAdminTimetableActs(participantContext)).resolves.toEqual([
+      {
+        id: 'act-1',
+        name: 'The Headliners',
+        description: 'Gitarren.',
+      },
+    ])
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      1,
+      'ha_admin_list_timetable_acts',
+      expectedParticipantRpcContext,
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'act-2',
+          name: 'Late Night DJ',
+          description: null,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      createTimetableAct(
+        {
+          name: 'Late Night DJ',
+          description: '',
+        },
+        participantContext,
+      ),
+    ).resolves.toEqual({
+      id: 'act-2',
+      name: 'Late Night DJ',
+      description: null,
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(2, 'ha_create_timetable_act', {
+      ...expectedParticipantRpcContext,
+      p_name: 'Late Night DJ',
+      p_description: '',
+    })
+
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'act-2',
+          name: 'Late Night DJ Neu',
+          description: 'Dance.',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      updateTimetableAct(
+        {
+          id: 'act-2',
+          name: 'Late Night DJ Neu',
+          description: 'Dance.',
+        },
+        participantContext,
+      ),
+    ).resolves.toEqual({
+      id: 'act-2',
+      name: 'Late Night DJ Neu',
+      description: 'Dance.',
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(3, 'ha_update_timetable_act', {
+      ...expectedParticipantRpcContext,
+      p_act_id: 'act-2',
+      p_name: 'Late Night DJ Neu',
+      p_description: 'Dance.',
+    })
+
+    rpcMock.mockResolvedValueOnce({
+      data: null,
+      error: null,
+    })
+
+    await expect(
+      deleteTimetableAct('act-2', participantContext),
+    ).resolves.toBeUndefined()
+    expect(rpcMock).toHaveBeenNthCalledWith(4, 'ha_delete_timetable_act', {
+      ...expectedParticipantRpcContext,
+      p_act_id: 'act-2',
     })
   })
 

@@ -83,16 +83,21 @@ import {
 } from '../data/bingo'
 import {
   createFestivalDay,
+  createTimetableAct,
   createTimetableStage,
   deleteFestivalDay,
+  deleteTimetableAct,
   deleteTimetableStage,
   loadAdminFestivalDays,
+  loadAdminTimetableActs,
   loadAdminTimetableStages,
   loadTimetable,
   updateFestivalDay,
+  updateTimetableAct,
   updateTimetableStage,
   type FestivalDay,
   type Timetable,
+  type TimetableAct,
   type TimetableStage,
 } from '../data/timetable'
 import type { MusicPlaylist } from '../data/musicEmbeds'
@@ -179,13 +184,17 @@ vi.mock('../data/bingo', () => ({
 
 vi.mock('../data/timetable', () => ({
   createFestivalDay: vi.fn(),
+  createTimetableAct: vi.fn(),
   createTimetableStage: vi.fn(),
   deleteFestivalDay: vi.fn(),
+  deleteTimetableAct: vi.fn(),
   deleteTimetableStage: vi.fn(),
   loadAdminFestivalDays: vi.fn(),
+  loadAdminTimetableActs: vi.fn(),
   loadAdminTimetableStages: vi.fn(),
   loadTimetable: vi.fn(),
   updateFestivalDay: vi.fn(),
+  updateTimetableAct: vi.fn(),
   updateTimetableStage: vi.fn(),
 }))
 
@@ -326,6 +335,19 @@ const timetableStages: TimetableStage[] = [
   },
 ]
 
+const timetableActs: TimetableAct[] = [
+  {
+    id: 'act-1',
+    name: 'The Headliners',
+    description: 'Große Gitarren und große Gefühle.',
+  },
+  {
+    id: 'act-2',
+    name: 'Late Night DJ',
+    description: null,
+  },
+]
+
 const festivalAccessStorageKey =
   'hurricane-awards:hurricane-awards-2026:festival-access'
 const festivalAccessVersion = '2026-07-01 10:00:00+00'
@@ -376,6 +398,7 @@ function mockLoadedData({
   loadedTimetable = emptyTimetable,
   loadedAdminFestivalDays = loadedTimetable.festivalDays,
   loadedAdminTimetableStages = loadedTimetable.stages,
+  loadedAdminTimetableActs = loadedTimetable.acts,
 }: {
   loadedFestivalName?: string
   loadedFestivalAccessCode?: string
@@ -397,6 +420,7 @@ function mockLoadedData({
   loadedTimetable?: Timetable
   loadedAdminFestivalDays?: FestivalDay[]
   loadedAdminTimetableStages?: TimetableStage[]
+  loadedAdminTimetableActs?: TimetableAct[]
 } = {}) {
   vi.mocked(loadFestivalName).mockResolvedValue(loadedFestivalName)
   vi.mocked(loadFestivalAccessVersion).mockResolvedValue(
@@ -456,6 +480,7 @@ function mockLoadedData({
   vi.mocked(loadTimetable).mockResolvedValue(loadedTimetable)
   vi.mocked(loadAdminFestivalDays).mockResolvedValue(loadedAdminFestivalDays)
   vi.mocked(loadAdminTimetableStages).mockResolvedValue(loadedAdminTimetableStages)
+  vi.mocked(loadAdminTimetableActs).mockResolvedValue(loadedAdminTimetableActs)
   vi.mocked(createFestivalDay).mockImplementation(async (input) => ({
     id: input.label.toLowerCase(),
     date: input.date,
@@ -480,6 +505,17 @@ function mockLoadedData({
     sortOrder: input.sortOrder,
   }))
   vi.mocked(deleteTimetableStage).mockResolvedValue()
+  vi.mocked(createTimetableAct).mockImplementation(async (input) => ({
+    id: input.name.toLowerCase().replace(/\s+/g, '-'),
+    name: input.name,
+    description: input.description || null,
+  }))
+  vi.mocked(updateTimetableAct).mockImplementation(async (input) => ({
+    id: input.id,
+    name: input.name,
+    description: input.description || null,
+  }))
+  vi.mocked(deleteTimetableAct).mockResolvedValue()
   vi.mocked(startBingoRound).mockResolvedValue(bingoRound)
   vi.mocked(closeBingoRound).mockResolvedValue()
   vi.mocked(setBingoMark).mockImplementation(async (number, isMarked) => {
@@ -2458,6 +2494,158 @@ describe('Admin', () => {
 
     expect(
       await within(stagesSection).findByText(/bühnenname ist bereits vergeben/i),
+    ).toBeVisible()
+  })
+
+  it('verwaltet Acts im Adminbereich Timetable', async () => {
+    mockLoadedData({
+      loadedTimetable: {
+        ...emptyTimetable,
+        festivalDays,
+        stages: timetableStages,
+        acts: timetableActs,
+      },
+      loadedAdminFestivalDays: festivalDays,
+      loadedAdminTimetableStages: timetableStages,
+      loadedAdminTimetableActs: timetableActs,
+    })
+    vi.mocked(loadAdminTimetableActs)
+      .mockResolvedValueOnce(timetableActs)
+      .mockResolvedValueOnce([
+        ...timetableActs,
+        {
+          id: 'act-3',
+          name: 'Sunday Choir',
+          description: 'Mehrstimmig in den Morgen.',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          ...timetableActs[0],
+          name: 'The Headliners Neu',
+          description: 'Noch größere Gitarren.',
+        },
+        timetableActs[1],
+      ])
+      .mockResolvedValueOnce([timetableActs[1]])
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^timetable$/i)
+
+    const actsSection = sectionForHeading(/^acts$/i)
+
+    expect(loadAdminTimetableActs).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+
+    await user.click(
+      within(actsSection).getByRole('button', { name: /act anlegen/i }),
+    )
+    await user.type(within(actsSection).getByLabelText(/^name$/i), 'Sunday Choir')
+    await user.type(
+      within(actsSection).getByLabelText(/^beschreibung$/i),
+      'Mehrstimmig in den Morgen.',
+    )
+    await user.click(
+      within(actsSection).getByRole('button', { name: /^speichern$/i }),
+    )
+
+    expect(createTimetableAct).toHaveBeenCalledWith(
+      {
+        name: 'Sunday Choir',
+        description: 'Mehrstimmig in den Morgen.',
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(await within(actsSection).findByText('Sunday Choir')).toBeVisible()
+
+    const headlinersCard = within(actsSection)
+      .getByRole('heading', { name: 'The Headliners' })
+      .closest('article')
+
+    expect(headlinersCard).not.toBeNull()
+
+    await user.click(
+      within(headlinersCard as HTMLElement).getByRole('button', {
+        name: /bearbeiten/i,
+      }),
+    )
+    await user.clear(within(actsSection).getByLabelText(/^name$/i))
+    await user.type(
+      within(actsSection).getByLabelText(/^name$/i),
+      'The Headliners Neu',
+    )
+    await user.clear(within(actsSection).getByLabelText(/^beschreibung$/i))
+    await user.type(
+      within(actsSection).getByLabelText(/^beschreibung$/i),
+      'Noch größere Gitarren.',
+    )
+    await user.click(
+      within(actsSection).getByRole('button', { name: /^speichern$/i }),
+    )
+
+    expect(updateTimetableAct).toHaveBeenCalledWith(
+      {
+        id: 'act-1',
+        name: 'The Headliners Neu',
+        description: 'Noch größere Gitarren.',
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(
+      await within(actsSection).findByText('The Headliners Neu'),
+    ).toBeVisible()
+
+    const updatedActCard = within(actsSection)
+      .getByRole('heading', { name: 'The Headliners Neu' })
+      .closest('article')
+
+    expect(updatedActCard).not.toBeNull()
+
+    await user.click(
+      within(updatedActCard as HTMLElement).getByRole('button', {
+        name: /löschen/i,
+      }),
+    )
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringContaining('The Headliners Neu'),
+    )
+    expect(deleteTimetableAct).toHaveBeenCalledWith('act-1', {
+      participantAccessCode: 'ALICE42',
+    })
+  })
+
+  it('zeigt belegte Acts beim Loeschen verstaendlich an', async () => {
+    mockLoadedData({ loadedAdminTimetableActs: timetableActs })
+    vi.mocked(deleteTimetableAct).mockRejectedValueOnce(
+      new Error('act cannot be deleted while performances exist'),
+    )
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^timetable$/i)
+
+    const actsSection = sectionForHeading(/^acts$/i)
+    const headlinersCard = within(actsSection)
+      .getByRole('heading', { name: 'The Headliners' })
+      .closest('article')
+
+    expect(headlinersCard).not.toBeNull()
+
+    await user.click(
+      within(headlinersCard as HTMLElement).getByRole('button', {
+        name: /löschen/i,
+      }),
+    )
+
+    expect(
+      await within(actsSection).findByText(/auftritte zugeordnet/i),
     ).toBeVisible()
   })
 

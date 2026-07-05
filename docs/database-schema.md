@@ -460,6 +460,8 @@ Dies ist keine vollstaendige API-Referenz, sondern eine Gruppierung der wichtigs
 - `ha_create_festival_day`, `ha_update_festival_day`, `ha_delete_festival_day`: Admin-RPCs fuer Festivaltage inklusive eindeutiger Datumsvalidierung.
 - `ha_admin_list_timetable_stages`: Listet Buehnen fuer Admins.
 - `ha_create_timetable_stage`, `ha_update_timetable_stage`, `ha_delete_timetable_stage`: Admin-RPCs fuer Buehnen inklusive eindeutiger Namensvalidierung.
+- `ha_admin_list_timetable_acts`: Listet Acts fuer Admins.
+- `ha_create_timetable_act`, `ha_update_timetable_act`, `ha_delete_timetable_act`: Admin-RPCs fuer Acts. Acts bleiben unabhaengig von Auftritten; `ha_delete_timetable_act` verhindert das Loeschen bereits zugeordneter Acts.
 
 ### Archivierung
 

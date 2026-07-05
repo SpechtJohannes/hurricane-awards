@@ -316,6 +316,28 @@
           "nameRequired": "De podiumnaam is verplicht.",
           "sortOrderInvalid": "De sortering moet een geheel getal vanaf 0 zijn."
         }
+      },
+      "acts": {
+        "title": "Acts",
+        "loading": "Acts worden geladen...",
+        "empty": "Nog geen acts aangemaakt.",
+        "createButton": "Act aanmaken",
+        "createTitle": "Act aanmaken",
+        "editTitle": "Act bewerken",
+        "nameLabel": "Naam",
+        "descriptionLabel": "Beschrijving",
+        "save": "Opslaan",
+        "cancel": "Annuleren",
+        "edit": "Bewerken",
+        "delete": "Verwijderen",
+        "deleting": "Verwijderen...",
+        "confirmDelete": "Act \"{{name}}\" echt verwijderen?",
+        "errors": {
+          "load": "De acts konden net niet worden geladen.",
+          "save": "De act kon net niet worden opgeslagen.",
+          "deleteHasPerformances": "Deze act kan niet worden verwijderd zolang er optredens aan gekoppeld zijn.",
+          "nameRequired": "De naam is verplicht."
+        }
       }
     },
     "bingo": {

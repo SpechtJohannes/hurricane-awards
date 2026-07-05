@@ -64,6 +64,17 @@ export type UpdateTimetableStageInput = {
   sortOrder: number
 }
 
+export type CreateTimetableActInput = {
+  name: string
+  description: string
+}
+
+export type UpdateTimetableActInput = {
+  id: string
+  name: string
+  description: string
+}
+
 type FestivalDayRow = {
   id: string
   date: string
@@ -287,6 +298,74 @@ export async function deleteTimetableStage(
   const { error } = await supabase.rpc('ha_delete_timetable_stage', {
     ...participantRpcParams(context),
     p_stage_id: stageId,
+  })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function loadAdminTimetableActs(
+  context: AdminAccessContext,
+): Promise<TimetableAct[]> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc(
+    'ha_admin_list_timetable_acts',
+    participantRpcParams(context),
+  )
+
+  if (error) {
+    throw error
+  }
+
+  return ((data ?? []) as TimetableActRow[]).map(mapAct)
+}
+
+export async function createTimetableAct(
+  input: CreateTimetableActInput,
+  context: AdminAccessContext,
+): Promise<TimetableAct> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc('ha_create_timetable_act', {
+    ...participantRpcParams(context),
+    p_name: input.name,
+    p_description: input.description,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return mapAct((Array.isArray(data) ? data[0] : data) as TimetableActRow)
+}
+
+export async function updateTimetableAct(
+  input: UpdateTimetableActInput,
+  context: AdminAccessContext,
+): Promise<TimetableAct> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc('ha_update_timetable_act', {
+    ...participantRpcParams(context),
+    p_act_id: input.id,
+    p_name: input.name,
+    p_description: input.description,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return mapAct((Array.isArray(data) ? data[0] : data) as TimetableActRow)
+}
+
+export async function deleteTimetableAct(
+  actId: string,
+  context: AdminAccessContext,
+): Promise<void> {
+  const supabase = getSupabase()
+  const { error } = await supabase.rpc('ha_delete_timetable_act', {
+    ...participantRpcParams(context),
+    p_act_id: actId,
   })
 
   if (error) {
