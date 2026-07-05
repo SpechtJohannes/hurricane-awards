@@ -16,6 +16,7 @@ export type TimetableStage = {
   id: string
   name: string
   sortOrder: number
+  color: string | null
 }
 
 export type TimetableAct = {
@@ -69,12 +70,14 @@ export type UpdateFestivalDayInput = {
 export type CreateTimetableStageInput = {
   name: string
   sortOrder: number
+  color: string | null
 }
 
 export type UpdateTimetableStageInput = {
   id: string
   name: string
   sortOrder: number
+  color: string | null
 }
 
 export type CreateTimetableActInput = {
@@ -111,6 +114,7 @@ type TimetableStageRow = {
   id: string
   name: string
   sort_order: number
+  color?: string | null
 }
 
 type TimetableActRow = {
@@ -153,6 +157,7 @@ function mapStage(row: TimetableStageRow): TimetableStage {
     id: row.id,
     name: row.name,
     sortOrder: row.sort_order,
+    color: row.color ?? null,
   }
 }
 
@@ -353,6 +358,7 @@ export async function createTimetableStage(
     ...participantRpcParams(context),
     p_name: input.name,
     p_sort_order: input.sortOrder,
+    p_color: input.color,
   })
 
   if (error) {
@@ -372,6 +378,7 @@ export async function updateTimetableStage(
     p_stage_id: input.id,
     p_name: input.name,
     p_sort_order: input.sortOrder,
+    p_color: input.color,
   })
 
   if (error) {

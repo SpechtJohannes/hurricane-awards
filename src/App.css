@@ -967,6 +967,8 @@ h1 {
   font-size: 0.86rem;
   font-weight: 900;
   text-transform: uppercase;
+  border-top: 4px solid var(--stage-color, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .timetable-grid__time {
@@ -987,6 +989,7 @@ h1 {
 
 .timetable-grid__cell {
   min-height: 64px;
+  box-shadow: inset 3px 0 0 var(--stage-color, transparent);
 }
 
 .timetable-performance {
@@ -1000,6 +1003,7 @@ h1 {
   color: #101014;
   background: #ffbe0b;
   border: 1px solid rgba(255, 255, 255, 0.55);
+  border-left: 5px solid var(--stage-color, rgba(16, 16, 20, 0.22));
   border-radius: 8px;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
 }
@@ -1007,6 +1011,7 @@ h1 {
 .timetable-performance--favorite {
   background: #ffffff;
   border-color: #ff006e;
+  border-left-color: var(--stage-color, #ff006e);
   border-width: 2px;
   box-shadow:
     inset 0 0 0 3px rgba(255, 190, 11, 0.58),
@@ -1690,6 +1695,41 @@ h1 {
   min-height: 112px;
   padding-block: 14px;
   resize: vertical;
+}
+
+.admin-stage-color {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-stage-color__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-stage-color__toggle input {
+  width: auto;
+  min-height: 0;
+}
+
+.admin-category-form input[type='color'] {
+  width: 72px;
+  min-height: 42px;
+  padding: 4px;
+}
+
+.admin-stage-color__preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-stage-color__swatch {
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  border-radius: 999px;
 }
 
 .admin-category-form input:disabled,

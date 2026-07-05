@@ -736,6 +736,7 @@ describe('Supabase Datenzugriffe', () => {
               id: 'stage-1',
               name: 'Mainstage',
               sort_order: 1,
+              color: '#ff006e',
             },
           ],
           acts: [
@@ -787,6 +788,7 @@ describe('Supabase Datenzugriffe', () => {
           id: 'stage-1',
           name: 'Mainstage',
           sortOrder: 1,
+          color: '#ff006e',
         },
       ],
       acts: [
@@ -966,6 +968,7 @@ describe('Supabase Datenzugriffe', () => {
           id: 'stage-1',
           name: 'Mainstage',
           sort_order: 1,
+          color: '#ff006e',
         },
       ],
       error: null,
@@ -976,6 +979,7 @@ describe('Supabase Datenzugriffe', () => {
         id: 'stage-1',
         name: 'Mainstage',
         sortOrder: 1,
+        color: '#ff006e',
       },
     ])
     expect(rpcMock).toHaveBeenNthCalledWith(
@@ -990,6 +994,7 @@ describe('Supabase Datenzugriffe', () => {
           id: 'stage-2',
           name: 'Tent Stage',
           sort_order: 2,
+          color: null,
         },
       ],
       error: null,
@@ -1000,6 +1005,7 @@ describe('Supabase Datenzugriffe', () => {
         {
           name: 'Tent Stage',
           sortOrder: 2,
+          color: null,
         },
         participantContext,
       ),
@@ -1007,11 +1013,13 @@ describe('Supabase Datenzugriffe', () => {
       id: 'stage-2',
       name: 'Tent Stage',
       sortOrder: 2,
+      color: null,
     })
     expect(rpcMock).toHaveBeenNthCalledWith(2, 'ha_create_timetable_stage', {
       ...expectedParticipantRpcContext,
       p_name: 'Tent Stage',
       p_sort_order: 2,
+      p_color: null,
     })
 
     rpcMock.mockResolvedValueOnce({
@@ -1020,6 +1028,7 @@ describe('Supabase Datenzugriffe', () => {
           id: 'stage-2',
           name: 'Beach Stage',
           sort_order: 3,
+          color: '#00a6fb',
         },
       ],
       error: null,
@@ -1031,6 +1040,7 @@ describe('Supabase Datenzugriffe', () => {
           id: 'stage-2',
           name: 'Beach Stage',
           sortOrder: 3,
+          color: '#00a6fb',
         },
         participantContext,
       ),
@@ -1038,12 +1048,14 @@ describe('Supabase Datenzugriffe', () => {
       id: 'stage-2',
       name: 'Beach Stage',
       sortOrder: 3,
+      color: '#00a6fb',
     })
     expect(rpcMock).toHaveBeenNthCalledWith(3, 'ha_update_timetable_stage', {
       ...expectedParticipantRpcContext,
       p_stage_id: 'stage-2',
       p_name: 'Beach Stage',
       p_sort_order: 3,
+      p_color: '#00a6fb',
     })
 
     rpcMock.mockResolvedValueOnce({

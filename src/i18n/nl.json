@@ -299,6 +299,9 @@
         "editTitle": "Podium bewerken",
         "nameLabel": "Podiumnaam",
         "sortOrderLabel": "Sortering",
+        "colorLabel": "Kleur",
+        "useColorLabel": "Podiumkleur gebruiken",
+        "defaultColor": "Standaard",
         "save": "Opslaan",
         "cancel": "Annuleren",
         "edit": "Bewerken",
@@ -314,7 +317,8 @@
           "reorder": "De volgorde kon net niet worden opgeslagen.",
           "duplicateName": "Deze podiumnaam is al in gebruik.",
           "nameRequired": "De podiumnaam is verplicht.",
-          "sortOrderInvalid": "De sortering moet een geheel getal vanaf 0 zijn."
+          "sortOrderInvalid": "De sortering moet een geheel getal vanaf 0 zijn.",
+          "colorInvalid": "De kleur moet een geldige hex-kleurwaarde zijn."
         }
       },
       "acts": {

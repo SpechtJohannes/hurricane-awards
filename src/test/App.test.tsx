@@ -342,11 +342,13 @@ const timetableStages: TimetableStage[] = [
     id: 'stage-1',
     name: 'Mainstage',
     sortOrder: 1,
+    color: '#ff006e',
   },
   {
     id: 'stage-2',
     name: 'Tent Stage',
     sortOrder: 2,
+    color: null,
   },
 ]
 
@@ -529,11 +531,13 @@ function mockLoadedData({
     id: input.name.toLowerCase().replace(/\s+/g, '-'),
     name: input.name,
     sortOrder: input.sortOrder,
+    color: input.color,
   }))
   vi.mocked(updateTimetableStage).mockImplementation(async (input) => ({
     id: input.id,
     name: input.name,
     sortOrder: input.sortOrder,
+    color: input.color,
   }))
   vi.mocked(deleteTimetableStage).mockResolvedValue()
   vi.mocked(createTimetableAct).mockImplementation(async (input) => ({
@@ -1415,10 +1419,20 @@ describe('Login', () => {
       }),
     ).toBeVisible()
     expect(
+      within(timetableSection)
+        .getByRole('columnheader', { name: 'Mainstage' })
+        .style.getPropertyValue('--stage-color'),
+    ).toBe('#ff006e')
+    expect(
       within(timetableSection).getByRole('columnheader', {
         name: 'Tent Stage',
       }),
     ).toBeVisible()
+    expect(
+      within(timetableSection)
+        .getByRole('columnheader', { name: 'Tent Stage' })
+        .style.getPropertyValue('--stage-color'),
+    ).toBe('')
     expect(
       within(timetableSection).getByRole('rowheader', { name: '20:00' }),
     ).toBeVisible()
@@ -2587,12 +2601,14 @@ describe('Admin', () => {
           id: 'stage-3',
           name: 'Beach Stage',
           sortOrder: 3,
+          color: '#00a6fb',
         },
       ])
       .mockResolvedValueOnce([
         {
           ...timetableStages[0],
           name: 'Mainstage Neu',
+          color: '#9ef01a',
         },
         timetableStages[1],
       ])
@@ -2605,6 +2621,7 @@ describe('Admin', () => {
           ...timetableStages[0],
           name: 'Mainstage Neu',
           sortOrder: 2,
+          color: '#9ef01a',
         },
       ])
       .mockResolvedValueOnce([timetableStages[1]])
@@ -2627,12 +2644,21 @@ describe('Admin', () => {
     await user.type(within(stagesSection).getByLabelText(/^bühnenname$/i), 'Beach Stage')
     await user.clear(within(stagesSection).getByLabelText(/^sortierung$/i))
     await user.type(within(stagesSection).getByLabelText(/^sortierung$/i), '3')
+    await user.click(
+      within(stagesSection).getByRole('checkbox', {
+        name: /farbe verwenden/i,
+      }),
+    )
+    fireEvent.change(within(stagesSection).getByLabelText(/^farbe$/i), {
+      target: { value: '#00a6fb' },
+    })
     await user.click(within(stagesSection).getByRole('button', { name: /^speichern$/i }))
 
     expect(createTimetableStage).toHaveBeenCalledWith(
       {
         name: 'Beach Stage',
         sortOrder: 3,
+        color: '#00a6fb',
       },
       { participantAccessCode: 'ALICE42' },
     )
@@ -2654,6 +2680,9 @@ describe('Admin', () => {
       within(stagesSection).getByLabelText(/^bühnenname$/i),
       'Mainstage Neu',
     )
+    fireEvent.change(within(stagesSection).getByLabelText(/^farbe$/i), {
+      target: { value: '#9ef01a' },
+    })
     await user.click(within(stagesSection).getByRole('button', { name: /^speichern$/i }))
 
     expect(updateTimetableStage).toHaveBeenCalledWith(
@@ -2661,6 +2690,7 @@ describe('Admin', () => {
         id: 'stage-1',
         name: 'Mainstage Neu',
         sortOrder: 1,
+        color: '#9ef01a',
       },
       { participantAccessCode: 'ALICE42' },
     )
@@ -2683,6 +2713,7 @@ describe('Admin', () => {
         id: 'stage-1',
         name: 'Mainstage Neu',
         sortOrder: 2,
+        color: '#9ef01a',
       },
       { participantAccessCode: 'ALICE42' },
     )
@@ -2691,6 +2722,7 @@ describe('Admin', () => {
         id: 'stage-2',
         name: 'Tent Stage',
         sortOrder: 1,
+        color: null,
       },
       { participantAccessCode: 'ALICE42' },
     )

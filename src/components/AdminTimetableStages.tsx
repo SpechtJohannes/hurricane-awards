@@ -10,6 +10,8 @@ type StageFormState = {
   id: string | null
   name: string
   sortOrder: string
+  color: string
+  hasColor: boolean
 }
 
 type AdminTimetableStagesProps = {
@@ -46,6 +48,8 @@ export function AdminTimetableStages({
       id: null,
       name: '',
       sortOrder: String(stages.length + 1),
+      color: '#ffbe0b',
+      hasColor: false,
     })
   }
 
@@ -55,6 +59,8 @@ export function AdminTimetableStages({
       id: stage.id,
       name: stage.name,
       sortOrder: String(stage.sortOrder),
+      color: stage.color ?? '#ffbe0b',
+      hasColor: Boolean(stage.color),
     })
   }
 
@@ -72,6 +78,7 @@ export function AdminTimetableStages({
 
     const name = form.name.trim()
     const sortOrder = Number(form.sortOrder)
+    const color = form.hasColor ? form.color : null
 
     if (!name) {
       setFormError(t('admin.timetable.stages.errors.nameRequired'))
@@ -92,11 +99,13 @@ export function AdminTimetableStages({
           id: form.id,
           name,
           sortOrder,
+          color,
         })
       } else {
         await onCreate({
           name,
           sortOrder,
+          color,
         })
       }
 
@@ -165,6 +174,35 @@ export function AdminTimetableStages({
               />
             </label>
 
+            <div className="admin-stage-color">
+              <label className="admin-stage-color__toggle">
+                <input
+                  type="checkbox"
+                  checked={form.hasColor}
+                  disabled={isSaving}
+                  onChange={(event) => {
+                    setForm({ ...form, hasColor: event.target.checked })
+                    setFormError('')
+                  }}
+                />
+                {t('admin.timetable.stages.useColorLabel')}
+              </label>
+
+              <label htmlFor="admin-timetable-stage-color">
+                {t('admin.timetable.stages.colorLabel')}
+                <input
+                  id="admin-timetable-stage-color"
+                  type="color"
+                  value={form.color}
+                  disabled={isSaving || !form.hasColor}
+                  onChange={(event) => {
+                    setForm({ ...form, color: event.target.value })
+                    setFormError('')
+                  }}
+                />
+              </label>
+            </div>
+
             {formError ? (
               <p className="admin-participant-form__error">{formError}</p>
             ) : null}
@@ -209,6 +247,22 @@ export function AdminTimetableStages({
                       <div>
                         <dt>{t('admin.timetable.stages.sortOrderLabel')}</dt>
                         <dd>{stage.sortOrder}</dd>
+                      </div>
+                      <div>
+                        <dt>{t('admin.timetable.stages.colorLabel')}</dt>
+                        <dd>
+                          {stage.color ? (
+                            <span className="admin-stage-color__preview">
+                              <span
+                                className="admin-stage-color__swatch"
+                                style={{ background: stage.color }}
+                              />
+                              {stage.color}
+                            </span>
+                          ) : (
+                            t('admin.timetable.stages.defaultColor')
+                          )}
+                        </dd>
                       </div>
                     </dl>
                   </div>
