@@ -53,6 +53,17 @@ export type UpdateFestivalDayInput = {
   sortOrder: number
 }
 
+export type CreateTimetableStageInput = {
+  name: string
+  sortOrder: number
+}
+
+export type UpdateTimetableStageInput = {
+  id: string
+  name: string
+  sortOrder: number
+}
+
 type FestivalDayRow = {
   id: string
   date: string
@@ -208,6 +219,74 @@ export async function deleteFestivalDay(
   const { error } = await supabase.rpc('ha_delete_festival_day', {
     ...participantRpcParams(context),
     p_festival_day_id: festivalDayId,
+  })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function loadAdminTimetableStages(
+  context: AdminAccessContext,
+): Promise<TimetableStage[]> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc(
+    'ha_admin_list_timetable_stages',
+    participantRpcParams(context),
+  )
+
+  if (error) {
+    throw error
+  }
+
+  return ((data ?? []) as TimetableStageRow[]).map(mapStage)
+}
+
+export async function createTimetableStage(
+  input: CreateTimetableStageInput,
+  context: AdminAccessContext,
+): Promise<TimetableStage> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc('ha_create_timetable_stage', {
+    ...participantRpcParams(context),
+    p_name: input.name,
+    p_sort_order: input.sortOrder,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return mapStage((Array.isArray(data) ? data[0] : data) as TimetableStageRow)
+}
+
+export async function updateTimetableStage(
+  input: UpdateTimetableStageInput,
+  context: AdminAccessContext,
+): Promise<TimetableStage> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc('ha_update_timetable_stage', {
+    ...participantRpcParams(context),
+    p_stage_id: input.id,
+    p_name: input.name,
+    p_sort_order: input.sortOrder,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return mapStage((Array.isArray(data) ? data[0] : data) as TimetableStageRow)
+}
+
+export async function deleteTimetableStage(
+  stageId: string,
+  context: AdminAccessContext,
+): Promise<void> {
+  const supabase = getSupabase()
+  const { error } = await supabase.rpc('ha_delete_timetable_stage', {
+    ...participantRpcParams(context),
+    p_stage_id: stageId,
   })
 
   if (error) {

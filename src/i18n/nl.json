@@ -289,6 +289,33 @@
           "labelRequired": "De naam is verplicht.",
           "sortOrderInvalid": "De sortering moet een geheel getal vanaf 0 zijn."
         }
+      },
+      "stages": {
+        "title": "Podia",
+        "loading": "Podia worden geladen...",
+        "empty": "Nog geen podia aangemaakt.",
+        "createButton": "Podium aanmaken",
+        "createTitle": "Podium aanmaken",
+        "editTitle": "Podium bewerken",
+        "nameLabel": "Podiumnaam",
+        "sortOrderLabel": "Sortering",
+        "save": "Opslaan",
+        "cancel": "Annuleren",
+        "edit": "Bewerken",
+        "delete": "Verwijderen",
+        "deleting": "Verwijderen...",
+        "moveUp": "Omhoog",
+        "moveDown": "Omlaag",
+        "confirmDelete": "Podium \"{{name}}\" echt verwijderen?",
+        "errors": {
+          "load": "De podia konden net niet worden geladen.",
+          "save": "Het podium kon net niet worden opgeslagen.",
+          "delete": "Het podium kon net niet worden verwijderd.",
+          "reorder": "De volgorde kon net niet worden opgeslagen.",
+          "duplicateName": "Deze podiumnaam is al in gebruik.",
+          "nameRequired": "De podiumnaam is verplicht.",
+          "sortOrderInvalid": "De sortering moet een geheel getal vanaf 0 zijn."
+        }
       }
     },
     "bingo": {

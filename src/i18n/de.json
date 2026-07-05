@@ -289,6 +289,33 @@
           "labelRequired": "Die Bezeichnung ist erforderlich.",
           "sortOrderInvalid": "Die Sortierung muss eine ganze Zahl ab 0 sein."
         }
+      },
+      "stages": {
+        "title": "Bühnen",
+        "loading": "Bühnen werden geladen...",
+        "empty": "Noch keine Bühnen angelegt.",
+        "createButton": "Bühne anlegen",
+        "createTitle": "Bühne anlegen",
+        "editTitle": "Bühne bearbeiten",
+        "nameLabel": "Bühnenname",
+        "sortOrderLabel": "Sortierung",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "deleting": "Lösche...",
+        "moveUp": "Nach oben",
+        "moveDown": "Nach unten",
+        "confirmDelete": "Bühne \"{{name}}\" wirklich löschen?",
+        "errors": {
+          "load": "Die Bühnen konnten gerade nicht geladen werden.",
+          "save": "Die Bühne konnte gerade nicht gespeichert werden.",
+          "delete": "Die Bühne konnte gerade nicht gelöscht werden.",
+          "reorder": "Die Reihenfolge konnte gerade nicht gespeichert werden.",
+          "duplicateName": "Dieser Bühnenname ist bereits vergeben.",
+          "nameRequired": "Der Bühnenname ist erforderlich.",
+          "sortOrderInvalid": "Die Sortierung muss eine ganze Zahl ab 0 sein."
+        }
       }
     },
     "bingo": {

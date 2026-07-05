@@ -89,10 +89,14 @@ import {
 } from '../data/bingo'
 import {
   createFestivalDay,
+  createTimetableStage,
   deleteFestivalDay,
+  deleteTimetableStage,
   loadAdminFestivalDays,
+  loadAdminTimetableStages,
   loadTimetable,
   updateFestivalDay,
+  updateTimetableStage,
 } from '../data/timetable'
 import {
   isSupportedMusicPlaylistLink,
@@ -894,6 +898,107 @@ describe('Supabase Datenzugriffe', () => {
     expect(rpcMock).toHaveBeenNthCalledWith(4, 'ha_delete_festival_day', {
       ...expectedParticipantRpcContext,
       p_festival_day_id: 'day-2',
+    })
+  })
+
+  it('verwaltet Timetable Buehnen ueber Admin RPCs', async () => {
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'stage-1',
+          name: 'Mainstage',
+          sort_order: 1,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(loadAdminTimetableStages(participantContext)).resolves.toEqual([
+      {
+        id: 'stage-1',
+        name: 'Mainstage',
+        sortOrder: 1,
+      },
+    ])
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      1,
+      'ha_admin_list_timetable_stages',
+      expectedParticipantRpcContext,
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'stage-2',
+          name: 'Tent Stage',
+          sort_order: 2,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      createTimetableStage(
+        {
+          name: 'Tent Stage',
+          sortOrder: 2,
+        },
+        participantContext,
+      ),
+    ).resolves.toEqual({
+      id: 'stage-2',
+      name: 'Tent Stage',
+      sortOrder: 2,
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(2, 'ha_create_timetable_stage', {
+      ...expectedParticipantRpcContext,
+      p_name: 'Tent Stage',
+      p_sort_order: 2,
+    })
+
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'stage-2',
+          name: 'Beach Stage',
+          sort_order: 3,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      updateTimetableStage(
+        {
+          id: 'stage-2',
+          name: 'Beach Stage',
+          sortOrder: 3,
+        },
+        participantContext,
+      ),
+    ).resolves.toEqual({
+      id: 'stage-2',
+      name: 'Beach Stage',
+      sortOrder: 3,
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(3, 'ha_update_timetable_stage', {
+      ...expectedParticipantRpcContext,
+      p_stage_id: 'stage-2',
+      p_name: 'Beach Stage',
+      p_sort_order: 3,
+    })
+
+    rpcMock.mockResolvedValueOnce({
+      data: null,
+      error: null,
+    })
+
+    await expect(
+      deleteTimetableStage('stage-2', participantContext),
+    ).resolves.toBeUndefined()
+    expect(rpcMock).toHaveBeenNthCalledWith(4, 'ha_delete_timetable_stage', {
+      ...expectedParticipantRpcContext,
+      p_stage_id: 'stage-2',
     })
   })
 

@@ -85,14 +85,21 @@ import {
 } from './data/bingo'
 import {
   createFestivalDay,
+  createTimetableStage,
   deleteFestivalDay,
+  deleteTimetableStage,
   loadAdminFestivalDays,
+  loadAdminTimetableStages,
   loadTimetable,
   updateFestivalDay,
+  updateTimetableStage,
   type CreateFestivalDayInput,
+  type CreateTimetableStageInput,
   type FestivalDay,
   type Timetable,
+  type TimetableStage,
   type UpdateFestivalDayInput,
+  type UpdateTimetableStageInput,
 } from './data/timetable'
 import {
   isSupportedMusicPlaylistLink,
@@ -108,6 +115,7 @@ import { AdminCategories } from './components/AdminCategories'
 import { AdminFestivalDocuments } from './components/AdminFestivalDocuments'
 import { AdminBingo } from './components/AdminBingo'
 import { AdminTimetableDays } from './components/AdminTimetableDays'
+import { AdminTimetableStages } from './components/AdminTimetableStages'
 import { Bingo } from './components/Bingo'
 import { FestivalInfo } from './components/FestivalInfo'
 import { Avatar, ParticipantName } from './components/Avatar'
@@ -975,6 +983,14 @@ function App() {
   const [deletingFestivalDayId, setDeletingFestivalDayId] = useState<
     string | null
   >(null)
+  const [adminTimetableStages, setAdminTimetableStages] = useState<
+    TimetableStage[]
+  >([])
+  const [adminTimetableStagesError, setAdminTimetableStagesError] = useState('')
+  const [isLoadingAdminTimetableStages, setIsLoadingAdminTimetableStages] =
+    useState(false)
+  const [savingStageId, setSavingStageId] = useState<string | null>(null)
+  const [deletingStageId, setDeletingStageId] = useState<string | null>(null)
   const [togglingBingoNumber, setTogglingBingoNumber] = useState<number | null>(
     null,
   )
@@ -1363,6 +1379,11 @@ function App() {
     setIsLoadingAdminFestivalDays(false)
     setSavingFestivalDayId(null)
     setDeletingFestivalDayId(null)
+    setAdminTimetableStages([])
+    setAdminTimetableStagesError('')
+    setIsLoadingAdminTimetableStages(false)
+    setSavingStageId(null)
+    setDeletingStageId(null)
     setTogglingBingoNumber(null)
     setAdminBingoRound(null)
     setAdminBingoError('')
@@ -1456,6 +1477,7 @@ function App() {
         void reloadAdminCategories()
         void reloadAdminParticipants()
         void reloadAdminFestivalDays()
+        void reloadAdminTimetableStages()
         void reloadAdminFestivalDocuments()
         void reloadAdminBingoRound()
 
@@ -1536,6 +1558,24 @@ function App() {
     return t('admin.timetable.days.errors.save')
   }
 
+  function timetableStageMutationErrorMessage(error: unknown) {
+    const message = technicalErrorMessage(error)
+
+    if (message.includes('stage name already exists')) {
+      return t('admin.timetable.stages.errors.duplicateName')
+    }
+
+    if (message.includes('stage name is required')) {
+      return t('admin.timetable.stages.errors.nameRequired')
+    }
+
+    if (message.includes('stage sort order is invalid')) {
+      return t('admin.timetable.stages.errors.sortOrderInvalid')
+    }
+
+    return t('admin.timetable.stages.errors.save')
+  }
+
   function festivalNameMutationErrorMessage(error: unknown) {
     const message = technicalErrorMessage(error)
 
@@ -1579,12 +1619,18 @@ function App() {
       return
     }
 
-    const [loadedAdminFestivalDays, loadedTimetable] = await Promise.all([
+    const [
+      loadedAdminFestivalDays,
+      loadedAdminTimetableStages,
+      loadedTimetable,
+    ] = await Promise.all([
       loadAdminFestivalDays(adminContext),
+      loadAdminTimetableStages(adminContext),
       loadTimetable(adminContext),
     ])
 
     setAdminFestivalDays(loadedAdminFestivalDays)
+    setAdminTimetableStages(loadedAdminTimetableStages)
     setTimetable(loadedTimetable)
   }
 
@@ -1649,6 +1695,27 @@ function App() {
       setAdminFestivalDaysError(t('admin.timetable.days.errors.load'))
     } finally {
       setIsLoadingAdminFestivalDays(false)
+    }
+  }
+
+  async function reloadAdminTimetableStages() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsLoadingAdminTimetableStages(true)
+    setAdminTimetableStagesError('')
+
+    try {
+      const loadedStages = await loadAdminTimetableStages(adminContext)
+
+      setAdminTimetableStages(loadedStages)
+    } catch {
+      setAdminTimetableStagesError(t('admin.timetable.stages.errors.load'))
+    } finally {
+      setIsLoadingAdminTimetableStages(false)
     }
   }
 
@@ -2190,6 +2257,125 @@ function App() {
       setAdminFestivalDaysError(t('admin.timetable.days.errors.delete'))
     } finally {
       setDeletingFestivalDayId(null)
+    }
+  }
+
+  async function createAdminTimetableStage(input: CreateTimetableStageInput) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setAdminTimetableStagesError('')
+
+    try {
+      await createTimetableStage(input, adminContext)
+      await reloadTimetableForAdminChange()
+    } catch (error) {
+      throw new Error(timetableStageMutationErrorMessage(error), {
+        cause: error,
+      })
+    }
+  }
+
+  async function updateAdminTimetableStage(input: UpdateTimetableStageInput) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setAdminTimetableStagesError('')
+
+    try {
+      await updateTimetableStage(input, adminContext)
+      await reloadTimetableForAdminChange()
+    } catch (error) {
+      throw new Error(timetableStageMutationErrorMessage(error), {
+        cause: error,
+      })
+    }
+  }
+
+  async function moveAdminTimetableStage(
+    stage: TimetableStage,
+    direction: 'up' | 'down',
+  ) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    const orderedStages = [...adminTimetableStages].sort(
+      (firstStage, secondStage) =>
+        firstStage.sortOrder - secondStage.sortOrder ||
+        firstStage.name.localeCompare(secondStage.name),
+    )
+    const currentIndex = orderedStages.findIndex(
+      (currentStage) => currentStage.id === stage.id,
+    )
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+    const targetStage = orderedStages[targetIndex]
+
+    if (currentIndex < 0 || !targetStage) {
+      return
+    }
+
+    setSavingStageId(stage.id)
+    setAdminTimetableStagesError('')
+
+    try {
+      await updateTimetableStage(
+        {
+          ...stage,
+          sortOrder: targetStage.sortOrder,
+        },
+        adminContext,
+      )
+      await updateTimetableStage(
+        {
+          ...targetStage,
+          sortOrder: stage.sortOrder,
+        },
+        adminContext,
+      )
+      await reloadTimetableForAdminChange()
+    } catch {
+      setAdminTimetableStagesError(t('admin.timetable.stages.errors.reorder'))
+    } finally {
+      setSavingStageId(null)
+    }
+  }
+
+  async function deleteAdminTimetableStage(stage: TimetableStage) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    const shouldDelete = window.confirm(
+      t('admin.timetable.stages.confirmDelete', {
+        name: stage.name,
+      }),
+    )
+
+    if (!shouldDelete) {
+      return
+    }
+
+    setDeletingStageId(stage.id)
+    setAdminTimetableStagesError('')
+
+    try {
+      await deleteTimetableStage(stage.id, adminContext)
+      await reloadTimetableForAdminChange()
+    } catch {
+      setAdminTimetableStagesError(t('admin.timetable.stages.errors.delete'))
+    } finally {
+      setDeletingStageId(null)
     }
   }
 
@@ -2769,17 +2955,30 @@ function App() {
           ) : null}
 
           {activeAdminSection === 'timetable' ? (
-            <AdminTimetableDays
-              festivalDays={adminFestivalDays}
-              error={adminFestivalDaysError}
-              isLoading={isLoadingAdminFestivalDays}
-              savingFestivalDayId={savingFestivalDayId}
-              deletingFestivalDayId={deletingFestivalDayId}
-              onCreate={createAdminFestivalDay}
-              onUpdate={updateAdminFestivalDay}
-              onDelete={deleteAdminFestivalDay}
-              onMove={moveAdminFestivalDay}
-            />
+            <>
+              <AdminTimetableDays
+                festivalDays={adminFestivalDays}
+                error={adminFestivalDaysError}
+                isLoading={isLoadingAdminFestivalDays}
+                savingFestivalDayId={savingFestivalDayId}
+                deletingFestivalDayId={deletingFestivalDayId}
+                onCreate={createAdminFestivalDay}
+                onUpdate={updateAdminFestivalDay}
+                onDelete={deleteAdminFestivalDay}
+                onMove={moveAdminFestivalDay}
+              />
+              <AdminTimetableStages
+                stages={adminTimetableStages}
+                error={adminTimetableStagesError}
+                isLoading={isLoadingAdminTimetableStages}
+                savingStageId={savingStageId}
+                deletingStageId={deletingStageId}
+                onCreate={createAdminTimetableStage}
+                onUpdate={updateAdminTimetableStage}
+                onDelete={deleteAdminTimetableStage}
+                onMove={moveAdminTimetableStage}
+              />
+            </>
           ) : null}
 
           {activeAdminSection === 'games' ? (

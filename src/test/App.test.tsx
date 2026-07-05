@@ -83,12 +83,17 @@ import {
 } from '../data/bingo'
 import {
   createFestivalDay,
+  createTimetableStage,
   deleteFestivalDay,
+  deleteTimetableStage,
   loadAdminFestivalDays,
+  loadAdminTimetableStages,
   loadTimetable,
   updateFestivalDay,
+  updateTimetableStage,
   type FestivalDay,
   type Timetable,
+  type TimetableStage,
 } from '../data/timetable'
 import type { MusicPlaylist } from '../data/musicEmbeds'
 import i18n from '../i18n'
@@ -174,10 +179,14 @@ vi.mock('../data/bingo', () => ({
 
 vi.mock('../data/timetable', () => ({
   createFestivalDay: vi.fn(),
+  createTimetableStage: vi.fn(),
   deleteFestivalDay: vi.fn(),
+  deleteTimetableStage: vi.fn(),
   loadAdminFestivalDays: vi.fn(),
+  loadAdminTimetableStages: vi.fn(),
   loadTimetable: vi.fn(),
   updateFestivalDay: vi.fn(),
+  updateTimetableStage: vi.fn(),
 }))
 
 const participants: Participant[] = [
@@ -304,6 +313,19 @@ const festivalDays: FestivalDay[] = [
   },
 ]
 
+const timetableStages: TimetableStage[] = [
+  {
+    id: 'stage-1',
+    name: 'Mainstage',
+    sortOrder: 1,
+  },
+  {
+    id: 'stage-2',
+    name: 'Tent Stage',
+    sortOrder: 2,
+  },
+]
+
 const festivalAccessStorageKey =
   'hurricane-awards:hurricane-awards-2026:festival-access'
 const festivalAccessVersion = '2026-07-01 10:00:00+00'
@@ -353,6 +375,7 @@ function mockLoadedData({
   loadedAdminBingoRound = loadedBingoCard,
   loadedTimetable = emptyTimetable,
   loadedAdminFestivalDays = loadedTimetable.festivalDays,
+  loadedAdminTimetableStages = loadedTimetable.stages,
 }: {
   loadedFestivalName?: string
   loadedFestivalAccessCode?: string
@@ -373,6 +396,7 @@ function mockLoadedData({
   loadedAdminBingoRound?: BingoRound | null
   loadedTimetable?: Timetable
   loadedAdminFestivalDays?: FestivalDay[]
+  loadedAdminTimetableStages?: TimetableStage[]
 } = {}) {
   vi.mocked(loadFestivalName).mockResolvedValue(loadedFestivalName)
   vi.mocked(loadFestivalAccessVersion).mockResolvedValue(
@@ -431,6 +455,7 @@ function mockLoadedData({
   vi.mocked(loadAdminBingoRound).mockResolvedValue(loadedAdminBingoRound)
   vi.mocked(loadTimetable).mockResolvedValue(loadedTimetable)
   vi.mocked(loadAdminFestivalDays).mockResolvedValue(loadedAdminFestivalDays)
+  vi.mocked(loadAdminTimetableStages).mockResolvedValue(loadedAdminTimetableStages)
   vi.mocked(createFestivalDay).mockImplementation(async (input) => ({
     id: input.label.toLowerCase(),
     date: input.date,
@@ -444,6 +469,17 @@ function mockLoadedData({
     sortOrder: input.sortOrder,
   }))
   vi.mocked(deleteFestivalDay).mockResolvedValue()
+  vi.mocked(createTimetableStage).mockImplementation(async (input) => ({
+    id: input.name.toLowerCase().replace(/\s+/g, '-'),
+    name: input.name,
+    sortOrder: input.sortOrder,
+  }))
+  vi.mocked(updateTimetableStage).mockImplementation(async (input) => ({
+    id: input.id,
+    name: input.name,
+    sortOrder: input.sortOrder,
+  }))
+  vi.mocked(deleteTimetableStage).mockResolvedValue()
   vi.mocked(startBingoRound).mockResolvedValue(bingoRound)
   vi.mocked(closeBingoRound).mockResolvedValue()
   vi.mocked(setBingoMark).mockImplementation(async (number, isMarked) => {
@@ -2250,6 +2286,178 @@ describe('Admin', () => {
 
     expect(
       await screen.findByText(/bereits einen festivaltag/i),
+    ).toBeVisible()
+  })
+
+  it('verwaltet Buehnen im Adminbereich Timetable', async () => {
+    mockLoadedData({
+      loadedTimetable: {
+        ...emptyTimetable,
+        festivalDays,
+        stages: timetableStages,
+      },
+      loadedAdminFestivalDays: festivalDays,
+      loadedAdminTimetableStages: timetableStages,
+    })
+    vi.mocked(loadAdminTimetableStages)
+      .mockResolvedValueOnce(timetableStages)
+      .mockResolvedValueOnce([
+        ...timetableStages,
+        {
+          id: 'stage-3',
+          name: 'Beach Stage',
+          sortOrder: 3,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          ...timetableStages[0],
+          name: 'Mainstage Neu',
+        },
+        timetableStages[1],
+      ])
+      .mockResolvedValueOnce([
+        {
+          ...timetableStages[1],
+          sortOrder: 1,
+        },
+        {
+          ...timetableStages[0],
+          name: 'Mainstage Neu',
+          sortOrder: 2,
+        },
+      ])
+      .mockResolvedValueOnce([timetableStages[1]])
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^timetable$/i)
+
+    const stagesSection = sectionForHeading(/^bühnen$/i)
+
+    expect(loadAdminTimetableStages).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+
+    await user.click(
+      within(stagesSection).getByRole('button', { name: /bühne anlegen/i }),
+    )
+    await user.type(within(stagesSection).getByLabelText(/^bühnenname$/i), 'Beach Stage')
+    await user.clear(within(stagesSection).getByLabelText(/^sortierung$/i))
+    await user.type(within(stagesSection).getByLabelText(/^sortierung$/i), '3')
+    await user.click(within(stagesSection).getByRole('button', { name: /^speichern$/i }))
+
+    expect(createTimetableStage).toHaveBeenCalledWith(
+      {
+        name: 'Beach Stage',
+        sortOrder: 3,
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(await within(stagesSection).findByText('Beach Stage')).toBeVisible()
+
+    const mainstageCard = within(stagesSection)
+      .getByRole('heading', { name: 'Mainstage' })
+      .closest('article')
+
+    expect(mainstageCard).not.toBeNull()
+
+    await user.click(
+      within(mainstageCard as HTMLElement).getByRole('button', {
+        name: /bearbeiten/i,
+      }),
+    )
+    await user.clear(within(stagesSection).getByLabelText(/^bühnenname$/i))
+    await user.type(
+      within(stagesSection).getByLabelText(/^bühnenname$/i),
+      'Mainstage Neu',
+    )
+    await user.click(within(stagesSection).getByRole('button', { name: /^speichern$/i }))
+
+    expect(updateTimetableStage).toHaveBeenCalledWith(
+      {
+        id: 'stage-1',
+        name: 'Mainstage Neu',
+        sortOrder: 1,
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(await within(stagesSection).findByText('Mainstage Neu')).toBeVisible()
+
+    const updatedStageCard = within(stagesSection)
+      .getByRole('heading', { name: 'Mainstage Neu' })
+      .closest('article')
+
+    expect(updatedStageCard).not.toBeNull()
+
+    await user.click(
+      within(updatedStageCard as HTMLElement).getByRole('button', {
+        name: /nach unten/i,
+      }),
+    )
+
+    expect(updateTimetableStage).toHaveBeenCalledWith(
+      {
+        id: 'stage-1',
+        name: 'Mainstage Neu',
+        sortOrder: 2,
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(updateTimetableStage).toHaveBeenCalledWith(
+      {
+        id: 'stage-2',
+        name: 'Tent Stage',
+        sortOrder: 1,
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+
+    const movedStageHeading = await within(stagesSection).findByRole('heading', {
+      name: 'Mainstage Neu',
+    })
+    const movedStageArticle = movedStageHeading.closest('article')
+
+    expect(movedStageArticle).not.toBeNull()
+
+    await user.click(
+      within(movedStageArticle as HTMLElement).getByRole('button', {
+        name: /löschen/i,
+      }),
+    )
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringContaining('Mainstage Neu'),
+    )
+    expect(deleteTimetableStage).toHaveBeenCalledWith('stage-1', {
+      participantAccessCode: 'ALICE42',
+    })
+  })
+
+  it('zeigt doppelte Buehnennamen verstaendlich an', async () => {
+    mockLoadedData({ loadedAdminTimetableStages: timetableStages })
+    vi.mocked(createTimetableStage).mockRejectedValueOnce(
+      new Error('stage name already exists'),
+    )
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^timetable$/i)
+
+    const stagesSection = sectionForHeading(/^bühnen$/i)
+
+    await user.click(
+      within(stagesSection).getByRole('button', { name: /bühne anlegen/i }),
+    )
+    await user.type(within(stagesSection).getByLabelText(/^bühnenname$/i), 'Mainstage')
+    await user.click(within(stagesSection).getByRole('button', { name: /^speichern$/i }))
+
+    expect(
+      await within(stagesSection).findByText(/bühnenname ist bereits vergeben/i),
     ).toBeVisible()
   })
 

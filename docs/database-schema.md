@@ -458,6 +458,8 @@ Dies ist keine vollstaendige API-Referenz, sondern eine Gruppierung der wichtigs
 - `ha_get_timetable`: Liefert Festivaltage, Buehnen, Acts und Auftritte fuer angemeldete Teilnehmer als technische Basisdaten.
 - `ha_admin_list_festival_days`: Listet Festivaltage fuer Admins.
 - `ha_create_festival_day`, `ha_update_festival_day`, `ha_delete_festival_day`: Admin-RPCs fuer Festivaltage inklusive eindeutiger Datumsvalidierung.
+- `ha_admin_list_timetable_stages`: Listet Buehnen fuer Admins.
+- `ha_create_timetable_stage`, `ha_update_timetable_stage`, `ha_delete_timetable_stage`: Admin-RPCs fuer Buehnen inklusive eindeutiger Namensvalidierung.
 
 ### Archivierung
 
