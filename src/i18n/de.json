@@ -299,6 +299,9 @@
         "editTitle": "Bühne bearbeiten",
         "nameLabel": "Bühnenname",
         "sortOrderLabel": "Sortierung",
+        "colorLabel": "Farbe",
+        "useColorLabel": "Bühnenfarbe verwenden",
+        "defaultColor": "Standard",
         "save": "Speichern",
         "cancel": "Abbrechen",
         "edit": "Bearbeiten",
@@ -314,7 +317,8 @@
           "reorder": "Die Reihenfolge konnte gerade nicht gespeichert werden.",
           "duplicateName": "Dieser Bühnenname ist bereits vergeben.",
           "nameRequired": "Der Bühnenname ist erforderlich.",
-          "sortOrderInvalid": "Die Sortierung muss eine ganze Zahl ab 0 sein."
+          "sortOrderInvalid": "Die Sortierung muss eine ganze Zahl ab 0 sein.",
+          "colorInvalid": "Die Farbe muss ein gültiger Hex-Farbwert sein."
         }
       },
       "acts": {

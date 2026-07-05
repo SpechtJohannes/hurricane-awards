@@ -71,6 +71,8 @@ describe('i18n test infrastructure', () => {
       'Festivaltag anlegen',
     )
     expect(i18n.t('admin.timetable.stages.createButton')).toBe('Bühne anlegen')
+    expect(i18n.t('admin.timetable.stages.colorLabel')).toBe('Farbe')
+    expect(i18n.t('admin.timetable.stages.defaultColor')).toBe('Standard')
     expect(i18n.t('admin.timetable.acts.createButton')).toBe('Act anlegen')
     expect(i18n.t('admin.timetable.performances.createButton')).toBe(
       'Auftritt anlegen',
@@ -85,6 +87,8 @@ describe('i18n test infrastructure', () => {
     expect(i18n.t('admin.timetable.stages.createButton')).toBe(
       'Podium aanmaken',
     )
+    expect(i18n.t('admin.timetable.stages.colorLabel')).toBe('Kleur')
+    expect(i18n.t('admin.timetable.stages.defaultColor')).toBe('Standaard')
     expect(i18n.t('admin.timetable.acts.createButton')).toBe('Act aanmaken')
     expect(i18n.t('admin.timetable.performances.createButton')).toBe(
       'Optreden aanmaken',

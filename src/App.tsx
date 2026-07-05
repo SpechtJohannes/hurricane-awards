@@ -4,6 +4,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type FormEvent,
   type MouseEvent,
 } from 'react'
@@ -602,6 +603,14 @@ function timeLabel(value: string) {
   return value.slice(11, 16)
 }
 
+function stageColorStyle(color: string | null): CSSProperties | undefined {
+  return color
+    ? ({
+        '--stage-color': color,
+      } as CSSProperties)
+    : undefined
+}
+
 function TimetableSection({
   timetable,
   error,
@@ -698,7 +707,11 @@ function TimetableSection({
                           className="timetable-grid__stage"
                           key={stage.id}
                           role="columnheader"
-                          style={{ gridColumn: stageIndex + 2, gridRow: 1 }}
+                          style={{
+                            gridColumn: stageIndex + 2,
+                            gridRow: 1,
+                            ...stageColorStyle(stage.color),
+                          }}
                         >
                           {stage.name}
                         </div>
@@ -723,6 +736,7 @@ function TimetableSection({
                             style={{
                               gridColumn: stageIndex + 2,
                               gridRow: slotIndex + 2,
+                              ...stageColorStyle(stage.color),
                             }}
                           />
                         )),
@@ -763,6 +777,8 @@ function TimetableSection({
                           return null
                         }
 
+                        const stage = timetable.stages[stageIndex]
+
                         return (
                           <article
                             className={`timetable-performance${isFavorite ? ' timetable-performance--favorite' : ''}`}
@@ -770,6 +786,7 @@ function TimetableSection({
                             style={{
                               gridColumn: stageIndex + 2,
                               gridRow: `${startsAtIndex + 2} / ${endsAtIndex + 2}`,
+                              ...stageColorStyle(stage.color),
                             }}
                           >
                             {isFavorite ? (
@@ -1850,6 +1867,10 @@ function App() {
 
     if (message.includes('stage sort order is invalid')) {
       return t('admin.timetable.stages.errors.sortOrderInvalid')
+    }
+
+    if (message.includes('stage color is invalid')) {
+      return t('admin.timetable.stages.errors.colorInvalid')
     }
 
     return t('admin.timetable.stages.errors.save')

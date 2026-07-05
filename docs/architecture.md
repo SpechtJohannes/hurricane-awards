@@ -127,7 +127,7 @@ Teilnehmer laden ihre Karte ueber `ha_get_or_create_bingo_card`. Die RPC erzeugt
 
 Der Timetable-Bereich ist als eigener Hauptbereich erreichbar. Teilnehmende sehen dort den vollstaendigen Festival-Timetable, getrennt nach Festivaltagen, mit Buehnen als Spalten, Uhrzeiten als Zeilen und Auftritten an ihrer jeweiligen Position. Die Darstellung nutzt fuer schmale Viewports horizontales Scrollen innerhalb der Buehnenspalten. Die Daten werden ueber `src/data/timetable.ts` und die RPC `ha_get_timetable` geladen. Der Lese-RPC liefert neben dem eigenen Favoritenstatus auch kompakte Teilnehmerinformationen zu gemeinsamen Favoriten pro Auftritt.
 
-Das Datenmodell trennt Festivaltage (`festival_days`), Buehnen (`timetable_stages`), Acts (`timetable_acts`) und Auftritte (`timetable_performances`). Ein Auftritt referenziert genau einen Festivaltag, genau eine Buehne und genau einen Act. Persoenliche Favoriten werden pro Teilnehmer und konkretem Auftritt in `participant_timetable_favorites` gespeichert. Der Primaerschluessel auf `(participant_id, performance_id)` verhindert doppelte Favoriteneintraege.
+Das Datenmodell trennt Festivaltage (`festival_days`), Buehnen (`timetable_stages`), Acts (`timetable_acts`) und Auftritte (`timetable_performances`). Buehnen koennen optional eine Hex-Farbe als visuellen Akzent tragen; Buehnen ohne Farbe nutzen die Standarddarstellung. Ein Auftritt referenziert genau einen Festivaltag, genau eine Buehne und genau einen Act. Persoenliche Favoriten werden pro Teilnehmer und konkretem Auftritt in `participant_timetable_favorites` gespeichert. Der Primaerschluessel auf `(participant_id, performance_id)` verhindert doppelte Favoriteneintraege.
 
 Admins koennen im Adminbereich `Timetable` Festivaltage, Buehnen, Acts und Auftritte anlegen, bearbeiten und loeschen. Festivaltage und Buehnen lassen sich zusaetzlich ueber die Sortierung bzw. Hoch-/Runter-Aktionen umordnen. Acts sind unabhaengig von Auftritten und koennen mehreren Auftritten zugeordnet werden. Jeder Auftritt referenziert genau einen Festivaltag, genau eine Buehne und genau einen Act und hat Start- und Endzeit.
 
@@ -181,7 +181,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `festival_documents`: Metadaten der Festivaldokumente fuer den Infos-Bereich.
 - `festival_document_uploads`: Kurzlebige, serverseitig freigegebene Storage-Uploadpfade fuer Festivaldokumente.
 - `festival_days`: Festivaltage fuer den strukturierten Timetable.
-- `timetable_stages`: Buehnen fuer den strukturierten Timetable.
+- `timetable_stages`: Buehnen fuer den strukturierten Timetable, optional mit Farbe zur visuellen Unterscheidung.
 - `timetable_acts`: Acts fuer den strukturierten Timetable.
 - `timetable_performances`: Auftritte, die je einen Festivaltag, eine Buehne und einen Act verbinden.
 - `participant_timetable_favorites`: Persoenliche Favoriten einzelner Teilnehmer fuer konkrete Timetable-Auftritte.

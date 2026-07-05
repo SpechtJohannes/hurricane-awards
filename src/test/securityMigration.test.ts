@@ -172,6 +172,13 @@ const timetableSharedFavoritesMigration = readFileSync(
   ),
   'utf8',
 )
+const timetableStageColorsMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260705170000_add_timetable_stage_colors.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -1274,6 +1281,35 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(timetableSharedFavoritesMigration).not.toContain('ha_admin')
   })
 
+  it('erweitert Timetable Buehnen um optionale Farben', () => {
+    expect(timetableStageColorsMigration).toContain(
+      'alter table public.timetable_stages',
+    )
+    expect(timetableStageColorsMigration).toContain(
+      'add column if not exists color text',
+    )
+    expect(timetableStageColorsMigration).toContain(
+      'constraint timetable_stages_color_hex',
+    )
+    expect(timetableStageColorsMigration).toContain(
+      "color is null or color ~ '^#[0-9A-Fa-f]{6}$'",
+    )
+    expect(timetableStageColorsMigration).toContain(
+      'drop function if exists public.ha_admin_list_timetable_stages(text)',
+    )
+    expect(timetableStageColorsMigration).toContain(
+      'p_color text default null',
+    )
+    expect(timetableStageColorsMigration).toContain("'color', ts.color")
+    expect(timetableStageColorsMigration).toContain(
+      'grant execute on function public.ha_create_timetable_stage(text, text, integer, text) to anon, authenticated',
+    )
+    expect(timetableStageColorsMigration).toContain(
+      'grant execute on function public.ha_update_timetable_stage(text, uuid, text, integer, text) to anon, authenticated',
+    )
+    expect(timetableStageColorsMigration).not.toContain('create table if not exists')
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -1300,6 +1336,7 @@ describe('Supabase Sicherheitsmigration', () => {
       timetablePerformancesManagementMigration,
       timetableFavoritesMigration,
       timetableSharedFavoritesMigration,
+      timetableStageColorsMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')
