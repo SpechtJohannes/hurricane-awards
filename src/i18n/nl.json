@@ -338,6 +338,42 @@
           "deleteHasPerformances": "Deze act kan niet worden verwijderd zolang er optredens aan gekoppeld zijn.",
           "nameRequired": "De naam is verplicht."
         }
+      },
+      "performances": {
+        "title": "Optredens",
+        "loading": "Optredens worden geladen...",
+        "empty": "Nog geen optredens aangemaakt.",
+        "missingBaseData": "Maak eerst minimaal een festivaldag, een podium en een act aan.",
+        "createButton": "Optreden aanmaken",
+        "createTitle": "Optreden aanmaken",
+        "editTitle": "Optreden bewerken",
+        "dayLabel": "Festivaldag",
+        "stageLabel": "Podium",
+        "actLabel": "Act",
+        "startLabel": "Starttijd",
+        "endLabel": "Eindtijd",
+        "save": "Opslaan",
+        "cancel": "Annuleren",
+        "edit": "Bewerken",
+        "delete": "Verwijderen",
+        "deleting": "Verwijderen...",
+        "confirmDelete": "Optreden van \"{{act}}\" echt verwijderen?",
+        "unknownDay": "Onbekende festivaldag",
+        "unknownStage": "Onbekend podium",
+        "unknownAct": "Onbekende act",
+        "errors": {
+          "load": "De optredens konden net niet worden geladen.",
+          "save": "Het optreden kon net niet worden opgeslagen.",
+          "delete": "Het optreden kon net niet worden verwijderd.",
+          "dayRequired": "Een festivaldag is verplicht.",
+          "stageRequired": "Een podium is verplicht.",
+          "actRequired": "Een act is verplicht.",
+          "startRequired": "De starttijd is verplicht.",
+          "endRequired": "De eindtijd is verplicht.",
+          "endAfterStart": "De eindtijd moet na de starttijd liggen.",
+          "overlap": "Op dit podium overlapt het optreden met een bestaand optreden.",
+          "invalidReference": "Festivaldag, podium of act kon niet worden gevonden."
+        }
       }
     },
     "bingo": {

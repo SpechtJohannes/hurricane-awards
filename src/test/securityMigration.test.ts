@@ -151,6 +151,13 @@ const timetableActsManagementMigration = readFileSync(
   ),
   'utf8',
 )
+const timetablePerformancesManagementMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260705140000_manage_timetable_performances.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -543,6 +550,22 @@ describe('Supabase Sicherheitsmigration', () => {
       [timetableActsManagementMigration, 'ha_create_timetable_act'],
       [timetableActsManagementMigration, 'ha_update_timetable_act'],
       [timetableActsManagementMigration, 'ha_delete_timetable_act'],
+      [
+        timetablePerformancesManagementMigration,
+        'ha_admin_list_timetable_performances',
+      ],
+      [
+        timetablePerformancesManagementMigration,
+        'ha_create_timetable_performance',
+      ],
+      [
+        timetablePerformancesManagementMigration,
+        'ha_update_timetable_performance',
+      ],
+      [
+        timetablePerformancesManagementMigration,
+        'ha_delete_timetable_performance',
+      ],
     ] as const
 
     for (const [migration, functionName] of adminRpcExpectations) {
@@ -1114,6 +1137,48 @@ describe('Supabase Sicherheitsmigration', () => {
     )
   })
 
+  it('stellt Admin RPCs und DB Validierung fuer Auftritte bereit', () => {
+    for (const functionName of [
+      'ha_admin_list_timetable_performances',
+      'ha_create_timetable_performance',
+      'ha_update_timetable_performance',
+      'ha_delete_timetable_performance',
+    ]) {
+      expect(timetablePerformancesManagementMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(timetablePerformancesManagementMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+
+    expect(timetablePerformancesManagementMigration).toContain(
+      'alter column ends_at set not null',
+    )
+    expect(timetablePerformancesManagementMigration).toContain(
+      'timetable_performances_no_stage_overlap',
+    )
+    expect(timetablePerformancesManagementMigration).toContain(
+      "tstzrange(starts_at, ends_at, '[)') with &&",
+    )
+    expect(timetablePerformancesManagementMigration).toContain(
+      'stage_id with =',
+    )
+    expect(timetablePerformancesManagementMigration).toContain(
+      'performance end time must be after start time',
+    )
+    expect(timetablePerformancesManagementMigration).toContain(
+      'performance overlaps existing performance on stage',
+    )
+    expect(timetablePerformancesManagementMigration).toContain(
+      'when exclusion_violation then',
+    )
+    expect(timetablePerformancesManagementMigration).toContain(
+      'p_performance_id uuid',
+    )
+    expect(timetablePerformancesManagementMigration).not.toContain('favorite')
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -1137,6 +1202,7 @@ describe('Supabase Sicherheitsmigration', () => {
       festivalDaysManagementMigration,
       timetableStagesManagementMigration,
       timetableActsManagementMigration,
+      timetablePerformancesManagementMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

@@ -84,20 +84,25 @@ import {
 import {
   createFestivalDay,
   createTimetableAct,
+  createTimetablePerformance,
   createTimetableStage,
   deleteFestivalDay,
   deleteTimetableAct,
+  deleteTimetablePerformance,
   deleteTimetableStage,
   loadAdminFestivalDays,
   loadAdminTimetableActs,
+  loadAdminTimetablePerformances,
   loadAdminTimetableStages,
   loadTimetable,
   updateFestivalDay,
   updateTimetableAct,
+  updateTimetablePerformance,
   updateTimetableStage,
   type FestivalDay,
   type Timetable,
   type TimetableAct,
+  type TimetablePerformance,
   type TimetableStage,
 } from '../data/timetable'
 import type { MusicPlaylist } from '../data/musicEmbeds'
@@ -185,16 +190,20 @@ vi.mock('../data/bingo', () => ({
 vi.mock('../data/timetable', () => ({
   createFestivalDay: vi.fn(),
   createTimetableAct: vi.fn(),
+  createTimetablePerformance: vi.fn(),
   createTimetableStage: vi.fn(),
   deleteFestivalDay: vi.fn(),
   deleteTimetableAct: vi.fn(),
+  deleteTimetablePerformance: vi.fn(),
   deleteTimetableStage: vi.fn(),
   loadAdminFestivalDays: vi.fn(),
   loadAdminTimetableActs: vi.fn(),
+  loadAdminTimetablePerformances: vi.fn(),
   loadAdminTimetableStages: vi.fn(),
   loadTimetable: vi.fn(),
   updateFestivalDay: vi.fn(),
   updateTimetableAct: vi.fn(),
+  updateTimetablePerformance: vi.fn(),
   updateTimetableStage: vi.fn(),
 }))
 
@@ -348,6 +357,17 @@ const timetableActs: TimetableAct[] = [
   },
 ]
 
+const timetablePerformances: TimetablePerformance[] = [
+  {
+    id: 'performance-1',
+    festivalDayId: 'day-1',
+    stageId: 'stage-1',
+    actId: 'act-1',
+    startsAt: '2026-06-19T20:00:00.000Z',
+    endsAt: '2026-06-19T21:00:00.000Z',
+  },
+]
+
 const festivalAccessStorageKey =
   'hurricane-awards:hurricane-awards-2026:festival-access'
 const festivalAccessVersion = '2026-07-01 10:00:00+00'
@@ -399,6 +419,7 @@ function mockLoadedData({
   loadedAdminFestivalDays = loadedTimetable.festivalDays,
   loadedAdminTimetableStages = loadedTimetable.stages,
   loadedAdminTimetableActs = loadedTimetable.acts,
+  loadedAdminTimetablePerformances = loadedTimetable.performances,
 }: {
   loadedFestivalName?: string
   loadedFestivalAccessCode?: string
@@ -421,6 +442,7 @@ function mockLoadedData({
   loadedAdminFestivalDays?: FestivalDay[]
   loadedAdminTimetableStages?: TimetableStage[]
   loadedAdminTimetableActs?: TimetableAct[]
+  loadedAdminTimetablePerformances?: TimetablePerformance[]
 } = {}) {
   vi.mocked(loadFestivalName).mockResolvedValue(loadedFestivalName)
   vi.mocked(loadFestivalAccessVersion).mockResolvedValue(
@@ -481,6 +503,9 @@ function mockLoadedData({
   vi.mocked(loadAdminFestivalDays).mockResolvedValue(loadedAdminFestivalDays)
   vi.mocked(loadAdminTimetableStages).mockResolvedValue(loadedAdminTimetableStages)
   vi.mocked(loadAdminTimetableActs).mockResolvedValue(loadedAdminTimetableActs)
+  vi.mocked(loadAdminTimetablePerformances).mockResolvedValue(
+    loadedAdminTimetablePerformances,
+  )
   vi.mocked(createFestivalDay).mockImplementation(async (input) => ({
     id: input.label.toLowerCase(),
     date: input.date,
@@ -516,6 +541,23 @@ function mockLoadedData({
     description: input.description || null,
   }))
   vi.mocked(deleteTimetableAct).mockResolvedValue()
+  vi.mocked(createTimetablePerformance).mockImplementation(async (input) => ({
+    id: `${input.actId}-${input.startsAt}`,
+    festivalDayId: input.festivalDayId,
+    stageId: input.stageId,
+    actId: input.actId,
+    startsAt: input.startsAt,
+    endsAt: input.endsAt,
+  }))
+  vi.mocked(updateTimetablePerformance).mockImplementation(async (input) => ({
+    id: input.id,
+    festivalDayId: input.festivalDayId,
+    stageId: input.stageId,
+    actId: input.actId,
+    startsAt: input.startsAt,
+    endsAt: input.endsAt,
+  }))
+  vi.mocked(deleteTimetablePerformance).mockResolvedValue()
   vi.mocked(startBingoRound).mockResolvedValue(bingoRound)
   vi.mocked(closeBingoRound).mockResolvedValue()
   vi.mocked(setBingoMark).mockImplementation(async (number, isMarked) => {
@@ -2646,6 +2688,183 @@ describe('Admin', () => {
 
     expect(
       await within(actsSection).findByText(/auftritte zugeordnet/i),
+    ).toBeVisible()
+  })
+
+  it('verwaltet Auftritte im Adminbereich Timetable', async () => {
+    mockLoadedData({
+      loadedTimetable: {
+        ...emptyTimetable,
+        festivalDays,
+        stages: timetableStages,
+        acts: timetableActs,
+        performances: timetablePerformances,
+      },
+      loadedAdminFestivalDays: festivalDays,
+      loadedAdminTimetableStages: timetableStages,
+      loadedAdminTimetableActs: timetableActs,
+      loadedAdminTimetablePerformances: timetablePerformances,
+    })
+    vi.mocked(loadAdminTimetablePerformances)
+      .mockResolvedValueOnce(timetablePerformances)
+      .mockResolvedValueOnce([
+        ...timetablePerformances,
+        {
+          id: 'performance-2',
+          festivalDayId: 'day-1',
+          stageId: 'stage-2',
+          actId: 'act-2',
+          startsAt: '2026-06-19T22:00:00.000Z',
+          endsAt: '2026-06-19T23:00:00.000Z',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          ...timetablePerformances[0],
+          endsAt: '2026-06-19T21:30:00.000Z',
+        },
+      ])
+      .mockResolvedValueOnce([])
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^timetable$/i)
+
+    const performancesSection = sectionForHeading(/^auftritte$/i)
+
+    expect(loadAdminTimetablePerformances).toHaveBeenCalledWith({
+      participantAccessCode: 'ALICE42',
+    })
+
+    await user.click(
+      within(performancesSection).getByRole('button', {
+        name: /auftritt anlegen/i,
+      }),
+    )
+    await user.selectOptions(
+      within(performancesSection).getByLabelText(/^bühne$/i),
+      'stage-2',
+    )
+    await user.selectOptions(
+      within(performancesSection).getByLabelText(/^act$/i),
+      'act-2',
+    )
+    fireEvent.change(
+      within(performancesSection).getByLabelText(/^startzeit$/i),
+      {
+        target: { value: '2026-06-19T22:00' },
+      },
+    )
+    fireEvent.change(within(performancesSection).getByLabelText(/^endzeit$/i), {
+      target: { value: '2026-06-19T23:00' },
+    })
+    await user.click(
+      within(performancesSection).getByRole('button', { name: /^speichern$/i }),
+    )
+
+    expect(createTimetablePerformance).toHaveBeenCalledWith(
+      {
+        festivalDayId: 'day-1',
+        stageId: 'stage-2',
+        actId: 'act-2',
+        startsAt: '2026-06-19T22:00',
+        endsAt: '2026-06-19T23:00',
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(await within(performancesSection).findByText('Late Night DJ')).toBeVisible()
+
+    const headlinersCard = within(performancesSection)
+      .getByRole('heading', { name: 'The Headliners' })
+      .closest('article')
+
+    expect(headlinersCard).not.toBeNull()
+
+    await user.click(
+      within(headlinersCard as HTMLElement).getByRole('button', {
+        name: /bearbeiten/i,
+      }),
+    )
+    fireEvent.change(within(performancesSection).getByLabelText(/^endzeit$/i), {
+      target: { value: '2026-06-19T21:30' },
+    })
+    await user.click(
+      within(performancesSection).getByRole('button', { name: /^speichern$/i }),
+    )
+
+    expect(updateTimetablePerformance).toHaveBeenCalledWith(
+      {
+        id: 'performance-1',
+        festivalDayId: 'day-1',
+        stageId: 'stage-1',
+        actId: 'act-1',
+        startsAt: '2026-06-19T20:00',
+        endsAt: '2026-06-19T21:30',
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+
+    const updatedHeadlinersCard = within(performancesSection)
+      .getByRole('heading', { name: 'The Headliners' })
+      .closest('article')
+
+    expect(updatedHeadlinersCard).not.toBeNull()
+
+    await user.click(
+      within(updatedHeadlinersCard as HTMLElement).getByRole('button', {
+        name: /löschen/i,
+      }),
+    )
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringContaining('The Headliners'),
+    )
+    expect(deleteTimetablePerformance).toHaveBeenCalledWith('performance-1', {
+      participantAccessCode: 'ALICE42',
+    })
+  })
+
+  it('zeigt zeitliche Ueberschneidungen bei Auftritten verstaendlich an', async () => {
+    mockLoadedData({
+      loadedAdminFestivalDays: festivalDays,
+      loadedAdminTimetableStages: timetableStages,
+      loadedAdminTimetableActs: timetableActs,
+      loadedAdminTimetablePerformances: timetablePerformances,
+    })
+    vi.mocked(createTimetablePerformance).mockRejectedValueOnce(
+      new Error('performance overlaps existing performance on stage'),
+    )
+
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^timetable$/i)
+
+    const performancesSection = sectionForHeading(/^auftritte$/i)
+
+    await user.click(
+      within(performancesSection).getByRole('button', {
+        name: /auftritt anlegen/i,
+      }),
+    )
+    fireEvent.change(
+      within(performancesSection).getByLabelText(/^startzeit$/i),
+      {
+        target: { value: '2026-06-19T20:30' },
+      },
+    )
+    fireEvent.change(within(performancesSection).getByLabelText(/^endzeit$/i), {
+      target: { value: '2026-06-19T21:30' },
+    })
+    await user.click(
+      within(performancesSection).getByRole('button', { name: /^speichern$/i }),
+    )
+
+    expect(
+      await within(performancesSection).findByText(/überschneidet/i),
     ).toBeVisible()
   })
 
