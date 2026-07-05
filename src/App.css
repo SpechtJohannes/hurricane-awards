@@ -905,6 +905,126 @@ h1 {
   border-color: rgba(255, 0, 110, 0.4);
 }
 
+.timetable__days {
+  display: grid;
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  gap: 28px;
+}
+
+.timetable-day {
+  min-width: 0;
+}
+
+.timetable-day__header {
+  margin: 0 0 14px;
+}
+
+.timetable-day__header p {
+  margin: 0 0 4px;
+  color: rgba(244, 231, 207, 0.72);
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.timetable-day__header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(1.5rem, 7vw, 2.5rem);
+  line-height: 1;
+}
+
+.timetable-grid {
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-color: rgba(255, 190, 11, 0.8) rgba(255, 255, 255, 0.08);
+}
+
+.timetable-grid__inner {
+  display: grid;
+  min-width: 680px;
+  gap: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.timetable-grid__corner,
+.timetable-grid__stage,
+.timetable-grid__time,
+.timetable-grid__cell {
+  min-width: 0;
+  background: rgba(16, 16, 20, 0.92);
+}
+
+.timetable-grid__stage {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 12px;
+  color: #ffffff;
+  font-size: 0.86rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.timetable-grid__time {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  padding: 10px;
+  color: #ffbe0b;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.timetable-grid__corner {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+}
+
+.timetable-grid__cell {
+  min-height: 64px;
+}
+
+.timetable-performance {
+  z-index: 1;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  margin: 5px;
+  padding: 10px;
+  color: #101014;
+  background: #ffbe0b;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 8px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+}
+
+.timetable-performance__time {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.timetable-performance h4 {
+  margin: 0;
+  color: #101014;
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.timetable-performance p:not(.timetable-performance__time) {
+  margin: 0;
+  color: rgba(16, 16, 20, 0.78);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
 .bingo-card {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

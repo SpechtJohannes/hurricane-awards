@@ -125,9 +125,9 @@ Teilnehmer laden ihre Karte ueber `ha_get_or_create_bingo_card`. Die RPC erzeugt
 
 ### Timetable
 
-Der Timetable-Bereich ist als technische Basis vorbereitet. Die App zeigt einen eigenen Hauptbereich und laedt strukturierte Basisdaten ueber `src/data/timetable.ts` und die RPC `ha_get_timetable`.
+Der Timetable-Bereich ist als eigener Hauptbereich erreichbar. Teilnehmende sehen dort den vollstaendigen Festival-Timetable, getrennt nach Festivaltagen, mit Buehnen als Spalten, Uhrzeiten als Zeilen und Auftritten an ihrer jeweiligen Position. Die Darstellung bleibt eine reine Leseansicht und nutzt fuer schmale Viewports horizontales Scrollen innerhalb der Buehnenspalten. Die Daten werden ueber `src/data/timetable.ts` und die RPC `ha_get_timetable` geladen.
 
-Das Datenmodell trennt Festivaltage (`festival_days`), Buehnen (`timetable_stages`), Acts (`timetable_acts`) und Auftritte (`timetable_performances`). Ein Auftritt referenziert genau einen Festivaltag, genau eine Buehne und genau einen Act. Es gibt noch keine editierbare Teilnehmer-Timetable-Ansicht, keine Favoritenlogik und keine komplexe Darstellung nach Buehnen oder Zeiten.
+Das Datenmodell trennt Festivaltage (`festival_days`), Buehnen (`timetable_stages`), Acts (`timetable_acts`) und Auftritte (`timetable_performances`). Ein Auftritt referenziert genau einen Festivaltag, genau eine Buehne und genau einen Act. Es gibt keine Favoritenlogik in der Teilnehmeransicht.
 
 Admins koennen im Adminbereich `Timetable` Festivaltage, Buehnen, Acts und Auftritte anlegen, bearbeiten und loeschen. Festivaltage und Buehnen lassen sich zusaetzlich ueber die Sortierung bzw. Hoch-/Runter-Aktionen umordnen. Acts sind unabhaengig von Auftritten und koennen mehreren Auftritten zugeordnet werden. Jeder Auftritt referenziert genau einen Festivaltag, genau eine Buehne und genau einen Act und hat Start- und Endzeit.
 
@@ -216,7 +216,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - Sichtbare UI-Texte werden ueber Uebersetzungsdateien gepflegt und nicht direkt in Komponenten hardcodiert.
 - Datenadapter in `src/data` kapseln Supabase RPC-Aufrufe, damit UI-Komponenten nicht direkt mit RPC-Details arbeiten muessen.
 - Festivaldokumente trennen Dateiinhalt und Metadaten: Storage enthaelt die Dateien, PostgreSQL/RPCs steuern die sichtbaren Dokumenteintraege.
-- Der strukturierte Timetable startet mit getrennten Kernentitaeten, einem Lese-RPC und einer Adminverwaltung fuer Festivaltage, Buehnen, Acts und Auftritte; Favoriten und komplexe Teilnehmerdarstellungen werden bewusst spaeter ergaenzt.
+- Der strukturierte Timetable nutzt getrennte Kernentitaeten, einen Lese-RPC, eine Adminverwaltung fuer Festivaltage, Buehnen, Acts und Auftritte sowie eine nach Tagen, Buehnen und Zeiten gruppierte Teilnehmer-Leseansicht; Favoriten werden bewusst spaeter ergaenzt.
 
 ## Wartung und Erweiterung
 
