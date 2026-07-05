@@ -45,6 +45,7 @@ describe('i18n test infrastructure', () => {
     expect(i18n.t('timetable.emptyDay')).toContain('An diesem Tag')
     expect(i18n.t('timetable.unknownAct')).toBe('Unbekannter Act')
     expect(i18n.t('timetable.favorite.add')).toBe('Als Favorit markieren')
+    expect(i18n.t('timetable.favorite.badge')).toBe('Favorit')
     expect(i18n.t('timetable.favorite.remove')).toBe('Favorit entfernen')
 
     await i18n.changeLanguage('nl')
@@ -54,6 +55,7 @@ describe('i18n test infrastructure', () => {
     expect(i18n.t('timetable.emptyDay')).toContain('Voor deze dag')
     expect(i18n.t('timetable.unknownAct')).toBe('Onbekende act')
     expect(i18n.t('timetable.favorite.add')).toBe('Als favoriet markeren')
+    expect(i18n.t('timetable.favorite.badge')).toBe('Favoriet')
     expect(i18n.t('timetable.favorite.remove')).toBe('Favoriet verwijderen')
   })
 

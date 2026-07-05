@@ -505,6 +505,7 @@
     "unknownAct": "Unbekannter Act",
     "favorite": {
       "add": "Als Favorit markieren",
+      "badge": "Favorit",
       "remove": "Favorit entfernen",
       "errors": {
         "save": "Der Favorit konnte gerade nicht gespeichert werden."

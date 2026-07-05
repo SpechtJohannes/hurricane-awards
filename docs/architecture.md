@@ -133,7 +133,7 @@ Admins koennen im Adminbereich `Timetable` Festivaltage, Buehnen, Acts und Auftr
 
 Die Datenbank erzwingt, dass die Endzeit nach der Startzeit liegt und dass sich Auftritte auf derselben Buehne zeitlich nicht ueberschneiden. Die Ueberschneidungsregel ist als Exclusion Constraint auf `timetable_performances` abgesichert und gilt dadurch auch beim Bearbeiten, ohne dass ein Auftritt mit sich selbst kollidiert.
 
-Teilnehmende markieren und entfernen Favoriten direkt in der Timetable-Leseansicht ueber `ha_add_timetable_favorite` und `ha_remove_timetable_favorite`. Beide RPCs ermitteln den Teilnehmer serverseitig aus dem Teilnehmercode. Direkte Browserrechte auf die Favoritentabelle sind entzogen.
+Teilnehmende markieren und entfernen Favoriten direkt in der Timetable-Leseansicht ueber `ha_add_timetable_favorite` und `ha_remove_timetable_favorite`. Favorisierte Auftritte werden in der Timetable-Karte optisch hervorgehoben und tragen zusaetzlich ein sichtbares Favoriten-Label, damit die Markierung nicht nur ueber Farbe vermittelt wird. Beide RPCs ermitteln den Teilnehmer serverseitig aus dem Teilnehmercode. Direkte Browserrechte auf die Favoritentabelle sind entzogen.
 
 ### Festivaleinstellungen
 

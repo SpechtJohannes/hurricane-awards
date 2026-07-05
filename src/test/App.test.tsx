@@ -1436,6 +1436,35 @@ describe('Login', () => {
     ).toBeVisible()
   })
 
+  it('hebt favorisierte Timetable Auftritte sichtbar hervor', async () => {
+    mockLoadedData({
+      loadedTimetable: {
+        festivalDays,
+        stages: timetableStages,
+        acts: timetableActs,
+        performances: timetablePerformances,
+        favoritePerformanceIds: ['performance-1'],
+      },
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^timetable$/i)
+
+    const timetableSection = sectionForHeading(/^timetable$/i)
+    const performanceTitle = within(timetableSection).getByRole('heading', {
+      name: 'The Headliners',
+    })
+    const performanceCard = performanceTitle.closest('article')
+
+    expect(performanceCard).toHaveClass('timetable-performance--favorite')
+    expect(within(performanceCard as HTMLElement).getByText('Favorit')).toBeVisible()
+    expect(
+      within(performanceCard as HTMLElement).getByRole('button', {
+        name: /favorit entfernen/i,
+      }),
+    ).toHaveAttribute('aria-pressed', 'true')
+  })
+
   it('markiert und entfernt Timetable Auftritte als Favoriten', async () => {
     mockLoadedData({
       loadedTimetable: {
