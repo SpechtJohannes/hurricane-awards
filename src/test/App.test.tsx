@@ -319,6 +319,7 @@ const emptyTimetable: Timetable = {
   acts: [],
   performances: [],
   favoritePerformanceIds: [],
+  performanceFavorites: [],
 }
 
 const festivalDays: FestivalDay[] = [
@@ -1395,6 +1396,7 @@ describe('Login', () => {
         acts: timetableActs,
         performances: timetablePerformances,
         favoritePerformanceIds: [],
+        performanceFavorites: [],
       },
     })
     await renderLoadedApp()
@@ -1444,6 +1446,7 @@ describe('Login', () => {
         acts: timetableActs,
         performances: timetablePerformances,
         favoritePerformanceIds: ['performance-1'],
+        performanceFavorites: [],
       },
     })
     await renderLoadedApp()
@@ -1465,6 +1468,67 @@ describe('Login', () => {
     ).toHaveAttribute('aria-pressed', 'true')
   })
 
+  it('zeigt andere Teilnehmende mit gemeinsamen Timetable Favoriten kompakt an', async () => {
+    mockLoadedData({
+      loadedTimetable: {
+        festivalDays,
+        stages: timetableStages,
+        acts: timetableActs,
+        performances: timetablePerformances,
+        favoritePerformanceIds: ['performance-1'],
+        performanceFavorites: [
+          {
+            performanceId: 'performance-1',
+            participants: [
+              {
+                participantId: 'alice',
+                displayName: 'Alice',
+                avatarId: 'camp-sunrise',
+              },
+              {
+                participantId: 'bob',
+                displayName: 'Bob',
+                avatarId: 'neon-tent',
+              },
+              {
+                participantId: 'carla',
+                displayName: 'Carla',
+                avatarId: 'sunset-stage',
+              },
+              {
+                participantId: 'dina',
+                displayName: 'Dina',
+                avatarId: null,
+              },
+              {
+                participantId: 'emil',
+                displayName: 'Emil',
+                avatarId: null,
+              },
+            ],
+          },
+        ],
+      },
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^timetable$/i)
+
+    const timetableSection = sectionForHeading(/^timetable$/i)
+    const performanceTitle = within(timetableSection).getByRole('heading', {
+      name: 'The Headliners',
+    })
+    const performanceCard = performanceTitle.closest('article') as HTMLElement
+
+    expect(performanceCard).toHaveClass('timetable-performance--favorite')
+    expect(within(performanceCard).getByText('Auch dabei')).toBeVisible()
+    expect(within(performanceCard).getByText('Bob')).toBeVisible()
+    expect(within(performanceCard).getByText('Carla')).toBeVisible()
+    expect(within(performanceCard).getByText('Dina')).toBeVisible()
+    expect(within(performanceCard).getByText('+1')).toBeVisible()
+    expect(within(performanceCard).queryByText('Alice')).not.toBeInTheDocument()
+  })
+
   it('markiert und entfernt Timetable Auftritte als Favoriten', async () => {
     mockLoadedData({
       loadedTimetable: {
@@ -1473,6 +1537,7 @@ describe('Login', () => {
         acts: timetableActs,
         performances: timetablePerformances,
         favoritePerformanceIds: [],
+        performanceFavorites: [],
       },
     })
     await renderLoadedApp()

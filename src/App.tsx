@@ -593,6 +593,7 @@ type TimetableSectionProps = {
   timetable: Timetable | null
   error: string
   isLoading: boolean
+  currentParticipantId: string | null
   togglingPerformanceId: string | null
   onToggleFavorite: (performanceId: string, isFavorite: boolean) => void
 }
@@ -605,6 +606,7 @@ function TimetableSection({
   timetable,
   error,
   isLoading,
+  currentParticipantId,
   togglingPerformanceId,
   onToggleFavorite,
 }: TimetableSectionProps) {
@@ -612,6 +614,12 @@ function TimetableSection({
   const hasTimetableData = Boolean(timetable?.performances.length)
   const actById = new Map(timetable?.acts.map((act) => [act.id, act]) ?? [])
   const favoritePerformanceIds = new Set(timetable?.favoritePerformanceIds ?? [])
+  const favoriteParticipantsByPerformanceId = new Map(
+    timetable?.performanceFavorites.map((favorite) => [
+      favorite.performanceId,
+      favorite.participants,
+    ]) ?? [],
+  )
   const performancesByDay = new Map<string, Timetable['performances']>()
 
   for (const performance of timetable?.performances ?? []) {
@@ -734,6 +742,22 @@ function TimetableSection({
                         )
                         const isToggling =
                           togglingPerformanceId === performance.id
+                        const sharedFavoriteParticipants = (
+                          favoriteParticipantsByPerformanceId.get(
+                            performance.id,
+                          ) ?? []
+                        ).filter(
+                          (participant) =>
+                            participant.participantId !== currentParticipantId,
+                        )
+                        const visibleFavoriteParticipants =
+                          sharedFavoriteParticipants.slice(0, 3)
+                        const hiddenFavoriteParticipantCount =
+                          sharedFavoriteParticipants.length -
+                          visibleFavoriteParticipants.length
+                        const sharedFavoriteNames = sharedFavoriteParticipants
+                          .map((participant) => participant.displayName)
+                          .join(', ')
 
                         if (stageIndex < 0 || startsAtIndex < 0 || endsAtIndex < 0) {
                           return null
@@ -763,6 +787,54 @@ function TimetableSection({
                               {act?.name ?? t('timetable.unknownAct')}
                             </h4>
                             {act?.description ? <p>{act.description}</p> : null}
+                            {sharedFavoriteParticipants.length > 0 ? (
+                              <div
+                                className="timetable-performance__shared"
+                                aria-label={t(
+                                  'timetable.favorite.sharedAria',
+                                  {
+                                    names: sharedFavoriteNames,
+                                  },
+                                )}
+                              >
+                                <span className="timetable-performance__shared-label">
+                                  {t('timetable.favorite.sharedLabel')}
+                                </span>
+                                <span className="timetable-performance__shared-list">
+                                  {visibleFavoriteParticipants.map(
+                                    (participant) => (
+                                      <span
+                                        className="timetable-performance__shared-person"
+                                        key={participant.participantId}
+                                      >
+                                        <Avatar
+                                          avatarId={participant.avatarId}
+                                          name={participant.displayName}
+                                          size="small"
+                                        />
+                                        <span>{participant.displayName}</span>
+                                      </span>
+                                    ),
+                                  )}
+                                  {hiddenFavoriteParticipantCount > 0 ? (
+                                    <span
+                                      className="timetable-performance__shared-more"
+                                      aria-label={t(
+                                        'timetable.favorite.sharedMoreAria',
+                                        {
+                                          count:
+                                            hiddenFavoriteParticipantCount,
+                                        },
+                                      )}
+                                    >
+                                      {t('timetable.favorite.sharedMore', {
+                                        count: hiddenFavoriteParticipantCount,
+                                      })}
+                                    </span>
+                                  ) : null}
+                                </span>
+                              </div>
+                            ) : null}
                             <button
                               className="timetable-performance__favorite"
                               type="button"
@@ -3122,15 +3194,51 @@ function App() {
     }
 
     const previousFavoritePerformanceIds = timetable.favoritePerformanceIds
+    const previousPerformanceFavorites = timetable.performanceFavorites
     const nextFavoritePerformanceIds = isFavorite
       ? previousFavoritePerformanceIds.filter((id) => id !== performanceId)
       : Array.from(new Set([...previousFavoritePerformanceIds, performanceId]))
+    const hasPerformanceFavoritesEntry = previousPerformanceFavorites.some(
+      (favorite) => favorite.performanceId === performanceId,
+    )
+    const nextPerformanceFavoritesSource = hasPerformanceFavoritesEntry
+      ? previousPerformanceFavorites
+      : [
+          ...previousPerformanceFavorites,
+          {
+            performanceId,
+            participants: [],
+          },
+        ]
 
     setTogglingFavoritePerformanceId(performanceId)
     setTimetableError('')
     setTimetable({
       ...timetable,
       favoritePerformanceIds: nextFavoritePerformanceIds,
+      performanceFavorites: nextPerformanceFavoritesSource.map((favorite) =>
+        favorite.performanceId === performanceId
+          ? {
+              ...favorite,
+              participants: isFavorite
+                ? favorite.participants.filter(
+                    (participant) =>
+                      participant.participantId !== selectedParticipant.id,
+                  )
+                : [
+                    ...favorite.participants.filter(
+                      (participant) =>
+                        participant.participantId !== selectedParticipant.id,
+                    ),
+                    {
+                      participantId: selectedParticipant.id,
+                      displayName: selectedParticipant.displayName,
+                      avatarId: selectedParticipant.avatarId ?? null,
+                    },
+                  ],
+            }
+          : favorite,
+      ),
     })
 
     try {
@@ -3149,6 +3257,7 @@ function App() {
           ? {
               ...currentTimetable,
               favoritePerformanceIds: previousFavoritePerformanceIds,
+              performanceFavorites: previousPerformanceFavorites,
             }
           : currentTimetable,
       )
@@ -3660,6 +3769,7 @@ function App() {
           timetable={timetable}
           error={timetableError}
           isLoading={isLoadingTimetable}
+          currentParticipantId={selectedParticipant?.id ?? null}
           togglingPerformanceId={togglingFavoritePerformanceId}
           onToggleFavorite={toggleTimetableFavorite}
         />

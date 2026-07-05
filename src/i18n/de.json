@@ -507,6 +507,10 @@
       "add": "Als Favorit markieren",
       "badge": "Favorit",
       "remove": "Favorit entfernen",
+      "sharedLabel": "Auch dabei",
+      "sharedAria": "Auch interessiert: {{names}}",
+      "sharedMore": "+{{count}}",
+      "sharedMoreAria": "{{count}} weitere Teilnehmende",
       "errors": {
         "save": "Der Favorit konnte gerade nicht gespeichert werden."
       }

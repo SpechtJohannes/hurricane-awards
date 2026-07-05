@@ -507,6 +507,10 @@
       "add": "Als favoriet markeren",
       "badge": "Favoriet",
       "remove": "Favoriet verwijderen",
+      "sharedLabel": "Ook erbij",
+      "sharedAria": "Ook geinteresseerd: {{names}}",
+      "sharedMore": "+{{count}}",
+      "sharedMoreAria": "{{count}} extra deelnemers",
       "errors": {
         "save": "De favoriet kon net niet worden opgeslagen."
       }

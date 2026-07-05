@@ -33,12 +33,24 @@ export type TimetablePerformance = {
   endsAt: string | null
 }
 
+export type TimetableFavoriteParticipant = {
+  participantId: string
+  displayName: string
+  avatarId: string | null
+}
+
+export type TimetablePerformanceFavorites = {
+  performanceId: string
+  participants: TimetableFavoriteParticipant[]
+}
+
 export type Timetable = {
   festivalDays: FestivalDay[]
   stages: TimetableStage[]
   acts: TimetableAct[]
   performances: TimetablePerformance[]
   favoritePerformanceIds: string[]
+  performanceFavorites: TimetablePerformanceFavorites[]
 }
 
 export type CreateFestivalDayInput = {
@@ -116,6 +128,17 @@ type TimetablePerformanceRow = {
   ends_at: string | null
 }
 
+type TimetableFavoriteParticipantRow = {
+  participant_id: string
+  display_name: string
+  avatar_id: string | null
+}
+
+type TimetablePerformanceFavoritesRow = {
+  performance_id: string
+  participants: TimetableFavoriteParticipantRow[]
+}
+
 function mapFestivalDay(row: FestivalDayRow): FestivalDay {
   return {
     id: row.id,
@@ -152,6 +175,25 @@ function mapPerformance(row: TimetablePerformanceRow): TimetablePerformance {
   }
 }
 
+function mapFavoriteParticipant(
+  row: TimetableFavoriteParticipantRow,
+): TimetableFavoriteParticipant {
+  return {
+    participantId: row.participant_id,
+    displayName: row.display_name,
+    avatarId: row.avatar_id,
+  }
+}
+
+function mapPerformanceFavorites(
+  row: TimetablePerformanceFavoritesRow,
+): TimetablePerformanceFavorites {
+  return {
+    performanceId: row.performance_id,
+    participants: (row.participants ?? []).map(mapFavoriteParticipant),
+  }
+}
+
 export async function loadTimetable(
   context: ParticipantAccessContext,
 ): Promise<Timetable> {
@@ -171,6 +213,7 @@ export async function loadTimetable(
     acts: TimetableActRow[]
     performances: TimetablePerformanceRow[]
     favorite_performance_ids: string[]
+    performance_favorites: TimetablePerformanceFavoritesRow[]
   }> | null
 
   return {
@@ -179,6 +222,9 @@ export async function loadTimetable(
     acts: (row?.acts ?? []).map(mapAct),
     performances: (row?.performances ?? []).map(mapPerformance),
     favoritePerformanceIds: row?.favorite_performance_ids ?? [],
+    performanceFavorites: (row?.performance_favorites ?? []).map(
+      mapPerformanceFavorites,
+    ),
   }
 }
 

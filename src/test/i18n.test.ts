@@ -47,6 +47,8 @@ describe('i18n test infrastructure', () => {
     expect(i18n.t('timetable.favorite.add')).toBe('Als Favorit markieren')
     expect(i18n.t('timetable.favorite.badge')).toBe('Favorit')
     expect(i18n.t('timetable.favorite.remove')).toBe('Favorit entfernen')
+    expect(i18n.t('timetable.favorite.sharedLabel')).toBe('Auch dabei')
+    expect(i18n.t('timetable.favorite.sharedMore', { count: 2 })).toBe('+2')
 
     await i18n.changeLanguage('nl')
 
@@ -57,6 +59,8 @@ describe('i18n test infrastructure', () => {
     expect(i18n.t('timetable.favorite.add')).toBe('Als favoriet markeren')
     expect(i18n.t('timetable.favorite.badge')).toBe('Favoriet')
     expect(i18n.t('timetable.favorite.remove')).toBe('Favoriet verwijderen')
+    expect(i18n.t('timetable.favorite.sharedLabel')).toBe('Ook erbij')
+    expect(i18n.t('timetable.favorite.sharedMore', { count: 2 })).toBe('+2')
   })
 
   it('enthaelt Admin Texte fuer Festivaltage auf Deutsch und Niederlaendisch', async () => {
