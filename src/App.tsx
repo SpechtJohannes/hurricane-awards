@@ -741,13 +741,18 @@ function TimetableSection({
 
                         return (
                           <article
-                            className="timetable-performance"
+                            className={`timetable-performance${isFavorite ? ' timetable-performance--favorite' : ''}`}
                             key={performance.id}
                             style={{
                               gridColumn: stageIndex + 2,
                               gridRow: `${startsAtIndex + 2} / ${endsAtIndex + 2}`,
                             }}
                           >
+                            {isFavorite ? (
+                              <span className="timetable-performance__badge">
+                                {t('timetable.favorite.badge')}
+                              </span>
+                            ) : null}
                             <p className="timetable-performance__time">
                               {timeLabel(performance.startsAt)} -{' '}
                               {performance.endsAt
