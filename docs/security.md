@@ -120,6 +120,10 @@ Adminfunktionen sind von normalen Teilnehmerfunktionen getrennt:
 - `ha_create_festival_day`
 - `ha_update_festival_day`
 - `ha_delete_festival_day`
+- `ha_admin_list_timetable_stages`
+- `ha_create_timetable_stage`
+- `ha_update_timetable_stage`
+- `ha_delete_timetable_stage`
 
 Adminrechte werden ueber `participants.is_admin` gesteuert. Die App zeigt Adminfunktionen nur fuer Teilnehmer an, deren Login-RPC `is_admin = true` zurueckgibt. Das ist nur Komfort; verbindlich ist die serverseitige Pruefung in `ha_has_admin_access`.
 
