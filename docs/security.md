@@ -128,6 +128,10 @@ Adminfunktionen sind von normalen Teilnehmerfunktionen getrennt:
 - `ha_create_timetable_act`
 - `ha_update_timetable_act`
 - `ha_delete_timetable_act`
+- `ha_admin_list_timetable_performances`
+- `ha_create_timetable_performance`
+- `ha_update_timetable_performance`
+- `ha_delete_timetable_performance`
 
 Adminrechte werden ueber `participants.is_admin` gesteuert. Die App zeigt Adminfunktionen nur fuer Teilnehmer an, deren Login-RPC `is_admin = true` zurueckgibt. Das ist nur Komfort; verbindlich ist die serverseitige Pruefung in `ha_has_admin_access`.
 

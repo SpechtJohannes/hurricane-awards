@@ -338,6 +338,42 @@
           "deleteHasPerformances": "Dieser Act kann nicht gelöscht werden, solange Auftritte zugeordnet sind.",
           "nameRequired": "Der Name ist erforderlich."
         }
+      },
+      "performances": {
+        "title": "Auftritte",
+        "loading": "Auftritte werden geladen...",
+        "empty": "Noch keine Auftritte angelegt.",
+        "missingBaseData": "Lege zuerst mindestens einen Festivaltag, eine Bühne und einen Act an.",
+        "createButton": "Auftritt anlegen",
+        "createTitle": "Auftritt anlegen",
+        "editTitle": "Auftritt bearbeiten",
+        "dayLabel": "Festivaltag",
+        "stageLabel": "Bühne",
+        "actLabel": "Act",
+        "startLabel": "Startzeit",
+        "endLabel": "Endzeit",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "deleting": "Lösche...",
+        "confirmDelete": "Auftritt von \"{{act}}\" wirklich löschen?",
+        "unknownDay": "Unbekannter Festivaltag",
+        "unknownStage": "Unbekannte Bühne",
+        "unknownAct": "Unbekannter Act",
+        "errors": {
+          "load": "Die Auftritte konnten gerade nicht geladen werden.",
+          "save": "Der Auftritt konnte gerade nicht gespeichert werden.",
+          "delete": "Der Auftritt konnte gerade nicht gelöscht werden.",
+          "dayRequired": "Ein Festivaltag ist erforderlich.",
+          "stageRequired": "Eine Bühne ist erforderlich.",
+          "actRequired": "Ein Act ist erforderlich.",
+          "startRequired": "Die Startzeit ist erforderlich.",
+          "endRequired": "Die Endzeit ist erforderlich.",
+          "endAfterStart": "Die Endzeit muss nach der Startzeit liegen.",
+          "overlap": "Auf dieser Bühne überschneidet sich der Auftritt mit einem bestehenden Auftritt.",
+          "invalidReference": "Festivaltag, Bühne oder Act konnte nicht gefunden werden."
+        }
       }
     },
     "bingo": {

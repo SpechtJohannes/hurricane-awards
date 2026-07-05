@@ -90,16 +90,20 @@ import {
 import {
   createFestivalDay,
   createTimetableAct,
+  createTimetablePerformance,
   createTimetableStage,
   deleteFestivalDay,
   deleteTimetableAct,
+  deleteTimetablePerformance,
   deleteTimetableStage,
   loadAdminFestivalDays,
   loadAdminTimetableActs,
+  loadAdminTimetablePerformances,
   loadAdminTimetableStages,
   loadTimetable,
   updateFestivalDay,
   updateTimetableAct,
+  updateTimetablePerformance,
   updateTimetableStage,
 } from '../data/timetable'
 import {
@@ -1105,6 +1109,138 @@ describe('Supabase Datenzugriffe', () => {
       ...expectedParticipantRpcContext,
       p_act_id: 'act-2',
     })
+  })
+
+  it('verwaltet Timetable Auftritte ueber Admin RPCs', async () => {
+    const performanceRow = {
+      id: 'performance-1',
+      festival_day_id: 'day-1',
+      stage_id: 'stage-1',
+      act_id: 'act-1',
+      starts_at: '2026-06-19T20:00:00.000Z',
+      ends_at: '2026-06-19T21:00:00.000Z',
+    }
+
+    rpcMock.mockResolvedValueOnce({
+      data: [performanceRow],
+      error: null,
+    })
+
+    await expect(
+      loadAdminTimetablePerformances(participantContext),
+    ).resolves.toEqual([
+      {
+        id: 'performance-1',
+        festivalDayId: 'day-1',
+        stageId: 'stage-1',
+        actId: 'act-1',
+        startsAt: '2026-06-19T20:00:00.000Z',
+        endsAt: '2026-06-19T21:00:00.000Z',
+      },
+    ])
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      1,
+      'ha_admin_list_timetable_performances',
+      expectedParticipantRpcContext,
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: [performanceRow],
+      error: null,
+    })
+
+    await expect(
+      createTimetablePerformance(
+        {
+          festivalDayId: 'day-1',
+          stageId: 'stage-1',
+          actId: 'act-1',
+          startsAt: '2026-06-19T20:00',
+          endsAt: '2026-06-19T21:00',
+        },
+        participantContext,
+      ),
+    ).resolves.toEqual({
+      id: 'performance-1',
+      festivalDayId: 'day-1',
+      stageId: 'stage-1',
+      actId: 'act-1',
+      startsAt: '2026-06-19T20:00:00.000Z',
+      endsAt: '2026-06-19T21:00:00.000Z',
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      2,
+      'ha_create_timetable_performance',
+      {
+        ...expectedParticipantRpcContext,
+        p_festival_day_id: 'day-1',
+        p_stage_id: 'stage-1',
+        p_act_id: 'act-1',
+        p_starts_at: '2026-06-19T20:00',
+        p_ends_at: '2026-06-19T21:00',
+      },
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          ...performanceRow,
+          ends_at: '2026-06-19T21:30:00.000Z',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      updateTimetablePerformance(
+        {
+          id: 'performance-1',
+          festivalDayId: 'day-1',
+          stageId: 'stage-1',
+          actId: 'act-1',
+          startsAt: '2026-06-19T20:00',
+          endsAt: '2026-06-19T21:30',
+        },
+        participantContext,
+      ),
+    ).resolves.toEqual({
+      id: 'performance-1',
+      festivalDayId: 'day-1',
+      stageId: 'stage-1',
+      actId: 'act-1',
+      startsAt: '2026-06-19T20:00:00.000Z',
+      endsAt: '2026-06-19T21:30:00.000Z',
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      3,
+      'ha_update_timetable_performance',
+      {
+        ...expectedParticipantRpcContext,
+        p_performance_id: 'performance-1',
+        p_festival_day_id: 'day-1',
+        p_stage_id: 'stage-1',
+        p_act_id: 'act-1',
+        p_starts_at: '2026-06-19T20:00',
+        p_ends_at: '2026-06-19T21:30',
+      },
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: null,
+      error: null,
+    })
+
+    await expect(
+      deleteTimetablePerformance('performance-1', participantContext),
+    ).resolves.toBeUndefined()
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      4,
+      'ha_delete_timetable_performance',
+      {
+        ...expectedParticipantRpcContext,
+        p_performance_id: 'performance-1',
+      },
+    )
   })
 
   it('laedt Kategorien ueber eine geschuetzte RPC Funktion', async () => {

@@ -86,26 +86,33 @@ import {
 import {
   createFestivalDay,
   createTimetableAct,
+  createTimetablePerformance,
   createTimetableStage,
   deleteFestivalDay,
   deleteTimetableAct,
+  deleteTimetablePerformance,
   deleteTimetableStage,
   loadAdminFestivalDays,
   loadAdminTimetableActs,
+  loadAdminTimetablePerformances,
   loadAdminTimetableStages,
   loadTimetable,
   updateFestivalDay,
   updateTimetableAct,
+  updateTimetablePerformance,
   updateTimetableStage,
+  type CreateTimetablePerformanceInput,
   type CreateFestivalDayInput,
   type CreateTimetableActInput,
   type CreateTimetableStageInput,
   type FestivalDay,
   type Timetable,
   type TimetableAct,
+  type TimetablePerformance,
   type TimetableStage,
   type UpdateFestivalDayInput,
   type UpdateTimetableActInput,
+  type UpdateTimetablePerformanceInput,
   type UpdateTimetableStageInput,
 } from './data/timetable'
 import {
@@ -123,6 +130,7 @@ import { AdminFestivalDocuments } from './components/AdminFestivalDocuments'
 import { AdminBingo } from './components/AdminBingo'
 import { AdminTimetableActs } from './components/AdminTimetableActs'
 import { AdminTimetableDays } from './components/AdminTimetableDays'
+import { AdminTimetablePerformances } from './components/AdminTimetablePerformances'
 import { AdminTimetableStages } from './components/AdminTimetableStages'
 import { Bingo } from './components/Bingo'
 import { FestivalInfo } from './components/FestivalInfo'
@@ -1004,6 +1012,18 @@ function App() {
   const [isLoadingAdminTimetableActs, setIsLoadingAdminTimetableActs] =
     useState(false)
   const [deletingActId, setDeletingActId] = useState<string | null>(null)
+  const [adminTimetablePerformances, setAdminTimetablePerformances] = useState<
+    TimetablePerformance[]
+  >([])
+  const [adminTimetablePerformancesError, setAdminTimetablePerformancesError] =
+    useState('')
+  const [
+    isLoadingAdminTimetablePerformances,
+    setIsLoadingAdminTimetablePerformances,
+  ] = useState(false)
+  const [deletingPerformanceId, setDeletingPerformanceId] = useState<
+    string | null
+  >(null)
   const [togglingBingoNumber, setTogglingBingoNumber] = useState<number | null>(
     null,
   )
@@ -1401,6 +1421,10 @@ function App() {
     setAdminTimetableActsError('')
     setIsLoadingAdminTimetableActs(false)
     setDeletingActId(null)
+    setAdminTimetablePerformances([])
+    setAdminTimetablePerformancesError('')
+    setIsLoadingAdminTimetablePerformances(false)
+    setDeletingPerformanceId(null)
     setTogglingBingoNumber(null)
     setAdminBingoRound(null)
     setAdminBingoError('')
@@ -1496,6 +1520,7 @@ function App() {
         void reloadAdminFestivalDays()
         void reloadAdminTimetableStages()
         void reloadAdminTimetableActs()
+        void reloadAdminTimetablePerformances()
         void reloadAdminFestivalDocuments()
         void reloadAdminBingoRound()
 
@@ -1608,6 +1633,44 @@ function App() {
     return t('admin.timetable.acts.errors.save')
   }
 
+  function timetablePerformanceMutationErrorMessage(error: unknown) {
+    const message = technicalErrorMessage(error)
+
+    if (message.includes('festival day is required')) {
+      return t('admin.timetable.performances.errors.dayRequired')
+    }
+
+    if (message.includes('stage is required')) {
+      return t('admin.timetable.performances.errors.stageRequired')
+    }
+
+    if (message.includes('act is required')) {
+      return t('admin.timetable.performances.errors.actRequired')
+    }
+
+    if (message.includes('performance start time is required')) {
+      return t('admin.timetable.performances.errors.startRequired')
+    }
+
+    if (message.includes('performance end time is required')) {
+      return t('admin.timetable.performances.errors.endRequired')
+    }
+
+    if (message.includes('performance end time must be after start time')) {
+      return t('admin.timetable.performances.errors.endAfterStart')
+    }
+
+    if (message.includes('performance overlaps existing performance on stage')) {
+      return t('admin.timetable.performances.errors.overlap')
+    }
+
+    if (message.includes('performance references are invalid')) {
+      return t('admin.timetable.performances.errors.invalidReference')
+    }
+
+    return t('admin.timetable.performances.errors.save')
+  }
+
   function festivalNameMutationErrorMessage(error: unknown) {
     const message = technicalErrorMessage(error)
 
@@ -1655,17 +1718,20 @@ function App() {
       loadedAdminFestivalDays,
       loadedAdminTimetableStages,
       loadedAdminTimetableActs,
+      loadedAdminTimetablePerformances,
       loadedTimetable,
     ] = await Promise.all([
       loadAdminFestivalDays(adminContext),
       loadAdminTimetableStages(adminContext),
       loadAdminTimetableActs(adminContext),
+      loadAdminTimetablePerformances(adminContext),
       loadTimetable(adminContext),
     ])
 
     setAdminFestivalDays(loadedAdminFestivalDays)
     setAdminTimetableStages(loadedAdminTimetableStages)
     setAdminTimetableActs(loadedAdminTimetableActs)
+    setAdminTimetablePerformances(loadedAdminTimetablePerformances)
     setTimetable(loadedTimetable)
   }
 
@@ -1772,6 +1838,30 @@ function App() {
       setAdminTimetableActsError(t('admin.timetable.acts.errors.load'))
     } finally {
       setIsLoadingAdminTimetableActs(false)
+    }
+  }
+
+  async function reloadAdminTimetablePerformances() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsLoadingAdminTimetablePerformances(true)
+    setAdminTimetablePerformancesError('')
+
+    try {
+      const loadedPerformances =
+        await loadAdminTimetablePerformances(adminContext)
+
+      setAdminTimetablePerformances(loadedPerformances)
+    } catch {
+      setAdminTimetablePerformancesError(
+        t('admin.timetable.performances.errors.load'),
+      )
+    } finally {
+      setIsLoadingAdminTimetablePerformances(false)
     }
   }
 
@@ -2503,6 +2593,85 @@ function App() {
     }
   }
 
+  async function createAdminTimetablePerformance(
+    input: CreateTimetablePerformanceInput,
+  ) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setAdminTimetablePerformancesError('')
+
+    try {
+      await createTimetablePerformance(input, adminContext)
+      await reloadTimetableForAdminChange()
+    } catch (error) {
+      throw new Error(timetablePerformanceMutationErrorMessage(error), {
+        cause: error,
+      })
+    }
+  }
+
+  async function updateAdminTimetablePerformance(
+    input: UpdateTimetablePerformanceInput,
+  ) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setAdminTimetablePerformancesError('')
+
+    try {
+      await updateTimetablePerformance(input, adminContext)
+      await reloadTimetableForAdminChange()
+    } catch (error) {
+      throw new Error(timetablePerformanceMutationErrorMessage(error), {
+        cause: error,
+      })
+    }
+  }
+
+  async function deleteAdminTimetablePerformance(
+    performance: TimetablePerformance,
+  ) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    const act = adminTimetableActs.find(
+      (currentAct) => currentAct.id === performance.actId,
+    )
+    const shouldDelete = window.confirm(
+      t('admin.timetable.performances.confirmDelete', {
+        act: act?.name ?? t('admin.timetable.performances.unknownAct'),
+      }),
+    )
+
+    if (!shouldDelete) {
+      return
+    }
+
+    setDeletingPerformanceId(performance.id)
+    setAdminTimetablePerformancesError('')
+
+    try {
+      await deleteTimetablePerformance(performance.id, adminContext)
+      await reloadTimetableForAdminChange()
+    } catch {
+      setAdminTimetablePerformancesError(
+        t('admin.timetable.performances.errors.delete'),
+      )
+    } finally {
+      setDeletingPerformanceId(null)
+    }
+  }
+
   async function uploadAdminFestivalDocument(
     documentType: FestivalDocumentType,
     file: File,
@@ -3110,6 +3279,18 @@ function App() {
                 onCreate={createAdminTimetableAct}
                 onUpdate={updateAdminTimetableAct}
                 onDelete={deleteAdminTimetableAct}
+              />
+              <AdminTimetablePerformances
+                performances={adminTimetablePerformances}
+                festivalDays={adminFestivalDays}
+                stages={adminTimetableStages}
+                acts={adminTimetableActs}
+                error={adminTimetablePerformancesError}
+                isLoading={isLoadingAdminTimetablePerformances}
+                deletingPerformanceId={deletingPerformanceId}
+                onCreate={createAdminTimetablePerformance}
+                onUpdate={updateAdminTimetablePerformance}
+                onDelete={deleteAdminTimetablePerformance}
               />
             </>
           ) : null}

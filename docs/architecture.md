@@ -104,7 +104,7 @@ Admin-RPCs umfassen unter anderem:
 - Kategorien: `ha_admin_list_categories`, `ha_create_category`, `ha_update_category`, `ha_update_category_status`, `ha_delete_category`, `ha_delete_category_votes`
 - Festival: `ha_update_festival_name`, `ha_get_festival_access_code`, `ha_update_festival_access_code`, `ha_archive_festival`
 - Infos: `ha_admin_list_festival_documents`, `ha_upsert_festival_document`, `ha_delete_festival_document`, `ha_admin_get_music_playlist`, `ha_update_music_playlist`, `ha_delete_music_playlist`
-- Timetable: `ha_admin_list_festival_days`, `ha_create_festival_day`, `ha_update_festival_day`, `ha_delete_festival_day`, `ha_admin_list_timetable_stages`, `ha_create_timetable_stage`, `ha_update_timetable_stage`, `ha_delete_timetable_stage`, `ha_admin_list_timetable_acts`, `ha_create_timetable_act`, `ha_update_timetable_act`, `ha_delete_timetable_act`
+- Timetable: `ha_admin_list_festival_days`, `ha_create_festival_day`, `ha_update_festival_day`, `ha_delete_festival_day`, `ha_admin_list_timetable_stages`, `ha_create_timetable_stage`, `ha_update_timetable_stage`, `ha_delete_timetable_stage`, `ha_admin_list_timetable_acts`, `ha_create_timetable_act`, `ha_update_timetable_act`, `ha_delete_timetable_act`, `ha_admin_list_timetable_performances`, `ha_create_timetable_performance`, `ha_update_timetable_performance`, `ha_delete_timetable_performance`
 - Bingo: `ha_admin_get_bingo_round`, `ha_start_bingo_round`, `ha_close_bingo_round`
 
 ### Festivalinfos und Dokumente
@@ -129,7 +129,9 @@ Der Timetable-Bereich ist als technische Basis vorbereitet. Die App zeigt einen 
 
 Das Datenmodell trennt Festivaltage (`festival_days`), Buehnen (`timetable_stages`), Acts (`timetable_acts`) und Auftritte (`timetable_performances`). Ein Auftritt referenziert genau einen Festivaltag, genau eine Buehne und genau einen Act. Es gibt noch keine editierbare Teilnehmer-Timetable-Ansicht, keine Favoritenlogik und keine komplexe Darstellung nach Buehnen oder Zeiten.
 
-Admins koennen im Adminbereich `Timetable` Festivaltage, Buehnen und Acts anlegen, bearbeiten und loeschen. Festivaltage und Buehnen lassen sich zusaetzlich ueber die Sortierung bzw. Hoch-/Runter-Aktionen umordnen. Acts sind unabhaengig von Auftritten und koennen spaeter mehreren Auftritten zugeordnet werden. Eine Auftrittsverwaltung ist noch nicht umgesetzt.
+Admins koennen im Adminbereich `Timetable` Festivaltage, Buehnen, Acts und Auftritte anlegen, bearbeiten und loeschen. Festivaltage und Buehnen lassen sich zusaetzlich ueber die Sortierung bzw. Hoch-/Runter-Aktionen umordnen. Acts sind unabhaengig von Auftritten und koennen mehreren Auftritten zugeordnet werden. Jeder Auftritt referenziert genau einen Festivaltag, genau eine Buehne und genau einen Act und hat Start- und Endzeit.
+
+Die Datenbank erzwingt, dass die Endzeit nach der Startzeit liegt und dass sich Auftritte auf derselben Buehne zeitlich nicht ueberschneiden. Die Ueberschneidungsregel ist als Exclusion Constraint auf `timetable_performances` abgesichert und gilt dadurch auch beim Bearbeiten, ohne dass ein Auftritt mit sich selbst kollidiert.
 
 ### Festivaleinstellungen
 
@@ -214,7 +216,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - Sichtbare UI-Texte werden ueber Uebersetzungsdateien gepflegt und nicht direkt in Komponenten hardcodiert.
 - Datenadapter in `src/data` kapseln Supabase RPC-Aufrufe, damit UI-Komponenten nicht direkt mit RPC-Details arbeiten muessen.
 - Festivaldokumente trennen Dateiinhalt und Metadaten: Storage enthaelt die Dateien, PostgreSQL/RPCs steuern die sichtbaren Dokumenteintraege.
-- Der strukturierte Timetable startet mit getrennten Kernentitaeten, einem Lese-RPC und einer schmalen Adminverwaltung fuer Festivaltage, Buehnen und Acts; Auftritte, Favoriten und komplexe Darstellungen werden bewusst spaeter ergaenzt.
+- Der strukturierte Timetable startet mit getrennten Kernentitaeten, einem Lese-RPC und einer Adminverwaltung fuer Festivaltage, Buehnen, Acts und Auftritte; Favoriten und komplexe Teilnehmerdarstellungen werden bewusst spaeter ergaenzt.
 
 ## Wartung und Erweiterung
 

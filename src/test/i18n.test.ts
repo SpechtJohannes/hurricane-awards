@@ -58,6 +58,9 @@ describe('i18n test infrastructure', () => {
     )
     expect(i18n.t('admin.timetable.stages.createButton')).toBe('Bühne anlegen')
     expect(i18n.t('admin.timetable.acts.createButton')).toBe('Act anlegen')
+    expect(i18n.t('admin.timetable.performances.createButton')).toBe(
+      'Auftritt anlegen',
+    )
 
     await i18n.changeLanguage('nl')
 
@@ -69,5 +72,8 @@ describe('i18n test infrastructure', () => {
       'Podium aanmaken',
     )
     expect(i18n.t('admin.timetable.acts.createButton')).toBe('Act aanmaken')
+    expect(i18n.t('admin.timetable.performances.createButton')).toBe(
+      'Optreden aanmaken',
+    )
   })
 })

@@ -75,6 +75,18 @@ export type UpdateTimetableActInput = {
   description: string
 }
 
+export type CreateTimetablePerformanceInput = {
+  festivalDayId: string
+  stageId: string
+  actId: string
+  startsAt: string
+  endsAt: string
+}
+
+export type UpdateTimetablePerformanceInput = CreateTimetablePerformanceInput & {
+  id: string
+}
+
 type FestivalDayRow = {
   id: string
   date: string
@@ -366,6 +378,84 @@ export async function deleteTimetableAct(
   const { error } = await supabase.rpc('ha_delete_timetable_act', {
     ...participantRpcParams(context),
     p_act_id: actId,
+  })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function loadAdminTimetablePerformances(
+  context: AdminAccessContext,
+): Promise<TimetablePerformance[]> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc(
+    'ha_admin_list_timetable_performances',
+    participantRpcParams(context),
+  )
+
+  if (error) {
+    throw error
+  }
+
+  return ((data ?? []) as TimetablePerformanceRow[]).map(mapPerformance)
+}
+
+export async function createTimetablePerformance(
+  input: CreateTimetablePerformanceInput,
+  context: AdminAccessContext,
+): Promise<TimetablePerformance> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc('ha_create_timetable_performance', {
+    ...participantRpcParams(context),
+    p_festival_day_id: input.festivalDayId,
+    p_stage_id: input.stageId,
+    p_act_id: input.actId,
+    p_starts_at: input.startsAt,
+    p_ends_at: input.endsAt,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return mapPerformance(
+    (Array.isArray(data) ? data[0] : data) as TimetablePerformanceRow,
+  )
+}
+
+export async function updateTimetablePerformance(
+  input: UpdateTimetablePerformanceInput,
+  context: AdminAccessContext,
+): Promise<TimetablePerformance> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc('ha_update_timetable_performance', {
+    ...participantRpcParams(context),
+    p_performance_id: input.id,
+    p_festival_day_id: input.festivalDayId,
+    p_stage_id: input.stageId,
+    p_act_id: input.actId,
+    p_starts_at: input.startsAt,
+    p_ends_at: input.endsAt,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return mapPerformance(
+    (Array.isArray(data) ? data[0] : data) as TimetablePerformanceRow,
+  )
+}
+
+export async function deleteTimetablePerformance(
+  performanceId: string,
+  context: AdminAccessContext,
+): Promise<void> {
+  const supabase = getSupabase()
+  const { error } = await supabase.rpc('ha_delete_timetable_performance', {
+    ...participantRpcParams(context),
+    p_performance_id: performanceId,
   })
 
   if (error) {

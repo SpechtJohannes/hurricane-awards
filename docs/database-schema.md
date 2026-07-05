@@ -196,7 +196,7 @@ Wichtigste Spalten:
 - `stage_id`: Zugehoerige Buehne.
 - `act_id`: Zugehoeriger Act.
 - `starts_at`: Startzeitpunkt.
-- `ends_at`: Optionaler Endzeitpunkt.
+- `ends_at`: Endzeitpunkt.
 
 Primaerschluessel: `id`.
 
@@ -208,7 +208,8 @@ Fremdschluessel:
 
 Besonderheiten:
 
-- `ends_at` muss, falls gesetzt, nach `starts_at` liegen.
+- `ends_at` ist erforderlich und muss nach `starts_at` liegen.
+- `timetable_performances_no_stage_overlap` verhindert zeitliche Ueberschneidungen auf derselben Buehne.
 - Direkte Browserzugriffe sind gesperrt; Lesen laeuft ueber `ha_get_timetable`.
 
 ### `festival_access_attempts`
@@ -462,6 +463,8 @@ Dies ist keine vollstaendige API-Referenz, sondern eine Gruppierung der wichtigs
 - `ha_create_timetable_stage`, `ha_update_timetable_stage`, `ha_delete_timetable_stage`: Admin-RPCs fuer Buehnen inklusive eindeutiger Namensvalidierung.
 - `ha_admin_list_timetable_acts`: Listet Acts fuer Admins.
 - `ha_create_timetable_act`, `ha_update_timetable_act`, `ha_delete_timetable_act`: Admin-RPCs fuer Acts. Acts bleiben unabhaengig von Auftritten; `ha_delete_timetable_act` verhindert das Loeschen bereits zugeordneter Acts.
+- `ha_admin_list_timetable_performances`: Listet Auftritte fuer Admins.
+- `ha_create_timetable_performance`, `ha_update_timetable_performance`, `ha_delete_timetable_performance`: Admin-RPCs fuer Auftritte. Ein Datenbank-Constraint verhindert zeitliche Ueberschneidungen auf derselben Buehne; `ends_at` ist erforderlich und muss nach `starts_at` liegen.
 
 ### Archivierung
 
