@@ -500,7 +500,9 @@
     "eyebrow": "Festival",
     "title": "Timetable",
     "loading": "Timetable wird geladen...",
-    "empty": "Der Timetable ist vorbereitet. Es sind noch keine Auftritte hinterlegt.",
+    "empty": "Es sind noch keine Auftritte hinterlegt.",
+    "emptyDay": "An diesem Tag sind noch keine Auftritte hinterlegt.",
+    "unknownAct": "Unbekannter Act",
     "errors": {
       "load": "Der Timetable konnte gerade nicht geladen werden."
     }

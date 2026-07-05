@@ -42,11 +42,15 @@ describe('i18n test infrastructure', () => {
 
     expect(i18n.t('navigation.timetable')).toBe('Timetable')
     expect(i18n.t('timetable.empty')).toContain('noch keine Auftritte')
+    expect(i18n.t('timetable.emptyDay')).toContain('An diesem Tag')
+    expect(i18n.t('timetable.unknownAct')).toBe('Unbekannter Act')
 
     await i18n.changeLanguage('nl')
 
     expect(i18n.t('navigation.timetable')).toBe('Timetable')
     expect(i18n.t('timetable.empty')).toContain('nog geen optredens')
+    expect(i18n.t('timetable.emptyDay')).toContain('Voor deze dag')
+    expect(i18n.t('timetable.unknownAct')).toBe('Onbekende act')
   })
 
   it('enthaelt Admin Texte fuer Festivaltage auf Deutsch und Niederlaendisch', async () => {

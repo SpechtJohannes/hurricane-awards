@@ -593,14 +593,22 @@ type TimetableSectionProps = {
   isLoading: boolean
 }
 
+function timeLabel(value: string) {
+  return value.slice(11, 16)
+}
+
 function TimetableSection({ timetable, error, isLoading }: TimetableSectionProps) {
   const { t } = useTranslation()
-  const hasTimetableData = timetable
-    ? timetable.festivalDays.length > 0 ||
-      timetable.stages.length > 0 ||
-      timetable.acts.length > 0 ||
-      timetable.performances.length > 0
-    : false
+  const hasTimetableData = Boolean(timetable?.performances.length)
+  const actById = new Map(timetable?.acts.map((act) => [act.id, act]) ?? [])
+  const performancesByDay = new Map<string, Timetable['performances']>()
+
+  for (const performance of timetable?.performances ?? []) {
+    const performances = performancesByDay.get(performance.festivalDayId) ?? []
+
+    performances.push(performance)
+    performancesByDay.set(performance.festivalDayId, performances)
+  }
 
   return (
     <section
@@ -625,6 +633,125 @@ function TimetableSection({ timetable, error, isLoading }: TimetableSectionProps
       ) : null}
       {!isLoading && !error && !hasTimetableData ? (
         <p className="timetable__notice">{t('timetable.empty')}</p>
+      ) : null}
+
+      {!isLoading && !error && hasTimetableData && timetable ? (
+        <div className="timetable__days">
+          {timetable.festivalDays.map((day) => {
+            const dayPerformances = (
+              performancesByDay.get(day.id) ?? []
+            ).sort((firstPerformance, secondPerformance) =>
+              firstPerformance.startsAt.localeCompare(secondPerformance.startsAt),
+            )
+            const timeSlots = Array.from(
+              new Set(
+                dayPerformances.flatMap((performance) => [
+                  performance.startsAt,
+                  performance.endsAt,
+                ]).filter((value): value is string => Boolean(value)),
+              ),
+            ).sort()
+
+            return (
+              <article className="timetable-day" key={day.id}>
+                <div className="timetable-day__header">
+                  <p>{day.date}</p>
+                  <h3>{day.label}</h3>
+                </div>
+
+                {dayPerformances.length === 0 ? (
+                  <p className="timetable__notice">{t('timetable.emptyDay')}</p>
+                ) : (
+                  <div className="timetable-grid" role="table">
+                    <div
+                      className="timetable-grid__inner"
+                      style={{
+                        gridTemplateColumns: `72px repeat(${timetable.stages.length}, minmax(160px, 1fr))`,
+                        gridTemplateRows: `auto repeat(${Math.max(timeSlots.length - 1, 1)}, minmax(64px, auto))`,
+                      }}
+                    >
+                      <div
+                        className="timetable-grid__corner"
+                        aria-hidden="true"
+                      />
+                      {timetable.stages.map((stage, stageIndex) => (
+                        <div
+                          className="timetable-grid__stage"
+                          key={stage.id}
+                          role="columnheader"
+                          style={{ gridColumn: stageIndex + 2, gridRow: 1 }}
+                        >
+                          {stage.name}
+                        </div>
+                      ))}
+
+                      {timeSlots.slice(0, -1).map((slot, slotIndex) => (
+                        <div
+                          className="timetable-grid__time"
+                          key={slot}
+                          role="rowheader"
+                          style={{ gridColumn: 1, gridRow: slotIndex + 2 }}
+                        >
+                          {timeLabel(slot)}
+                        </div>
+                      ))}
+
+                      {timeSlots.slice(0, -1).flatMap((slot, slotIndex) =>
+                        timetable.stages.map((stage, stageIndex) => (
+                          <div
+                            className="timetable-grid__cell"
+                            key={`${slot}-${stage.id}`}
+                            style={{
+                              gridColumn: stageIndex + 2,
+                              gridRow: slotIndex + 2,
+                            }}
+                          />
+                        )),
+                      )}
+
+                      {dayPerformances.map((performance) => {
+                        const stageIndex = timetable.stages.findIndex(
+                          (stage) => stage.id === performance.stageId,
+                        )
+                        const startsAtIndex = timeSlots.indexOf(performance.startsAt)
+                        const endsAtIndex = performance.endsAt
+                          ? timeSlots.indexOf(performance.endsAt)
+                          : startsAtIndex + 1
+                        const act = actById.get(performance.actId)
+
+                        if (stageIndex < 0 || startsAtIndex < 0 || endsAtIndex < 0) {
+                          return null
+                        }
+
+                        return (
+                          <article
+                            className="timetable-performance"
+                            key={performance.id}
+                            style={{
+                              gridColumn: stageIndex + 2,
+                              gridRow: `${startsAtIndex + 2} / ${endsAtIndex + 2}`,
+                            }}
+                          >
+                            <p className="timetable-performance__time">
+                              {timeLabel(performance.startsAt)} -{' '}
+                              {performance.endsAt
+                                ? timeLabel(performance.endsAt)
+                                : ''}
+                            </p>
+                            <h4>
+                              {act?.name ?? t('timetable.unknownAct')}
+                            </h4>
+                            {act?.description ? <p>{act.description}</p> : null}
+                          </article>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </article>
+            )
+          })}
+        </div>
       ) : null}
     </section>
   )

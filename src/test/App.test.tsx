@@ -1380,6 +1380,54 @@ describe('Login', () => {
     ).toBeVisible()
   })
 
+  it('zeigt den Timetable nach Tagen, Buehnen und Uhrzeiten gruppiert', async () => {
+    mockLoadedData({
+      loadedTimetable: {
+        festivalDays,
+        stages: timetableStages,
+        acts: timetableActs,
+        performances: timetablePerformances,
+      },
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^timetable$/i)
+
+    const timetableSection = sectionForHeading(/^timetable$/i)
+
+    expect(
+      within(timetableSection).getByRole('heading', { name: 'Freitag' }),
+    ).toBeVisible()
+    expect(within(timetableSection).getByText('2026-06-19')).toBeVisible()
+    expect(
+      within(timetableSection).getByRole('columnheader', {
+        name: 'Mainstage',
+      }),
+    ).toBeVisible()
+    expect(
+      within(timetableSection).getByRole('columnheader', {
+        name: 'Tent Stage',
+      }),
+    ).toBeVisible()
+    expect(
+      within(timetableSection).getByRole('rowheader', { name: '20:00' }),
+    ).toBeVisible()
+
+    const performanceTitle = within(timetableSection).getByRole('heading', {
+      name: 'The Headliners',
+    })
+    const performanceCard = performanceTitle.closest('article')
+
+    expect(performanceCard).toHaveStyle('grid-column: 2')
+    expect(performanceCard).toHaveStyle('grid-row: 2 / 3')
+    expect(
+      within(timetableSection).getByText('20:00 - 21:00'),
+    ).toBeVisible()
+    expect(
+      within(timetableSection).getByText(/Gro.e Gitarren und gro.e Gef.hle/i),
+    ).toBeVisible()
+  })
+
   it('zeigt die individuelle Bingokarte und speichert Markierungen', async () => {
     mockLoadedData({ loadedBingoCard: bingoCard })
     await renderLoadedApp()
