@@ -85,20 +85,27 @@ import {
 } from './data/bingo'
 import {
   createFestivalDay,
+  createTimetableAct,
   createTimetableStage,
   deleteFestivalDay,
+  deleteTimetableAct,
   deleteTimetableStage,
   loadAdminFestivalDays,
+  loadAdminTimetableActs,
   loadAdminTimetableStages,
   loadTimetable,
   updateFestivalDay,
+  updateTimetableAct,
   updateTimetableStage,
   type CreateFestivalDayInput,
+  type CreateTimetableActInput,
   type CreateTimetableStageInput,
   type FestivalDay,
   type Timetable,
+  type TimetableAct,
   type TimetableStage,
   type UpdateFestivalDayInput,
+  type UpdateTimetableActInput,
   type UpdateTimetableStageInput,
 } from './data/timetable'
 import {
@@ -114,6 +121,7 @@ import { AdminFestival } from './components/AdminFestival'
 import { AdminCategories } from './components/AdminCategories'
 import { AdminFestivalDocuments } from './components/AdminFestivalDocuments'
 import { AdminBingo } from './components/AdminBingo'
+import { AdminTimetableActs } from './components/AdminTimetableActs'
 import { AdminTimetableDays } from './components/AdminTimetableDays'
 import { AdminTimetableStages } from './components/AdminTimetableStages'
 import { Bingo } from './components/Bingo'
@@ -991,6 +999,11 @@ function App() {
     useState(false)
   const [savingStageId, setSavingStageId] = useState<string | null>(null)
   const [deletingStageId, setDeletingStageId] = useState<string | null>(null)
+  const [adminTimetableActs, setAdminTimetableActs] = useState<TimetableAct[]>([])
+  const [adminTimetableActsError, setAdminTimetableActsError] = useState('')
+  const [isLoadingAdminTimetableActs, setIsLoadingAdminTimetableActs] =
+    useState(false)
+  const [deletingActId, setDeletingActId] = useState<string | null>(null)
   const [togglingBingoNumber, setTogglingBingoNumber] = useState<number | null>(
     null,
   )
@@ -1384,6 +1397,10 @@ function App() {
     setIsLoadingAdminTimetableStages(false)
     setSavingStageId(null)
     setDeletingStageId(null)
+    setAdminTimetableActs([])
+    setAdminTimetableActsError('')
+    setIsLoadingAdminTimetableActs(false)
+    setDeletingActId(null)
     setTogglingBingoNumber(null)
     setAdminBingoRound(null)
     setAdminBingoError('')
@@ -1478,6 +1495,7 @@ function App() {
         void reloadAdminParticipants()
         void reloadAdminFestivalDays()
         void reloadAdminTimetableStages()
+        void reloadAdminTimetableActs()
         void reloadAdminFestivalDocuments()
         void reloadAdminBingoRound()
 
@@ -1576,6 +1594,20 @@ function App() {
     return t('admin.timetable.stages.errors.save')
   }
 
+  function timetableActMutationErrorMessage(error: unknown) {
+    const message = technicalErrorMessage(error)
+
+    if (message.includes('act name is required')) {
+      return t('admin.timetable.acts.errors.nameRequired')
+    }
+
+    if (message.includes('act cannot be deleted while performances exist')) {
+      return t('admin.timetable.acts.errors.deleteHasPerformances')
+    }
+
+    return t('admin.timetable.acts.errors.save')
+  }
+
   function festivalNameMutationErrorMessage(error: unknown) {
     const message = technicalErrorMessage(error)
 
@@ -1622,15 +1654,18 @@ function App() {
     const [
       loadedAdminFestivalDays,
       loadedAdminTimetableStages,
+      loadedAdminTimetableActs,
       loadedTimetable,
     ] = await Promise.all([
       loadAdminFestivalDays(adminContext),
       loadAdminTimetableStages(adminContext),
+      loadAdminTimetableActs(adminContext),
       loadTimetable(adminContext),
     ])
 
     setAdminFestivalDays(loadedAdminFestivalDays)
     setAdminTimetableStages(loadedAdminTimetableStages)
+    setAdminTimetableActs(loadedAdminTimetableActs)
     setTimetable(loadedTimetable)
   }
 
@@ -1716,6 +1751,27 @@ function App() {
       setAdminTimetableStagesError(t('admin.timetable.stages.errors.load'))
     } finally {
       setIsLoadingAdminTimetableStages(false)
+    }
+  }
+
+  async function reloadAdminTimetableActs() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsLoadingAdminTimetableActs(true)
+    setAdminTimetableActsError('')
+
+    try {
+      const loadedActs = await loadAdminTimetableActs(adminContext)
+
+      setAdminTimetableActs(loadedActs)
+    } catch {
+      setAdminTimetableActsError(t('admin.timetable.acts.errors.load'))
+    } finally {
+      setIsLoadingAdminTimetableActs(false)
     }
   }
 
@@ -2379,6 +2435,74 @@ function App() {
     }
   }
 
+  async function createAdminTimetableAct(input: CreateTimetableActInput) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setAdminTimetableActsError('')
+
+    try {
+      await createTimetableAct(input, adminContext)
+      await reloadTimetableForAdminChange()
+    } catch (error) {
+      throw new Error(timetableActMutationErrorMessage(error), {
+        cause: error,
+      })
+    }
+  }
+
+  async function updateAdminTimetableAct(input: UpdateTimetableActInput) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setAdminTimetableActsError('')
+
+    try {
+      await updateTimetableAct(input, adminContext)
+      await reloadTimetableForAdminChange()
+    } catch (error) {
+      throw new Error(timetableActMutationErrorMessage(error), {
+        cause: error,
+      })
+    }
+  }
+
+  async function deleteAdminTimetableAct(act: TimetableAct) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    const shouldDelete = window.confirm(
+      t('admin.timetable.acts.confirmDelete', {
+        name: act.name,
+      }),
+    )
+
+    if (!shouldDelete) {
+      return
+    }
+
+    setDeletingActId(act.id)
+    setAdminTimetableActsError('')
+
+    try {
+      await deleteTimetableAct(act.id, adminContext)
+      await reloadTimetableForAdminChange()
+    } catch (error) {
+      setAdminTimetableActsError(timetableActMutationErrorMessage(error))
+    } finally {
+      setDeletingActId(null)
+    }
+  }
+
   async function uploadAdminFestivalDocument(
     documentType: FestivalDocumentType,
     file: File,
@@ -2977,6 +3101,15 @@ function App() {
                 onUpdate={updateAdminTimetableStage}
                 onDelete={deleteAdminTimetableStage}
                 onMove={moveAdminTimetableStage}
+              />
+              <AdminTimetableActs
+                acts={adminTimetableActs}
+                error={adminTimetableActsError}
+                isLoading={isLoadingAdminTimetableActs}
+                deletingActId={deletingActId}
+                onCreate={createAdminTimetableAct}
+                onUpdate={updateAdminTimetableAct}
+                onDelete={deleteAdminTimetableAct}
               />
             </>
           ) : null}

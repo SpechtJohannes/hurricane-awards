@@ -144,6 +144,13 @@ const timetableStagesManagementMigration = readFileSync(
   ),
   'utf8',
 )
+const timetableActsManagementMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260705130000_manage_timetable_acts.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -532,6 +539,10 @@ describe('Supabase Sicherheitsmigration', () => {
       [timetableStagesManagementMigration, 'ha_create_timetable_stage'],
       [timetableStagesManagementMigration, 'ha_update_timetable_stage'],
       [timetableStagesManagementMigration, 'ha_delete_timetable_stage'],
+      [timetableActsManagementMigration, 'ha_admin_list_timetable_acts'],
+      [timetableActsManagementMigration, 'ha_create_timetable_act'],
+      [timetableActsManagementMigration, 'ha_update_timetable_act'],
+      [timetableActsManagementMigration, 'ha_delete_timetable_act'],
     ] as const
 
     for (const [migration, functionName] of adminRpcExpectations) {
@@ -1072,6 +1083,37 @@ describe('Supabase Sicherheitsmigration', () => {
     )
   })
 
+  it('stellt Admin RPCs fuer die Act Verwaltung bereit', () => {
+    for (const functionName of [
+      'ha_admin_list_timetable_acts',
+      'ha_create_timetable_act',
+      'ha_update_timetable_act',
+      'ha_delete_timetable_act',
+    ]) {
+      expect(timetableActsManagementMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(timetableActsManagementMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+
+    expect(timetableActsManagementMigration).toContain(
+      'if not public.ha_has_admin_access(p_participant_access_code)',
+    )
+    expect(timetableActsManagementMigration).toContain('act name is required')
+    expect(timetableActsManagementMigration).toContain(
+      'act cannot be deleted while performances exist',
+    )
+    expect(timetableActsManagementMigration).toContain(
+      'from public.timetable_performances tp',
+    )
+    expect(timetableActsManagementMigration).toContain('order by ta.name')
+    expect(timetableActsManagementMigration).not.toContain(
+      'ha_create_timetable_performance',
+    )
+  })
+
   it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
     const migrations = [
       baseMigration,
@@ -1094,6 +1136,7 @@ describe('Supabase Sicherheitsmigration', () => {
       timetableMigration,
       festivalDaysManagementMigration,
       timetableStagesManagementMigration,
+      timetableActsManagementMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')
