@@ -116,6 +116,10 @@ Adminfunktionen sind von normalen Teilnehmerfunktionen getrennt:
 - `ha_get_festival_access_code`
 - `ha_update_festival_access_code`
 - `ha_archive_festival`
+- `ha_admin_list_festival_days`
+- `ha_create_festival_day`
+- `ha_update_festival_day`
+- `ha_delete_festival_day`
 
 Adminrechte werden ueber `participants.is_admin` gesteuert. Die App zeigt Adminfunktionen nur fuer Teilnehmer an, deren Login-RPC `is_admin = true` zurueckgibt. Das ist nur Komfort; verbindlich ist die serverseitige Pruefung in `ha_has_admin_access`.
 

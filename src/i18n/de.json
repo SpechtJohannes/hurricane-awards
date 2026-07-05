@@ -192,6 +192,7 @@
       "festival": "Festival",
       "participants": "Teilnehmer",
       "awards": "Awards",
+      "timetable": "Timetable",
       "games": "Spiele",
       "bingo": "Bingo",
       "info": "Infos",
@@ -256,6 +257,38 @@
         "invalid": "Bitte gib einen gültigen Spotify Playlist Link ein.",
         "save": "Die Playlist konnte gerade nicht gespeichert werden.",
         "remove": "Die Playlist konnte gerade nicht entfernt werden."
+      }
+    },
+    "timetable": {
+      "eyebrow": "Timetable",
+      "title": "Timetable",
+      "days": {
+        "loading": "Festivaltage werden geladen...",
+        "empty": "Noch keine Festivaltage angelegt.",
+        "createButton": "Festivaltag anlegen",
+        "createTitle": "Festivaltag anlegen",
+        "editTitle": "Festivaltag bearbeiten",
+        "dateLabel": "Datum",
+        "labelLabel": "Bezeichnung",
+        "sortOrderLabel": "Sortierung",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "deleting": "Lösche...",
+        "moveUp": "Nach oben",
+        "moveDown": "Nach unten",
+        "confirmDelete": "Festivaltag \"{{label}}\" wirklich löschen?",
+        "errors": {
+          "load": "Die Festivaltage konnten gerade nicht geladen werden.",
+          "save": "Der Festivaltag konnte gerade nicht gespeichert werden.",
+          "delete": "Der Festivaltag konnte gerade nicht gelöscht werden.",
+          "reorder": "Die Reihenfolge konnte gerade nicht gespeichert werden.",
+          "duplicateDate": "Für dieses Datum gibt es bereits einen Festivaltag.",
+          "dateRequired": "Das Datum ist erforderlich.",
+          "labelRequired": "Die Bezeichnung ist erforderlich.",
+          "sortOrderInvalid": "Die Sortierung muss eine ganze Zahl ab 0 sein."
+        }
       }
     },
     "bingo": {

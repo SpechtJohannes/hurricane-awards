@@ -192,6 +192,7 @@
       "festival": "Festival",
       "participants": "Deelnemers",
       "awards": "Awards",
+      "timetable": "Timetable",
       "games": "Spellen",
       "bingo": "Bingo",
       "info": "Info",
@@ -256,6 +257,38 @@
         "invalid": "Voer een geldige Spotify-playlistlink in.",
         "save": "De playlist kon net niet worden opgeslagen.",
         "remove": "De playlist kon net niet worden verwijderd."
+      }
+    },
+    "timetable": {
+      "eyebrow": "Timetable",
+      "title": "Timetable",
+      "days": {
+        "loading": "Festivaldagen worden geladen...",
+        "empty": "Nog geen festivaldagen aangemaakt.",
+        "createButton": "Festivaldag aanmaken",
+        "createTitle": "Festivaldag aanmaken",
+        "editTitle": "Festivaldag bewerken",
+        "dateLabel": "Datum",
+        "labelLabel": "Naam",
+        "sortOrderLabel": "Sortering",
+        "save": "Opslaan",
+        "cancel": "Annuleren",
+        "edit": "Bewerken",
+        "delete": "Verwijderen",
+        "deleting": "Verwijderen...",
+        "moveUp": "Omhoog",
+        "moveDown": "Omlaag",
+        "confirmDelete": "Festivaldag \"{{label}}\" echt verwijderen?",
+        "errors": {
+          "load": "De festivaldagen konden net niet worden geladen.",
+          "save": "De festivaldag kon net niet worden opgeslagen.",
+          "delete": "De festivaldag kon net niet worden verwijderd.",
+          "reorder": "De volgorde kon net niet worden opgeslagen.",
+          "duplicateDate": "Voor deze datum bestaat al een festivaldag.",
+          "dateRequired": "De datum is verplicht.",
+          "labelRequired": "De naam is verplicht.",
+          "sortOrderInvalid": "De sortering moet een geheel getal vanaf 0 zijn."
+        }
       }
     },
     "bingo": {
