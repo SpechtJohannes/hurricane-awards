@@ -4,6 +4,29 @@ All notable changes between releases of this project are documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.3.0
+
+### Timetable
+
+Der Festival Timetable wurde vollständig in die App integriert und ermöglicht die Planung des Festivalwochenendes direkt innerhalb der Anwendung.
+
+#### Neu
+
+* Mehrtägiger Timetable mit Bühnen und Auftritten
+* Verwaltung von Bühnen, Acts und Auftritten im Administrationsbereich
+* Hervorhebung der Bühnen durch individuelle Farben
+* Persönliche Favoriten können direkt im Timetable markiert werden
+* Gemeinsame Favoriten anderer Teilnehmender werden angezeigt und erleichtern die gemeinsame Festivalplanung
+
+#### Verbessert
+
+* Darstellung und Bedienung des Timetables optimiert
+* Performance verbessert
+* Usability überarbeitet
+* Tests und Dokumentation ergänzt
+* Vollständige Mehrsprachigkeit für das Timetable Feature
+
+
 ## v1.2.0
 
 ### Features
