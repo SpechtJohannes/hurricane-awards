@@ -1348,6 +1348,12 @@ describe('Login', () => {
     ).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('heading', { name: /^bingo$/i })).toBeVisible()
     expect(
+      screen.getByText(/jede person erhaelt automatisch/i),
+    ).toBeVisible()
+    expect(
+      screen.getByText(/ziehung findet ausserhalb der app statt/i),
+    ).toBeVisible()
+    expect(
       screen.queryByRole('heading', { name: /abstimmung/i }),
     ).not.toBeInTheDocument()
 

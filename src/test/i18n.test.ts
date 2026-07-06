@@ -67,6 +67,26 @@ describe('i18n test infrastructure', () => {
     expect(i18n.t('timetable.favorite.sharedMore', { count: 2 })).toBe('+2')
   })
 
+  it('enthaelt Bingo Erklaerungen auf Deutsch und Niederlaendisch', async () => {
+    await i18n.changeLanguage('de')
+
+    expect(i18n.t('bingo.description')).toContain(
+      'automatisch eine eigene Bingokarte',
+    )
+    expect(i18n.t('bingo.description')).toContain(
+      'ausserhalb der App',
+    )
+
+    await i18n.changeLanguage('nl')
+
+    expect(i18n.t('bingo.description')).toContain(
+      'automatisch een eigen bingokaart',
+    )
+    expect(i18n.t('bingo.description')).toContain(
+      'buiten de app',
+    )
+  })
+
   it('enthaelt Admin Texte fuer Festivaltage auf Deutsch und Niederlaendisch', async () => {
     await i18n.changeLanguage('de')
 
