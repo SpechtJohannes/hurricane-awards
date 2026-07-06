@@ -599,6 +599,13 @@ type TimetableSectionProps = {
   onToggleFavorite: (performanceId: string, isFavorite: boolean) => void
 }
 
+type TimetableDaySchedule = {
+  day: Timetable['festivalDays'][number]
+  performances: Timetable['performances']
+  timeSlots: string[]
+  timeRows: string[]
+}
+
 function timeLabel(value: string) {
   return value.slice(11, 16)
 }
@@ -620,23 +627,70 @@ function TimetableSection({
   onToggleFavorite,
 }: TimetableSectionProps) {
   const { t } = useTranslation()
-  const hasTimetableData = Boolean(timetable?.performances.length)
-  const actById = new Map(timetable?.acts.map((act) => [act.id, act]) ?? [])
-  const favoritePerformanceIds = new Set(timetable?.favoritePerformanceIds ?? [])
-  const favoriteParticipantsByPerformanceId = new Map(
-    timetable?.performanceFavorites.map((favorite) => [
-      favorite.performanceId,
-      favorite.participants,
-    ]) ?? [],
+  const hasTimetableStructure = Boolean(
+    timetable && timetable.festivalDays.length > 0 && timetable.stages.length > 0,
   )
-  const performancesByDay = new Map<string, Timetable['performances']>()
+  const actById = useMemo(
+    () => new Map(timetable?.acts.map((act) => [act.id, act]) ?? []),
+    [timetable?.acts],
+  )
+  const stageIndexById = useMemo(
+    () => new Map(timetable?.stages.map((stage, index) => [stage.id, index]) ?? []),
+    [timetable?.stages],
+  )
+  const favoritePerformanceIds = useMemo(
+    () => new Set(timetable?.favoritePerformanceIds ?? []),
+    [timetable?.favoritePerformanceIds],
+  )
+  const favoriteParticipantsByPerformanceId = useMemo(
+    () =>
+      new Map(
+        timetable?.performanceFavorites.map((favorite) => [
+          favorite.performanceId,
+          favorite.participants,
+        ]) ?? [],
+      ),
+    [timetable?.performanceFavorites],
+  )
+  const daySchedules = useMemo<TimetableDaySchedule[]>(() => {
+    if (!timetable) {
+      return []
+    }
 
-  for (const performance of timetable?.performances ?? []) {
-    const performances = performancesByDay.get(performance.festivalDayId) ?? []
+    const performancesByDay = new Map<string, Timetable['performances']>()
 
-    performances.push(performance)
-    performancesByDay.set(performance.festivalDayId, performances)
-  }
+    for (const performance of timetable.performances) {
+      const performances = performancesByDay.get(performance.festivalDayId) ?? []
+
+      performances.push(performance)
+      performancesByDay.set(performance.festivalDayId, performances)
+    }
+
+    return timetable.festivalDays.map((day) => {
+      const performances = (performancesByDay.get(day.id) ?? [])
+        .slice()
+        .sort((firstPerformance, secondPerformance) =>
+          firstPerformance.startsAt.localeCompare(secondPerformance.startsAt),
+        )
+      const timeSlots = Array.from(
+        new Set(
+          performances
+            .flatMap((performance) => [
+              performance.startsAt,
+              performance.endsAt,
+            ])
+            .filter((value): value is string => Boolean(value)),
+        ),
+      ).sort()
+
+      return {
+        day,
+        performances,
+        timeSlots,
+        timeRows: timeSlots.length > 1 ? timeSlots.slice(0, -1) : timeSlots,
+      }
+    })
+  }, [timetable])
 
   return (
     <section
@@ -659,27 +713,23 @@ function TimetableSection({
           {error}
         </p>
       ) : null}
-      {!isLoading && !error && !hasTimetableData ? (
+      {!isLoading &&
+      !error &&
+      timetable &&
+      timetable.festivalDays.length === 0 ? (
         <p className="timetable__notice">{t('timetable.empty')}</p>
       ) : null}
+      {!isLoading &&
+      !error &&
+      timetable &&
+      timetable.festivalDays.length > 0 &&
+      timetable.stages.length === 0 ? (
+        <p className="timetable__notice">{t('timetable.emptyStages')}</p>
+      ) : null}
 
-      {!isLoading && !error && hasTimetableData && timetable ? (
+      {!isLoading && !error && hasTimetableStructure && timetable ? (
         <div className="timetable__days">
-          {timetable.festivalDays.map((day) => {
-            const dayPerformances = (
-              performancesByDay.get(day.id) ?? []
-            ).sort((firstPerformance, secondPerformance) =>
-              firstPerformance.startsAt.localeCompare(secondPerformance.startsAt),
-            )
-            const timeSlots = Array.from(
-              new Set(
-                dayPerformances.flatMap((performance) => [
-                  performance.startsAt,
-                  performance.endsAt,
-                ]).filter((value): value is string => Boolean(value)),
-              ),
-            ).sort()
-
+          {daySchedules.map(({ day, performances, timeSlots, timeRows }) => {
             return (
               <article className="timetable-day" key={day.id}>
                 <div className="timetable-day__header">
@@ -687,15 +737,19 @@ function TimetableSection({
                   <h3>{day.label}</h3>
                 </div>
 
-                {dayPerformances.length === 0 ? (
+                {performances.length === 0 ? (
                   <p className="timetable__notice">{t('timetable.emptyDay')}</p>
                 ) : (
                   <div className="timetable-grid" role="table">
+                    <p className="timetable-grid__hint">
+                      {t('timetable.scrollHint')}
+                    </p>
                     <div
                       className="timetable-grid__inner"
                       style={{
-                        gridTemplateColumns: `72px repeat(${timetable.stages.length}, minmax(160px, 1fr))`,
-                        gridTemplateRows: `auto repeat(${Math.max(timeSlots.length - 1, 1)}, minmax(64px, auto))`,
+                        gridTemplateColumns: `76px repeat(${timetable.stages.length}, minmax(180px, 1fr))`,
+                        gridTemplateRows: `auto repeat(${Math.max(timeRows.length, 1)}, minmax(72px, auto))`,
+                        minWidth: `calc(76px + ${timetable.stages.length} * 180px)`,
                       }}
                     >
                       <div
@@ -717,7 +771,7 @@ function TimetableSection({
                         </div>
                       ))}
 
-                      {timeSlots.slice(0, -1).map((slot, slotIndex) => (
+                      {timeRows.map((slot, slotIndex) => (
                         <div
                           className="timetable-grid__time"
                           key={slot}
@@ -728,7 +782,7 @@ function TimetableSection({
                         </div>
                       ))}
 
-                      {timeSlots.slice(0, -1).flatMap((slot, slotIndex) =>
+                      {timeRows.flatMap((slot, slotIndex) =>
                         timetable.stages.map((stage, stageIndex) => (
                           <div
                             className="timetable-grid__cell"
@@ -742,10 +796,8 @@ function TimetableSection({
                         )),
                       )}
 
-                      {dayPerformances.map((performance) => {
-                        const stageIndex = timetable.stages.findIndex(
-                          (stage) => stage.id === performance.stageId,
-                        )
+                      {performances.map((performance) => {
+                        const stageIndex = stageIndexById.get(performance.stageId)
                         const startsAtIndex = timeSlots.indexOf(performance.startsAt)
                         const endsAtIndex = performance.endsAt
                           ? timeSlots.indexOf(performance.endsAt)
@@ -773,7 +825,11 @@ function TimetableSection({
                           .map((participant) => participant.displayName)
                           .join(', ')
 
-                        if (stageIndex < 0 || startsAtIndex < 0 || endsAtIndex < 0) {
+                        if (
+                          stageIndex === undefined ||
+                          startsAtIndex < 0 ||
+                          endsAtIndex < 0
+                        ) {
                           return null
                         }
 

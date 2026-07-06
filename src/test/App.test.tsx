@@ -1450,6 +1450,65 @@ describe('Login', () => {
     expect(
       within(timetableSection).getByText(/Gro.e Gitarren und gro.e Gef.hle/i),
     ).toBeVisible()
+    expect(
+      within(timetableSection).getByRole('heading', { name: 'Samstag' }),
+    ).toBeVisible()
+    expect(
+      within(timetableSection).getByText(/an diesem tag sind noch keine/i),
+    ).toBeVisible()
+    expect(
+      within(timetableSection).getByText(/seitlich scrollen/i),
+    ).toBeVisible()
+  })
+
+  it('stellt viele Buehnen und lange Act Namen in einem horizontalen Raster dar', async () => {
+    const manyStages = Array.from({ length: 7 }, (_, index) => ({
+      id: `stage-${index + 1}`,
+      name: `Sehr lange Buehne ${index + 1}`,
+      sortOrder: index + 1,
+      color: index === 0 ? '#3a86ff' : null,
+    }))
+    const longActName =
+      'Ein aussergewoehnlich langer Act Name mit sehr vielen Woertern'
+
+    mockLoadedData({
+      loadedTimetable: {
+        festivalDays,
+        stages: manyStages,
+        acts: [
+          {
+            id: 'act-long',
+            name: longActName,
+            description: 'Beschreibung mit laengerem Text fuer mobile Karten.',
+          },
+        ],
+        performances: [
+          {
+            ...timetablePerformances[0],
+            actId: 'act-long',
+            stageId: 'stage-7',
+          },
+        ],
+        favoritePerformanceIds: [],
+        performanceFavorites: [],
+      },
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^timetable$/i)
+
+    const timetableSection = sectionForHeading(/^timetable$/i)
+    const grid = timetableSection.querySelector('.timetable-grid__inner')
+
+    expect(grid).toHaveStyle('min-width: calc(76px + 7 * 180px)')
+    expect(
+      within(timetableSection).getByRole('columnheader', {
+        name: 'Sehr lange Buehne 7',
+      }),
+    ).toBeVisible()
+    expect(
+      within(timetableSection).getByRole('heading', { name: longActName }),
+    ).toBeVisible()
   })
 
   it('hebt favorisierte Timetable Auftritte sichtbar hervor', async () => {

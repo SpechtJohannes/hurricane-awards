@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "build:analyze": "tsc -b && vite build --mode analyze",
     "lint": "eslint .",
+    "typecheck": "tsc -b",
     "preview": "vite preview",
     "supabase:version": "supabase --version",
     "supabase:link": "supabase link",

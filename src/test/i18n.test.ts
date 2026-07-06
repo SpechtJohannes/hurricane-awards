@@ -42,7 +42,9 @@ describe('i18n test infrastructure', () => {
 
     expect(i18n.t('navigation.timetable')).toBe('Timetable')
     expect(i18n.t('timetable.empty')).toContain('noch keine Auftritte')
+    expect(i18n.t('timetable.emptyStages')).toContain('noch keine Buehnen')
     expect(i18n.t('timetable.emptyDay')).toContain('An diesem Tag')
+    expect(i18n.t('timetable.scrollHint')).toContain('Seitlich scrollen')
     expect(i18n.t('timetable.unknownAct')).toBe('Unbekannter Act')
     expect(i18n.t('timetable.favorite.add')).toBe('Als Favorit markieren')
     expect(i18n.t('timetable.favorite.badge')).toBe('Favorit')
@@ -54,7 +56,9 @@ describe('i18n test infrastructure', () => {
 
     expect(i18n.t('navigation.timetable')).toBe('Timetable')
     expect(i18n.t('timetable.empty')).toContain('nog geen optredens')
+    expect(i18n.t('timetable.emptyStages')).toContain('nog geen podia')
     expect(i18n.t('timetable.emptyDay')).toContain('Voor deze dag')
+    expect(i18n.t('timetable.scrollHint')).toContain('Scroll zijwaarts')
     expect(i18n.t('timetable.unknownAct')).toBe('Onbekende act')
     expect(i18n.t('timetable.favorite.add')).toBe('Als favoriet markeren')
     expect(i18n.t('timetable.favorite.badge')).toBe('Favoriet')
