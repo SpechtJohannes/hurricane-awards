@@ -493,7 +493,7 @@
   "bingo": {
     "eyebrow": "Bingoronde",
     "title": "Bingo",
-    "description": "De nummers worden analoog getrokken. Markeer hier je getrokken nummers of verwijder een markering.",
+    "description": "Iedereen krijgt automatisch een eigen bingokaart. Je kunt hier op je kaart de velden markeren die je hebt geploegd; de trekking gebeurt buiten de app.",
     "cardLabel": "Je bingokaart",
     "errors": {
       "load": "Je bingokaart kon net niet worden geladen.",
