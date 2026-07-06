@@ -138,6 +138,7 @@ import { AdminTimetableStages } from './components/AdminTimetableStages'
 import { Bingo } from './components/Bingo'
 import { FestivalInfo } from './components/FestivalInfo'
 import { Avatar, ParticipantName } from './components/Avatar'
+import { SectionHeader } from './components/SectionHeader'
 import { useFestivalAccess } from './hooks/useFestivalAccess'
 import { avatars } from './config/avatars'
 import i18n from './i18n'
@@ -698,10 +699,12 @@ function TimetableSection({
       id="main-timetable"
       aria-labelledby="timetable-title"
     >
-      <div className="timetable__header">
-        <p className="timetable__eyebrow">{t('timetable.eyebrow')}</p>
-        <h2 id="timetable-title">{t('timetable.title')}</h2>
-      </div>
+      <SectionHeader
+        title={t('timetable.title')}
+        titleId="timetable-title"
+        eyebrow={t('timetable.eyebrow')}
+        width="narrow"
+      />
 
       {isLoading ? (
         <p className="timetable__notice" role="status">
@@ -3754,7 +3757,10 @@ function App() {
           aria-labelledby="identity-title"
         >
           <div className="identity__content">
-            <h2 id="identity-title">{t('identity.title')}</h2>
+            <SectionHeader
+              title={t('identity.title')}
+              titleId="identity-title"
+            />
 
             <div className="identity__selected">
               <p>
@@ -3867,12 +3873,11 @@ function App() {
       {activeMainSection === 'awards' ? (
         <div id="main-awards">
           <section className="categories" id="abstimmung" aria-labelledby="categories-title">
-            <div className="categories__header">
-              <p className="categories__eyebrow">
-                {t('categories.eyebrow', { count: participantCount })}
-              </p>
-              <h2 id="categories-title">{t('categories.title')}</h2>
-            </div>
+            <SectionHeader
+              title={t('categories.title')}
+              titleId="categories-title"
+              eyebrow={t('categories.eyebrow', { count: participantCount })}
+            />
 
             {votesError ? <p className="categories__notice">{votesError}</p> : null}
             {isLoadingData ? (
@@ -3965,10 +3970,11 @@ function App() {
           </section>
 
           <section className="results" id="ergebnisse" aria-labelledby="results-title">
-            <div className="results__header">
-              <p className="results__eyebrow">{t('results.eyebrow')}</p>
-              <h2 id="results-title">{t('results.title')}</h2>
-            </div>
+            <SectionHeader
+              title={t('results.title')}
+              titleId="results-title"
+              eyebrow={t('results.eyebrow')}
+            />
 
             {resultsError ? <p className="results__notice">{resultsError}</p> : null}
 
@@ -3993,10 +3999,11 @@ function App() {
             id="gesamtclassement"
             aria-labelledby="standings-title"
           >
-            <div className="standings__header">
-              <p className="standings__eyebrow">{t('standings.eyebrow')}</p>
-              <h2 id="standings-title">{t('standings.title')}</h2>
-            </div>
+            <SectionHeader
+              title={t('standings.title')}
+              titleId="standings-title"
+              eyebrow={t('standings.eyebrow')}
+            />
 
             {isStandingsLoading ? (
               <p className="standings__notice" role="status">

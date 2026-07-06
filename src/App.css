@@ -329,6 +329,49 @@ h1 {
   border-color: #ffbe0b;
 }
 
+.section-header {
+  display: grid;
+  width: min(100%, 960px);
+  margin: 0 auto 18px;
+  gap: 7px;
+}
+
+.section-header--narrow {
+  width: min(100%, 760px);
+}
+
+.section-header--participants {
+  margin-top: 28px;
+}
+
+.section-header__eyebrow {
+  margin: 0;
+  color: #ffbe0b;
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.section-header__title {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(1.7rem, 7vw, 3rem);
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.section-header__description {
+  max-width: 42rem;
+  margin: 2px 0 0;
+  color: #f4e7cf;
+  font-size: 0.96rem;
+  font-weight: 750;
+  line-height: 1.42;
+}
+
 .stage-lights {
   position: absolute;
   inset: 0;
@@ -365,7 +408,7 @@ h1 {
 .identity {
   position: relative;
   z-index: 1;
-  padding: 48px 20px;
+  padding: 34px 20px 48px;
   background: rgba(255, 255, 255, 0.05);
   border-block: 1px solid rgba(255, 255, 255, 0.12);
 }
@@ -373,15 +416,6 @@ h1 {
 .identity__content {
   width: min(100%, 960px);
   margin: 0 auto;
-}
-
-.identity h2 {
-  margin: 0 0 22px;
-  color: #ffffff;
-  font-size: clamp(2rem, 10vw, 4rem);
-  line-height: 0.95;
-  letter-spacing: -0.06em;
-  text-transform: uppercase;
 }
 
 .identity__form {
@@ -703,7 +737,7 @@ h1 {
 .admin {
   position: relative;
   z-index: 1;
-  padding: 48px 20px;
+  padding: 34px 20px 48px;
   background: rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
@@ -714,33 +748,6 @@ h1 {
   margin: 0 auto 28px;
   gap: 8px;
   overflow-x: auto;
-}
-
-.admin__header {
-  width: min(100%, 960px);
-  margin: 0 auto 24px;
-}
-
-.admin__header--participants {
-  margin-top: 42px;
-}
-
-.admin__eyebrow {
-  margin: 0 0 10px;
-  color: #ffbe0b;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.admin h2 {
-  margin: 0;
-  color: #ffffff;
-  font-size: clamp(2rem, 10vw, 4rem);
-  line-height: 0.95;
-  letter-spacing: -0.06em;
-  text-transform: uppercase;
 }
 
 .admin__list {
@@ -812,36 +819,7 @@ h1 {
 
 .bingo {
   position: relative;
-  padding: 56px 20px 72px;
-}
-
-.bingo__header {
-  width: min(100%, 760px);
-  margin: 0 auto 24px;
-}
-
-.bingo__eyebrow {
-  margin: 0 0 10px;
-  color: #ffbe0b;
-  font-size: 0.76rem;
-  font-weight: 850;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.bingo h2 {
-  margin: 0 0 12px;
-  color: #ffffff;
-  font-size: clamp(2.4rem, 12vw, 5rem);
-  line-height: 0.92;
-  text-transform: uppercase;
-}
-
-.bingo__header p {
-  margin: 0;
-  color: #f4e7cf;
-  font-weight: 750;
-  line-height: 1.45;
+  padding: 34px 20px 56px;
 }
 
 .bingo__notice {
@@ -863,29 +841,7 @@ h1 {
 
 .timetable {
   position: relative;
-  padding: 56px 20px 72px;
-}
-
-.timetable__header {
-  width: min(100%, 760px);
-  margin: 0 auto 24px;
-}
-
-.timetable__eyebrow {
-  margin: 0 0 10px;
-  color: #ffbe0b;
-  font-size: 0.76rem;
-  font-weight: 850;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.timetable h2 {
-  margin: 0;
-  color: #ffffff;
-  font-size: clamp(2.4rem, 12vw, 5rem);
-  line-height: 0.92;
-  text-transform: uppercase;
+  padding: 34px 20px 56px;
 }
 
 .timetable__notice {
@@ -1210,30 +1166,7 @@ h1 {
 
 .festival-info {
   position: relative;
-  padding: 56px 20px 72px;
-}
-
-.festival-info__header {
-  width: min(100%, 960px);
-  margin: 0 auto 24px;
-}
-
-.festival-info__eyebrow {
-  margin: 0 0 10px;
-  color: #ffbe0b;
-  font-size: 0.76rem;
-  font-weight: 850;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.festival-info h2 {
-  max-width: 11ch;
-  margin: 0;
-  color: #ffffff;
-  font-size: clamp(2.4rem, 12vw, 5rem);
-  line-height: 0.92;
-  text-transform: uppercase;
+  padding: 34px 20px 56px;
 }
 
 .festival-info__notice {
@@ -1897,32 +1830,9 @@ h1 {
 .categories {
   position: relative;
   z-index: 1;
-  padding: 56px 20px 72px;
+  padding: 34px 20px 56px;
   background: rgba(16, 16, 20, 0.72);
   backdrop-filter: blur(18px);
-}
-
-.categories__header {
-  width: min(100%, 960px);
-  margin: 0 auto 24px;
-}
-
-.categories__eyebrow {
-  margin: 0 0 10px;
-  color: #ffbe0b;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.categories h2 {
-  margin: 0;
-  color: #ffffff;
-  font-size: clamp(2rem, 10vw, 4rem);
-  line-height: 0.95;
-  letter-spacing: -0.06em;
-  text-transform: uppercase;
 }
 
 .categories__grid {
@@ -2074,32 +1984,9 @@ h1 {
 .results {
   position: relative;
   z-index: 1;
-  padding: 56px 20px 72px;
+  padding: 34px 20px 56px;
   background: rgba(255, 255, 255, 0.05);
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.results__header {
-  width: min(100%, 960px);
-  margin: 0 auto 24px;
-}
-
-.results__eyebrow {
-  margin: 0 0 10px;
-  color: #ffbe0b;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.results h2 {
-  margin: 0;
-  color: #ffffff;
-  font-size: clamp(2rem, 10vw, 4rem);
-  line-height: 0.95;
-  letter-spacing: -0.06em;
-  text-transform: uppercase;
 }
 
 .results__grid {
@@ -2313,7 +2200,7 @@ h1 {
 .standings {
   position: relative;
   z-index: 1;
-  padding: 56px 20px 80px;
+  padding: 34px 20px 60px;
   background:
     radial-gradient(circle at 85% 15%, rgba(255, 190, 11, 0.14), transparent 20rem),
     rgba(16, 16, 20, 0.72);
@@ -2328,34 +2215,10 @@ h1 {
   border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.standings__header,
 .standings__table,
 .standings__notice {
   width: min(100%, 960px);
   margin-inline: auto;
-}
-
-.standings__header {
-  margin-bottom: 24px;
-}
-
-.standings__eyebrow {
-  margin: 0 0 10px;
-  color: #ffbe0b;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.standings h2 {
-  margin: 0;
-  color: #ffffff;
-  font-size: clamp(2rem, 10vw, 4rem);
-  line-height: 0.95;
-  letter-spacing: -0.06em;
-  text-transform: uppercase;
-  overflow-wrap: anywhere;
 }
 
 .standings__notice {
@@ -2614,12 +2477,24 @@ h1 {
     margin-top: 42px;
   }
 
-  .identity {
-    padding: 64px;
+  .section-header {
+    margin-bottom: 22px;
   }
 
-  .identity h2 {
-    margin-bottom: 28px;
+  .section-header--participants {
+    margin-top: 32px;
+  }
+
+  .section-header__title {
+    font-size: clamp(2rem, 4.2vw, 3.4rem);
+  }
+
+  .section-header__description {
+    font-size: 1rem;
+  }
+
+  .identity {
+    padding: 42px 64px 64px;
   }
 
   .identity__form {
@@ -2638,11 +2513,7 @@ h1 {
   }
 
   .admin {
-    padding: 64px;
-  }
-
-  .admin__header {
-    margin-bottom: 32px;
+    padding: 42px 64px 64px;
   }
 
   .admin-festival {
@@ -2684,11 +2555,7 @@ h1 {
   }
 
   .categories {
-    padding: 72px 64px 96px;
-  }
-
-  .categories__header {
-    margin-bottom: 32px;
+    padding: 42px 64px 72px;
   }
 
   .categories__grid {
@@ -2696,11 +2563,7 @@ h1 {
   }
 
   .results {
-    padding: 72px 64px 96px;
-  }
-
-  .results__header {
-    margin-bottom: 32px;
+    padding: 42px 64px 72px;
   }
 
   .results__grid {
@@ -2708,11 +2571,7 @@ h1 {
   }
 
   .standings {
-    padding: 72px 64px 96px;
-  }
-
-  .standings__header {
-    margin-bottom: 32px;
+    padding: 42px 64px 72px;
   }
 
   .standings__columns,

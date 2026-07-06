@@ -10,6 +10,7 @@ import {
   type FestivalDocumentType,
 } from '../data/festivalDocuments'
 import type { MusicPlaylist } from '../data/musicEmbeds'
+import { SectionHeader } from './SectionHeader'
 
 type AdminFestivalDocumentsProps = {
   documents: FestivalDocument[]
@@ -111,10 +112,10 @@ export function AdminFestivalDocuments({
 
   return (
     <>
-      <div className="admin__header admin__header--documents">
-        <p className="admin__eyebrow">{t('admin.documents.eyebrow')}</p>
-        <h2>{t('admin.documents.title')}</h2>
-      </div>
+      <SectionHeader
+        title={t('admin.documents.title')}
+        eyebrow={t('admin.documents.eyebrow')}
+      />
 
       {error ? <p className="admin__notice" role="alert">{error}</p> : null}
 

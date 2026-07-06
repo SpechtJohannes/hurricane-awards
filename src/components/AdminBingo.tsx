@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { BingoRound } from '../data/bingo'
+import { SectionHeader } from './SectionHeader'
 
 type AdminBingoProps = {
   round: BingoRound | null
@@ -49,10 +50,11 @@ export function AdminBingo({
 
   return (
     <>
-      <div className="admin__header">
-        <p className="admin__eyebrow">{t('admin.bingo.eyebrow')}</p>
-        <h2 id="admin-bingo-title">{t('admin.bingo.title')}</h2>
-      </div>
+      <SectionHeader
+        title={t('admin.bingo.title')}
+        titleId="admin-bingo-title"
+        eyebrow={t('admin.bingo.eyebrow')}
+      />
 
       <div className="admin-bingo">
         {isLoading ? (

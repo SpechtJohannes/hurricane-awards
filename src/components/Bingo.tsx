@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { BingoCard } from '../data/bingo'
+import { SectionHeader } from './SectionHeader'
 
 type BingoProps = {
   card: BingoCard
@@ -19,11 +20,13 @@ export function Bingo({
 
   return (
     <section className="bingo" id="main-bingo" aria-labelledby="bingo-title">
-      <div className="bingo__header">
-        <p className="bingo__eyebrow">{t('bingo.eyebrow')}</p>
-        <h2 id="bingo-title">{t('bingo.title')}</h2>
-        <p>{t('bingo.description')}</p>
-      </div>
+      <SectionHeader
+        title={t('bingo.title')}
+        titleId="bingo-title"
+        eyebrow={t('bingo.eyebrow')}
+        description={t('bingo.description')}
+        width="narrow"
+      />
 
       {error ? (
         <p className="bingo__notice bingo__notice--error" role="alert">

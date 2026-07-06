@@ -5,6 +5,7 @@ import {
   type FestivalDay,
   type UpdateFestivalDayInput,
 } from '../data/timetable'
+import { SectionHeader } from './SectionHeader'
 
 type FestivalDayFormState = {
   id: string | null
@@ -121,10 +122,11 @@ export function AdminTimetableDays({
 
   return (
     <>
-      <div className="admin__header">
-        <p className="admin__eyebrow">{t('admin.timetable.eyebrow')}</p>
-        <h2 id="admin-title">{t('admin.timetable.title')}</h2>
-      </div>
+      <SectionHeader
+        title={t('admin.timetable.title')}
+        titleId="admin-title"
+        eyebrow={t('admin.timetable.eyebrow')}
+      />
 
       {error ? <p className="admin__notice">{error}</p> : null}
 

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { SectionHeader } from './SectionHeader'
 
 type AdminFestivalProps = {
   mode?: 'settings' | 'archive'
@@ -132,10 +133,11 @@ export function AdminFestival({
   if (mode === 'archive') {
     return (
       <>
-        <div className="admin__header">
-          <p className="admin__eyebrow">{t('admin.archive.eyebrow')}</p>
-          <h2 id="admin-archive-title">{t('admin.archive.title')}</h2>
-        </div>
+        <SectionHeader
+          title={t('admin.archive.title')}
+          titleId="admin-archive-title"
+          eyebrow={t('admin.archive.eyebrow')}
+        />
 
         <div className="admin-festival-actions">
           <label className="admin-festival-actions__option">
@@ -218,10 +220,11 @@ export function AdminFestival({
 
   return (
     <>
-      <div className="admin__header">
-        <p className="admin__eyebrow">{t('admin.festival.eyebrow')}</p>
-        <h2 id="admin-title">{t('admin.festival.title')}</h2>
-      </div>
+      <SectionHeader
+        title={t('admin.festival.title')}
+        titleId="admin-title"
+        eyebrow={t('admin.festival.eyebrow')}
+      />
 
       {error ? <p className="admin__notice">{error}</p> : null}
 

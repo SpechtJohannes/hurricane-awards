@@ -2,6 +2,7 @@ import { type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ParticipantName } from './Avatar'
 import { type Participant } from '../data/participants'
+import { SectionHeader } from './SectionHeader'
 
 export type ParticipantFormState = {
   id: string | null
@@ -48,10 +49,11 @@ export function AdminParticipants({
 
   return (
     <>
-      <div className="admin__header admin__header--participants">
-        <p className="admin__eyebrow">{t('admin.participants.eyebrow')}</p>
-        <h2>{t('admin.participants.title')}</h2>
-      </div>
+      <SectionHeader
+        title={t('admin.participants.title')}
+        eyebrow={t('admin.participants.eyebrow')}
+        className="section-header--participants"
+      />
 
       {error ? <p className="admin__notice">{error}</p> : null}
 

@@ -5,6 +5,7 @@ import {
   type TimetableStage,
   type UpdateTimetableStageInput,
 } from '../data/timetable'
+import { SectionHeader } from './SectionHeader'
 
 type StageFormState = {
   id: string | null
@@ -119,10 +120,10 @@ export function AdminTimetableStages({
 
   return (
     <>
-      <div className="admin__header">
-        <p className="admin__eyebrow">{t('admin.timetable.eyebrow')}</p>
-        <h2>{t('admin.timetable.stages.title')}</h2>
-      </div>
+      <SectionHeader
+        title={t('admin.timetable.stages.title')}
+        eyebrow={t('admin.timetable.eyebrow')}
+      />
 
       {error ? <p className="admin__notice">{error}</p> : null}
 

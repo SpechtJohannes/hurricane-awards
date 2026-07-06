@@ -8,6 +8,7 @@ import {
   type TimetableStage,
   type UpdateTimetablePerformanceInput,
 } from '../data/timetable'
+import { SectionHeader } from './SectionHeader'
 
 type PerformanceFormState = {
   id: string | null
@@ -165,12 +166,11 @@ export function AdminTimetablePerformances({
       className="admin-timetable-performances"
       aria-labelledby="admin-timetable-performances-title"
     >
-      <div className="admin__header">
-        <p className="admin__eyebrow">{t('admin.timetable.eyebrow')}</p>
-        <h2 id="admin-timetable-performances-title">
-          {t('admin.timetable.performances.title')}
-        </h2>
-      </div>
+      <SectionHeader
+        title={t('admin.timetable.performances.title')}
+        titleId="admin-timetable-performances-title"
+        eyebrow={t('admin.timetable.eyebrow')}
+      />
 
       {error ? <p className="admin__notice">{error}</p> : null}
 

@@ -6,6 +6,7 @@ import {
   type CreateCategoryInput,
   type UpdateCategoryInput,
 } from '../data/categories'
+import { SectionHeader } from './SectionHeader'
 
 type CategoryFormState = {
   id: string | null
@@ -132,10 +133,11 @@ export function AdminCategories({
 
   return (
     <>
-      <div className="admin__header">
-        <p className="admin__eyebrow">{t('admin.eyebrow')}</p>
-        <h2 id="admin-title">{t('admin.title')}</h2>
-      </div>
+      <SectionHeader
+        title={t('admin.title')}
+        titleId="admin-title"
+        eyebrow={t('admin.eyebrow')}
+      />
 
       {error ? <p className="admin__notice">{error}</p> : null}
 

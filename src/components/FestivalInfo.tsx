@@ -6,6 +6,7 @@ import {
   type FestivalDocumentType,
 } from '../data/festivalDocuments'
 import type { MusicPlaylist } from '../data/musicEmbeds'
+import { SectionHeader } from './SectionHeader'
 
 type FestivalInfoProps = {
   documents: FestivalDocument[]
@@ -68,10 +69,11 @@ export function FestivalInfo({
       id="main-info"
       aria-labelledby="festival-info-title"
     >
-      <div className="festival-info__header">
-        <p className="festival-info__eyebrow">{t('info.eyebrow')}</p>
-        <h2 id="festival-info-title">{t('info.title')}</h2>
-      </div>
+      <SectionHeader
+        title={t('info.title')}
+        titleId="festival-info-title"
+        eyebrow={t('info.eyebrow')}
+      />
 
       {isLoading ? (
         <p className="festival-info__notice" role="status">
