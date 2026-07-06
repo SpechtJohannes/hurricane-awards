@@ -505,7 +505,9 @@
     "title": "Timetable",
     "loading": "Timetable wordt geladen...",
     "empty": "Er zijn nog geen optredens beschikbaar.",
+    "emptyStages": "Er zijn nog geen podia voor de timetable beschikbaar.",
     "emptyDay": "Voor deze dag zijn nog geen optredens beschikbaar.",
+    "scrollHint": "Scroll zijwaarts voor meer podia",
     "unknownAct": "Onbekende act",
     "favorite": {
       "add": "Als favoriet markeren",

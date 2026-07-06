@@ -505,7 +505,9 @@
     "title": "Timetable",
     "loading": "Timetable wird geladen...",
     "empty": "Es sind noch keine Auftritte hinterlegt.",
+    "emptyStages": "Es sind noch keine Buehnen fuer den Timetable hinterlegt.",
     "emptyDay": "An diesem Tag sind noch keine Auftritte hinterlegt.",
+    "scrollHint": "Seitlich scrollen fuer weitere Buehnen",
     "unknownAct": "Unbekannter Act",
     "favorite": {
       "add": "Als Favorit markieren",

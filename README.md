@@ -12,6 +12,12 @@ Die technische Referenz zum aktuellen Datenbankschema steht in `docs/database-sc
 
 Installations- und Deployment-Hinweise stehen in `docs/installation-and-deployment.md`.
 
+## Timetable
+
+Der Timetable ist ein eigener Hauptbereich der App. Er gruppiert Auftritte nach Festivaltagen, zeigt Buehnen als horizontal scrollbare Spalten und laesst Teilnehmende einzelne Auftritte als Favoriten markieren. Leere Festivaltage bleiben sichtbar, damit vorbereitete Timetable-Strukturen auch ohne eingetragene Auftritte nachvollziehbar sind.
+
+Die technische Struktur, Supabase RPCs und UI-Entscheidungen sind in `docs/architecture.md` im Abschnitt `Timetable` dokumentiert.
+
 ### Supabase CLI und Migrationen
 
 Die Supabase CLI ist als Dev Dependency eingerichtet. Neue Entwickler installieren sie zusammen mit den anderen Projektabhaengigkeiten:
