@@ -629,7 +629,10 @@ function TimetableSection({
 }: TimetableSectionProps) {
   const { t } = useTranslation()
   const hasTimetableStructure = Boolean(
-    timetable && timetable.festivalDays.length > 0 && timetable.stages.length > 0,
+    timetable &&
+      timetable.festivalDays.length > 0 &&
+      timetable.stages.length > 0 &&
+      timetable.performances.length > 0,
   )
   const actById = useMemo(
     () => new Map(timetable?.acts.map((act) => [act.id, act]) ?? []),
@@ -667,30 +670,32 @@ function TimetableSection({
       performancesByDay.set(performance.festivalDayId, performances)
     }
 
-    return timetable.festivalDays.map((day) => {
-      const performances = (performancesByDay.get(day.id) ?? [])
-        .slice()
-        .sort((firstPerformance, secondPerformance) =>
-          firstPerformance.startsAt.localeCompare(secondPerformance.startsAt),
-        )
-      const timeSlots = Array.from(
-        new Set(
-          performances
-            .flatMap((performance) => [
-              performance.startsAt,
-              performance.endsAt,
-            ])
-            .filter((value): value is string => Boolean(value)),
-        ),
-      ).sort()
+    return timetable.festivalDays
+      .map((day) => {
+        const performances = (performancesByDay.get(day.id) ?? [])
+          .slice()
+          .sort((firstPerformance, secondPerformance) =>
+            firstPerformance.startsAt.localeCompare(secondPerformance.startsAt),
+          )
+        const timeSlots = Array.from(
+          new Set(
+            performances
+              .flatMap((performance) => [
+                performance.startsAt,
+                performance.endsAt,
+              ])
+              .filter((value): value is string => Boolean(value)),
+          ),
+        ).sort()
 
-      return {
-        day,
-        performances,
-        timeSlots,
-        timeRows: timeSlots.length > 1 ? timeSlots.slice(0, -1) : timeSlots,
-      }
-    })
+        return {
+          day,
+          performances,
+          timeSlots,
+          timeRows: timeSlots.length > 1 ? timeSlots.slice(0, -1) : timeSlots,
+        }
+      })
+      .filter(({ performances }) => performances.length > 0)
   }, [timetable])
 
   return (
@@ -719,13 +724,14 @@ function TimetableSection({
       {!isLoading &&
       !error &&
       timetable &&
-      timetable.festivalDays.length === 0 ? (
+      timetable.performances.length === 0 ? (
         <p className="timetable__notice">{t('timetable.empty')}</p>
       ) : null}
       {!isLoading &&
       !error &&
       timetable &&
       timetable.festivalDays.length > 0 &&
+      timetable.performances.length > 0 &&
       timetable.stages.length === 0 ? (
         <p className="timetable__notice">{t('timetable.emptyStages')}</p>
       ) : null}
@@ -740,26 +746,23 @@ function TimetableSection({
                   <h3>{day.label}</h3>
                 </div>
 
-                {performances.length === 0 ? (
-                  <p className="timetable__notice">{t('timetable.emptyDay')}</p>
-                ) : (
-                  <div className="timetable-grid" role="table">
-                    <p className="timetable-grid__hint">
-                      {t('timetable.scrollHint')}
-                    </p>
+                <div className="timetable-grid" role="table">
+                  <p className="timetable-grid__hint">
+                    {t('timetable.scrollHint')}
+                  </p>
+                  <div
+                    className="timetable-grid__inner"
+                    style={{
+                      gridTemplateColumns: `76px repeat(${timetable.stages.length}, minmax(180px, 1fr))`,
+                      gridTemplateRows: `auto repeat(${Math.max(timeRows.length, 1)}, minmax(72px, auto))`,
+                      minWidth: `calc(76px + ${timetable.stages.length} * 180px)`,
+                    }}
+                  >
                     <div
-                      className="timetable-grid__inner"
-                      style={{
-                        gridTemplateColumns: `76px repeat(${timetable.stages.length}, minmax(180px, 1fr))`,
-                        gridTemplateRows: `auto repeat(${Math.max(timeRows.length, 1)}, minmax(72px, auto))`,
-                        minWidth: `calc(76px + ${timetable.stages.length} * 180px)`,
-                      }}
-                    >
-                      <div
-                        className="timetable-grid__corner"
-                        aria-hidden="true"
-                      />
-                      {timetable.stages.map((stage, stageIndex) => (
+                      className="timetable-grid__corner"
+                      aria-hidden="true"
+                    />
+                    {timetable.stages.map((stage, stageIndex) => (
                         <div
                           className="timetable-grid__stage"
                           key={stage.id}
@@ -928,8 +931,7 @@ function TimetableSection({
                         )
                       })}
                     </div>
-                  </div>
-                )}
+                </div>
               </article>
             )
           })}

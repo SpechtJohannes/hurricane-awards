@@ -1398,6 +1398,34 @@ describe('Login', () => {
     ).toBeVisible()
   })
 
+  it('zeigt einen Hinweis, wenn im Timetable keine Auftritte vorhanden sind', async () => {
+    mockLoadedData({
+      loadedTimetable: {
+        festivalDays,
+        stages: timetableStages,
+        acts: timetableActs,
+        performances: [],
+        favoritePerformanceIds: [],
+        performanceFavorites: [],
+      },
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^timetable$/i)
+
+    const timetableSection = sectionForHeading(/^timetable$/i)
+
+    expect(
+      within(timetableSection).getByText(/noch keine auftritte hinterlegt/i),
+    ).toBeVisible()
+    expect(
+      within(timetableSection).queryByRole('heading', { name: 'Freitag' }),
+    ).not.toBeInTheDocument()
+    expect(
+      within(timetableSection).queryByRole('heading', { name: 'Samstag' }),
+    ).not.toBeInTheDocument()
+  })
+
   it('zeigt den Timetable nach Tagen, Buehnen und Uhrzeiten gruppiert', async () => {
     mockLoadedData({
       loadedTimetable: {
@@ -1457,14 +1485,63 @@ describe('Login', () => {
       within(timetableSection).getByText(/Gro.e Gitarren und gro.e Gef.hle/i),
     ).toBeVisible()
     expect(
-      within(timetableSection).getByRole('heading', { name: 'Samstag' }),
-    ).toBeVisible()
+      within(timetableSection).queryByRole('heading', { name: 'Samstag' }),
+    ).not.toBeInTheDocument()
     expect(
-      within(timetableSection).getByText(/an diesem tag sind noch keine/i),
-    ).toBeVisible()
+      within(timetableSection).queryByText(/an diesem tag sind noch keine/i),
+    ).not.toBeInTheDocument()
     expect(
       within(timetableSection).getByText(/seitlich scrollen/i),
     ).toBeVisible()
+  })
+
+  it('erhaelt die chronologische Reihenfolge der Timetable Tage mit Auftritten', async () => {
+    const sundayPerformance: TimetablePerformance = {
+      id: 'performance-2',
+      festivalDayId: 'day-3',
+      stageId: 'stage-2',
+      actId: 'act-2',
+      startsAt: '2026-06-21T18:00:00.000Z',
+      endsAt: '2026-06-21T19:00:00.000Z',
+    }
+
+    mockLoadedData({
+      loadedTimetable: {
+        festivalDays: [
+          ...festivalDays,
+          {
+            id: 'day-3',
+            date: '2026-06-21',
+            label: 'Sonntag',
+            sortOrder: 3,
+          },
+        ],
+        stages: timetableStages,
+        acts: timetableActs,
+        performances: [...timetablePerformances, sundayPerformance],
+        favoritePerformanceIds: [],
+        performanceFavorites: [],
+      },
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^timetable$/i)
+
+    const timetableSection = sectionForHeading(/^timetable$/i)
+    const fridayHeading = within(timetableSection).getByRole('heading', {
+      name: 'Freitag',
+    })
+    const sundayHeading = within(timetableSection).getByRole('heading', {
+      name: 'Sonntag',
+    })
+
+    expect(
+      within(timetableSection).queryByRole('heading', { name: 'Samstag' }),
+    ).not.toBeInTheDocument()
+    expect(
+      fridayHeading.compareDocumentPosition(sundayHeading) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
   })
 
   it('stellt viele Buehnen und lange Act Namen in einem horizontalen Raster dar', async () => {
