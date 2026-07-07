@@ -742,7 +742,7 @@ async function unlockFestivalWith(code = 'HURRICANE2026') {
 
   await waitFor(() => {
     expect(
-      screen.queryByRole('textbox', { name: /^teilnehmercode$/i }) ??
+      screen.queryByRole('navigation', { name: /hauptbereiche/i }) ??
         screen.queryByRole('alert'),
     ).not.toBeNull()
   })
@@ -754,6 +754,10 @@ async function loginWith(code: string) {
   const user = screen.queryByRole('textbox', { name: /^teilnehmercode$/i })
     ? userEvent.setup()
     : await unlockFestivalWith()
+
+  if (!screen.queryByRole('textbox', { name: /^teilnehmercode$/i })) {
+    await user.click(screen.getByRole('button', { name: /^profil$/i }))
+  }
 
   await user.clear(screen.getByRole('textbox', { name: /^teilnehmercode$/i }))
   await user.type(
@@ -1103,7 +1107,7 @@ describe('Login', () => {
     expect(loadFestivalName).toHaveBeenCalled()
   })
 
-  it('zeigt nach gueltigem Festivalcode den Teilnehmerlogin und speichert die Freischaltung', async () => {
+  it('zeigt nach gueltigem Festivalcode das Dashboard und speichert die Freischaltung', async () => {
     await renderLoadedApp()
 
     await unlockFestivalWith(' hurricane2026 ')
@@ -1113,8 +1117,12 @@ describe('Login', () => {
     )
     expect(verifyFestivalAccessCode).toHaveBeenCalledWith('HURRICANE2026')
     expect(
-      await screen.findByRole('textbox', { name: /^teilnehmercode$/i }),
+      await screen.findByRole('heading', { name: /hallo festivalcrew/i }),
     ).toBeVisible()
+    expect(screen.getAllByText('Hurricane Awards 2026').length).toBeGreaterThan(0)
+    expect(
+      screen.queryByRole('textbox', { name: /^teilnehmercode$/i }),
+    ).not.toBeInTheDocument()
     expect(loadParticipants).not.toHaveBeenCalled()
     expect(loadVotes).not.toHaveBeenCalled()
   })
@@ -1131,7 +1139,7 @@ describe('Login', () => {
     await unlockFestivalWith('HURRICANE2026')
 
     expect(
-      await screen.findByRole('textbox', { name: /^teilnehmercode$/i }),
+      await screen.findByRole('heading', { name: /hallo festivalcrew/i }),
     ).toBeVisible()
   })
 
@@ -1160,7 +1168,7 @@ describe('Login', () => {
       audio: false,
     })
     expect(
-      await screen.findByRole('textbox', { name: /^teilnehmercode$/i }),
+      await screen.findByRole('heading', { name: /hallo festivalcrew/i }),
     ).toBeVisible()
     expect(verifyFestivalAccessCode).toHaveBeenCalledWith('HURRICANE2026')
     expect(stopCameraTrack).toHaveBeenCalled()
@@ -1193,6 +1201,12 @@ describe('Login', () => {
     await userEvent.click(
       await screen.findByRole('button', { name: /qr-code scannen/i }),
     )
+
+    expect(
+      await screen.findByRole('heading', { name: /hallo festivalcrew/i }),
+    ).toBeVisible()
+
+    await userEvent.click(screen.getByRole('button', { name: /^profil$/i }))
 
     const participantCodeInput = await screen.findByRole('textbox', {
       name: /^teilnehmercode$/i,
@@ -1227,7 +1241,7 @@ describe('Login', () => {
     render(<App />)
 
     expect(
-      await screen.findByRole('textbox', { name: /^teilnehmercode$/i }),
+      await screen.findByRole('heading', { name: /hallo festivalcrew/i }),
     ).toBeVisible()
     expect(
       screen.queryByRole('textbox', { name: /^festivalcode$/i }),
@@ -1237,7 +1251,8 @@ describe('Login', () => {
   it('zeigt nicht angemeldet den Profilbereich mit Loginueberschrift', async () => {
     await renderLoadedApp()
 
-    await unlockFestivalWith()
+    const user = await unlockFestivalWith()
+    await user.click(screen.getByRole('button', { name: /^profil$/i }))
 
     const profileSection = sectionForHeading(/mit teilnehmercode anmelden/i)
 
@@ -1256,11 +1271,13 @@ describe('Login', () => {
     await renderLoadedApp()
     const user = await unlockFestivalWith()
 
+    await user.click(screen.getByRole('button', { name: /^profil$/i }))
     await user.type(
       screen.getByRole('textbox', { name: /^teilnehmercode$/i }),
       'ALICE42',
     )
     await user.click(screen.getByRole('button', { name: /code/i }))
+    await user.click(screen.getByRole('button', { name: /^profil$/i }))
 
     const profileSection = sectionForHeading(/dein profil/i)
 
@@ -1275,6 +1292,101 @@ describe('Login', () => {
         name: /mit teilnehmercode anmelden/i,
       }),
     ).not.toBeInTheDocument()
+  })
+
+  it('zeigt nach der Anmeldung ein persoenliches Dashboard statt der alten Hero Startansicht', async () => {
+    await renderLoadedApp()
+    const user = await unlockFestivalWith()
+
+    await user.click(screen.getByRole('button', { name: /^profil$/i }))
+    await user.type(
+      screen.getByRole('textbox', { name: /^teilnehmercode$/i }),
+      'ALICE42',
+    )
+    await user.click(screen.getByRole('button', { name: /code/i }))
+
+    expect(
+      await screen.findByRole('heading', { name: /hallo alice/i }),
+    ).toBeVisible()
+    expect(screen.getAllByText('Hurricane Awards 2026').length).toBeGreaterThan(0)
+    expect(screen.queryByText(/knallharter wettbewerb/i)).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /^zur abstimmung$/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('zeigt Dashboard Schnellzugriff Kacheln und navigiert in die Bereiche', async () => {
+    mockLoadedData({ loadedBingoCard: bingoCard })
+    await renderLoadedApp()
+    const user = await unlockFestivalWith()
+
+    await user.click(screen.getByRole('button', { name: /^profil$/i }))
+    await user.type(
+      screen.getByRole('textbox', { name: /^teilnehmercode$/i }),
+      'ALICE42',
+    )
+    await user.click(screen.getByRole('button', { name: /code/i }))
+
+    const dashboardSection = sectionForHeading(/hallo alice/i)
+
+    await user.click(
+      within(dashboardSection).getByRole('button', { name: /timetable/i }),
+    )
+    expect(screen.getByRole('heading', { name: /^timetable$/i })).toBeVisible()
+
+    await switchMainSection(/^start$/i)
+    await user.click(
+      within(sectionForHeading(/hallo alice/i)).getByRole('button', {
+        name: /spiele/i,
+      }),
+    )
+    expect(screen.getByRole('heading', { name: /^spiele$/i })).toBeVisible()
+    expect(screen.getByRole('heading', { name: /^bingo$/i })).toBeVisible()
+
+    await switchMainSection(/^start$/i)
+    await user.click(
+      within(sectionForHeading(/hallo alice/i)).getByRole('button', {
+        name: /festivalinfos/i,
+      }),
+    )
+    expect(screen.getByRole('heading', { name: /^infos$/i })).toBeVisible()
+
+    await switchMainSection(/^start$/i)
+    await user.click(
+      within(sectionForHeading(/hallo alice/i)).getByRole('button', {
+        name: /abstimmungen/i,
+      }),
+    )
+    expect(screen.getByRole('heading', { name: /^abstimmung$/i })).toBeVisible()
+  })
+
+  it('zeigt das Dashboard auch nicht angemeldet sinnvoll an', async () => {
+    await renderLoadedApp()
+    const user = await unlockFestivalWith()
+
+    const dashboardSection = sectionForHeading(/hallo festivalcrew/i)
+
+    expect(within(dashboardSection).getByText('Hurricane Awards 2026')).toBeVisible()
+    expect(
+      within(dashboardSection).getByRole('button', { name: /timetable/i }),
+    ).toBeVisible()
+    expect(
+      within(dashboardSection).getByRole('button', { name: /spiele/i }),
+    ).toBeVisible()
+    expect(
+      within(dashboardSection).getByRole('button', { name: /festivalinfos/i }),
+    ).toBeVisible()
+    expect(
+      within(dashboardSection).getByRole('button', { name: /abstimmungen/i }),
+    ).toBeVisible()
+
+    await user.click(
+      within(dashboardSection).getByRole('button', { name: /timetable/i }),
+    )
+
+    expect(
+      screen.getByRole('heading', { name: /mit teilnehmercode anmelden/i }),
+    ).toBeVisible()
   })
 
   it('erlaubt Zugriff mit gueltigem Teilnehmercode', async () => {
@@ -1432,7 +1544,7 @@ describe('Login', () => {
     expect(screen.getByText(/angemeldet als:/i)).toBeVisible()
   })
 
-  it('blendet Spiele ohne aktive Runde aus und zeigt keinen Bingo Hauptnavpunkt', async () => {
+  it('zeigt Spiele ohne aktive Runde mit Hinweis und ohne Bingo Hauptnavpunkt', async () => {
     await renderLoadedApp()
     await loginWith('ALICE42')
 
@@ -1442,8 +1554,13 @@ describe('Login', () => {
       within(navigation).queryByRole('button', { name: /^bingo$/i }),
     ).not.toBeInTheDocument()
     expect(
-      within(navigation).queryByRole('button', { name: /^spiele$/i }),
-    ).not.toBeInTheDocument()
+      within(navigation).getByRole('button', { name: /^spiele$/i }),
+    ).toBeVisible()
+
+    await switchMainSection(/^spiele$/i)
+
+    expect(screen.getByRole('heading', { name: /^spiele$/i })).toBeVisible()
+    expect(screen.getByText(/aktuell ist kein spiel aktiv/i)).toBeVisible()
   })
 
   it('laedt die Timetable Basisdaten und zeigt einen leeren vorbereiteten Bereich', async () => {
@@ -1936,7 +2053,8 @@ describe('Login', () => {
 
   it('sperrt die Codeeingabe nach mehreren ungueltigen Versuchen kurzzeitig', async () => {
     await renderLoadedApp()
-    await unlockFestivalWith()
+    const user = await unlockFestivalWith()
+    await user.click(screen.getByRole('button', { name: /^profil$/i }))
     const lockedUntil = new Date(Date.now() + 1_000).toISOString()
 
     vi.mocked(loginParticipant)
@@ -1981,7 +2099,8 @@ describe('Login', () => {
 
   it('zeigt eine vom Server gemeldete aktive Sperre an', async () => {
     await renderLoadedApp()
-    await unlockFestivalWith()
+    const user = await unlockFestivalWith()
+    await user.click(screen.getByRole('button', { name: /^profil$/i }))
 
     vi.mocked(loginParticipant).mockResolvedValueOnce({
       status: 'blocked',
@@ -2005,6 +2124,7 @@ describe('Login', () => {
   it('setzt Fehlversuche bei erfolgreichem Login zurueck', async () => {
     await renderLoadedApp()
     const user = await unlockFestivalWith()
+    await user.click(screen.getByRole('button', { name: /^profil$/i }))
 
     vi.mocked(loginParticipant)
       .mockResolvedValueOnce({
@@ -2094,9 +2214,12 @@ describe('Login', () => {
     render(<App />)
 
     expect(
-      await screen.findByRole('textbox', { name: /^teilnehmercode$/i }),
+      await screen.findByRole('heading', { name: /hallo festivalcrew/i }),
     ).toBeVisible()
     expect(screen.queryByText(/angemeldet als:/i)).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('textbox', { name: /^teilnehmercode$/i }),
+    ).not.toBeInTheDocument()
     expect(
       localStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
     ).toBeNull()
@@ -2114,11 +2237,9 @@ describe('Login', () => {
       await screen.findByRole('heading', { name: 'Hurricane Awards 2026' }),
     ).toBeVisible()
     expect(
-      screen.getByRole('heading', { name: /mit teilnehmercode anmelden/i }),
+      screen.getByRole('heading', { name: /hallo festivalcrew/i }),
     ).toBeVisible()
-    expect(
-      screen.getByRole('textbox', { name: /^teilnehmercode$/i }),
-    ).toBeVisible()
+    expect(screen.queryByRole('textbox', { name: /^teilnehmercode$/i })).toBeNull()
     expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
     expect(
       localStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),

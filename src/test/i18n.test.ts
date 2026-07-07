@@ -106,13 +106,21 @@ describe('i18n test infrastructure', () => {
   it('enthaelt Profiltexte fuer Login- und Profilzustand', async () => {
     await i18n.changeLanguage('de')
 
+    expect(i18n.t('navigation.dashboard')).toBe('Start')
+    expect(i18n.t('dashboard.greeting', { name: 'Alice' })).toBe('Hallo Alice')
+    expect(i18n.t('dashboard.tiles.awards.title')).toBe('Abstimmungen')
     expect(i18n.t('identity.loginTitle')).toContain('Teilnehmercode')
     expect(i18n.t('identity.profileTitle')).toBe('Dein Profil')
+    expect(i18n.t('identity.avatar.selected')).toBe('Ausgewählt')
 
     await i18n.changeLanguage('nl')
 
+    expect(i18n.t('navigation.dashboard')).toBe('Start')
+    expect(i18n.t('dashboard.greeting', { name: 'Alice' })).toBe('Hallo Alice')
+    expect(i18n.t('dashboard.tiles.awards.title')).toBe('Stemmingen')
     expect(i18n.t('identity.loginTitle')).toContain('deelnemerscode')
     expect(i18n.t('identity.profileTitle')).toBe('Je profiel')
+    expect(i18n.t('identity.avatar.selected')).toBe('Gekozen')
   })
 
   it('enthaelt Admin Texte fuer Festivaltage auf Deutsch und Niederlaendisch', async () => {
