@@ -1588,6 +1588,7 @@ function App() {
           loadedMusicPlaylist,
           loadedBingoCard,
           loadedTimetable,
+          loadedStandingsResult,
         ] = await Promise.all([
           loadParticipants(accessContext),
           loadCategories(accessContext),
@@ -1597,6 +1598,17 @@ function App() {
           loadMusicPlaylist(accessContext),
           loadOrCreateBingoCard(accessContext),
           loadTimetable(accessContext),
+          loadAllTimeStandings(accessContext).then(
+            (loadedStandings) =>
+              ({
+                status: 'fulfilled',
+                value: loadedStandings,
+              }) as const,
+            () =>
+              ({
+                status: 'rejected',
+              }) as const,
+          ),
         ])
 
         if (isCurrent) {
@@ -1609,6 +1621,14 @@ function App() {
           setBingoCard(loadedBingoCard)
           setTimetable(loadedTimetable)
           setCampLocationOpenError('')
+
+          if (loadedStandingsResult.status === 'fulfilled') {
+            setAllTimeStandings(loadedStandingsResult.value)
+          } else {
+            setStandingsError(
+              i18n.t('standings.errors.load'),
+            )
+          }
         }
       } catch {
         if (isCurrent) {
@@ -1627,6 +1647,7 @@ function App() {
         if (isCurrent) {
           setIsLoadingFestivalDocuments(false)
           setIsLoadingTimetable(false)
+          setIsStandingsLoading(false)
         }
       }
 
@@ -1646,23 +1667,6 @@ function App() {
         }
       }
 
-      try {
-        const loadedStandings = await loadAllTimeStandings(accessContext)
-
-        if (isCurrent) {
-          setAllTimeStandings(loadedStandings)
-        }
-      } catch {
-        if (isCurrent) {
-          setStandingsError(
-            i18n.t('standings.errors.load'),
-          )
-        }
-      } finally {
-        if (isCurrent) {
-          setIsStandingsLoading(false)
-        }
-      }
     }
 
     void loadData()
