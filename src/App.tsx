@@ -678,7 +678,7 @@ function DashboardSection({
       <div className="dashboard__grid" aria-label={t('dashboard.quickAccess')}>
         {tiles.map((tile) => (
           <button
-            className="dashboard-tile"
+            className={`dashboard-tile dashboard-tile--${tile.section}`}
             type="button"
             key={tile.id}
             onClick={() => onNavigate(isAuthenticated ? tile.section : 'profile')}

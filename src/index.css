@@ -1,9 +1,37 @@
 :root {
+  --color-app-bg: #090b10;
+  --color-app-bg-elevated: #0e1118;
+  --color-card-bg: #131821;
+  --color-card-bg-soft: #171d28;
+  --color-card-border: rgba(225, 232, 244, 0.13);
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #bac4d3;
+  --color-text-muted: #8793a5;
+  --color-accent: #f6c344;
+  --color-accent-strong: #ffd66b;
+  --color-accent-contrast: #101014;
+  --color-awards: #d98cff;
+  --color-timetable: #66d9e8;
+  --color-info: #7dd3fc;
+  --color-games: #8bd66b;
+  --color-profile: #f2a65a;
+  --color-success: #54d38a;
+  --color-warning: #f6c344;
+  --color-error: #ff6b8a;
+  --surface-glass: rgba(14, 17, 24, 0.78);
+  --surface-card: rgba(19, 24, 33, 0.88);
+  --surface-card-hover: rgba(27, 34, 46, 0.94);
+  --border-subtle: rgba(225, 232, 244, 0.13);
+  --border-strong: rgba(225, 232, 244, 0.24);
+  --shadow-card: 0 18px 50px rgba(0, 0, 0, 0.32);
+  --section-color: var(--color-accent);
+  --section-color-soft: color-mix(in srgb, var(--section-color) 18%, transparent);
+  --section-color-border: color-mix(in srgb, var(--section-color) 44%, transparent);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
-  color: #fff7ed;
-  background: #101014;
+  color: var(--color-text-primary);
+  background: var(--color-app-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -16,7 +44,7 @@
 
 html {
   min-width: 320px;
-  background: #101014;
+  background: var(--color-app-bg);
 }
 
 body {
