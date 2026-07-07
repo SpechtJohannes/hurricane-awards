@@ -142,22 +142,58 @@
       "timetable": {
         "title": "Timetable",
         "description": "Deine Festivalplanung und Favoriten.",
+        "status": {
+          "available": "{{count}} Auftritte hinterlegt.",
+          "empty": "Noch kein Timetable vorhanden."
+        },
         "detail": "Zum Timetable"
       },
       "games": {
         "title": "Spiele",
         "description": "Bingo und spaetere Festivalspiele.",
+        "status": {
+          "bingo": "Bingo ist verfuegbar.",
+          "empty": "Aktuell ist kein Spiel aktiv."
+        },
         "detail": "Zu den Spielen"
       },
       "info": {
         "title": "Festivalinfos",
         "description": "Dokumente, Campstandort und Playlist.",
+        "status": {
+          "available": "{{count}} Infos verfuegbar.",
+          "empty": "Noch keine Festivalinfos hinterlegt."
+        },
         "detail": "Zu den Infos"
       },
       "awards": {
+        "title": "Awards",
+        "description": "Ergebnisse und Gesamtclassement.",
+        "status": {
+          "standings": "{{count}} Eintraege im Gesamtclassement.",
+          "votes": "{{count}} Stimmen eingegangen.",
+          "empty": "Award Bereich bereit."
+        },
+        "detail": "Zu den Awards"
+      },
+      "voting": {
         "title": "Abstimmungen",
-        "description": "{{count}} aktive Abstimmungen.",
+        "description": "Aktive Abstimmungen fuer die Festivalcrew.",
+        "status": {
+          "available": "{{count}} aktive Abstimmungen.",
+          "empty": "Keine Abstimmung aktiv."
+        },
         "detail": "Zur Abstimmung"
+      },
+      "profile": {
+        "title": "Profil",
+        "description": "Teilnehmercode, Avatar und Abmeldung.",
+        "status": {
+          "authenticated": "Angemeldet als {{name}}.",
+          "guest": "Melde dich mit deinem Teilnehmercode an."
+        },
+        "detailAuthenticated": "Zum Profil",
+        "detailGuest": "Zur Anmeldung"
       }
     }
   },
