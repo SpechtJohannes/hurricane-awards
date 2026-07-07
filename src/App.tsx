@@ -241,7 +241,7 @@ function technicalErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error)
 }
 
-type MainSection = 'awards' | 'timetable' | 'bingo' | 'info' | 'profile'
+type MainSection = 'awards' | 'timetable' | 'games' | 'info' | 'profile'
 type AdminSection =
   | 'festival'
   | 'participants'
@@ -1407,7 +1407,7 @@ function App() {
           { section: 'awards', label: t('navigation.awards') },
           { section: 'timetable', label: t('navigation.timetable') },
           ...(bingoCard
-            ? [{ section: 'bingo' as const, label: t('navigation.bingo') }]
+            ? [{ section: 'games' as const, label: t('navigation.games') }]
             : []),
           { section: 'info', label: t('navigation.info') },
           { section: 'profile', label: t('navigation.profile') },
@@ -3238,7 +3238,7 @@ function App() {
       setBingoCard(null)
       setBingoError('')
 
-      if (activeMainSection === 'bingo') {
+      if (activeMainSection === 'games') {
         setActiveMainSection('awards')
       }
     } finally {
@@ -3835,13 +3835,37 @@ function App() {
         </section>
       ) : null}
 
-      {selectedParticipant && activeMainSection === 'bingo' && bingoCard ? (
-        <Bingo
-          card={bingoCard}
-          error={bingoError}
-          togglingNumber={togglingBingoNumber}
-          onToggleNumber={toggleBingoNumber}
-        />
+      {selectedParticipant && activeMainSection === 'games' && bingoCard ? (
+        <section
+          className="games"
+          id="main-games"
+          aria-labelledby="games-title"
+        >
+          <SectionHeader
+            title={t('games.title')}
+            titleId="games-title"
+            eyebrow={t('games.eyebrow')}
+            description={t('games.description')}
+            width="narrow"
+          />
+
+          <nav className="games__navigation" aria-label={t('games.navigationLabel')}>
+            <button
+              className="games__tab is-active"
+              type="button"
+              aria-current="page"
+            >
+              {t('games.bingo')}
+            </button>
+          </nav>
+
+          <Bingo
+            card={bingoCard}
+            error={bingoError}
+            togglingNumber={togglingBingoNumber}
+            onToggleNumber={toggleBingoNumber}
+          />
+        </section>
       ) : null}
 
       {selectedParticipant && activeMainSection === 'timetable' ? (

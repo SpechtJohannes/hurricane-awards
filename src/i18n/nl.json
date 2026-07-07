@@ -118,6 +118,7 @@
     "label": "Hoofdonderdelen",
     "awards": "Awards",
     "timetable": "Timetable",
+    "games": "Spellen",
     "bingo": "Bingo",
     "info": "Info",
     "profile": "Profiel"
@@ -503,6 +504,13 @@
       "load": "Je bingokaart kon net niet worden geladen.",
       "mark": "De markering kon net niet worden opgeslagen."
     }
+  },
+  "games": {
+    "eyebrow": "Spellen",
+    "title": "Spellen",
+    "description": "Kies een spel en ga meteen verder.",
+    "navigationLabel": "Spelkeuze",
+    "bingo": "Bingo"
   },
   "timetable": {
     "eyebrow": "Festival",

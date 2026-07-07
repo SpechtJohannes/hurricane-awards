@@ -70,6 +70,9 @@ describe('i18n test infrastructure', () => {
   it('enthaelt Bingo Erklaerungen auf Deutsch und Niederlaendisch', async () => {
     await i18n.changeLanguage('de')
 
+    expect(i18n.t('navigation.games')).toBe('Spiele')
+    expect(i18n.t('games.title')).toBe('Spiele')
+    expect(i18n.t('games.navigationLabel')).toBe('Spielauswahl')
     expect(i18n.t('bingo.description')).toContain(
       'automatisch eine eigene Bingokarte',
     )
@@ -79,6 +82,9 @@ describe('i18n test infrastructure', () => {
 
     await i18n.changeLanguage('nl')
 
+    expect(i18n.t('navigation.games')).toBe('Spellen')
+    expect(i18n.t('games.title')).toBe('Spellen')
+    expect(i18n.t('games.navigationLabel')).toBe('Spelkeuze')
     expect(i18n.t('bingo.description')).toContain(
       'automatisch een eigen bingokaart',
     )

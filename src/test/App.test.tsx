@@ -1390,10 +1390,21 @@ describe('Login', () => {
     ).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('heading', { name: /^timetable$/i })).toBeVisible()
 
-    await switchMainSection(/^bingo$/i)
+    await switchMainSection(/^spiele$/i)
 
     expect(
-      within(navigation).getByRole('button', { name: /^bingo$/i }),
+      within(navigation).getByRole('button', { name: /^spiele$/i }),
+    ).toHaveAttribute('aria-current', 'page')
+    expect(
+      within(navigation).queryByRole('button', { name: /^bingo$/i }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /^spiele$/i })).toBeVisible()
+    expect(
+      screen.getByRole('navigation', { name: /spielauswahl/i }),
+    ).toBeVisible()
+    expect(
+      within(screen.getByRole('navigation', { name: /spielauswahl/i }))
+        .getByRole('button', { name: /^bingo$/i }),
     ).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('heading', { name: /^bingo$/i })).toBeVisible()
     expect(
@@ -1421,7 +1432,7 @@ describe('Login', () => {
     expect(screen.getByText(/angemeldet als:/i)).toBeVisible()
   })
 
-  it('blendet Bingo ohne aktive Runde aus', async () => {
+  it('blendet Spiele ohne aktive Runde aus und zeigt keinen Bingo Hauptnavpunkt', async () => {
     await renderLoadedApp()
     await loginWith('ALICE42')
 
@@ -1429,6 +1440,9 @@ describe('Login', () => {
 
     expect(
       within(navigation).queryByRole('button', { name: /^bingo$/i }),
+    ).not.toBeInTheDocument()
+    expect(
+      within(navigation).queryByRole('button', { name: /^spiele$/i }),
     ).not.toBeInTheDocument()
   })
 
@@ -1791,7 +1805,7 @@ describe('Login', () => {
     mockLoadedData({ loadedBingoCard: bingoCard })
     await renderLoadedApp()
     await loginWith('ALICE42')
-    await switchMainSection(/^bingo$/i)
+    await switchMainSection(/^spiele$/i)
 
     const bingoSection = sectionForHeading(/^bingo$/i)
     const markedButton = within(bingoSection).getByRole('button', { name: '1' })
@@ -3358,7 +3372,7 @@ describe('Admin', () => {
       await within(adminBingoSection).findByText(/aktive bingorunde/i),
     ).toBeVisible()
 
-    await switchMainSection(/^bingo$/i)
+    await switchMainSection(/^spiele$/i)
     expect(screen.getByRole('button', { name: '1' })).toBeVisible()
 
     await switchAdminSection(/^bingo$/i)
