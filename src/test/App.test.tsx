@@ -1527,12 +1527,16 @@ describe('Login', () => {
     await loginWith('ALICE42')
     await switchMainSection(/profil/i)
 
+    const selectedAvatarButton = screen.getByRole('button', {
+      name: /avatar camp sunrise ausw/i,
+    })
+
     expect(
       screen.getByRole('img', { name: 'Alice: Camp Sunrise' }),
     ).toBeVisible()
-    expect(
-      screen.getByRole('button', { name: /avatar camp sunrise ausw/i }),
-    ).toHaveAttribute('aria-pressed', 'true')
+    expect(selectedAvatarButton).toHaveAttribute('aria-pressed', 'true')
+    expect(selectedAvatarButton).toHaveClass('is-selected')
+    expect(within(selectedAvatarButton).getByText(/ausgew/i)).toBeVisible()
   })
 
   it('zeigt die Avatar Auswahl im Profil', async () => {
@@ -1554,6 +1558,10 @@ describe('Login', () => {
     const user = await loginWith('ALICE42')
     await switchMainSection(/profil/i)
 
+    const previousAvatarButton = screen.getByRole('button', {
+      name: /avatar camp sunrise ausw/i,
+    })
+
     await user.click(
       screen.getByRole('button', { name: /avatar neon tent ausw/i }),
     )
@@ -1562,15 +1570,45 @@ describe('Login', () => {
       { participantId: 'alice', avatarId: 'neon-tent' },
       { participantAccessCode: 'ALICE42' },
     )
-    expect(
-      await screen.findByRole('button', {
-        name: /avatar neon tent ausw/i,
-        pressed: true,
-      }),
-    ).toBeVisible()
+    const selectedAvatarButton = await screen.findByRole('button', {
+      name: /avatar neon tent ausw/i,
+      pressed: true,
+    })
+
+    expect(selectedAvatarButton).toBeVisible()
+    expect(selectedAvatarButton).toHaveClass('is-selected')
+    expect(within(selectedAvatarButton).getByText(/ausgew/i)).toBeVisible()
+    expect(previousAvatarButton).not.toHaveClass('is-selected')
+    expect(previousAvatarButton).toHaveAttribute('aria-pressed', 'false')
+    expect(within(previousAvatarButton).queryByText(/ausgew/i)).not.toBeInTheDocument()
     expect(
       sessionStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
     ).toContain('"avatarId":"neon-tent"')
+  })
+
+  it('hebt den gespeicherten Avatar nach erneutem Laden hervor', async () => {
+    localStorage.setItem(
+      festivalAccessStorageKey,
+      JSON.stringify({ version: festivalAccessVersion }),
+    )
+    sessionStorage.setItem(
+      'hurricane-awards:hurricane-awards-2026:participant',
+      JSON.stringify({ ...participants[0], avatarId: 'neon-tent' }),
+    )
+
+    render(<App />)
+    await switchMainSection(/profil/i)
+
+    const selectedAvatarButton = await screen.findByRole('button', {
+      name: /avatar neon tent ausw/i,
+      pressed: true,
+    })
+
+    expect(selectedAvatarButton).toHaveClass('is-selected')
+    expect(within(selectedAvatarButton).getByText(/ausgew/i)).toBeVisible()
+    expect(
+      screen.getByRole('button', { name: /avatar camp sunrise ausw/i }),
+    ).toHaveAttribute('aria-pressed', 'false')
   })
 
   it('zeigt Avatare zusammen mit Teilnehmernamen in Ergebnislisten', async () => {
