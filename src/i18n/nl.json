@@ -122,7 +122,8 @@
     "games": "Spellen",
     "bingo": "Bingo",
     "info": "Info",
-    "profile": "Profiel"
+    "profile": "Profiel",
+    "backToDashboard": "Naar dashboardoverzicht"
   },
   "placeholders": {
     "gamesTitle": "Spellen",

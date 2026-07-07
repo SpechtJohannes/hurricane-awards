@@ -1462,6 +1462,60 @@ describe('Login', () => {
     expect(screen.getByRole('heading', { name: /dein profil/i })).toBeVisible()
   })
 
+  it('ermoeglicht aus allen Hauptbereichen die Rueckkehr zum Dashboard', async () => {
+    mockLoadedData({
+      loadedBingoCard: bingoCard,
+      loadedFestivalDocuments: festivalDocuments,
+      loadedCampLocationLink: 'https://maps.example.test/camp',
+      loadedMusicPlaylist: musicPlaylist,
+      loadedTimetable: {
+        festivalDays,
+        stages: timetableStages,
+        acts: timetableActs,
+        performances: timetablePerformances,
+        favoritePerformanceIds: [],
+        performanceFavorites: [],
+      },
+    })
+    await renderLoadedApp()
+    const user = await unlockFestivalWith()
+
+    await user.click(screen.getByRole('button', { name: /^profil/i }))
+    await user.type(
+      screen.getByRole('textbox', { name: /^teilnehmercode$/i }),
+      'ALICE42',
+    )
+    await user.click(screen.getByRole('button', { name: /code/i }))
+
+    async function expectDashboardReturn(
+      tileName: RegExp,
+      destinationHeading: RegExp,
+    ) {
+      const dashboardSection = sectionForHeading(/hallo alice/i)
+
+      await user.click(
+        within(dashboardSection).getByRole('button', { name: tileName }),
+      )
+      expect(
+        await screen.findByRole('heading', { name: destinationHeading }),
+      ).toBeVisible()
+
+      await user.click(
+        screen.getByRole('button', { name: /zur dashboard uebersicht/i }),
+      )
+      expect(
+        await screen.findByRole('heading', { name: /hallo alice/i }),
+      ).toBeVisible()
+    }
+
+    await expectDashboardReturn(/^awards/i, /^abstimmung$/i)
+    await expectDashboardReturn(/^timetable/i, /^timetable$/i)
+    await expectDashboardReturn(/^spiele/i, /^spiele$/i)
+    await expectDashboardReturn(/^festivalinfos/i, /^infos$/i)
+    await expectDashboardReturn(/^abstimmungen/i, /^abstimmung$/i)
+    await expectDashboardReturn(/^profil/i, /dein profil/i)
+  })
+
   it('zeigt das Dashboard auch nicht angemeldet sinnvoll an', async () => {
     await renderLoadedApp()
     const user = await unlockFestivalWith()
