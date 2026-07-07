@@ -4,6 +4,26 @@ All notable changes between releases of this project are documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.4.0
+
+### UI und Nutzerführung
+
+Diese Version verbessert die Bedienbarkeit und das visuelle Gesamtbild der App deutlich. Die Startseite wurde zu einem persönlichen Dashboard weiterentwickelt und dient nun als zentrale Navigation in die wichtigsten App Bereiche.
+
+### Änderungen
+
+* Die Startseite zeigt nun ein persönliches Dashboard mit Statusinformationen und direkten Einstiegen in die Hauptbereiche.
+* Aus allen Hauptbereichen ist eine Rückkehr zum Dashboard möglich.
+* Das Header Konzept wurde vereinheitlicht und kompakter gestaltet.
+* Der Profilbereich reagiert nun besser auf den aktuellen Loginstatus.
+* Der ausgewählte Avatar wird deutlicher hervorgehoben.
+* Der Bingo Bereich enthält nun eine kurze Erklärung zur Funktionsweise.
+* Der Bereich Spiele wurde als Einstieg für Bingo und künftige Spiele eingeführt.
+* Bei nicht aktiven Abstimmungen wird ein verständlicher Hinweis angezeigt.
+* Im Timetable werden Tage ohne Auftritte ausgeblendet.
+* Ein konsistentes Farbsystem verbessert die visuelle Orientierung in der App.
+* Fehlerhafte Tests wurden korrigiert.
+
 ## v1.3.0
 
 ### Timetable
