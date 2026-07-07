@@ -603,6 +603,7 @@ type TimetableSectionProps = {
   isLoading: boolean
   currentParticipantId: string | null
   togglingPerformanceId: string | null
+  onBackToDashboard: () => void
   onToggleFavorite: (performanceId: string, isFavorite: boolean) => void
 }
 
@@ -644,6 +645,37 @@ function stageColorStyle(color: string | null): CSSProperties | undefined {
         '--stage-color': color,
       } as CSSProperties)
     : undefined
+}
+
+type DashboardBackButtonProps = {
+  onClick: () => void
+  width?: 'standard' | 'narrow'
+}
+
+function DashboardBackButton({
+  onClick,
+  width = 'standard',
+}: DashboardBackButtonProps) {
+  const { t } = useTranslation()
+
+  return (
+    <div
+      className={`dashboard-back${
+        width === 'narrow' ? ' dashboard-back--narrow' : ''
+      }`}
+    >
+      <button
+        className="dashboard-back__button"
+        type="button"
+        onClick={onClick}
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20">
+          <path d="M10.7 6.3 5 12l5.7 5.7 1.4-1.4-3.3-3.3H19v-2H8.8l3.3-3.3-1.4-1.4Z" />
+        </svg>
+        <span>{t('navigation.backToDashboard')}</span>
+      </button>
+    </div>
+  )
 }
 
 function DashboardSection({
@@ -708,6 +740,7 @@ function TimetableSection({
   isLoading,
   currentParticipantId,
   togglingPerformanceId,
+  onBackToDashboard,
   onToggleFavorite,
 }: TimetableSectionProps) {
   const { t } = useTranslation()
@@ -787,6 +820,8 @@ function TimetableSection({
       id="main-timetable"
       aria-labelledby="timetable-title"
     >
+      <DashboardBackButton onClick={onBackToDashboard} width="narrow" />
+
       <SectionHeader
         title={t('timetable.title')}
         titleId="timetable-title"
@@ -1842,6 +1877,23 @@ function App() {
       }
 
       setLoginLockedUntil(null)
+      setIsStandingsLoading(true)
+      setStandingsError('')
+
+      try {
+        const loadedStandings = await loadAllTimeStandings({
+          participantAccessCode: loginResult.participant.accessCode,
+        })
+
+        setAllTimeStandings(loadedStandings)
+      } catch {
+        setStandingsError(
+          t('standings.errors.load'),
+        )
+      } finally {
+        setIsStandingsLoading(false)
+      }
+
       storeAuthenticatedParticipant(loginResult.participant)
       setSelectedParticipant(loginResult.participant)
       setActiveMainSection('dashboard')
@@ -3849,6 +3901,8 @@ function App() {
           aria-labelledby="identity-title"
         >
           <div className="identity__content">
+            <DashboardBackButton onClick={() => setActiveMainSection('dashboard')} />
+
             {selectedParticipant ? (
               <>
                 <SectionHeader
@@ -3991,6 +4045,11 @@ function App() {
           id="main-games"
           aria-labelledby="games-title"
         >
+          <DashboardBackButton
+            onClick={() => setActiveMainSection('dashboard')}
+            width="narrow"
+          />
+
           <SectionHeader
             title={t('games.title')}
             titleId="games-title"
@@ -4029,6 +4088,7 @@ function App() {
           isLoading={isLoadingTimetable}
           currentParticipantId={selectedParticipant?.id ?? null}
           togglingPerformanceId={togglingFavoritePerformanceId}
+          onBackToDashboard={() => setActiveMainSection('dashboard')}
           onToggleFavorite={toggleTimetableFavorite}
         />
       ) : null}
@@ -4041,6 +4101,11 @@ function App() {
           musicPlaylist={musicPlaylist}
           error={festivalDocumentsError}
           isLoading={isLoadingFestivalDocuments}
+          dashboardBackButton={
+            <DashboardBackButton
+              onClick={() => setActiveMainSection('dashboard')}
+            />
+          }
           onOpenCampLocation={openCampLocationLink}
         />
       ) : null}
@@ -4048,6 +4113,8 @@ function App() {
       {selectedParticipant && activeMainSection === 'awards' ? (
         <div id="main-awards">
           <section className="categories" id="abstimmung" aria-labelledby="categories-title">
+            <DashboardBackButton onClick={() => setActiveMainSection('dashboard')} />
+
             <SectionHeader
               title={t('categories.title')}
               titleId="categories-title"

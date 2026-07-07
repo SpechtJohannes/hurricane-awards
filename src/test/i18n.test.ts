@@ -107,6 +107,7 @@ describe('i18n test infrastructure', () => {
     await i18n.changeLanguage('de')
 
     expect(i18n.t('navigation.dashboard')).toBe('Start')
+    expect(i18n.t('navigation.backToDashboard')).toBe('Zur Dashboard Uebersicht')
     expect(i18n.t('dashboard.greeting', { name: 'Alice' })).toBe('Hallo Alice')
     expect(i18n.t('dashboard.tiles.awards.title')).toBe('Awards')
     expect(i18n.t('dashboard.tiles.voting.title')).toBe('Abstimmungen')
@@ -120,6 +121,7 @@ describe('i18n test infrastructure', () => {
     await i18n.changeLanguage('nl')
 
     expect(i18n.t('navigation.dashboard')).toBe('Start')
+    expect(i18n.t('navigation.backToDashboard')).toBe('Naar dashboardoverzicht')
     expect(i18n.t('dashboard.greeting', { name: 'Alice' })).toBe('Hallo Alice')
     expect(i18n.t('dashboard.tiles.awards.title')).toBe('Awards')
     expect(i18n.t('dashboard.tiles.voting.title')).toBe('Stemmingen')

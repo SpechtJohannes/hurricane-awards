@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   festivalDocumentTypes,
@@ -15,6 +16,7 @@ type FestivalInfoProps = {
   musicPlaylist: MusicPlaylist | null
   error: string
   isLoading: boolean
+  dashboardBackButton?: ReactNode
   onOpenCampLocation: () => void
 }
 
@@ -36,6 +38,7 @@ export function FestivalInfo({
   musicPlaylist,
   error,
   isLoading,
+  dashboardBackButton,
   onOpenCampLocation,
 }: FestivalInfoProps) {
   const { t } = useTranslation()
@@ -69,6 +72,8 @@ export function FestivalInfo({
       id="main-info"
       aria-labelledby="festival-info-title"
     >
+      {dashboardBackButton}
+
       <SectionHeader
         title={t('info.title')}
         titleId="festival-info-title"
