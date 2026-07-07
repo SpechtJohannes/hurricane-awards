@@ -118,6 +118,7 @@
     "label": "Hauptbereiche",
     "awards": "Awards",
     "timetable": "Timetable",
+    "games": "Spiele",
     "bingo": "Bingo",
     "info": "Infos",
     "profile": "Profil"
@@ -503,6 +504,13 @@
       "load": "Deine Bingokarte konnte gerade nicht geladen werden.",
       "mark": "Die Markierung konnte gerade nicht gespeichert werden."
     }
+  },
+  "games": {
+    "eyebrow": "Spiele",
+    "title": "Spiele",
+    "description": "Waehle ein Spiel aus und mach direkt weiter.",
+    "navigationLabel": "Spielauswahl",
+    "bingo": "Bingo"
   },
   "timetable": {
     "eyebrow": "Festival",
