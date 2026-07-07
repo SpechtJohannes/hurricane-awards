@@ -116,6 +116,7 @@
   },
   "navigation": {
     "label": "Hauptbereiche",
+    "dashboard": "Start",
     "awards": "Awards",
     "timetable": "Timetable",
     "games": "Spiele",
@@ -128,6 +129,37 @@
     "gamesBody": "Dieser Bereich ist vorbereitet. Konkrete Spiele werden später ergänzt.",
     "infoTitle": "Infos",
     "infoBody": "Dieser Bereich ist vorbereitet. Festivalinfos werden später ergänzt."
+  },
+  "dashboard": {
+    "eyebrow": "Dein Dashboard",
+    "festivalLabel": "Festival",
+    "guestName": "Festivalcrew",
+    "greeting": "Hallo {{name}}",
+    "description": "Alles Wichtige fuer dein Festival auf einen Blick.",
+    "guestDescription": "Melde dich mit deinem Teilnehmercode an, um alle Bereiche persoenlich zu nutzen.",
+    "quickAccess": "Schnellzugriff",
+    "tiles": {
+      "timetable": {
+        "title": "Timetable",
+        "description": "Deine Festivalplanung und Favoriten.",
+        "detail": "Zum Timetable"
+      },
+      "games": {
+        "title": "Spiele",
+        "description": "Bingo und spaetere Festivalspiele.",
+        "detail": "Zu den Spielen"
+      },
+      "info": {
+        "title": "Festivalinfos",
+        "description": "Dokumente, Campstandort und Playlist.",
+        "detail": "Zu den Infos"
+      },
+      "awards": {
+        "title": "Abstimmungen",
+        "description": "{{count}} aktive Abstimmungen.",
+        "detail": "Zur Abstimmung"
+      }
+    }
   },
   "info": {
     "eyebrow": "Festivalinfos",
@@ -182,6 +214,7 @@
       "title": "Avatar auswählen",
       "description": "Wähle einen Avatar aus der festen Bibliothek. Du kannst ihn jederzeit ändern.",
       "selectLabel": "Avatar {{avatar}} auswählen",
+      "selected": "Ausgewählt",
       "saving": "Avatar wird gespeichert...",
       "errors": {
         "save": "Der Avatar konnte gerade nicht gespeichert werden. Versuch es bitte gleich nochmal."
@@ -510,7 +543,8 @@
     "title": "Spiele",
     "description": "Waehle ein Spiel aus und mach direkt weiter.",
     "navigationLabel": "Spielauswahl",
-    "bingo": "Bingo"
+    "bingo": "Bingo",
+    "empty": "Aktuell ist kein Spiel aktiv."
   },
   "timetable": {
     "eyebrow": "Festival",

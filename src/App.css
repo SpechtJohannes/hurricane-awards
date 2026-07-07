@@ -63,6 +63,53 @@
   align-items: center;
 }
 
+.app-header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-height: 112px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 20px;
+  background: rgba(16, 16, 20, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(14px);
+}
+
+.app-header__brand {
+  min-width: 0;
+}
+
+.app-header__brand p {
+  margin: 0 0 6px;
+  color: #ffbe0b;
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.app-header__brand h1 {
+  max-width: none;
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(1.8rem, 8vw, 3rem);
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.app-header__actions {
+  z-index: 2;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 .hero__admin {
   display: inline-flex;
   min-height: 44px;
@@ -370,6 +417,132 @@ h1 {
   font-size: 0.96rem;
   font-weight: 750;
   line-height: 1.42;
+}
+
+.dashboard {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 22px;
+  padding: 34px 20px 56px;
+}
+
+.dashboard__intro,
+.dashboard__grid {
+  width: min(100%, 960px);
+  margin: 0 auto;
+}
+
+.dashboard__intro {
+  display: grid;
+  gap: 10px;
+}
+
+.dashboard__eyebrow {
+  width: fit-content;
+  margin: 0;
+  padding: 7px 12px;
+  color: #101014;
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: #ffbe0b;
+  border-radius: 999px;
+}
+
+.dashboard__intro h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2.1rem, 9vw, 4.2rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.dashboard__festival {
+  margin: 0;
+  color: #ffbe0b;
+  font-size: clamp(1.05rem, 4vw, 1.35rem);
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.dashboard__description {
+  max-width: 44rem;
+  margin: 0;
+  color: #f4e7cf;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.dashboard-tile {
+  display: grid;
+  min-height: 166px;
+  align-content: space-between;
+  gap: 14px;
+  padding: 18px;
+  color: #fff7ed;
+  font: inherit;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.dashboard-tile:hover,
+.dashboard-tile:focus-visible {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 190, 11, 0.58);
+  box-shadow: 0 22px 56px rgba(251, 86, 7, 0.2);
+}
+
+.dashboard-tile:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.dashboard-tile__title {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.dashboard-tile__description {
+  color: #f4e7cf;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.dashboard-tile__detail {
+  width: fit-content;
+  min-height: 28px;
+  padding: 6px 10px;
+  color: #101014;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+  background: #ffbe0b;
+  border-radius: 999px;
 }
 
 .stage-lights {
@@ -886,6 +1059,18 @@ h1 {
 
 .games .bingo {
   padding: 24px 0 0;
+}
+
+.games__notice {
+  width: min(100%, 760px);
+  margin: 18px auto 0;
+  padding: 18px 20px;
+  color: #f4e7cf;
+  font-weight: 750;
+  line-height: 1.45;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
 }
 
 .bingo {
@@ -2532,6 +2717,11 @@ h1 {
   .hero__actions {
     top: 28px;
     right: 32px;
+  }
+
+  .app-header {
+    align-items: center;
+    padding: 26px 64px;
   }
 
   .hero__eyebrow {

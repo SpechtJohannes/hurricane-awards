@@ -116,6 +116,7 @@
   },
   "navigation": {
     "label": "Hoofdonderdelen",
+    "dashboard": "Start",
     "awards": "Awards",
     "timetable": "Timetable",
     "games": "Spellen",
@@ -128,6 +129,37 @@
     "gamesBody": "Dit onderdeel is voorbereid. Concrete spellen worden later toegevoegd.",
     "infoTitle": "Info",
     "infoBody": "Dit onderdeel is voorbereid. Festivalinfo wordt later toegevoegd."
+  },
+  "dashboard": {
+    "eyebrow": "Je dashboard",
+    "festivalLabel": "Festival",
+    "guestName": "festivalcrew",
+    "greeting": "Hallo {{name}}",
+    "description": "Alles wat belangrijk is voor je festival in een overzicht.",
+    "guestDescription": "Meld je aan met je deelnemerscode om alle onderdelen persoonlijk te gebruiken.",
+    "quickAccess": "Snelle toegang",
+    "tiles": {
+      "timetable": {
+        "title": "Timetable",
+        "description": "Je festivalplanning en favorieten.",
+        "detail": "Naar timetable"
+      },
+      "games": {
+        "title": "Spellen",
+        "description": "Bingo en latere festivalspellen.",
+        "detail": "Naar spellen"
+      },
+      "info": {
+        "title": "Festivalinfo",
+        "description": "Documenten, campingplek en playlist.",
+        "detail": "Naar info"
+      },
+      "awards": {
+        "title": "Stemmingen",
+        "description": "{{count}} actieve stemmingen.",
+        "detail": "Naar stemming"
+      }
+    }
   },
   "info": {
     "eyebrow": "Festivalinfo",
@@ -182,6 +214,7 @@
       "title": "Avatar kiezen",
       "description": "Kies een avatar uit de vaste bibliotheek. Je kunt hem op elk moment wijzigen.",
       "selectLabel": "Avatar {{avatar}} kiezen",
+      "selected": "Gekozen",
       "saving": "Avatar wordt opgeslagen...",
       "errors": {
         "save": "De avatar kon net niet worden opgeslagen. Probeer het zo nog eens."
@@ -510,7 +543,8 @@
     "title": "Spellen",
     "description": "Kies een spel en ga meteen verder.",
     "navigationLabel": "Spelkeuze",
-    "bingo": "Bingo"
+    "bingo": "Bingo",
+    "empty": "Er is momenteel geen spel actief."
   },
   "timetable": {
     "eyebrow": "Festival",

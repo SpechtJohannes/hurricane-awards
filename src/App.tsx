@@ -241,7 +241,13 @@ function technicalErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error)
 }
 
-type MainSection = 'awards' | 'timetable' | 'games' | 'info' | 'profile'
+type MainSection =
+  | 'dashboard'
+  | 'awards'
+  | 'timetable'
+  | 'games'
+  | 'info'
+  | 'profile'
 type AdminSection =
   | 'festival'
   | 'participants'
@@ -607,6 +613,21 @@ type TimetableDaySchedule = {
   timeRows: string[]
 }
 
+type DashboardTile = {
+  section: MainSection
+  title: string
+  description: string
+  detail: string
+}
+
+type DashboardSectionProps = {
+  festivalName: string
+  participantName: string | null
+  tiles: DashboardTile[]
+  isAuthenticated: boolean
+  onNavigate: (section: MainSection) => void
+}
+
 function timeLabel(value: string) {
   return value.slice(11, 16)
 }
@@ -617,6 +638,55 @@ function stageColorStyle(color: string | null): CSSProperties | undefined {
         '--stage-color': color,
       } as CSSProperties)
     : undefined
+}
+
+function DashboardSection({
+  festivalName,
+  participantName,
+  tiles,
+  isAuthenticated,
+  onNavigate,
+}: DashboardSectionProps) {
+  const { t } = useTranslation()
+  const greetingName = participantName ?? t('dashboard.guestName')
+
+  return (
+    <section
+      className="dashboard"
+      id="main-dashboard"
+      aria-labelledby="dashboard-title"
+    >
+      <div className="dashboard__intro">
+        <p className="dashboard__eyebrow">{t('dashboard.eyebrow')}</p>
+        <h2 id="dashboard-title">
+          {t('dashboard.greeting', { name: greetingName })}
+        </h2>
+        <p className="dashboard__festival">{festivalName}</p>
+        <p className="dashboard__description">
+          {isAuthenticated
+            ? t('dashboard.description')
+            : t('dashboard.guestDescription')}
+        </p>
+      </div>
+
+      <div className="dashboard__grid" aria-label={t('dashboard.quickAccess')}>
+        {tiles.map((tile) => (
+          <button
+            className="dashboard-tile"
+            type="button"
+            key={tile.section}
+            onClick={() => onNavigate(isAuthenticated ? tile.section : 'profile')}
+          >
+            <span className="dashboard-tile__title">{tile.title}</span>
+            <span className="dashboard-tile__description">
+              {tile.description}
+            </span>
+            <span className="dashboard-tile__detail">{tile.detail}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  )
 }
 
 function TimetableSection({
@@ -1364,7 +1434,7 @@ function App() {
   const [updatingCategoryId, setUpdatingCategoryId] = useState<string | null>(null)
   const [isAdminVisible, setIsAdminVisible] = useState(false)
   const [activeMainSection, setActiveMainSection] =
-    useState<MainSection>(() => (selectedParticipant ? 'awards' : 'profile'))
+    useState<MainSection>('dashboard')
   const [activeAdminSection, setActiveAdminSection] =
     useState<AdminSection>('festival')
   const [isLoadingData, setIsLoadingData] = useState(Boolean(selectedParticipant))
@@ -1401,18 +1471,48 @@ function App() {
     : 0
   const loginLockRemainingSeconds = Math.ceil(loginLockRemainingMs / 1000)
   const isLoginLocked = loginLockRemainingMs > 0
+  const dashboardTiles: DashboardTile[] = [
+    {
+      section: 'timetable',
+      title: t('dashboard.tiles.timetable.title'),
+      description: t('dashboard.tiles.timetable.description'),
+      detail: t('dashboard.tiles.timetable.detail'),
+    },
+    {
+      section: 'games',
+      title: t('dashboard.tiles.games.title'),
+      description: t('dashboard.tiles.games.description'),
+      detail: t('dashboard.tiles.games.detail'),
+    },
+    {
+      section: 'info',
+      title: t('dashboard.tiles.info.title'),
+      description: t('dashboard.tiles.info.description'),
+      detail: t('dashboard.tiles.info.detail'),
+    },
+    {
+      section: 'awards',
+      title: t('dashboard.tiles.awards.title'),
+      description: t('dashboard.tiles.awards.description', {
+        count: openCategories.length,
+      }),
+      detail: t('dashboard.tiles.awards.detail'),
+    },
+  ]
   const mainNavigationItems: Array<{ section: MainSection; label: string }> =
     selectedParticipant
       ? [
+          { section: 'dashboard', label: t('navigation.dashboard') },
           { section: 'awards', label: t('navigation.awards') },
           { section: 'timetable', label: t('navigation.timetable') },
-          ...(bingoCard
-            ? [{ section: 'games' as const, label: t('navigation.games') }]
-            : []),
+          { section: 'games', label: t('navigation.games') },
           { section: 'info', label: t('navigation.info') },
           { section: 'profile', label: t('navigation.profile') },
         ]
-      : [{ section: 'profile', label: t('navigation.profile') }]
+      : [
+          { section: 'dashboard', label: t('navigation.dashboard') },
+          { section: 'profile', label: t('navigation.profile') },
+        ]
   const adminNavigationItems: Array<{ section: AdminSection; label: string }> = [
     { section: 'festival', label: t('admin.navigation.festival') },
     { section: 'participants', label: t('admin.navigation.participants') },
@@ -1676,6 +1776,7 @@ function App() {
       setLoginLockedUntil(null)
       storeAuthenticatedParticipant(loginResult.participant)
       setSelectedParticipant(loginResult.participant)
+      setActiveMainSection('dashboard')
       setSelectedVotesByCategory({})
       setAccessCode('')
       setAccessCodeError('')
@@ -1758,7 +1859,7 @@ function App() {
     setAvatarError('')
     setSavingAvatarId(null)
     setIsAdminVisible(false)
-    setActiveMainSection('profile')
+    setActiveMainSection('dashboard')
     setActiveAdminSection('festival')
     setSelectedVotesByCategory({})
 
@@ -3438,8 +3539,13 @@ function App() {
         festivalName: displayedFestivalName,
       })}
     >
-      <header className="hero" aria-labelledby="hero-title">
-        <div className="hero__actions">
+      <header className="app-header" aria-labelledby="app-title">
+        <div className="app-header__brand">
+          <p>{t('dashboard.festivalLabel')}</p>
+          <h1 id="app-title">{displayedFestivalName}</h1>
+        </div>
+
+        <div className="app-header__actions">
           <PwaInstallPrompt />
           <LanguageSwitcher />
           {selectedParticipant?.isAdmin ? (
@@ -3461,27 +3567,6 @@ function App() {
               <span>{isAdminVisible ? t('hero.adminClose') : t('hero.admin')}</span>
             </button>
           ) : null}
-        </div>
-
-        <div className="hero__content">
-          <p className="hero__eyebrow">{t('hero.eyebrow')}</p>
-          <h1 id="hero-title">{displayedFestivalName}</h1>
-          <p className="hero__subtitle">{t('hero.subtitle')}</p>
-          {selectedParticipant ? (
-            <button
-              className="hero__button"
-              type="button"
-              onClick={() => setActiveMainSection('awards')}
-            >
-              {t('hero.voteCta')}
-            </button>
-          ) : null}
-        </div>
-
-        <div className="stage-lights" aria-hidden="true">
-          <span />
-          <span />
-          <span />
         </div>
       </header>
 
@@ -3697,6 +3782,16 @@ function App() {
         </section>
       ) : null}
 
+      {activeMainSection === 'dashboard' ? (
+        <DashboardSection
+          festivalName={displayedFestivalName}
+          participantName={selectedParticipant?.displayName ?? null}
+          tiles={dashboardTiles}
+          isAuthenticated={Boolean(selectedParticipant)}
+          onNavigate={setActiveMainSection}
+        />
+      ) : null}
+
       {activeMainSection === 'profile' ? (
         <section
           className="identity"
@@ -3835,7 +3930,7 @@ function App() {
         </section>
       ) : null}
 
-      {selectedParticipant && activeMainSection === 'games' && bingoCard ? (
+      {selectedParticipant && activeMainSection === 'games' ? (
         <section
           className="games"
           id="main-games"
@@ -3859,12 +3954,16 @@ function App() {
             </button>
           </nav>
 
-          <Bingo
-            card={bingoCard}
-            error={bingoError}
-            togglingNumber={togglingBingoNumber}
-            onToggleNumber={toggleBingoNumber}
-          />
+          {bingoCard ? (
+            <Bingo
+              card={bingoCard}
+              error={bingoError}
+              togglingNumber={togglingBingoNumber}
+              onToggleNumber={toggleBingoNumber}
+            />
+          ) : (
+            <p className="games__notice">{t('games.empty')}</p>
+          )}
         </section>
       ) : null}
 
