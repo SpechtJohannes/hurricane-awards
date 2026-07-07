@@ -529,6 +529,7 @@
     "eyebrow": "{{count}} deelnemers",
     "title": "Stemming",
     "loginRequired": "Voer eerst je deelnemerscode in. Daarna kun je stemmen.",
+    "empty": "Er zijn momenteel geen actieve stemmingen. Kijk later nog eens.",
     "alreadyVoted": "Je hebt al gestemd.",
     "voteTargetLabel": "Stem gaat naar",
     "selectPerson": "Persoon kiezen",

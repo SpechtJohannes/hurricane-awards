@@ -1984,6 +1984,32 @@ describe('Login', () => {
 })
 
 describe('Kategorien', () => {
+  it('zeigt einen Hinweis, wenn keine aktiven Abstimmungen vorhanden sind', async () => {
+    mockLoadedData({
+      loadedCategories: categories.filter((category) => category.status !== 'open'),
+    })
+
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    const votingSection = sectionForHeading(/abstimmung/i)
+    expect(
+      within(votingSection).getByText(/keine abstimmungen aktiv/i),
+    ).toBeVisible()
+    expect(within(votingSection).queryByLabelText(/stimme geht an/i)).toBeNull()
+  })
+
+  it('zeigt keinen Hinweis, wenn aktive Abstimmungen vorhanden sind', async () => {
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+
+    const votingSection = sectionForHeading(/abstimmung/i)
+    expect(
+      within(votingSection).queryByText(/keine abstimmungen aktiv/i),
+    ).toBeNull()
+    expect(within(votingSection).getByLabelText(/stimme geht an/i)).toBeVisible()
+  })
+
   it('laedt Kategorien und macht nur offene Kategorien abstimmbar', async () => {
     await renderLoadedApp()
     await loginWith('ALICE42')
