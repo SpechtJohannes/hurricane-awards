@@ -529,6 +529,7 @@
     "eyebrow": "{{count}} Teilnehmende",
     "title": "Abstimmung",
     "loginRequired": "Gib zuerst deinen Teilnehmercode ein. Danach kannst du abstimmen.",
+    "empty": "Aktuell sind keine Abstimmungen aktiv. Schau später wieder vorbei.",
     "alreadyVoted": "Du hast bereits abgestimmt.",
     "voteTargetLabel": "Stimme geht an",
     "selectPerson": "Person auswählen",

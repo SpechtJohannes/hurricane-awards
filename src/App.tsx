@@ -3888,6 +3888,9 @@ function App() {
             {categoriesError ? (
               <p className="categories__notice">{categoriesError}</p>
             ) : null}
+            {!isLoadingData && openCategories.length === 0 ? (
+              <p className="categories__notice">{t('categories.empty')}</p>
+            ) : null}
 
             <div className="categories__grid">
               {openCategories.map((category) => {

@@ -87,6 +87,16 @@ describe('i18n test infrastructure', () => {
     )
   })
 
+  it('enthaelt Abstimmungs-Empty-State-Texte auf Deutsch und Niederlaendisch', async () => {
+    await i18n.changeLanguage('de')
+
+    expect(i18n.t('categories.empty')).toContain('keine Abstimmungen aktiv')
+
+    await i18n.changeLanguage('nl')
+
+    expect(i18n.t('categories.empty')).toContain('geen actieve stemmingen')
+  })
+
   it('enthaelt Admin Texte fuer Festivaltage auf Deutsch und Niederlaendisch', async () => {
     await i18n.changeLanguage('de')
 
