@@ -1387,19 +1387,37 @@ describe('Login', () => {
     expect(
       within(dashboardSection).getByRole('button', { name: /^profil/i }),
     ).toBeVisible()
-    expect(within(dashboardSection).getByText(/2 eintraege im gesamtclassement/i)).toBeVisible()
-    expect(within(dashboardSection).getByText(/1 auftritte hinterlegt/i)).toBeVisible()
-    expect(within(dashboardSection).getByText(/bingo ist verfuegbar/i)).toBeVisible()
-    expect(within(dashboardSection).getByText(/4 infos verfuegbar/i)).toBeVisible()
-    expect(within(dashboardSection).getByText(/1 aktive abstimmungen/i)).toBeVisible()
-    expect(within(dashboardSection).getByText(/angemeldet als alice/i)).toBeVisible()
+    const awardsTile = within(dashboardSection).getByRole('button', {
+      name: /^awards/i,
+    })
+    const timetableTile = within(dashboardSection).getByRole('button', {
+      name: /timetable/i,
+    })
+    const gamesTile = within(dashboardSection).getByRole('button', {
+      name: /spiele/i,
+    })
+    const infoTile = within(dashboardSection).getByRole('button', {
+      name: /festivalinfos/i,
+    })
+    const votingTile = within(dashboardSection).getByRole('button', {
+      name: /abstimmungen/i,
+    })
+    const profileTile = within(dashboardSection).getByRole('button', {
+      name: /^profil/i,
+    })
+
+    expect(awardsTile).toHaveTextContent(/2/)
+    expect(awardsTile).toHaveTextContent(/gesamtclassement/i)
+    expect(timetableTile).toHaveTextContent(/1/)
+    expect(gamesTile).toHaveTextContent(/bingo/i)
+    expect(infoTile).toHaveTextContent(/4/)
+    expect(votingTile).toHaveTextContent(/1/)
+    expect(profileTile).toHaveTextContent(/alice/i)
     expect(
       within(dashboardSection).getByRole('img', { name: 'Alice: Camp Sunrise' }),
     ).toBeVisible()
 
-    await user.click(
-      within(dashboardSection).getByRole('button', { name: /^awards/i }),
-    )
+    await user.click(awardsTile)
     expect(screen.getByRole('heading', { name: /ergebnisse/i })).toBeVisible()
 
     await switchMainSection(/^start$/i)
