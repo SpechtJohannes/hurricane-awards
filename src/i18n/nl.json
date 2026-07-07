@@ -182,6 +182,7 @@
       "title": "Avatar kiezen",
       "description": "Kies een avatar uit de vaste bibliotheek. Je kunt hem op elk moment wijzigen.",
       "selectLabel": "Avatar {{avatar}} kiezen",
+      "selected": "Gekozen",
       "saving": "Avatar wordt opgeslagen...",
       "errors": {
         "save": "De avatar kon net niet worden opgeslagen. Probeer het zo nog eens."

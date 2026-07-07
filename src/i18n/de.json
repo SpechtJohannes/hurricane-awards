@@ -182,6 +182,7 @@
       "title": "Avatar auswählen",
       "description": "Wähle einen Avatar aus der festen Bibliothek. Du kannst ihn jederzeit ändern.",
       "selectLabel": "Avatar {{avatar}} auswählen",
+      "selected": "Ausgewählt",
       "saving": "Avatar wird gespeichert...",
       "errors": {
         "save": "Der Avatar konnte gerade nicht gespeichert werden. Versuch es bitte gleich nochmal."

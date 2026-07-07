@@ -639,6 +639,7 @@ h1 {
 }
 
 .avatar-picker__option {
+  position: relative;
   display: grid;
   min-height: 118px;
   place-items: center;
@@ -668,9 +669,32 @@ h1 {
 
 .avatar-picker__option.is-selected {
   color: #101014;
-  background: #ffbe0b;
+  background: linear-gradient(135deg, #ffbe0b, #ffd166);
   border-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+  border-width: 2px;
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.24),
+    0 0 0 8px rgba(255, 190, 11, 0.22),
+    0 18px 34px rgba(255, 190, 11, 0.2);
+  transform: translateY(-2px);
+}
+
+.avatar-picker__option.is-selected .avatar {
+  border-color: #101014;
+  box-shadow:
+    0 0 0 3px rgba(16, 16, 20, 0.18),
+    0 10px 22px rgba(16, 16, 20, 0.22);
+}
+
+.avatar-picker__selected-badge {
+  min-height: 24px;
+  padding: 4px 8px;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 900;
+  line-height: 1;
+  background: #101014;
+  border-radius: 999px;
 }
 
 .avatar-picker__option:disabled {

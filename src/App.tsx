@@ -3764,6 +3764,11 @@ function App() {
                             size="large"
                           />
                           <span>{avatar.label}</span>
+                          {isSelected ? (
+                            <span className="avatar-picker__selected-badge">
+                              {t('identity.avatar.selected')}
+                            </span>
+                          ) : null}
                         </button>
                       )
                     })}
