@@ -97,6 +97,18 @@ describe('i18n test infrastructure', () => {
     expect(i18n.t('categories.empty')).toContain('geen actieve stemmingen')
   })
 
+  it('enthaelt Profiltexte fuer Login- und Profilzustand', async () => {
+    await i18n.changeLanguage('de')
+
+    expect(i18n.t('identity.loginTitle')).toContain('Teilnehmercode')
+    expect(i18n.t('identity.profileTitle')).toBe('Dein Profil')
+
+    await i18n.changeLanguage('nl')
+
+    expect(i18n.t('identity.loginTitle')).toContain('deelnemerscode')
+    expect(i18n.t('identity.profileTitle')).toBe('Je profiel')
+  })
+
   it('enthaelt Admin Texte fuer Festivaltage auf Deutsch und Niederlaendisch', async () => {
     await i18n.changeLanguage('de')
 

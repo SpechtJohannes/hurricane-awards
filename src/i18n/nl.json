@@ -160,6 +160,10 @@
   },
   "identity": {
     "title": "Voer je deelnemerscode in",
+    "loginTitle": "Aanmelden met deelnemerscode",
+    "loginDescription": "Voer je deelnemerscode in om je profiel, stemmingen en persoonlijke festivalonderdelen te ontgrendelen.",
+    "profileTitle": "Je profiel",
+    "profileDescription": "Hier zie je met welke naam en avatar je op het festival meedoet.",
     "loggedInAs": "Aangemeld als:",
     "logout": "Afmelden",
     "participantCodeLabel": "Deelnemerscode",

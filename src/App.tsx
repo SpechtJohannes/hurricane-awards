@@ -1364,7 +1364,7 @@ function App() {
   const [updatingCategoryId, setUpdatingCategoryId] = useState<string | null>(null)
   const [isAdminVisible, setIsAdminVisible] = useState(false)
   const [activeMainSection, setActiveMainSection] =
-    useState<MainSection>('awards')
+    useState<MainSection>(() => (selectedParticipant ? 'awards' : 'profile'))
   const [activeAdminSection, setActiveAdminSection] =
     useState<AdminSection>('festival')
   const [isLoadingData, setIsLoadingData] = useState(Boolean(selectedParticipant))
@@ -1401,13 +1401,18 @@ function App() {
     : 0
   const loginLockRemainingSeconds = Math.ceil(loginLockRemainingMs / 1000)
   const isLoginLocked = loginLockRemainingMs > 0
-  const mainNavigationItems: Array<{ section: MainSection; label: string }> = [
-    { section: 'awards', label: t('navigation.awards') },
-    { section: 'timetable', label: t('navigation.timetable') },
-    ...(bingoCard ? [{ section: 'bingo' as const, label: t('navigation.bingo') }] : []),
-    { section: 'info', label: t('navigation.info') },
-    { section: 'profile', label: t('navigation.profile') },
-  ]
+  const mainNavigationItems: Array<{ section: MainSection; label: string }> =
+    selectedParticipant
+      ? [
+          { section: 'awards', label: t('navigation.awards') },
+          { section: 'timetable', label: t('navigation.timetable') },
+          ...(bingoCard
+            ? [{ section: 'bingo' as const, label: t('navigation.bingo') }]
+            : []),
+          { section: 'info', label: t('navigation.info') },
+          { section: 'profile', label: t('navigation.profile') },
+        ]
+      : [{ section: 'profile', label: t('navigation.profile') }]
   const adminNavigationItems: Array<{ section: AdminSection; label: string }> = [
     { section: 'festival', label: t('admin.navigation.festival') },
     { section: 'participants', label: t('admin.navigation.participants') },
@@ -1753,7 +1758,7 @@ function App() {
     setAvatarError('')
     setSavingAvatarId(null)
     setIsAdminVisible(false)
-    setActiveMainSection('awards')
+    setActiveMainSection('profile')
     setActiveAdminSection('festival')
     setSelectedVotesByCategory({})
 
@@ -3425,68 +3430,6 @@ function App() {
     )
   }
 
-  if (!selectedParticipant) {
-    return (
-      <main
-        className="home home--locked"
-        aria-label={t('app.lockedAriaLabel', {
-          festivalName: displayedFestivalName,
-        })}
-      >
-        <header className="hero hero--locked" aria-labelledby="hero-title">
-          <div className="hero__content hero__content--locked">
-            <h1 id="hero-title">{displayedFestivalName}</h1>
-            <form
-              className="identity__form identity__form--locked"
-              onSubmit={submitAccessCode}
-            >
-              <label htmlFor="participant-access-code">
-                {t('identity.participantCodeLabel')}
-              </label>
-              <input
-                id="participant-access-code"
-                type="text"
-                value={accessCode}
-                disabled={isSubmittingAccessCode || isLoginLocked}
-                onChange={(event) => {
-                  setAccessCode(event.target.value)
-                  setAccessCodeError('')
-                }}
-                autoComplete="off"
-                inputMode="text"
-                placeholder={t('identity.participantCodePlaceholder')}
-              />
-              {accessCodeError ? (
-                <p className="identity__error">{accessCodeError}</p>
-              ) : null}
-              {isLoginLocked ? (
-                <p className="identity__error" role="status">
-                  {t('identity.locked', {
-                    seconds: loginLockRemainingSeconds,
-                  })}
-                </p>
-              ) : null}
-              <button
-                className="identity__submit"
-                type="submit"
-                disabled={isSubmittingAccessCode || isLoginLocked}
-              >
-                {isSubmittingAccessCode ? t('common.loading') : t('identity.submit')}
-              </button>
-            </form>
-          </div>
-
-          <div className="stage-lights" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
-        </header>
-        <AppFooter />
-      </main>
-    )
-  }
-
   return (
     <main
       className="home"
@@ -3499,7 +3442,7 @@ function App() {
         <div className="hero__actions">
           <PwaInstallPrompt />
           <LanguageSwitcher />
-          {selectedParticipant.isAdmin ? (
+          {selectedParticipant?.isAdmin ? (
             <button
               className="hero__admin"
               type="button"
@@ -3524,13 +3467,15 @@ function App() {
           <p className="hero__eyebrow">{t('hero.eyebrow')}</p>
           <h1 id="hero-title">{displayedFestivalName}</h1>
           <p className="hero__subtitle">{t('hero.subtitle')}</p>
-          <button
-            className="hero__button"
-            type="button"
-            onClick={() => setActiveMainSection('awards')}
-          >
-            {t('hero.voteCta')}
-          </button>
+          {selectedParticipant ? (
+            <button
+              className="hero__button"
+              type="button"
+              onClick={() => setActiveMainSection('awards')}
+            >
+              {t('hero.voteCta')}
+            </button>
+          ) : null}
         </div>
 
         <div className="stage-lights" aria-hidden="true">
@@ -3562,7 +3507,7 @@ function App() {
         </div>
       </nav>
 
-      {selectedParticipant.isAdmin && isAdminVisible ? (
+      {selectedParticipant?.isAdmin && isAdminVisible ? (
         <section
           className="admin"
           id="admin"
@@ -3759,88 +3704,138 @@ function App() {
           aria-labelledby="identity-title"
         >
           <div className="identity__content">
-            <SectionHeader
-              title={t('identity.title')}
-              titleId="identity-title"
-            />
+            {selectedParticipant ? (
+              <>
+                <SectionHeader
+                  title={t('identity.profileTitle')}
+                  titleId="identity-title"
+                  description={t('identity.profileDescription')}
+                />
 
-            <div className="identity__selected">
-              <p>
-                {t('identity.loggedInAs')}{' '}
-                <strong>
-                  <ParticipantName
+                <div className="identity__selected identity__profile-card">
+                  <Avatar
                     avatarId={selectedParticipant.avatarId}
                     name={selectedParticipant.displayName}
-                    size="medium"
+                    size="large"
                   />
-                </strong>
-              </p>
-              <button
-                className="identity__change"
-                type="button"
-                onClick={logout}
-              >
-                {t('identity.logout')}
-              </button>
-            </div>
+                  <div className="identity__profile-copy">
+                    <p>{t('identity.loggedInAs')}</p>
+                    <h3>{selectedParticipant.displayName}</h3>
+                  </div>
+                  <button
+                    className="identity__change"
+                    type="button"
+                    onClick={logout}
+                  >
+                    {t('identity.logout')}
+                  </button>
+                </div>
 
-            <div className="avatar-picker" aria-labelledby="avatar-picker-title">
-              <div className="avatar-picker__header">
-                <h3 id="avatar-picker-title">{t('identity.avatar.title')}</h3>
-                <p>{t('identity.avatar.description')}</p>
-              </div>
-              <div className="avatar-picker__grid">
-                {avatars.map((avatar) => {
-                  const isSelected =
-                    avatar.id ===
-                    (selectedParticipant.avatarId ?? avatars[0]?.id)
+                <div className="avatar-picker" aria-labelledby="avatar-picker-title">
+                  <div className="avatar-picker__header">
+                    <h3 id="avatar-picker-title">{t('identity.avatar.title')}</h3>
+                    <p>{t('identity.avatar.description')}</p>
+                  </div>
+                  <div className="avatar-picker__grid">
+                    {avatars.map((avatar) => {
+                      const isSelected =
+                        avatar.id ===
+                        (selectedParticipant.avatarId ?? avatars[0]?.id)
 
-                  return (
-                    <button
-                      className={`avatar-picker__option${
-                        isSelected ? ' is-selected' : ''
-                      }`}
-                      type="button"
-                      key={avatar.id}
-                      onClick={() => {
-                        void saveParticipantAvatar(avatar.id)
-                      }}
-                      disabled={savingAvatarId !== null}
-                      aria-pressed={isSelected}
-                      aria-label={t('identity.avatar.selectLabel', {
-                        avatar: avatar.label,
+                      return (
+                        <button
+                          className={`avatar-picker__option${
+                            isSelected ? ' is-selected' : ''
+                          }`}
+                          type="button"
+                          key={avatar.id}
+                          onClick={() => {
+                            void saveParticipantAvatar(avatar.id)
+                          }}
+                          disabled={savingAvatarId !== null}
+                          aria-pressed={isSelected}
+                          aria-label={t('identity.avatar.selectLabel', {
+                            avatar: avatar.label,
+                          })}
+                        >
+                          <Avatar
+                            avatarId={avatar.id}
+                            name={avatar.label}
+                            size="large"
+                          />
+                          <span>{avatar.label}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {savingAvatarId ? (
+                    <p className="identity__error" role="status">
+                      {t('identity.avatar.saving')}
+                    </p>
+                  ) : null}
+                  {avatarError ? (
+                    <p className="identity__error" role="alert">
+                      {avatarError}
+                    </p>
+                  ) : null}
+                </div>
+
+                {participantsError ? (
+                  <p className="identity__error">{participantsError}</p>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <SectionHeader
+                  title={t('identity.loginTitle')}
+                  titleId="identity-title"
+                  description={t('identity.loginDescription')}
+                />
+
+                <form className="identity__form" onSubmit={submitAccessCode}>
+                  <label htmlFor="participant-access-code">
+                    {t('identity.participantCodeLabel')}
+                  </label>
+                  <input
+                    id="participant-access-code"
+                    type="text"
+                    value={accessCode}
+                    disabled={isSubmittingAccessCode || isLoginLocked}
+                    onChange={(event) => {
+                      setAccessCode(event.target.value)
+                      setAccessCodeError('')
+                    }}
+                    autoComplete="off"
+                    inputMode="text"
+                    placeholder={t('identity.participantCodePlaceholder')}
+                  />
+                  {accessCodeError ? (
+                    <p className="identity__error">{accessCodeError}</p>
+                  ) : null}
+                  {isLoginLocked ? (
+                    <p className="identity__error" role="status">
+                      {t('identity.locked', {
+                        seconds: loginLockRemainingSeconds,
                       })}
-                    >
-                      <Avatar
-                        avatarId={avatar.id}
-                        name={avatar.label}
-                        size="large"
-                      />
-                      <span>{avatar.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-              {savingAvatarId ? (
-                <p className="identity__error" role="status">
-                  {t('identity.avatar.saving')}
-                </p>
-              ) : null}
-              {avatarError ? (
-                <p className="identity__error" role="alert">
-                  {avatarError}
-                </p>
-              ) : null}
-            </div>
-
-            {participantsError ? (
-              <p className="identity__error">{participantsError}</p>
-            ) : null}
+                    </p>
+                  ) : null}
+                  <button
+                    className="identity__submit"
+                    type="submit"
+                    disabled={isSubmittingAccessCode || isLoginLocked}
+                  >
+                    {isSubmittingAccessCode
+                      ? t('common.loading')
+                      : t('identity.submit')}
+                  </button>
+                </form>
+              </>
+            )}
           </div>
         </section>
       ) : null}
 
-      {activeMainSection === 'bingo' && bingoCard ? (
+      {selectedParticipant && activeMainSection === 'bingo' && bingoCard ? (
         <Bingo
           card={bingoCard}
           error={bingoError}
@@ -3849,7 +3844,7 @@ function App() {
         />
       ) : null}
 
-      {activeMainSection === 'timetable' ? (
+      {selectedParticipant && activeMainSection === 'timetable' ? (
         <TimetableSection
           timetable={timetable}
           error={timetableError}
@@ -3860,7 +3855,7 @@ function App() {
         />
       ) : null}
 
-      {activeMainSection === 'info' ? (
+      {selectedParticipant && activeMainSection === 'info' ? (
         <FestivalInfo
           documents={festivalDocuments}
           campLocationLink={campLocationLink}
@@ -3872,7 +3867,7 @@ function App() {
         />
       ) : null}
 
-      {activeMainSection === 'awards' ? (
+      {selectedParticipant && activeMainSection === 'awards' ? (
         <div id="main-awards">
           <section className="categories" id="abstimmung" aria-labelledby="categories-title">
             <SectionHeader
