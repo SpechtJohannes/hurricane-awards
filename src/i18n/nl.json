@@ -142,22 +142,58 @@
       "timetable": {
         "title": "Timetable",
         "description": "Je festivalplanning en favorieten.",
+        "status": {
+          "available": "{{count}} optredens beschikbaar.",
+          "empty": "Nog geen timetable beschikbaar."
+        },
         "detail": "Naar timetable"
       },
       "games": {
         "title": "Spellen",
         "description": "Bingo en latere festivalspellen.",
+        "status": {
+          "bingo": "Bingo is beschikbaar.",
+          "empty": "Er is momenteel geen spel actief."
+        },
         "detail": "Naar spellen"
       },
       "info": {
         "title": "Festivalinfo",
         "description": "Documenten, campingplek en playlist.",
+        "status": {
+          "available": "{{count}} infos beschikbaar.",
+          "empty": "Nog geen festivalinfo beschikbaar."
+        },
         "detail": "Naar info"
       },
       "awards": {
+        "title": "Awards",
+        "description": "Resultaten en totaalklassement.",
+        "status": {
+          "standings": "{{count}} vermeldingen in het totaalklassement.",
+          "votes": "{{count}} stemmen binnen.",
+          "empty": "Awardgedeelte klaar."
+        },
+        "detail": "Naar awards"
+      },
+      "voting": {
         "title": "Stemmingen",
-        "description": "{{count}} actieve stemmingen.",
+        "description": "Actieve stemmingen voor de festivalcrew.",
+        "status": {
+          "available": "{{count}} actieve stemmingen.",
+          "empty": "Geen stemming actief."
+        },
         "detail": "Naar stemming"
+      },
+      "profile": {
+        "title": "Profiel",
+        "description": "Deelnemerscode, avatar en afmelden.",
+        "status": {
+          "authenticated": "Aangemeld als {{name}}.",
+          "guest": "Meld je aan met je deelnemerscode."
+        },
+        "detailAuthenticated": "Naar profiel",
+        "detailGuest": "Naar aanmelden"
       }
     }
   },

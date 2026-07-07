@@ -614,10 +614,16 @@ type TimetableDaySchedule = {
 }
 
 type DashboardTile = {
+  id: string
   section: MainSection
   title: string
   description: string
+  status: string
   detail: string
+  avatar?: {
+    avatarId?: string | null
+    name: string
+  }
 }
 
 type DashboardSectionProps = {
@@ -674,13 +680,20 @@ function DashboardSection({
           <button
             className="dashboard-tile"
             type="button"
-            key={tile.section}
+            key={tile.id}
             onClick={() => onNavigate(isAuthenticated ? tile.section : 'profile')}
           >
             <span className="dashboard-tile__title">{tile.title}</span>
             <span className="dashboard-tile__description">
               {tile.description}
             </span>
+            {tile.avatar ? (
+              <span className="dashboard-tile__profile">
+                <Avatar avatarId={tile.avatar.avatarId} name={tile.avatar.name} />
+                <span>{tile.avatar.name}</span>
+              </span>
+            ) : null}
+            <span className="dashboard-tile__status">{tile.status}</span>
             <span className="dashboard-tile__detail">{tile.detail}</span>
           </button>
         ))}
@@ -1471,48 +1484,6 @@ function App() {
     : 0
   const loginLockRemainingSeconds = Math.ceil(loginLockRemainingMs / 1000)
   const isLoginLocked = loginLockRemainingMs > 0
-  const dashboardTiles: DashboardTile[] = [
-    {
-      section: 'timetable',
-      title: t('dashboard.tiles.timetable.title'),
-      description: t('dashboard.tiles.timetable.description'),
-      detail: t('dashboard.tiles.timetable.detail'),
-    },
-    {
-      section: 'games',
-      title: t('dashboard.tiles.games.title'),
-      description: t('dashboard.tiles.games.description'),
-      detail: t('dashboard.tiles.games.detail'),
-    },
-    {
-      section: 'info',
-      title: t('dashboard.tiles.info.title'),
-      description: t('dashboard.tiles.info.description'),
-      detail: t('dashboard.tiles.info.detail'),
-    },
-    {
-      section: 'awards',
-      title: t('dashboard.tiles.awards.title'),
-      description: t('dashboard.tiles.awards.description', {
-        count: openCategories.length,
-      }),
-      detail: t('dashboard.tiles.awards.detail'),
-    },
-  ]
-  const mainNavigationItems: Array<{ section: MainSection; label: string }> =
-    selectedParticipant
-      ? [
-          { section: 'dashboard', label: t('navigation.dashboard') },
-          { section: 'awards', label: t('navigation.awards') },
-          { section: 'timetable', label: t('navigation.timetable') },
-          { section: 'games', label: t('navigation.games') },
-          { section: 'info', label: t('navigation.info') },
-          { section: 'profile', label: t('navigation.profile') },
-        ]
-      : [
-          { section: 'dashboard', label: t('navigation.dashboard') },
-          { section: 'profile', label: t('navigation.profile') },
-        ]
   const adminNavigationItems: Array<{ section: AdminSection; label: string }> = [
     { section: 'festival', label: t('admin.navigation.festival') },
     { section: 'participants', label: t('admin.navigation.participants') },
@@ -1735,6 +1706,99 @@ function App() {
   )
 
   const hasVotes = allVotes.length > 0
+  const timetablePerformanceCount = timetable?.performances.length ?? 0
+  const festivalInfoCount =
+    festivalDocuments.length +
+    (campLocationLink ? 1 : 0) +
+    (musicPlaylist ? 1 : 0)
+  const dashboardTiles: DashboardTile[] = [
+    {
+      id: 'awards',
+      section: 'awards',
+      title: t('dashboard.tiles.awards.title'),
+      description: t('dashboard.tiles.awards.description'),
+      status:
+        allTimeStandings.length > 0
+          ? t('dashboard.tiles.awards.status.standings', {
+              count: allTimeStandings.length,
+            })
+          : hasVotes
+            ? t('dashboard.tiles.awards.status.votes', {
+                count: allVotes.length,
+              })
+            : t('dashboard.tiles.awards.status.empty'),
+      detail: t('dashboard.tiles.awards.detail'),
+    },
+    {
+      id: 'timetable',
+      section: 'timetable',
+      title: t('dashboard.tiles.timetable.title'),
+      description: t('dashboard.tiles.timetable.description'),
+      status:
+        timetablePerformanceCount > 0
+          ? t('dashboard.tiles.timetable.status.available', {
+              count: timetablePerformanceCount,
+            })
+          : t('dashboard.tiles.timetable.status.empty'),
+      detail: t('dashboard.tiles.timetable.detail'),
+    },
+    {
+      id: 'games',
+      section: 'games',
+      title: t('dashboard.tiles.games.title'),
+      description: t('dashboard.tiles.games.description'),
+      status: bingoCard
+        ? t('dashboard.tiles.games.status.bingo')
+        : t('dashboard.tiles.games.status.empty'),
+      detail: t('dashboard.tiles.games.detail'),
+    },
+    {
+      id: 'info',
+      section: 'info',
+      title: t('dashboard.tiles.info.title'),
+      description: t('dashboard.tiles.info.description'),
+      status:
+        festivalInfoCount > 0
+          ? t('dashboard.tiles.info.status.available', {
+              count: festivalInfoCount,
+            })
+          : t('dashboard.tiles.info.status.empty'),
+      detail: t('dashboard.tiles.info.detail'),
+    },
+    {
+      id: 'voting',
+      section: 'awards',
+      title: t('dashboard.tiles.voting.title'),
+      description: t('dashboard.tiles.voting.description'),
+      status:
+        openCategories.length > 0
+          ? t('dashboard.tiles.voting.status.available', {
+              count: openCategories.length,
+            })
+          : t('dashboard.tiles.voting.status.empty'),
+      detail: t('dashboard.tiles.voting.detail'),
+    },
+    {
+      id: 'profile',
+      section: 'profile',
+      title: t('dashboard.tiles.profile.title'),
+      description: t('dashboard.tiles.profile.description'),
+      status: selectedParticipant
+        ? t('dashboard.tiles.profile.status.authenticated', {
+            name: selectedParticipant.displayName,
+          })
+        : t('dashboard.tiles.profile.status.guest'),
+      detail: selectedParticipant
+        ? t('dashboard.tiles.profile.detailAuthenticated')
+        : t('dashboard.tiles.profile.detailGuest'),
+      avatar: selectedParticipant
+        ? {
+            avatarId: selectedParticipant.avatarId,
+            name: selectedParticipant.displayName,
+          }
+        : undefined,
+    },
+  ]
 
   async function submitAccessCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -3540,10 +3604,14 @@ function App() {
       })}
     >
       <header className="app-header" aria-labelledby="app-title">
-        <div className="app-header__brand">
+        <button
+          className="app-header__brand"
+          type="button"
+          onClick={() => setActiveMainSection('dashboard')}
+        >
           <p>{t('dashboard.festivalLabel')}</p>
           <h1 id="app-title">{displayedFestivalName}</h1>
-        </div>
+        </button>
 
         <div className="app-header__actions">
           <PwaInstallPrompt />
@@ -3569,28 +3637,6 @@ function App() {
           ) : null}
         </div>
       </header>
-
-      <nav
-        className="app-navigation"
-        aria-label={t('navigation.label')}
-      >
-        <div className="app-navigation__items">
-          {mainNavigationItems.map((item) => (
-            <button
-              className="app-navigation__button"
-              type="button"
-              key={item.section}
-              aria-current={
-                activeMainSection === item.section ? 'page' : undefined
-              }
-              aria-controls={`main-${item.section}`}
-              onClick={() => setActiveMainSection(item.section)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </nav>
 
       {selectedParticipant?.isAdmin && isAdminVisible ? (
         <section
