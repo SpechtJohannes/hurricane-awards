@@ -160,6 +160,10 @@
   },
   "identity": {
     "title": "Gib deinen Teilnehmercode ein",
+    "loginTitle": "Mit Teilnehmercode anmelden",
+    "loginDescription": "Gib deinen Teilnehmercode ein, um dein Profil, Abstimmungen und persönliche Festivalbereiche freizuschalten.",
+    "profileTitle": "Dein Profil",
+    "profileDescription": "Hier siehst du, mit welchem Namen und Avatar du im Festival unterwegs bist.",
     "loggedInAs": "Angemeldet als:",
     "logout": "Abmelden",
     "participantCodeLabel": "Teilnehmercode",

@@ -766,6 +766,12 @@ async function loginWith(code: string) {
     expect(screen.queryByText('Lade...')).not.toBeInTheDocument()
   })
 
+  const awardsButton = screen.queryByRole('button', { name: /^awards$/i })
+
+  if (awardsButton) {
+    await user.click(awardsButton)
+  }
+
   return user
 }
 
@@ -1228,13 +1234,56 @@ describe('Login', () => {
     ).not.toBeInTheDocument()
   })
 
+  it('zeigt nicht angemeldet den Profilbereich mit Loginueberschrift', async () => {
+    await renderLoadedApp()
+
+    await unlockFestivalWith()
+
+    const profileSection = sectionForHeading(/mit teilnehmercode anmelden/i)
+
+    expect(
+      within(profileSection).getByText(/profil, abstimmungen/i),
+    ).toBeVisible()
+    expect(
+      within(profileSection).getByRole('textbox', { name: /^teilnehmercode$/i }),
+    ).toBeVisible()
+    expect(
+      within(profileSection).queryByRole('heading', { name: /dein profil/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('zeigt nach der Anmeldung den Profilbereich mit Name und Avatar', async () => {
+    await renderLoadedApp()
+    const user = await unlockFestivalWith()
+
+    await user.type(
+      screen.getByRole('textbox', { name: /^teilnehmercode$/i }),
+      'ALICE42',
+    )
+    await user.click(screen.getByRole('button', { name: /code/i }))
+
+    const profileSection = sectionForHeading(/dein profil/i)
+
+    expect(
+      await within(profileSection).findByRole('heading', { name: 'Alice' }),
+    ).toBeVisible()
+    expect(
+      within(profileSection).getByRole('img', { name: 'Alice: Camp Sunrise' }),
+    ).toBeVisible()
+    expect(
+      within(profileSection).queryByRole('heading', {
+        name: /mit teilnehmercode anmelden/i,
+      }),
+    ).not.toBeInTheDocument()
+  })
+
   it('erlaubt Zugriff mit gueltigem Teilnehmercode', async () => {
     await renderLoadedApp()
 
     await loginWith(' alice42 ')
     await switchMainSection(/profil/i)
 
-    const identitySection = sectionForHeading(/teilnehmercode/i)
+    const identitySection = sectionForHeading(/dein profil/i)
     expect(await within(identitySection).findByText(/angemeldet als:/i)).toBeVisible()
     expect(within(identitySection).getByText('Alice')).toBeVisible()
     expect(loginParticipant).toHaveBeenCalledWith('ALICE42')
@@ -1971,7 +2020,7 @@ describe('Login', () => {
     await user.click(screen.getByRole('button', { name: /code/i }))
     await switchMainSection(/profil/i)
 
-    const identitySection = sectionForHeading(/teilnehmercode/i)
+    const identitySection = sectionForHeading(/dein profil/i)
     expect(await within(identitySection).findByText(/angemeldet als:/i)).toBeVisible()
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
     expect(loginParticipant).toHaveBeenLastCalledWith('ALICE42')
@@ -2010,7 +2059,7 @@ describe('Login', () => {
     await switchMainSection(/profil/i)
 
     expect(await screen.findByText(/angemeldet als:/i)).toBeVisible()
-    const identitySection = sectionForHeading(/teilnehmercode/i)
+    const identitySection = sectionForHeading(/dein profil/i)
     expect(within(identitySection).getByText('Alice')).toBeVisible()
     expect(loadParticipants).toHaveBeenCalled()
     expect(loadVotesForParticipant).toHaveBeenCalledWith('alice', {
@@ -2049,6 +2098,12 @@ describe('Login', () => {
 
     expect(
       await screen.findByRole('heading', { name: 'Hurricane Awards 2026' }),
+    ).toBeVisible()
+    expect(
+      screen.getByRole('heading', { name: /mit teilnehmercode anmelden/i }),
+    ).toBeVisible()
+    expect(
+      screen.getByRole('textbox', { name: /^teilnehmercode$/i }),
     ).toBeVisible()
     expect(screen.queryByRole('heading', { name: /abstimmung/i })).not.toBeInTheDocument()
     expect(

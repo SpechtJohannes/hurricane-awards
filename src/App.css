@@ -507,6 +507,31 @@ h1 {
   color: #ffbe0b;
 }
 
+.identity__profile-card {
+  align-items: center;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.identity__profile-copy {
+  min-width: 0;
+}
+
+.identity__profile-copy p {
+  color: rgba(255, 247, 237, 0.72);
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.identity__profile-copy h3 {
+  margin: 4px 0 0;
+  color: #ffffff;
+  font-size: clamp(1.4rem, 5vw, 2.15rem);
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
 .identity__submit,
 .identity__change {
   padding: 0 18px;
@@ -2510,6 +2535,10 @@ h1 {
   .identity__selected {
     grid-template-columns: 1fr auto;
     align-items: center;
+  }
+
+  .identity__profile-card {
+    grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
   .admin {
