@@ -221,6 +221,13 @@ const tournamentModeColumnMigration = readFileSync(
   ),
   'utf8',
 )
+const tournamentTableShapeSyncMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260708160000_sync_tournaments_table_shape.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -1334,6 +1341,68 @@ describe('Supabase Sicherheitsmigration', () => {
     )
     expect(tournamentModeColumnMigration).toContain(
       "notify pgrst, 'reload schema'",
+    )
+  })
+
+  it('gleicht die Turnier-Tabelle fuer bestehende Datenbanken vollstaendig ab', () => {
+    for (const columnDefinition of [
+      'add column if not exists id uuid default gen_random_uuid()',
+      'add column if not exists festival_id text',
+      'add column if not exists name text',
+      "add column if not exists mode text not null default 'ko'",
+      "add column if not exists status text not null default 'active'",
+      'add column if not exists selected_participant_ids text[] not null default array[]::text[]',
+      'add column if not exists draw_participant_ids text[] not null default array[]::text[]',
+      'add column if not exists qualification_ranking_ids text[] not null default array[]::text[]',
+      `add column if not exists bracket jsonb not null default '{"type":"single_elimination","rounds":[]}'::jsonb`,
+      'add column if not exists created_at timestamptz not null default now()',
+      'add column if not exists updated_at timestamptz not null default now()',
+      'add column if not exists created_by_participant_id text',
+    ]) {
+      expect(tournamentTableShapeSyncMigration).toContain(columnDefinition)
+    }
+
+    expect(tournamentTableShapeSyncMigration).toContain(
+      "alter column mode set default 'ko'",
+    )
+    expect(tournamentTableShapeSyncMigration).toContain(
+      'alter column draw_participant_ids set default array[]::text[]',
+    )
+    expect(tournamentTableShapeSyncMigration).toContain(
+      'alter column id set not null',
+    )
+    expect(tournamentTableShapeSyncMigration).toContain(
+      'alter column festival_id set not null',
+    )
+    expect(tournamentTableShapeSyncMigration).toContain(
+      'alter column name set not null',
+    )
+    expect(tournamentTableShapeSyncMigration).toContain(
+      'alter column bracket set not null',
+    )
+    expect(tournamentTableShapeSyncMigration).toContain(
+      'drop constraint if exists tournaments_status_check',
+    )
+    expect(tournamentTableShapeSyncMigration).toContain(
+      'drop constraint if exists tournaments_mode_check',
+    )
+    expect(tournamentTableShapeSyncMigration).toContain(
+      'drop constraint if exists tournaments_name_required',
+    )
+    expect(tournamentTableShapeSyncMigration).toContain(
+      'drop constraint if exists tournaments_bracket_object',
+    )
+    expect(tournamentTableShapeSyncMigration).toContain(
+      "check (status in ('draft', 'active'))",
+    )
+    expect(tournamentTableShapeSyncMigration).toContain(
+      "check (mode in ('ko', 'knockout', 'qualification_knockout'))",
+    )
+    expect(tournamentTableShapeSyncMigration).toContain(
+      "check (btrim(name) <> '')",
+    )
+    expect(tournamentTableShapeSyncMigration).toContain(
+      "check (jsonb_typeof(bracket) = 'object')",
     )
   })
 
