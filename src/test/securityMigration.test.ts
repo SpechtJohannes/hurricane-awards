@@ -228,6 +228,13 @@ const tournamentTableShapeSyncMigration = readFileSync(
   ),
   'utf8',
 )
+const tournamentCreateReturnShapeFixMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260708170000_fix_tournament_create_return_shape.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -1403,6 +1410,55 @@ describe('Supabase Sicherheitsmigration', () => {
     )
     expect(tournamentTableShapeSyncMigration).toContain(
       "check (jsonb_typeof(bracket) = 'object')",
+    )
+  })
+
+  it('gibt beim Turnier-Anlegen die deklarierte Tabellenstruktur explizit zurueck', () => {
+    for (const returnColumn of [
+      'id uuid',
+      'festival_id text',
+      'name text',
+      'mode text',
+      'status text',
+      'selected_participant_ids text[]',
+      'draw_participant_ids text[]',
+      'qualification_ranking_ids text[]',
+      'bracket jsonb',
+      'created_at timestamptz',
+      'updated_at timestamptz',
+    ]) {
+      expect(tournamentCreateReturnShapeFixMigration).toContain(returnColumn)
+    }
+
+    const explicitReturnQuery = [
+      'select',
+      '    t.id,',
+      '    t.festival_id,',
+      '    t.name,',
+      '    t.mode,',
+      '    t.status,',
+      '    t.selected_participant_ids,',
+      '    t.draw_participant_ids,',
+      '    t.qualification_ranking_ids,',
+      '    t.bracket,',
+      '    t.created_at,',
+      '    t.updated_at',
+      '  from public.tournaments t',
+      '  where t.id = v_tournament_id',
+    ].join('\n')
+
+    expect(tournamentCreateReturnShapeFixMigration).toContain(
+      explicitReturnQuery,
+    )
+    expect(tournamentCreateReturnShapeFixMigration).not.toContain(
+      'from public.ha_admin_list_tournaments',
+    )
+    expect(tournamentCreateReturnShapeFixMigration).not.toContain('select *')
+    expect(tournamentCreateReturnShapeFixMigration).toContain(
+      'grant execute on function public.ha_admin_create_tournament(text, text, text, text, text[])',
+    )
+    expect(tournamentCreateReturnShapeFixMigration).toContain(
+      "notify pgrst, 'reload schema'",
     )
   })
 
