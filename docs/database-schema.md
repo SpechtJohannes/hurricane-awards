@@ -384,7 +384,7 @@ Besonderheiten:
 - Direkte Browserzugriffe sind gesperrt.
 - Admin-RPCs validieren mindestens zwei aktive Teilnehmende.
 - Beim Anlegen wird `draw_participant_ids` serverseitig zufaellig erzeugt und gespeichert.
-- Die Nachruestmigration `20260708150000_add_tournament_mode_column.sql` fuegt `mode` fuer bereits bestehende `tournaments`-Tabellen per `add column if not exists` hinzu.
+- Die Nachruestmigration `20260708160000_sync_tournaments_table_shape.sql` gleicht bereits bestehende `tournaments`-Tabellen per `alter table ... add column if not exists` mit der aktuellen Tabellenform ab.
 - KO-Turniere erzeugen den KO-Baum sofort. Wenn die Teilnehmerzahl keine Zweierpotenz ist, werden Freilose ueber die gespeicherte Auslosung bestimmt und nicht als normale Begegnungen gespeichert.
 
 ## Beziehungen
