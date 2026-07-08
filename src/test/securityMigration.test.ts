@@ -235,6 +235,13 @@ const tournamentCreateReturnShapeFixMigration = readFileSync(
   ),
   'utf8',
 )
+const tournamentUpdateReturnShapeFixMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260708180000_fix_tournament_update_return_shape.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -1460,6 +1467,82 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(tournamentCreateReturnShapeFixMigration).toContain(
       "notify pgrst, 'reload schema'",
     )
+  })
+
+  it('gibt beim Turnier-Bearbeiten die deklarierte Tabellenstruktur explizit zurueck', () => {
+    for (const returnColumn of [
+      'id uuid',
+      'festival_id text',
+      'name text',
+      'mode text',
+      'status text',
+      'selected_participant_ids text[]',
+      'draw_participant_ids text[]',
+      'qualification_ranking_ids text[]',
+      'bracket jsonb',
+      'created_at timestamptz',
+      'updated_at timestamptz',
+    ]) {
+      expect(tournamentUpdateReturnShapeFixMigration).toContain(returnColumn)
+    }
+
+    const explicitReturnQuery = [
+      'select',
+      '    t.id,',
+      '    t.festival_id,',
+      '    t.name,',
+      '    t.mode,',
+      '    t.status,',
+      '    t.selected_participant_ids,',
+      '    t.draw_participant_ids,',
+      '    t.qualification_ranking_ids,',
+      '    t.bracket,',
+      '    t.created_at,',
+      '    t.updated_at',
+      '  from public.tournaments t',
+      '  where t.id = p_tournament_id',
+    ].join('\n')
+
+    expect(tournamentUpdateReturnShapeFixMigration).toContain(
+      explicitReturnQuery,
+    )
+    expect(tournamentUpdateReturnShapeFixMigration).not.toContain(
+      'from public.ha_admin_list_tournaments',
+    )
+    expect(tournamentUpdateReturnShapeFixMigration).not.toContain('select *')
+    expect(tournamentUpdateReturnShapeFixMigration).toContain(
+      'grant execute on function public.ha_admin_update_tournament(text, uuid, text, text, text[])',
+    )
+    expect(tournamentUpdateReturnShapeFixMigration).toContain(
+      "notify pgrst, 'reload schema'",
+    )
+  })
+
+  it('listet Admin-Turniere mit expliziter Rueckgabeform', () => {
+    const explicitReturnQuery = [
+      'select',
+      '    t.id,',
+      '    t.festival_id,',
+      '    t.name,',
+      '    t.mode,',
+      '    t.status,',
+      '    t.selected_participant_ids,',
+      '    t.draw_participant_ids,',
+      '    t.qualification_ranking_ids,',
+      '    t.bracket,',
+      '    t.created_at,',
+      '    t.updated_at',
+      '  from public.tournaments t',
+      '  where t.festival_id = p_festival_id',
+    ].join('\n')
+
+    expect(tournamentsMigration).toContain(
+      'create or replace function public.ha_admin_list_tournaments',
+    )
+    expect(tournamentsMigration).toContain(explicitReturnQuery)
+    expect(tournamentsMigration).toContain('selected_participant_ids text[]')
+    expect(tournamentsMigration).toContain('draw_participant_ids text[]')
+    expect(tournamentsMigration).toContain('bracket jsonb')
   })
 
   it('legt die technische Timetable Basis mit getrennten Entitaeten an', () => {
