@@ -186,6 +186,13 @@ const horseRacingMigration = readFileSync(
   ),
   'utf8',
 )
+const horseRacingRpcFixMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260708110000_fix_horse_racing_rpc_ambiguity.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -1065,6 +1072,34 @@ describe('Supabase Sicherheitsmigration', () => {
     }
   })
 
+  it('korrigiert Pferderennen RPCs ohne mehrdeutige Festival-ID Referenzen', () => {
+    for (const functionName of [
+      'ha_get_horse_racing_state',
+      'ha_place_horse_racing_bet',
+      'ha_admin_get_horse_racing_state',
+      'ha_admin_set_horse_racing_state',
+      'ha_admin_list_horse_racing_bets',
+    ]) {
+      expect(horseRacingRpcFixMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(horseRacingRpcFixMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+
+    expect(horseRacingRpcFixMigration).toContain(
+      'on conflict on constraint horse_racing_settings_pkey',
+    )
+    expect(horseRacingRpcFixMigration).not.toContain('on conflict (festival_id)')
+    expect(horseRacingRpcFixMigration).toContain('requested_festival_id')
+    expect(horseRacingRpcFixMigration).toContain('hrs.festival_id')
+    expect(horseRacingRpcFixMigration).toContain('hrb.festival_id')
+    expect(horseRacingRpcFixMigration).toContain(
+      'v_is_enabled := coalesce(p_is_enabled, false)',
+    )
+  })
+
   it('legt die technische Timetable Basis mit getrennten Entitaeten an', () => {
     for (const table of [
       'festival_days',
@@ -1401,6 +1436,7 @@ describe('Supabase Sicherheitsmigration', () => {
       timetableSharedFavoritesMigration,
       timetableStageColorsMigration,
       horseRacingMigration,
+      horseRacingRpcFixMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

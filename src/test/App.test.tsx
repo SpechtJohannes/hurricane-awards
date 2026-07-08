@@ -3775,7 +3775,18 @@ describe('Admin', () => {
     const user = await loginWith('ALICE42')
 
     await user.click(screen.getByRole('button', { name: /^admin$/i }))
-    await switchAdminSection(/^bingo$/i)
+    const adminNavigation = screen.getByRole('navigation', {
+      name: /adminbereiche/i,
+    })
+
+    expect(
+      within(adminNavigation).getByRole('button', { name: /^spiele$/i }),
+    ).toBeVisible()
+    expect(
+      within(adminNavigation).queryByRole('button', { name: /^bingo$/i }),
+    ).not.toBeInTheDocument()
+
+    await switchAdminSection(/^spiele$/i)
 
     const adminBingoSection = sectionForHeading(/^bingo$/i)
 
@@ -3802,7 +3813,7 @@ describe('Admin', () => {
     await switchMainSection(/^spiele$/i)
     expect(screen.getByRole('button', { name: '1' })).toBeVisible()
 
-    await switchAdminSection(/^bingo$/i)
+    await switchAdminSection(/^spiele$/i)
     await user.click(
       within(adminBingoSection).getByRole('button', {
         name: /bingorunde beenden/i,
