@@ -1556,7 +1556,7 @@ function App() {
     { section: 'participants', label: t('admin.navigation.participants') },
     { section: 'awards', label: t('admin.navigation.awards') },
     { section: 'timetable', label: t('admin.navigation.timetable') },
-    { section: 'games', label: t('admin.navigation.bingo') },
+    { section: 'games', label: t('admin.navigation.games') },
     { section: 'info', label: t('admin.navigation.info') },
     { section: 'archive', label: t('admin.navigation.archive') },
   ]
