@@ -112,6 +112,7 @@ import {
   loadTournaments,
   updateTournament,
   type Tournament,
+  type TournamentMode,
 } from './data/tournaments'
 import {
   addTimetableFavorite,
@@ -3830,7 +3831,7 @@ function App() {
 
   async function createAdminTournament(input: {
     name: string
-    mode: 'knockout' | 'qualification_knockout'
+    mode: TournamentMode
     participantIds: string[]
   }) {
     const adminContext = getParticipantAdminContext()
@@ -3860,7 +3861,7 @@ function App() {
     tournamentId: string,
     input: {
       name: string
-      mode: 'knockout' | 'qualification_knockout'
+      mode: TournamentMode
       participantIds: string[]
     },
   ) {
