@@ -106,6 +106,7 @@ Admin-RPCs umfassen unter anderem:
 - Infos: `ha_admin_list_festival_documents`, `ha_upsert_festival_document`, `ha_delete_festival_document`, `ha_admin_get_music_playlist`, `ha_update_music_playlist`, `ha_delete_music_playlist`
 - Timetable: `ha_get_timetable`, `ha_add_timetable_favorite`, `ha_remove_timetable_favorite`, `ha_admin_list_festival_days`, `ha_create_festival_day`, `ha_update_festival_day`, `ha_delete_festival_day`, `ha_admin_list_timetable_stages`, `ha_create_timetable_stage`, `ha_update_timetable_stage`, `ha_delete_timetable_stage`, `ha_admin_list_timetable_acts`, `ha_create_timetable_act`, `ha_update_timetable_act`, `ha_delete_timetable_act`, `ha_admin_list_timetable_performances`, `ha_create_timetable_performance`, `ha_update_timetable_performance`, `ha_delete_timetable_performance`
 - Bingo: `ha_admin_get_bingo_round`, `ha_start_bingo_round`, `ha_close_bingo_round`
+- Pferderennen: `ha_admin_get_horse_racing_state`, `ha_admin_set_horse_racing_state`, `ha_admin_list_horse_racing_bets`
 
 ### Festivalinfos und Dokumente
 
@@ -122,6 +123,14 @@ Die Festival Playlist wird als Spotify Playlist ID im `app_settings` Key `music_
 Der Bingo-Bereich ist nur sichtbar, wenn eine aktive Bingorunde existiert. Admins starten oder beenden diese Runde im Adminbereich unter Bingo. Die Ziehung bleibt analog; die App speichert nur individuelle Karten und Markierungen.
 
 Teilnehmer laden ihre Karte ueber `ha_get_or_create_bingo_card`. Die RPC erzeugt serverseitig genau eine Karte pro Teilnehmer und aktiver Runde, falls noch keine Karte existiert. Die Karte enthaelt 25 eindeutige Zahlen aus dem Bereich 1 bis 75. Markierungen werden ueber `ha_set_bingo_mark` gespeichert oder entfernt und beim erneuten Laden wieder angezeigt. Die App prueft kein Bingo automatisch.
+
+### Pferderennen
+
+Pferderennen ist ein festivalbezogenes Partyspiel im Spielebereich. Die App verwaltet nur Aktivierung, Wettphase und die persoenliche Wette auf eine Kartenfarbe; die Spielrunde mit Kartenziehen findet ausserhalb der App statt.
+
+Der Status liegt in `horse_racing_settings` mit genau einem Datensatz pro `festival_id`. Admins aktivieren oder deaktivieren das Spiel und oeffnen oder schliessen die Wettphase ueber `ha_admin_set_horse_racing_state`. Beim Deaktivieren wird die Wettphase serverseitig geschlossen. Admins koennen den Status ueber `ha_admin_get_horse_racing_state` laden und die abgegebenen Wetten ueber `ha_admin_list_horse_racing_bets` einsehen.
+
+Teilnehmende laden ihren Status und die eigene Auswahl ueber `ha_get_horse_racing_state`. Wetten werden in `horse_racing_bets` pro Festival und Teilnehmer gespeichert; der Unique Constraint auf `(festival_id, participant_id)` verhindert mehrere aktive Wetten. `ha_place_horse_racing_bet` erlaubt Einfuegen und Aendern nur, wenn Pferderennen aktiv und die Wettphase offen ist. Nach dem Schliessen bleibt die eigene Auswahl lesbar, aber nicht mehr aenderbar.
 
 ### Timetable
 
@@ -188,6 +197,8 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `bingo_rounds`: Bingorunden mit Status. Es darf nur eine aktive Runde geben; beim Start einer neuen Runde werden alte aktive Runden geschlossen. Es gibt keine UI-Historie.
 - `bingo_cards`: Serverseitig generierte Bingokarten, eindeutig pro Teilnehmer und aktiver Runde.
 - `bingo_marks`: Persistierte Markierungen fuer Zahlen auf einer Bingokarte.
+- `horse_racing_settings`: Festivalbezogener Pferderennen-Status mit Aktivierung und Wettphasenstatus; genau ein Datensatz pro Festival.
+- `horse_racing_bets`: Pferderennen-Wetten pro Festival und Teilnehmer mit Kartenfarbe; eindeutig ueber `(festival_id, participant_id)`.
 - `participant_login_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Teilnehmerlogin.
 - `festival_access_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Festivalcode.
 

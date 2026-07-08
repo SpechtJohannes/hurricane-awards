@@ -179,6 +179,13 @@ const timetableStageColorsMigration = readFileSync(
   ),
   'utf8',
 )
+const horseRacingMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260708100000_create_horse_racing.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -1002,6 +1009,62 @@ describe('Supabase Sicherheitsmigration', () => {
     expect(bingoFixMigration).not.toContain('delete from public.bingo_rounds;')
   })
 
+  it('legt Pferderennen mit festivalbezogenem Status und geschuetzten Wetten an', () => {
+    for (const table of ['horse_racing_settings', 'horse_racing_bets']) {
+      expect(horseRacingMigration).toContain(
+        `create table if not exists public.${table}`,
+      )
+      expect(horseRacingMigration).toContain(
+        `alter table public.${table} enable row level security`,
+      )
+      expect(horseRacingMigration).toContain(
+        `revoke all on table public.${table} from anon, authenticated`,
+      )
+    }
+
+    expect(horseRacingMigration).toContain('festival_id text primary key')
+    expect(horseRacingMigration).toContain(
+      'constraint horse_racing_bets_unique_participant_festival',
+    )
+    expect(horseRacingMigration).toContain(
+      'unique (festival_id, participant_id)',
+    )
+    expect(horseRacingMigration).toContain(
+      "check (suit in ('hearts', 'diamonds', 'spades', 'clubs'))",
+    )
+    expect(horseRacingMigration).toContain(
+      "check (betting_status in ('open', 'closed'))",
+    )
+    expect(horseRacingMigration).toContain(
+      'if not public.ha_has_admin_access(p_participant_access_code) then',
+    )
+    expect(horseRacingMigration).toContain(
+      "if v_betting_status <> 'open' then",
+    )
+    expect(horseRacingMigration).toContain(
+      'on conflict on constraint horse_racing_bets_unique_participant_festival',
+    )
+    expect(horseRacingMigration).toContain(
+      'when p_is_enabled then p_betting_status',
+    )
+    expect(horseRacingMigration).toContain("else 'closed'")
+
+    for (const functionName of [
+      'ha_get_horse_racing_state',
+      'ha_place_horse_racing_bet',
+      'ha_admin_get_horse_racing_state',
+      'ha_admin_set_horse_racing_state',
+      'ha_admin_list_horse_racing_bets',
+    ]) {
+      expect(horseRacingMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(horseRacingMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+  })
+
   it('legt die technische Timetable Basis mit getrennten Entitaeten an', () => {
     for (const table of [
       'festival_days',
@@ -1337,6 +1400,7 @@ describe('Supabase Sicherheitsmigration', () => {
       timetableFavoritesMigration,
       timetableSharedFavoritesMigration,
       timetableStageColorsMigration,
+      horseRacingMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

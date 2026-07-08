@@ -88,6 +88,13 @@ import {
   startBingoRound,
 } from '../data/bingo'
 import {
+  loadAdminHorseRacingBets,
+  loadAdminHorseRacingState,
+  loadHorseRacingState,
+  saveHorseRacingBet,
+  updateAdminHorseRacingState,
+} from '../data/horseRacing'
+import {
   addTimetableFavorite,
   createFestivalDay,
   createTimetableAct,
@@ -716,6 +723,163 @@ describe('Supabase Datenzugriffe', () => {
       3,
       'ha_close_bingo_round',
       expectedParticipantRpcContext,
+    )
+  })
+
+  it('laedt den Pferderennen Status fuer Teilnehmende', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          festival_id: 'hurricane-awards-2026',
+          is_enabled: true,
+          betting_status: 'open',
+          suit: 'hearts',
+          updated_at: '2026-07-08T10:00:00.000Z',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      loadHorseRacingState('hurricane-awards-2026', participantContext),
+    ).resolves.toEqual({
+      festivalId: 'hurricane-awards-2026',
+      isEnabled: true,
+      bettingStatus: 'open',
+      selectedSuit: 'hearts',
+      updatedAt: '2026-07-08T10:00:00.000Z',
+    })
+    expect(rpcMock).toHaveBeenCalledWith('ha_get_horse_racing_state', {
+      ...expectedParticipantRpcContext,
+      p_festival_id: 'hurricane-awards-2026',
+    })
+  })
+
+  it('speichert Pferderennen Wetten ueber Teilnehmer RPC', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          festival_id: 'hurricane-awards-2026',
+          is_enabled: true,
+          betting_status: 'open',
+          suit: 'clubs',
+          updated_at: '2026-07-08T10:03:00.000Z',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      saveHorseRacingBet('hurricane-awards-2026', 'clubs', participantContext),
+    ).resolves.toMatchObject({
+      festivalId: 'hurricane-awards-2026',
+      selectedSuit: 'clubs',
+    })
+    expect(rpcMock).toHaveBeenCalledWith('ha_place_horse_racing_bet', {
+      ...expectedParticipantRpcContext,
+      p_festival_id: 'hurricane-awards-2026',
+      p_suit: 'clubs',
+    })
+  })
+
+  it('verwaltet Pferderennen Status und Wettliste ueber Admin RPCs', async () => {
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          festival_id: 'hurricane-awards-2026',
+          is_enabled: false,
+          betting_status: 'closed',
+          bet_count: 0,
+          updated_at: null,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      loadAdminHorseRacingState('hurricane-awards-2026', participantContext),
+    ).resolves.toEqual({
+      festivalId: 'hurricane-awards-2026',
+      isEnabled: false,
+      bettingStatus: 'closed',
+      betCount: 0,
+      updatedAt: null,
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      1,
+      'ha_admin_get_horse_racing_state',
+      {
+        ...expectedParticipantRpcContext,
+        p_festival_id: 'hurricane-awards-2026',
+      },
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          festival_id: 'hurricane-awards-2026',
+          is_enabled: true,
+          betting_status: 'open',
+          bet_count: '2',
+          updated_at: '2026-07-08T10:05:00.000Z',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      updateAdminHorseRacingState(
+        'hurricane-awards-2026',
+        { isEnabled: true, bettingStatus: 'open' },
+        participantContext,
+      ),
+    ).resolves.toMatchObject({
+      isEnabled: true,
+      bettingStatus: 'open',
+      betCount: 2,
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      2,
+      'ha_admin_set_horse_racing_state',
+      {
+        ...expectedParticipantRpcContext,
+        p_festival_id: 'hurricane-awards-2026',
+        p_is_enabled: true,
+        p_betting_status: 'open',
+      },
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          participant_id: 'alice',
+          participant_name: 'Alice',
+          suit: 'diamonds',
+          placed_at: '2026-07-08T10:01:00.000Z',
+          updated_at: '2026-07-08T10:02:00.000Z',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      loadAdminHorseRacingBets('hurricane-awards-2026', participantContext),
+    ).resolves.toEqual([
+      {
+        participantId: 'alice',
+        participantName: 'Alice',
+        suit: 'diamonds',
+        placedAt: '2026-07-08T10:01:00.000Z',
+        updatedAt: '2026-07-08T10:02:00.000Z',
+      },
+    ])
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      3,
+      'ha_admin_list_horse_racing_bets',
+      {
+        ...expectedParticipantRpcContext,
+        p_festival_id: 'hurricane-awards-2026',
+      },
     )
   })
 
