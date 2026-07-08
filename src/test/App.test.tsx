@@ -82,6 +82,15 @@ import {
   type BingoRound,
 } from '../data/bingo'
 import {
+  loadAdminHorseRacingBets,
+  loadAdminHorseRacingState,
+  loadHorseRacingState,
+  saveHorseRacingBet,
+  updateAdminHorseRacingState,
+  type AdminHorseRacingState,
+  type HorseRacingState,
+} from '../data/horseRacing'
+import {
   addTimetableFavorite,
   createFestivalDay,
   createTimetableAct,
@@ -187,6 +196,14 @@ vi.mock('../data/bingo', () => ({
   loadOrCreateBingoCard: vi.fn(),
   setBingoMark: vi.fn(),
   startBingoRound: vi.fn(),
+}))
+
+vi.mock('../data/horseRacing', () => ({
+  loadAdminHorseRacingBets: vi.fn(),
+  loadAdminHorseRacingState: vi.fn(),
+  loadHorseRacingState: vi.fn(),
+  saveHorseRacingBet: vi.fn(),
+  updateAdminHorseRacingState: vi.fn(),
 }))
 
 vi.mock('../data/timetable', () => ({
@@ -313,6 +330,22 @@ const bingoCard: BingoCard = {
   markedNumbers: [1, 7],
 }
 
+const disabledHorseRacingState: HorseRacingState = {
+  festivalId: 'hurricane-awards-2026',
+  isEnabled: false,
+  bettingStatus: 'closed',
+  selectedSuit: null,
+  updatedAt: null,
+}
+
+const disabledAdminHorseRacingState: AdminHorseRacingState = {
+  festivalId: 'hurricane-awards-2026',
+  isEnabled: false,
+  bettingStatus: 'closed',
+  betCount: 0,
+  updatedAt: null,
+}
+
 const emptyTimetable: Timetable = {
   festivalDays: [],
   stages: [],
@@ -423,6 +456,9 @@ function mockLoadedData({
   loadedAdminMusicPlaylist = loadedMusicPlaylist,
   loadedBingoCard = null,
   loadedAdminBingoRound = loadedBingoCard,
+  loadedHorseRacingState = disabledHorseRacingState,
+  loadedAdminHorseRacingState = disabledAdminHorseRacingState,
+  loadedAdminHorseRacingBets = [],
   loadedTimetable = emptyTimetable,
   loadedAdminFestivalDays = loadedTimetable.festivalDays,
   loadedAdminTimetableStages = loadedTimetable.stages,
@@ -446,6 +482,9 @@ function mockLoadedData({
   loadedAdminMusicPlaylist?: MusicPlaylist | null
   loadedBingoCard?: BingoCard | null
   loadedAdminBingoRound?: BingoRound | null
+  loadedHorseRacingState?: HorseRacingState | null
+  loadedAdminHorseRacingState?: AdminHorseRacingState | null
+  loadedAdminHorseRacingBets?: Awaited<ReturnType<typeof loadAdminHorseRacingBets>>
   loadedTimetable?: Timetable
   loadedAdminFestivalDays?: FestivalDay[]
   loadedAdminTimetableStages?: TimetableStage[]
@@ -507,6 +546,26 @@ function mockLoadedData({
   vi.mocked(loadAdminMusicPlaylist).mockResolvedValue(loadedAdminMusicPlaylist)
   vi.mocked(loadOrCreateBingoCard).mockResolvedValue(loadedBingoCard)
   vi.mocked(loadAdminBingoRound).mockResolvedValue(loadedAdminBingoRound)
+  vi.mocked(loadHorseRacingState).mockResolvedValue(loadedHorseRacingState)
+  vi.mocked(loadAdminHorseRacingState).mockResolvedValue(
+    loadedAdminHorseRacingState,
+  )
+  vi.mocked(loadAdminHorseRacingBets).mockResolvedValue(
+    loadedAdminHorseRacingBets,
+  )
+  vi.mocked(saveHorseRacingBet).mockImplementation(async (_festivalId, suit) => ({
+    ...(loadedHorseRacingState ?? disabledHorseRacingState),
+    isEnabled: true,
+    bettingStatus: 'open',
+    selectedSuit: suit,
+  }))
+  vi.mocked(updateAdminHorseRacingState).mockImplementation(
+    async (_festivalId, input) => ({
+      ...(loadedAdminHorseRacingState ?? disabledAdminHorseRacingState),
+      isEnabled: input.isEnabled,
+      bettingStatus: input.isEnabled ? input.bettingStatus : 'closed',
+    }),
+  )
   vi.mocked(loadTimetable).mockResolvedValue(loadedTimetable)
   vi.mocked(loadAdminFestivalDays).mockResolvedValue(loadedAdminFestivalDays)
   vi.mocked(loadAdminTimetableStages).mockResolvedValue(loadedAdminTimetableStages)
@@ -1743,6 +1802,71 @@ describe('Login', () => {
 
     expect(screen.getByRole('heading', { name: /^spiele$/i })).toBeVisible()
     expect(screen.getByText(/aktuell ist kein spiel aktiv/i)).toBeVisible()
+  })
+
+  it('zeigt Pferderennen und speichert eine Wette waehrend offener Wettphase', async () => {
+    mockLoadedData({
+      loadedHorseRacingState: {
+        ...disabledHorseRacingState,
+        isEnabled: true,
+        bettingStatus: 'open',
+      },
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^spiele$/i)
+
+    await userEvent.click(
+      within(screen.getByRole('navigation', { name: /spielauswahl/i }))
+        .getByRole('button', { name: /^pferderennen$/i }),
+    )
+
+    expect(
+      screen.getByText(/die wettphase ist offen/i),
+    ).toBeVisible()
+
+    const heartsButton = screen.getByRole('button', { name: /herz/i })
+
+    await userEvent.click(heartsButton)
+
+    expect(saveHorseRacingBet).toHaveBeenCalledWith(
+      'hurricane-awards-2026',
+      'hearts',
+      { participantAccessCode: 'ALICE42' },
+    )
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: /herz.*ausgewaehlt/i }),
+      ).toHaveAttribute('aria-pressed', 'true')
+    })
+  })
+
+  it('zeigt eine geschlossene Pferderennen Wette, ohne Aenderungen zu erlauben', async () => {
+    mockLoadedData({
+      loadedHorseRacingState: {
+        ...disabledHorseRacingState,
+        isEnabled: true,
+        bettingStatus: 'closed',
+        selectedSuit: 'spades',
+      },
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^spiele$/i)
+
+    await userEvent.click(
+      within(screen.getByRole('navigation', { name: /spielauswahl/i }))
+        .getByRole('button', { name: /^pferderennen$/i }),
+    )
+
+    expect(
+      screen.getByText(/deine auswahl ist gespeichert/i),
+    ).toBeVisible()
+    expect(
+      screen.getByRole('button', { name: /pik.*ausgewaehlt/i }),
+    ).toBeDisabled()
+    expect(screen.getByRole('button', { name: /herz/i })).toBeDisabled()
+    expect(saveHorseRacingBet).not.toHaveBeenCalled()
   })
 
   it('laedt die Timetable Basisdaten und zeigt einen leeren vorbereiteten Bereich', async () => {

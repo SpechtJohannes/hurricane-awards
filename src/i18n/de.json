@@ -154,6 +154,7 @@
         "description": "Bingo und spaetere Festivalspiele.",
         "status": {
           "bingo": "Bingo ist verfuegbar.",
+          "horseRacing": "Pferderennen ist offen.",
           "empty": "Aktuell ist kein Spiel aktiv."
         },
         "detail": "Zu den Spielen"
@@ -470,6 +471,24 @@
         "close": "Die Bingorunde konnte gerade nicht beendet werden."
       }
     },
+    "horseRacing": {
+      "eyebrow": "Spiele",
+      "title": "Pferderennen",
+      "loading": "Pferderennen wird geladen...",
+      "disabled": "Pferderennen ist deaktiviert.",
+      "open": "Die Wettphase ist offen. {{count}} Wetten wurden abgegeben.",
+      "closed": "Die Wettphase ist geschlossen. {{count}} Wetten wurden abgegeben.",
+      "enable": "Pferderennen aktivieren",
+      "disable": "Pferderennen deaktivieren",
+      "openBetting": "Wettphase oeffnen",
+      "closeBetting": "Wettphase schliessen",
+      "betsTitle": "Abgegebene Wetten",
+      "noBets": "Es wurden noch keine Wetten abgegeben.",
+      "errors": {
+        "load": "Pferderennen konnte gerade nicht geladen werden.",
+        "save": "Pferderennen konnte gerade nicht aktualisiert werden."
+      }
+    },
     "festival": {
       "eyebrow": "Admin",
       "title": "Festival",
@@ -575,12 +594,35 @@
       "mark": "Die Markierung konnte gerade nicht gespeichert werden."
     }
   },
+  "horseRacing": {
+    "eyebrow": "Partyspiel",
+    "title": "Pferderennen",
+    "description": "Gib hier deine Wette auf eine Kartenfarbe ab. Die eigentliche Runde mit Kartenziehen findet ausserhalb der App statt.",
+    "disabled": "Pferderennen ist aktuell deaktiviert.",
+    "open": "Die Wettphase ist offen. Waehle eine Kartenfarbe.",
+    "openWithSelection": "Die Wettphase ist offen. Du kannst deine Auswahl noch aendern.",
+    "closedWithSelection": "Die Wettphase ist geschlossen. Deine Auswahl ist gespeichert und kann nicht mehr geaendert werden.",
+    "closedWithoutSelection": "Die Wettphase ist geschlossen. Du hast keine Wette abgegeben.",
+    "suitsLabel": "Kartenfarben",
+    "selected": "Ausgewaehlt",
+    "suits": {
+      "hearts": "Herz",
+      "diamonds": "Karo",
+      "spades": "Pik",
+      "clubs": "Kreuz"
+    },
+    "errors": {
+      "load": "Pferderennen konnte gerade nicht geladen werden.",
+      "save": "Deine Wette konnte gerade nicht gespeichert werden."
+    }
+  },
   "games": {
     "eyebrow": "Spiele",
     "title": "Spiele",
     "description": "Waehle ein Spiel aus und mach direkt weiter.",
     "navigationLabel": "Spielauswahl",
     "bingo": "Bingo",
+    "horseRacing": "Pferderennen",
     "empty": "Aktuell ist kein Spiel aktiv."
   },
   "timetable": {

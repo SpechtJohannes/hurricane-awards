@@ -154,6 +154,7 @@
         "description": "Bingo en latere festivalspellen.",
         "status": {
           "bingo": "Bingo is beschikbaar.",
+          "horseRacing": "Paardenrennen is open.",
           "empty": "Er is momenteel geen spel actief."
         },
         "detail": "Naar spellen"
@@ -470,6 +471,24 @@
         "close": "De bingoronde kon net niet worden beeindigd."
       }
     },
+    "horseRacing": {
+      "eyebrow": "Spellen",
+      "title": "Paardenrennen",
+      "loading": "Paardenrennen wordt geladen...",
+      "disabled": "Paardenrennen is gedeactiveerd.",
+      "open": "De wedfase is open. Er zijn {{count}} weddenschappen geplaatst.",
+      "closed": "De wedfase is gesloten. Er zijn {{count}} weddenschappen geplaatst.",
+      "enable": "Paardenrennen activeren",
+      "disable": "Paardenrennen deactiveren",
+      "openBetting": "Wedfase openen",
+      "closeBetting": "Wedfase sluiten",
+      "betsTitle": "Geplaatste weddenschappen",
+      "noBets": "Er zijn nog geen weddenschappen geplaatst.",
+      "errors": {
+        "load": "Paardenrennen kon net niet worden geladen.",
+        "save": "Paardenrennen kon net niet worden bijgewerkt."
+      }
+    },
     "festival": {
       "eyebrow": "Admin",
       "title": "Festival",
@@ -575,12 +594,35 @@
       "mark": "De markering kon net niet worden opgeslagen."
     }
   },
+  "horseRacing": {
+    "eyebrow": "Partyspel",
+    "title": "Paardenrennen",
+    "description": "Plaats hier je weddenschap op een kaartkleur. De ronde met kaarten trekken gebeurt buiten de app.",
+    "disabled": "Paardenrennen is momenteel gedeactiveerd.",
+    "open": "De wedfase is open. Kies een kaartkleur.",
+    "openWithSelection": "De wedfase is open. Je kunt je keuze nog aanpassen.",
+    "closedWithSelection": "De wedfase is gesloten. Je keuze is opgeslagen en kan niet meer worden gewijzigd.",
+    "closedWithoutSelection": "De wedfase is gesloten. Je hebt geen weddenschap geplaatst.",
+    "suitsLabel": "Kaartkleuren",
+    "selected": "Gekozen",
+    "suits": {
+      "hearts": "Harten",
+      "diamonds": "Ruiten",
+      "spades": "Schoppen",
+      "clubs": "Klaveren"
+    },
+    "errors": {
+      "load": "Paardenrennen kon net niet worden geladen.",
+      "save": "Je weddenschap kon net niet worden opgeslagen."
+    }
+  },
   "games": {
     "eyebrow": "Spellen",
     "title": "Spellen",
     "description": "Kies een spel en ga meteen verder.",
     "navigationLabel": "Spelkeuze",
     "bingo": "Bingo",
+    "horseRacing": "Paardenrennen",
     "empty": "Er is momenteel geen spel actief."
   },
   "timetable": {

@@ -1169,12 +1169,20 @@ h1 {
   border-color: var(--section-color);
 }
 
+.games__tab--disabled {
+  opacity: 0.72;
+}
+
 .games__tab:focus-visible {
   outline: 3px solid var(--section-color);
   outline-offset: 3px;
 }
 
 .games .bingo {
+  padding: 24px 0 0;
+}
+
+.games .horse-racing {
   padding: 24px 0 0;
 }
 
@@ -1211,6 +1219,144 @@ h1 {
 .bingo__notice--error {
   color: var(--color-error);
   border-color: color-mix(in srgb, var(--color-error) 46%, transparent);
+}
+
+.horse-racing {
+  --section-color: var(--color-games);
+  position: relative;
+  padding: 34px 20px 56px;
+}
+
+.horse-racing__notice {
+  width: min(100%, 760px);
+  margin: 0 auto 18px;
+  padding: 18px 20px;
+  color: var(--color-text-secondary);
+  font-weight: 750;
+  line-height: 1.45;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}
+
+.horse-racing__notice--error {
+  color: var(--color-error);
+  border-color: color-mix(in srgb, var(--color-error) 46%, transparent);
+}
+
+.horse-racing__suits {
+  display: grid;
+  width: min(100%, 760px);
+  margin: 0 auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.horse-racing__suit {
+  display: grid;
+  min-height: 126px;
+  padding: 18px;
+  place-items: center;
+  gap: 8px;
+  color: var(--color-text-secondary);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}
+
+.horse-racing__suit span {
+  display: grid;
+  min-width: 48px;
+  min-height: 48px;
+  place-items: center;
+  color: var(--color-accent-contrast);
+  font-size: 1.45rem;
+  font-weight: 950;
+  background: var(--section-color);
+  border-radius: 999px;
+}
+
+.horse-racing__suit strong {
+  font-size: 1.05rem;
+}
+
+.horse-racing__suit em {
+  color: var(--section-color);
+  font-size: 0.88rem;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.horse-racing__suit--hearts span,
+.horse-racing__suit--diamonds span {
+  background: #d83b4f;
+}
+
+.horse-racing__suit--spades span,
+.horse-racing__suit--clubs span {
+  background: #1f2937;
+}
+
+.horse-racing__suit.is-selected {
+  color: var(--color-text-primary);
+  border-color: var(--section-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--section-color) 28%, transparent);
+}
+
+.horse-racing__suit:focus-visible {
+  outline: 3px solid var(--section-color);
+  outline-offset: 3px;
+}
+
+.horse-racing__suit:disabled {
+  cursor: not-allowed;
+}
+
+.horse-racing__suit:disabled:not(.is-selected) {
+  opacity: 0.64;
+}
+
+.admin-horse-racing__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-horse-racing__actions button {
+  width: auto;
+}
+
+.admin-horse-racing__bets {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-horse-racing__bets h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+}
+
+.admin-horse-racing__bets ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 8px;
+  list-style: none;
+}
+
+.admin-horse-racing__bets li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
 }
 
 .timetable {
@@ -2841,6 +2987,16 @@ h1 {
 .legal-page__back:focus-visible {
   outline: 3px solid var(--color-text-primary);
   outline-offset: 3px;
+}
+
+@media (max-width: 430px) {
+  .horse-racing__suits {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-horse-racing__actions button {
+    width: 100%;
+  }
 }
 
 @media (min-width: 720px) {

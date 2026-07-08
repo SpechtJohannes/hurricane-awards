@@ -85,6 +85,18 @@ import {
   type BingoRound,
 } from './data/bingo'
 import {
+  loadAdminHorseRacingBets,
+  loadAdminHorseRacingState,
+  loadHorseRacingState,
+  saveHorseRacingBet,
+  updateAdminHorseRacingState,
+  type AdminHorseRacingBet,
+  type AdminHorseRacingState,
+  type HorseRacingBettingStatus,
+  type HorseRacingState,
+  type HorseRacingSuit,
+} from './data/horseRacing'
+import {
   addTimetableFavorite,
   createFestivalDay,
   createTimetableAct,
@@ -131,11 +143,13 @@ import { AdminFestival } from './components/AdminFestival'
 import { AdminCategories } from './components/AdminCategories'
 import { AdminFestivalDocuments } from './components/AdminFestivalDocuments'
 import { AdminBingo } from './components/AdminBingo'
+import { AdminHorseRacing } from './components/AdminHorseRacing'
 import { AdminTimetableActs } from './components/AdminTimetableActs'
 import { AdminTimetableDays } from './components/AdminTimetableDays'
 import { AdminTimetablePerformances } from './components/AdminTimetablePerformances'
 import { AdminTimetableStages } from './components/AdminTimetableStages'
 import { Bingo } from './components/Bingo'
+import { HorseRacing } from './components/HorseRacing'
 import { FestivalInfo } from './components/FestivalInfo'
 import { Avatar, ParticipantName } from './components/Avatar'
 import { SectionHeader } from './components/SectionHeader'
@@ -256,6 +270,7 @@ type AdminSection =
   | 'games'
   | 'info'
   | 'archive'
+type GameSection = 'bingo' | 'horseRacing'
 
 type ResultCardProps = {
   category: Category
@@ -1413,6 +1428,11 @@ function App() {
   const [isSavingMusicPlaylist, setIsSavingMusicPlaylist] = useState(false)
   const [bingoCard, setBingoCard] = useState<BingoCard | null>(null)
   const [bingoError, setBingoError] = useState('')
+  const [horseRacingState, setHorseRacingState] =
+    useState<HorseRacingState | null>(null)
+  const [horseRacingError, setHorseRacingError] = useState('')
+  const [savingHorseRacingSuit, setSavingHorseRacingSuit] =
+    useState<HorseRacingSuit | null>(null)
   const [timetable, setTimetable] = useState<Timetable | null>(null)
   const [timetableError, setTimetableError] = useState('')
   const [isLoadingTimetable, setIsLoadingTimetable] = useState(
@@ -1462,6 +1482,16 @@ function App() {
   const [adminBingoError, setAdminBingoError] = useState('')
   const [isLoadingAdminBingo, setIsLoadingAdminBingo] = useState(false)
   const [isSavingBingoRound, setIsSavingBingoRound] = useState(false)
+  const [adminHorseRacingState, setAdminHorseRacingState] =
+    useState<AdminHorseRacingState | null>(null)
+  const [adminHorseRacingBets, setAdminHorseRacingBets] = useState<
+    AdminHorseRacingBet[]
+  >([])
+  const [adminHorseRacingError, setAdminHorseRacingError] = useState('')
+  const [isLoadingAdminHorseRacing, setIsLoadingAdminHorseRacing] =
+    useState(false)
+  const [isSavingHorseRacingState, setIsSavingHorseRacingState] =
+    useState(false)
   const [adminFestivalDocumentsError, setAdminFestivalDocumentsError] =
     useState('')
   const [isLoadingAdminFestivalDocuments, setIsLoadingAdminFestivalDocuments] =
@@ -1485,6 +1515,8 @@ function App() {
     useState<MainSection>('dashboard')
   const [activeAdminSection, setActiveAdminSection] =
     useState<AdminSection>('festival')
+  const [activeGameSection, setActiveGameSection] =
+    useState<GameSection>('bingo')
   const [isLoadingData, setIsLoadingData] = useState(Boolean(selectedParticipant))
   const [isSubmittingAccessCode, setIsSubmittingAccessCode] = useState(false)
   const [loginLockedUntil, setLoginLockedUntil] = useState<number | null>(null)
@@ -1611,6 +1643,7 @@ function App() {
       setStandingsError('')
       setFestivalDocumentsError('')
       setBingoError('')
+      setHorseRacingError('')
       setTimetableError('')
 
       try {
@@ -1622,6 +1655,7 @@ function App() {
           loadedCampLocationLink,
           loadedMusicPlaylist,
           loadedBingoCard,
+          loadedHorseRacingState,
           loadedTimetable,
           loadedStandingsResult,
         ] = await Promise.all([
@@ -1632,6 +1666,7 @@ function App() {
           loadCampLocationLink(accessContext),
           loadMusicPlaylist(accessContext),
           loadOrCreateBingoCard(accessContext),
+          loadHorseRacingState(activeFestival.id, accessContext),
           loadTimetable(accessContext),
           loadAllTimeStandings(accessContext).then(
             (loadedStandings) =>
@@ -1654,6 +1689,7 @@ function App() {
           setCampLocationLink(loadedCampLocationLink)
           setMusicPlaylist(loadedMusicPlaylist)
           setBingoCard(loadedBingoCard)
+          setHorseRacingState(loadedHorseRacingState)
           setTimetable(loadedTimetable)
           setCampLocationOpenError('')
 
@@ -1676,6 +1712,7 @@ function App() {
           setVotesError(i18n.t('identity.errors.participantVotesLoad'))
           setFestivalDocumentsError(i18n.t('info.errors.load'))
           setBingoError(i18n.t('bingo.errors.load'))
+          setHorseRacingError(i18n.t('horseRacing.errors.load'))
           setTimetableError(i18n.t('timetable.errors.load'))
         }
       } finally {
@@ -1786,9 +1823,12 @@ function App() {
       section: 'games',
       title: t('dashboard.tiles.games.title'),
       description: t('dashboard.tiles.games.description'),
-      status: bingoCard
-        ? t('dashboard.tiles.games.status.bingo')
-        : t('dashboard.tiles.games.status.empty'),
+      status:
+        horseRacingState?.isEnabled && horseRacingState.bettingStatus === 'open'
+          ? t('dashboard.tiles.games.status.horseRacing')
+          : bingoCard
+            ? t('dashboard.tiles.games.status.bingo')
+            : t('dashboard.tiles.games.status.empty'),
       detail: t('dashboard.tiles.games.detail'),
     },
     {
@@ -2063,6 +2103,7 @@ function App() {
         void reloadAdminTimetablePerformances()
         void reloadAdminFestivalDocuments()
         void reloadAdminBingoRound()
+        void reloadAdminHorseRacing()
 
         window.setTimeout(() => {
           document.getElementById('admin')?.scrollIntoView({ behavior: 'smooth' })
@@ -2448,6 +2489,31 @@ function App() {
       setAdminBingoError(t('admin.bingo.errors.load'))
     } finally {
       setIsLoadingAdminBingo(false)
+    }
+  }
+
+  async function reloadAdminHorseRacing() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsLoadingAdminHorseRacing(true)
+    setAdminHorseRacingError('')
+
+    try {
+      const [loadedState, loadedBets] = await Promise.all([
+        loadAdminHorseRacingState(activeFestival.id, adminContext),
+        loadAdminHorseRacingBets(activeFestival.id, adminContext),
+      ])
+
+      setAdminHorseRacingState(loadedState)
+      setAdminHorseRacingBets(loadedBets)
+    } catch {
+      setAdminHorseRacingError(t('admin.horseRacing.errors.load'))
+    } finally {
+      setIsLoadingAdminHorseRacing(false)
     }
   }
 
@@ -3467,6 +3533,39 @@ function App() {
     }
   }
 
+  async function updateHorseRacingAdminState(input: {
+    isEnabled: boolean
+    bettingStatus: HorseRacingBettingStatus
+  }) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsSavingHorseRacingState(true)
+    setAdminHorseRacingError('')
+
+    try {
+      const updatedState = await updateAdminHorseRacingState(
+        activeFestival.id,
+        input,
+        adminContext,
+      )
+      const [loadedParticipantState, loadedBets] = await Promise.all([
+        loadHorseRacingState(activeFestival.id, adminContext),
+        loadAdminHorseRacingBets(activeFestival.id, adminContext),
+      ])
+
+      setAdminHorseRacingState(updatedState)
+      setAdminHorseRacingBets(loadedBets)
+      setHorseRacingState(loadedParticipantState)
+      setHorseRacingError('')
+    } finally {
+      setIsSavingHorseRacingState(false)
+    }
+  }
+
   async function toggleBingoNumber(number: number) {
     if (!selectedParticipant || !bingoCard) {
       return
@@ -3490,6 +3589,31 @@ function App() {
       setBingoError(t('bingo.errors.mark'))
     } finally {
       setTogglingBingoNumber(null)
+    }
+  }
+
+  async function selectHorseRacingSuit(suit: HorseRacingSuit) {
+    if (!selectedParticipant) {
+      return
+    }
+
+    setSavingHorseRacingSuit(suit)
+    setHorseRacingError('')
+
+    try {
+      const savedState = await saveHorseRacingBet(activeFestival.id, suit, {
+        participantAccessCode: selectedParticipant.accessCode,
+      })
+
+      setHorseRacingState(savedState)
+
+      if (selectedParticipant.isAdmin) {
+        void reloadAdminHorseRacing()
+      }
+    } catch {
+      setHorseRacingError(t('horseRacing.errors.save'))
+    } finally {
+      setSavingHorseRacingSuit(null)
     }
   }
 
@@ -3828,14 +3952,24 @@ function App() {
           ) : null}
 
           {activeAdminSection === 'games' ? (
-            <AdminBingo
-              round={adminBingoRound}
-              error={adminBingoError}
-              isLoading={isLoadingAdminBingo}
-              isSaving={isSavingBingoRound}
-              onStart={startAdminBingoRound}
-              onClose={closeAdminBingoRound}
-            />
+            <>
+              <AdminBingo
+                round={adminBingoRound}
+                error={adminBingoError}
+                isLoading={isLoadingAdminBingo}
+                isSaving={isSavingBingoRound}
+                onStart={startAdminBingoRound}
+                onClose={closeAdminBingoRound}
+              />
+              <AdminHorseRacing
+                state={adminHorseRacingState}
+                bets={adminHorseRacingBets}
+                error={adminHorseRacingError}
+                isLoading={isLoadingAdminHorseRacing}
+                isSaving={isSavingHorseRacingState}
+                onUpdate={updateHorseRacingAdminState}
+              />
+            </>
           ) : null}
 
           {activeAdminSection === 'info' ? (
@@ -4060,24 +4194,52 @@ function App() {
 
           <nav className="games__navigation" aria-label={t('games.navigationLabel')}>
             <button
-              className="games__tab is-active"
+              className={`games__tab${
+                activeGameSection === 'bingo' ? ' is-active' : ''
+              }`}
               type="button"
-              aria-current="page"
+              aria-current={activeGameSection === 'bingo' ? 'page' : undefined}
+              onClick={() => setActiveGameSection('bingo')}
             >
               {t('games.bingo')}
             </button>
+            <button
+              className={`games__tab${
+                activeGameSection === 'horseRacing' ? ' is-active' : ''
+              }${
+                horseRacingState?.isEnabled ? '' : ' games__tab--disabled'
+              }`}
+              type="button"
+              aria-current={
+                activeGameSection === 'horseRacing' ? 'page' : undefined
+              }
+              onClick={() => setActiveGameSection('horseRacing')}
+            >
+              {t('games.horseRacing')}
+            </button>
           </nav>
 
-          {bingoCard ? (
+          {activeGameSection === 'bingo' && bingoCard ? (
             <Bingo
               card={bingoCard}
               error={bingoError}
               togglingNumber={togglingBingoNumber}
               onToggleNumber={toggleBingoNumber}
             />
-          ) : (
+          ) : null}
+
+          {activeGameSection === 'bingo' && !bingoCard ? (
             <p className="games__notice">{t('games.empty')}</p>
-          )}
+          ) : null}
+
+          {activeGameSection === 'horseRacing' ? (
+            <HorseRacing
+              state={horseRacingState}
+              error={horseRacingError}
+              isSaving={savingHorseRacingSuit !== null}
+              onSelectSuit={selectHorseRacingSuit}
+            />
+          ) : null}
         </section>
       ) : null}
 
