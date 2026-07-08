@@ -100,6 +100,15 @@ import {
   type RandomPairingParticipantAssignment,
 } from '../data/randomPairings'
 import {
+  createTournament,
+  deleteTournament,
+  generateTournamentBracket,
+  loadAdminTournaments,
+  loadTournaments,
+  updateTournament,
+  type Tournament,
+} from '../data/tournaments'
+import {
   addTimetableFavorite,
   createFestivalDay,
   createTimetableAct,
@@ -222,6 +231,19 @@ vi.mock('../data/randomPairings', () => ({
   loadRandomPairingAssignments: vi.fn(),
   updateRandomPairingParticipants: vi.fn(),
 }))
+
+vi.mock('../data/tournaments', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../data/tournaments')>()
+
+  return {
+    ...actual,
+    createTournament: vi.fn(),
+    deleteTournament: vi.fn(),
+    loadAdminTournaments: vi.fn(),
+    loadTournaments: vi.fn(),
+    updateTournament: vi.fn(),
+  }
+})
 
 vi.mock('../data/timetable', () => ({
   addTimetableFavorite: vi.fn(),
@@ -402,6 +424,25 @@ const randomPairingAssignment: RandomPairingParticipantAssignment = {
   drawnAt: '2026-07-08T12:00:00.000Z',
 }
 
+const tournamentBracket = generateTournamentBracket([
+  { participantId: 'alice', participantName: 'Alice' },
+  { participantId: 'bob', participantName: 'Bob' },
+])
+
+const tournament: Tournament = {
+  id: 'tournament-1',
+  festivalId: 'hurricane-awards-2026',
+  name: 'Kicker Cup',
+  mode: 'knockout',
+  status: 'active',
+  selectedParticipantIds: ['alice', 'bob'],
+  drawParticipantIds: ['bob', 'alice'],
+  qualificationRankingIds: [],
+  bracket: tournamentBracket,
+  createdAt: '2026-07-08T12:00:00.000Z',
+  updatedAt: '2026-07-08T12:00:00.000Z',
+}
+
 const emptyTimetable: Timetable = {
   festivalDays: [],
   stages: [],
@@ -517,6 +558,8 @@ function mockLoadedData({
   loadedAdminHorseRacingBets = [],
   loadedRandomPairingAssignments = [],
   loadedAdminRandomPairingActions = [],
+  loadedTournaments = [],
+  loadedAdminTournaments = loadedTournaments,
   loadedTimetable = emptyTimetable,
   loadedAdminFestivalDays = loadedTimetable.festivalDays,
   loadedAdminTimetableStages = loadedTimetable.stages,
@@ -545,6 +588,8 @@ function mockLoadedData({
   loadedAdminHorseRacingBets?: Awaited<ReturnType<typeof loadAdminHorseRacingBets>>
   loadedRandomPairingAssignments?: RandomPairingParticipantAssignment[]
   loadedAdminRandomPairingActions?: AdminRandomPairingAction[]
+  loadedTournaments?: Tournament[]
+  loadedAdminTournaments?: Tournament[]
   loadedTimetable?: Timetable
   loadedAdminFestivalDays?: FestivalDay[]
   loadedAdminTimetableStages?: TimetableStage[]
@@ -632,6 +677,67 @@ function mockLoadedData({
   vi.mocked(loadAdminRandomPairingActions).mockResolvedValue(
     loadedAdminRandomPairingActions,
   )
+  vi.mocked(loadTournaments).mockResolvedValue(loadedTournaments)
+  vi.mocked(loadAdminTournaments).mockResolvedValue(loadedAdminTournaments)
+  vi.mocked(createTournament).mockImplementation(
+    async (_festivalId, input) => ({
+      ...tournament,
+      id: 'created-tournament',
+      name: input.name,
+      mode: input.mode,
+      selectedParticipantIds: input.participantIds,
+      drawParticipantIds: [...input.participantIds].reverse(),
+      qualificationRankingIds: [],
+      bracket: input.mode === 'knockout'
+        ? generateTournamentBracket(
+            [...input.participantIds].reverse().map((participantId) => {
+              const participant = participants.find(
+                (currentParticipant) => currentParticipant.id === participantId,
+              )
+
+              return {
+                participantId,
+                participantName: participant?.displayName ?? participantId,
+              }
+            }),
+          )
+        : {
+            type: 'single_elimination',
+            mainParticipantCount: 2,
+            rounds: [],
+          },
+    }),
+  )
+  vi.mocked(updateTournament).mockImplementation(
+    async (tournamentId, input) => ({
+      ...tournament,
+      id: tournamentId,
+      name: input.name,
+      mode: input.mode,
+      selectedParticipantIds: input.participantIds,
+      drawParticipantIds: [...input.participantIds].reverse(),
+      qualificationRankingIds: [],
+      bracket: input.mode === 'knockout'
+        ? generateTournamentBracket(
+            [...input.participantIds].reverse().map((participantId) => {
+              const participant = participants.find(
+                (currentParticipant) => currentParticipant.id === participantId,
+              )
+
+              return {
+                participantId,
+                participantName: participant?.displayName ?? participantId,
+              }
+            }),
+          )
+        : {
+            type: 'single_elimination',
+            mainParticipantCount: 2,
+            rounds: [],
+          },
+    }),
+  )
+  vi.mocked(deleteTournament).mockResolvedValue()
   vi.mocked(createRandomPairingAction).mockImplementation(
     async (_festivalId, actionName) => ({
       ...randomPairingAction,
@@ -2000,6 +2106,94 @@ describe('Login', () => {
     expect(
       screen.getByText(/keine zuordnung fuer dich/i),
     ).toBeVisible()
+  })
+
+  it('zeigt Turniere und den KO Baum fuer Teilnehmende', async () => {
+    mockLoadedData({
+      loadedTournaments: [tournament],
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^spiele$/i)
+
+    await userEvent.click(
+      within(screen.getByRole('navigation', { name: /spielauswahl/i }))
+        .getByRole('button', { name: /^turniere$/i }),
+    )
+
+    expect(screen.getByRole('heading', { name: /^turniere$/i })).toBeVisible()
+    expect(screen.getByText('Kicker Cup')).toBeVisible()
+    expect(screen.getByText(/2 teilnehmende/i)).toBeVisible()
+    expect(screen.getByText(/finale/i)).toBeVisible()
+    expect(screen.queryByText(/freilos/i)).not.toBeInTheDocument()
+    expect(screen.getAllByText('Bob').length).toBeGreaterThan(0)
+    expect(loadTournaments).toHaveBeenCalledWith('hurricane-awards-2026', {
+      participantAccessCode: 'ALICE42',
+    })
+  })
+
+  it('zeigt Freilose ohne Offen gegen Offen Begegnungen', async () => {
+    const sevenParticipantTournament: Tournament = {
+      ...tournament,
+      id: 'tournament-7',
+      name: 'Sieben Cup',
+      selectedParticipantIds: [
+        'p1',
+        'p2',
+        'p3',
+        'p4',
+        'p5',
+        'p6',
+        'p7',
+      ],
+      drawParticipantIds: [
+        'p1',
+        'p2',
+        'p3',
+        'p4',
+        'p5',
+        'p6',
+        'p7',
+      ],
+      bracket: generateTournamentBracket(
+        Array.from({ length: 7 }, (_, index) => ({
+          participantId: `p${index + 1}`,
+          participantName: `Person ${index + 1}`,
+        })),
+      ),
+    }
+
+    mockLoadedData({
+      loadedTournaments: [sevenParticipantTournament],
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^spiele$/i)
+
+    await userEvent.click(
+      within(screen.getByRole('navigation', { name: /spielauswahl/i }))
+        .getByRole('button', { name: /^turniere$/i }),
+    )
+
+    expect(screen.getByText(/freilos: person 7/i)).toBeVisible()
+    expect(screen.getAllByText(/^offen$/i)).toHaveLength(1)
+    for (const match of document.querySelectorAll('.tournament-match')) {
+      const openSlots = match.textContent?.match(/Offen/g) ?? []
+      expect(openSlots.length).toBeLessThan(2)
+    }
+  })
+
+  it('zeigt einen Leerzustand, wenn keine Turniere existieren', async () => {
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^spiele$/i)
+
+    await userEvent.click(
+      within(screen.getByRole('navigation', { name: /spielauswahl/i }))
+        .getByRole('button', { name: /^turniere$/i }),
+    )
+
+    expect(screen.getByText(/noch keine turniere/i)).toBeVisible()
   })
 
   it('laedt die Timetable Basisdaten und zeigt einen leeren vorbereiteten Bereich', async () => {
@@ -4018,6 +4212,110 @@ describe('Admin', () => {
     ).toBeVisible()
     expect(within(pairingsSection).getAllByText('Alice').length).toBeGreaterThan(0)
     expect(within(pairingsSection).getAllByText('Bob').length).toBeGreaterThan(0)
+  })
+
+  it('verwaltet Turniere im Adminbereich Spiele', async () => {
+    mockLoadedData({
+      loadedTournaments: [tournament],
+      loadedAdminTournaments: [tournament],
+    })
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^spiele$/i)
+
+    const tournamentsSection = sectionForHeading(/^turniere$/i)
+
+    await user.click(
+      within(tournamentsSection).getByRole('button', {
+        name: /turnier anlegen/i,
+      }),
+    )
+    await user.type(
+      within(tournamentsSection).getByLabelText(/turniername/i),
+      'Flunkyball Cup',
+    )
+    await user.click(within(tournamentsSection).getByLabelText(/alice/i))
+    await user.click(within(tournamentsSection).getByLabelText(/bob/i))
+    await user.click(within(tournamentsSection).getByLabelText(/carla/i))
+
+    expect(
+      within(tournamentsSection).getByText(/bekommt jemand ein freilos/i),
+    ).toBeVisible()
+
+    await user.click(
+      within(tournamentsSection).getByRole('button', { name: /^speichern$/i }),
+    )
+
+    expect(createTournament).toHaveBeenCalledWith(
+      'hurricane-awards-2026',
+      {
+        name: 'Flunkyball Cup',
+        mode: 'knockout',
+        participantIds: ['alice', 'bob', 'carla'],
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(await within(tournamentsSection).findByText('Flunkyball Cup')).toBeVisible()
+
+    const existingTournament = within(tournamentsSection)
+      .getByRole('heading', { name: /kicker cup/i })
+      .closest('article')
+
+    expect(existingTournament).not.toBeNull()
+
+    await user.click(
+      within(existingTournament as HTMLElement).getByRole('button', {
+        name: /bearbeiten/i,
+      }),
+    )
+    await user.clear(within(tournamentsSection).getByLabelText(/turniername/i))
+    await user.type(
+      within(tournamentsSection).getByLabelText(/turniername/i),
+      'Kicker Finale',
+    )
+    await user.click(
+      within(tournamentsSection).getByRole('button', { name: /^speichern$/i }),
+    )
+
+    expect(updateTournament).toHaveBeenCalledWith(
+      'tournament-1',
+      {
+        name: 'Kicker Finale',
+        mode: 'knockout',
+        participantIds: ['alice', 'bob'],
+      },
+      { participantAccessCode: 'ALICE42' },
+    )
+
+    const updatedTournament = await within(tournamentsSection).findByRole(
+      'heading',
+      { name: /kicker finale/i },
+    )
+    const updatedTournamentCard = updatedTournament.closest('article')
+
+    expect(updatedTournamentCard).not.toBeNull()
+
+    await user.click(
+      within(updatedTournamentCard as HTMLElement).getByRole('button', {
+        name: /^lÃ¶schen$/i,
+      }),
+    )
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringContaining('Kicker Finale'),
+    )
+    expect(deleteTournament).toHaveBeenCalledWith('tournament-1', {
+      participantAccessCode: 'ALICE42',
+    })
+    await waitFor(() => {
+      expect(
+        within(tournamentsSection).queryByRole('heading', {
+          name: /kicker finale/i,
+        }),
+      ).not.toBeInTheDocument()
+    })
   })
 
   it('verwaltet Festivaldokumente im Adminbereich Infos', async () => {

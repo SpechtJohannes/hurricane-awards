@@ -12,6 +12,7 @@ Das Schema besteht aus:
 - historisch/kompatibel beruecksichtigten Daten: `archived_votes`
 - zentralen Einstellungen: `app_settings`
 - strukturierter Timetable-Basis: `festival_days`, `timetable_stages`, `timetable_acts`, `timetable_performances`
+- Spiele: `bingo_*`, `horse_racing_*`, `random_pairing_*` und `tournaments`
 - unveraenderlichen Festival-Snapshots: `festival_archives` und `festival_archive_*`
 - technischem Login-Schutz: `participant_login_attempts`
 - optionaler Ergebnisrelation: `all_time_standings`, falls in der Umgebung vorhanden
@@ -359,6 +360,32 @@ Besonderheiten:
 - Alte, abgelaufene Daten werden in `ha_login_participant` bereinigt bzw. ignoriert.
 - Direkte Browserzugriffe sind gesperrt.
 
+### `tournaments`
+
+Zweck: Speichert festivalbezogene Turniere als KO-Turnier mit optionalen Freilosen.
+
+Wichtigste Spalten:
+
+- `id`: Turnier-ID.
+- `festival_id`: Technischer Festivalbezug.
+- `name`: Anzeigename des Turniers.
+- `mode`: Turniermodus, aktuell wird `knockout` in der UI verwendet.
+- `status`: Sichtbarkeits-/Arbeitsstatus, aktuell `draft` oder `active`.
+- `selected_participant_ids`: Ausgewaehlte aktive Teilnehmende in Setzreihenfolge.
+- `draw_participant_ids`: Einmalig zufaellig ausgeloste Reihenfolge der Teilnehmenden.
+- `qualification_ranking_ids`: Legacy-Feld fuer nicht mehr genutzte Qualifikationsplatzierungen.
+- `bracket`: Gespeicherter Single-Elimination-Baum als JSONB inklusive optionaler `byes` pro Runde.
+- `created_by_participant_id`: Optionaler Adminteilnehmer, der das Turnier angelegt hat.
+
+Primaerschluessel: `id`.
+
+Besonderheiten:
+
+- Direkte Browserzugriffe sind gesperrt.
+- Admin-RPCs validieren mindestens zwei aktive Teilnehmende.
+- Beim Anlegen wird `draw_participant_ids` serverseitig zufaellig erzeugt und gespeichert.
+- KO-Turniere erzeugen den KO-Baum sofort. Wenn die Teilnehmerzahl keine Zweierpotenz ist, werden Freilose ueber die gespeicherte Auslosung bestimmt und nicht als normale Begegnungen gespeichert.
+
 ## Beziehungen
 
 Die aktiven Daten bilden fachlich diesen Kern:
@@ -368,6 +395,7 @@ Die aktiven Daten bilden fachlich diesen Kern:
 - Eine Kategorie kann viele Stimmen enthalten: `categories.id` zu `votes.category_id`.
 - Ein Festivalarchiv hat viele archivierte Teilnehmer, Kategorien und Stimmen ueber `archive_id`.
 - Ein Auftritt verbindet einen Festivaltag, eine Buehne und einen Act.
+- Ein Turnier referenziert Teilnehmende aktuell ueber `selected_participant_ids` logisch und speichert den erzeugten Baum in `bracket`.
 - Archivtabellen speichern urspruengliche IDs als Werte, referenzieren aber bewusst keine aktiven Tabellen.
 - `participant_login_attempts` ist technisch isoliert und hat keine fachlichen Beziehungen.
 
@@ -465,6 +493,17 @@ Dies ist keine vollstaendige API-Referenz, sondern eine Gruppierung der wichtigs
 - `ha_create_timetable_act`, `ha_update_timetable_act`, `ha_delete_timetable_act`: Admin-RPCs fuer Acts. Acts bleiben unabhaengig von Auftritten; `ha_delete_timetable_act` verhindert das Loeschen bereits zugeordneter Acts.
 - `ha_admin_list_timetable_performances`: Listet Auftritte fuer Admins.
 - `ha_create_timetable_performance`, `ha_update_timetable_performance`, `ha_delete_timetable_performance`: Admin-RPCs fuer Auftritte. Ein Datenbank-Constraint verhindert zeitliche Ueberschneidungen auf derselben Buehne; `ends_at` ist erforderlich und muss nach `starts_at` liegen.
+
+### Turniere
+
+- `ha_list_tournaments`: Listet aktive Turniere inklusive gespeichertem Turnierbaum fuer angemeldete Teilnehmende.
+- `ha_admin_list_tournaments`: Listet alle Turniere fuer Admins.
+- `ha_admin_create_tournament`: Legt ein Turnier an, validiert aktive Teilnehmende und speichert eine zufaellige Auslosung.
+- `ha_admin_update_tournament`: Bearbeitet Name, Modus und Teilnehmendenauswahl und erzeugt eine neue gespeicherte Auslosung.
+- `ha_admin_set_tournament_qualification_ranking`: Legacy-RPC fuer den nicht mehr in der UI genutzten Qualifikationsmodus.
+- `ha_admin_delete_tournament`: Loescht ein Turnier.
+- `ha_generate_tournament_bracket`: Interne Hilfsfunktion zur Baumgenerierung inklusive Freilosen fuer nicht passende Teilnehmerzahlen.
+- `ha_seed_tournament_participants`: Interne Hilfsfunktion fuer Setzung nach Platzierung, z. B. 1 gegen 8, 4 gegen 5, 2 gegen 7, 3 gegen 6.
 
 ### Archivierung
 

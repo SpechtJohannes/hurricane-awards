@@ -108,6 +108,7 @@ Admin-RPCs umfassen unter anderem:
 - Bingo: `ha_admin_get_bingo_round`, `ha_start_bingo_round`, `ha_close_bingo_round`
 - Pferderennen: `ha_admin_get_horse_racing_state`, `ha_admin_set_horse_racing_state`, `ha_admin_list_horse_racing_bets`
 - Zufaellige Paarungen: `ha_admin_list_random_pairing_actions`, `ha_admin_create_random_pairing_action`, `ha_admin_set_random_pairing_participants`, `ha_admin_draw_random_pairing_action`
+- Turniere: `ha_admin_list_tournaments`, `ha_admin_create_tournament`, `ha_admin_update_tournament`, `ha_admin_set_tournament_qualification_ranking`, `ha_admin_delete_tournament`
 
 ### Festivalinfos und Dokumente
 
@@ -140,6 +141,14 @@ Zufaellige Paarungen sind im Spielebereich verortet. Admins legen festivalbezoge
 Die Auslosung in `ha_admin_draw_random_pairing_action` verlangt mindestens zwei aktive ausgewaehlte Personen. Sie sortiert die Auswahl zufaellig und ordnet jede Person der jeweils naechsten Person zu; die letzte Person wird der ersten zugeordnet. Dadurch entstehen bei mindestens zwei Personen keine Selbstzuordnungen. Bereits ausgeloste Aktionen koennen nicht versehentlich ueberschrieben werden: Ein erneutes Auslosen ist nur ueber den expliziten Parameter `p_replace_existing = true` erlaubt und ersetzt bestehende Paarungen.
 
 Teilnehmende laden ausschliesslich ihre eigenen Zuordnungen ueber `ha_list_random_pairing_assignments`. Die RPC ermittelt die Person serverseitig aus dem Teilnehmercode und filtert auf `random_pairing_assignments.participant_id`. Andere Paarungen derselben Aktion werden fuer Teilnehmende nicht ausgeliefert. Admins koennen ueber die Admin-RPCs Aktionen, Auswahl und alle Paarungen einsehen.
+
+### Turniere
+
+Turniere sind als weiterer Spielebereich verfuegbar. Admins legen Turniere im Adminbereich `Spiele` an, vergeben einen Namen und waehlen aktive Teilnehmende aus. Die Daten liegen in `tournaments`; direkte Browserrechte sind entzogen. Das Frontend spricht nur ueber `src/data/tournaments.ts` mit den RPCs.
+
+Beim Anlegen wird die ausgewaehlte Teilnehmendenliste zufaellig ausgelost und dauerhaft in `draw_participant_ids` gespeichert. KO-Turniere duerfen auch mit Teilnehmerzahlen angelegt werden, die keine Zweierpotenz sind. In diesem Fall erzeugt `ha_generate_tournament_bracket` das naechstgroessere KO-Feld, lost Freilose ueber die gespeicherte Reihenfolge zu und speichert diese als Rundennotiz statt als normale Begegnung.
+
+Teilnehmende laden aktive Turniere ueber `ha_list_tournaments` und sehen den Turnierbaum im Spielebereich. Begegnungen ohne konkrete Teilnehmende werden nicht angezeigt; offene Slots erscheinen nur, wenn sie einen erwarteten Gewinner aus einer vorherigen Begegnung vertreten. Die Darstellung ist horizontal scrollbar, damit mehrstufige Baeume auf Mobilgeraeten lesbar bleiben. Teams sind noch kein eigenes Datenmodell; der Baum-Slot ist im Frontend als Teilnehmer-Slot gekapselt, damit spaeter Team-Slots ergaenzt werden koennen.
 
 ### Timetable
 
@@ -211,6 +220,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `random_pairing_actions`: Festivalbezogene Aktionen fuer zufaellige Paarungen mit Name, Status und Auslosungszeitpunkt.
 - `random_pairing_participants`: Ausgewaehlte Teilnehmende pro Paarungsaktion; deaktivierte Teilnehmende werden serverseitig beim Speichern abgelehnt.
 - `random_pairing_assignments`: Ausgeloste Zuordnungen pro Aktion; Primaerschluessel `(action_id, participant_id)` und Check Constraint verhindern doppelte oder eigene Zuordnungen.
+- `tournaments`: Festivalbezogene Turniere mit Namen, Modus, Teilnehmendenauswahl, gespeicherter Auslosung und gespeichertem Single-Elimination-Baum inklusive optionaler Freilose.
 - `participant_login_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Teilnehmerlogin.
 - `festival_access_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Festivalcode.
 

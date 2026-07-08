@@ -156,6 +156,7 @@
           "bingo": "Bingo ist verfuegbar.",
           "horseRacing": "Pferderennen ist offen.",
           "randomPairings": "{{count}} Zuordnung vorhanden.",
+          "tournaments": "{{count}} Turnier vorhanden.",
           "empty": "Aktuell ist kein Spiel aktiv."
         },
         "detail": "Zu den Spielen"
@@ -513,6 +514,41 @@
         "draw": "Die Auslosung konnte gerade nicht gestartet werden. Es muessen mindestens zwei aktive Personen ausgewaehlt sein."
       }
     },
+    "tournaments": {
+      "eyebrow": "Spiele",
+      "title": "Turniere",
+      "loading": "Turniere werden geladen...",
+      "empty": "Es wurden noch keine Turniere angelegt.",
+      "createButton": "Turnier anlegen",
+      "nameLabel": "Turniername",
+      "modeLabel": "Turniermodus",
+      "modes": {
+        "knockout": "KO Turnier",
+        "qualificationKnockout": "Qualifikation plus KO Runde"
+      },
+      "participantsLabel": "Teilnehmerauswahl fuer das Turnier",
+      "noActiveParticipants": "Es gibt aktuell keine aktiven Teilnehmer.",
+      "byeNotice": "Fuer ein reines KO Turnier brauchst du 2, 4, 8, 16 oder 32 Teilnehmende. Bei dieser Teilnehmerzahl bekommt jemand ein Freilos. Wenn du fortfaehrst, bestimmt darueber das Los.",
+      "rankingLabel": "Qualifikationsreihenfolge",
+      "rankingHelp": "Trage pro Zeile eine Person ein. Die erste Zeile ist Platz 1.",
+      "saveRanking": "Platzierung speichern",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "edit": "Bearbeiten",
+      "delete": "LÃ¶schen",
+      "deleting": "LÃ¶sche...",
+      "confirmDelete": "Turnier \"{{name}}\" wirklich lÃ¶schen?",
+      "status": "{{count}} Teilnehmende ausgewaehlt.",
+      "errors": {
+        "load": "Die Turnierverwaltung konnte gerade nicht geladen werden.",
+        "save": "Das Turnier konnte gerade nicht gespeichert werden.",
+        "delete": "Das Turnier konnte gerade nicht gelÃ¶scht werden.",
+        "nameRequired": "Der Turniername ist erforderlich.",
+        "participantsRequired": "Bitte waehle mindestens zwei aktive Teilnehmende aus.",
+        "rankingInvalid": "Die Platzierung muss jede ausgewählte Person genau einmal enthalten.",
+        "rankingSave": "Die Platzierung konnte gerade nicht gespeichert werden."
+      }
+    },
     "festival": {
       "eyebrow": "Admin",
       "title": "Festival",
@@ -651,6 +687,31 @@
       "load": "Deine Zuordnungen konnten gerade nicht geladen werden."
     }
   },
+  "tournaments": {
+    "eyebrow": "KO System",
+    "title": "Turniere",
+    "description": "Hier siehst du alle angelegten Turniere und den aktuellen Turnierbaum.",
+    "loading": "Turniere werden geladen...",
+    "empty": "Aktuell gibt es noch keine Turniere. Sobald ein Admin eins anlegt, erscheint der Turnierbaum hier.",
+    "qualificationOpen": "Qualifikation offen. Der KO Baum wird angezeigt, sobald die Platzierung erfasst wurde.",
+    "participantCount": "{{count}} Teilnehmende",
+    "bracket": {
+      "label": "Turnierbaum fuer {{name}}",
+      "preliminary": "Vorrunde",
+      "roundOf16": "Achtelfinale",
+      "quarterFinal": "Viertelfinale",
+      "semiFinal": "Halbfinale",
+      "final": "Finale",
+      "round": "Runde {{round}}",
+      "match": "Begegnung {{position}}",
+      "openSlot": "Offen",
+      "byeNotice": "Freilos: {{name}} ist direkt in der naechsten Runde.",
+      "empty": "Fuer dieses Turnier ist noch kein Turnierbaum vorhanden."
+    },
+    "errors": {
+      "load": "Die Turniere konnten gerade nicht geladen werden."
+    }
+  },
   "games": {
     "eyebrow": "Spiele",
     "title": "Spiele",
@@ -659,6 +720,7 @@
     "bingo": "Bingo",
     "horseRacing": "Pferderennen",
     "randomPairings": "Zuordnungen",
+    "tournaments": "Turniere",
     "empty": "Aktuell ist kein Spiel aktiv."
   },
   "timetable": {
