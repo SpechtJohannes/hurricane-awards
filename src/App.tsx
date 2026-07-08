@@ -106,6 +106,14 @@ import {
   type RandomPairingParticipantAssignment,
 } from './data/randomPairings'
 import {
+  createTournament,
+  deleteTournament,
+  loadAdminTournaments,
+  loadTournaments,
+  updateTournament,
+  type Tournament,
+} from './data/tournaments'
+import {
   addTimetableFavorite,
   createFestivalDay,
   createTimetableAct,
@@ -154,6 +162,7 @@ import { AdminFestivalDocuments } from './components/AdminFestivalDocuments'
 import { AdminBingo } from './components/AdminBingo'
 import { AdminHorseRacing } from './components/AdminHorseRacing'
 import { AdminRandomPairings } from './components/AdminRandomPairings'
+import { AdminTournaments } from './components/AdminTournaments'
 import { AdminTimetableActs } from './components/AdminTimetableActs'
 import { AdminTimetableDays } from './components/AdminTimetableDays'
 import { AdminTimetablePerformances } from './components/AdminTimetablePerformances'
@@ -161,6 +170,7 @@ import { AdminTimetableStages } from './components/AdminTimetableStages'
 import { Bingo } from './components/Bingo'
 import { HorseRacing } from './components/HorseRacing'
 import { RandomPairings } from './components/RandomPairings'
+import { Tournaments } from './components/Tournaments'
 import { FestivalInfo } from './components/FestivalInfo'
 import { Avatar, ParticipantName } from './components/Avatar'
 import { SectionHeader } from './components/SectionHeader'
@@ -281,7 +291,7 @@ type AdminSection =
   | 'games'
   | 'info'
   | 'archive'
-type GameSection = 'bingo' | 'horseRacing' | 'randomPairings'
+type GameSection = 'bingo' | 'horseRacing' | 'randomPairings' | 'tournaments'
 
 type ResultCardProps = {
   category: Category
@@ -1448,6 +1458,8 @@ function App() {
     RandomPairingParticipantAssignment[]
   >([])
   const [randomPairingsError, setRandomPairingsError] = useState('')
+  const [tournaments, setTournaments] = useState<Tournament[]>([])
+  const [tournamentsError, setTournamentsError] = useState('')
   const [timetable, setTimetable] = useState<Timetable | null>(null)
   const [timetableError, setTimetableError] = useState('')
   const [isLoadingTimetable, setIsLoadingTimetable] = useState(
@@ -1517,6 +1529,16 @@ function App() {
     useState(false)
   const [savingRandomPairingActionId, setSavingRandomPairingActionId] =
     useState<string | null>(null)
+  const [adminTournaments, setAdminTournaments] = useState<Tournament[]>([])
+  const [adminTournamentsError, setAdminTournamentsError] = useState('')
+  const [isLoadingAdminTournaments, setIsLoadingAdminTournaments] =
+    useState(false)
+  const [savingTournamentId, setSavingTournamentId] = useState<string | null>(
+    null,
+  )
+  const [deletingTournamentId, setDeletingTournamentId] = useState<string | null>(
+    null,
+  )
   const [adminFestivalDocumentsError, setAdminFestivalDocumentsError] =
     useState('')
   const [isLoadingAdminFestivalDocuments, setIsLoadingAdminFestivalDocuments] =
@@ -1683,6 +1705,7 @@ function App() {
           loadedBingoCard,
           loadedHorseRacingState,
           loadedRandomPairingAssignments,
+          loadedTournaments,
           loadedTimetable,
           loadedStandingsResult,
         ] = await Promise.all([
@@ -1695,6 +1718,7 @@ function App() {
           loadOrCreateBingoCard(accessContext),
           loadHorseRacingState(activeFestival.id, accessContext),
           loadRandomPairingAssignments(activeFestival.id, accessContext),
+          loadTournaments(activeFestival.id, accessContext),
           loadTimetable(accessContext),
           loadAllTimeStandings(accessContext).then(
             (loadedStandings) =>
@@ -1719,6 +1743,7 @@ function App() {
           setBingoCard(loadedBingoCard)
           setHorseRacingState(loadedHorseRacingState)
           setRandomPairingAssignments(loadedRandomPairingAssignments)
+          setTournaments(loadedTournaments)
           setTimetable(loadedTimetable)
           setCampLocationOpenError('')
 
@@ -1743,6 +1768,7 @@ function App() {
           setBingoError(i18n.t('bingo.errors.load'))
           setHorseRacingError(i18n.t('horseRacing.errors.load'))
           setRandomPairingsError(i18n.t('randomPairings.errors.load'))
+          setTournamentsError(i18n.t('tournaments.errors.load'))
           setTimetableError(i18n.t('timetable.errors.load'))
         }
       } finally {
@@ -1857,6 +1883,10 @@ function App() {
         randomPairingAssignments.length > 0
           ? t('dashboard.tiles.games.status.randomPairings', {
               count: randomPairingAssignments.length,
+            })
+          : tournaments.length > 0
+          ? t('dashboard.tiles.games.status.tournaments', {
+              count: tournaments.length,
             })
           : horseRacingState?.isEnabled && horseRacingState.bettingStatus === 'open'
           ? t('dashboard.tiles.games.status.horseRacing')
@@ -2022,6 +2052,8 @@ function App() {
     setSavingHorseRacingSuit(null)
     setRandomPairingAssignments([])
     setRandomPairingsError('')
+    setTournaments([])
+    setTournamentsError('')
     setTimetable(null)
     setTimetableError('')
     setIsLoadingTimetable(false)
@@ -2059,6 +2091,11 @@ function App() {
     setIsLoadingAdminRandomPairings(false)
     setIsCreatingRandomPairingAction(false)
     setSavingRandomPairingActionId(null)
+    setAdminTournaments([])
+    setAdminTournamentsError('')
+    setIsLoadingAdminTournaments(false)
+    setSavingTournamentId(null)
+    setDeletingTournamentId(null)
     setAdminFestivalDocumentsError('')
     setIsLoadingAdminFestivalDocuments(false)
     setUploadingDocumentType(null)
@@ -2154,6 +2191,7 @@ function App() {
         void reloadAdminBingoRound()
         void reloadAdminHorseRacing()
         void reloadAdminRandomPairings()
+        void reloadAdminTournaments()
 
         window.setTimeout(() => {
           document.getElementById('admin')?.scrollIntoView({ behavior: 'smooth' })
@@ -2588,6 +2626,30 @@ function App() {
       setAdminRandomPairingsError(t('admin.randomPairings.errors.load'))
     } finally {
       setIsLoadingAdminRandomPairings(false)
+    }
+  }
+
+  async function reloadAdminTournaments() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsLoadingAdminTournaments(true)
+    setAdminTournamentsError('')
+
+    try {
+      const loadedTournaments = await loadAdminTournaments(
+        activeFestival.id,
+        adminContext,
+      )
+
+      setAdminTournaments(loadedTournaments)
+    } catch {
+      setAdminTournamentsError(t('admin.tournaments.errors.load'))
+    } finally {
+      setIsLoadingAdminTournaments(false)
     }
   }
 
@@ -3737,6 +3799,122 @@ function App() {
     }
   }
 
+  function replaceTournament(tournament: Tournament) {
+    setTournaments((currentTournaments) => {
+      const exists = currentTournaments.some(
+        (currentTournament) => currentTournament.id === tournament.id,
+      )
+
+      return exists
+        ? currentTournaments.map((currentTournament) =>
+            currentTournament.id === tournament.id
+              ? tournament
+              : currentTournament,
+          )
+        : [tournament, ...currentTournaments]
+    })
+    setAdminTournaments((currentTournaments) => {
+      const exists = currentTournaments.some(
+        (currentTournament) => currentTournament.id === tournament.id,
+      )
+
+      return exists
+        ? currentTournaments.map((currentTournament) =>
+            currentTournament.id === tournament.id
+              ? tournament
+              : currentTournament,
+          )
+        : [tournament, ...currentTournaments]
+    })
+  }
+
+  async function createAdminTournament(input: {
+    name: string
+    mode: 'knockout' | 'qualification_knockout'
+    participantIds: string[]
+  }) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setSavingTournamentId('new')
+    setAdminTournamentsError('')
+
+    try {
+      const createdTournament = await createTournament(
+        activeFestival.id,
+        input,
+        adminContext,
+      )
+
+      replaceTournament(createdTournament)
+      setTournamentsError('')
+    } finally {
+      setSavingTournamentId(null)
+    }
+  }
+
+  async function updateAdminTournament(
+    tournamentId: string,
+    input: {
+      name: string
+      mode: 'knockout' | 'qualification_knockout'
+      participantIds: string[]
+    },
+  ) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setSavingTournamentId(tournamentId)
+    setAdminTournamentsError('')
+
+    try {
+      const updatedTournament = await updateTournament(
+        tournamentId,
+        input,
+        adminContext,
+      )
+
+      replaceTournament(updatedTournament)
+      setTournamentsError('')
+    } finally {
+      setSavingTournamentId(null)
+    }
+  }
+
+  async function deleteAdminTournament(tournamentId: string) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setDeletingTournamentId(tournamentId)
+    setAdminTournamentsError('')
+
+    try {
+      await deleteTournament(tournamentId, adminContext)
+      setAdminTournaments((currentTournaments) =>
+        currentTournaments.filter(
+          (currentTournament) => currentTournament.id !== tournamentId,
+        ),
+      )
+      setTournaments((currentTournaments) =>
+        currentTournaments.filter(
+          (currentTournament) => currentTournament.id !== tournamentId,
+        ),
+      )
+      setTournamentsError('')
+    } finally {
+      setDeletingTournamentId(null)
+    }
+  }
+
   async function toggleBingoNumber(number: number) {
     if (!selectedParticipant || !bingoCard) {
       return
@@ -4151,6 +4329,17 @@ function App() {
                 onUpdateParticipants={updateAdminRandomPairingParticipants}
                 onDraw={drawAdminRandomPairingAction}
               />
+              <AdminTournaments
+                tournaments={adminTournaments}
+                participants={adminParticipants}
+                error={adminTournamentsError}
+                isLoading={isLoadingAdminTournaments}
+                savingTournamentId={savingTournamentId}
+                deletingTournamentId={deletingTournamentId}
+                onCreate={createAdminTournament}
+                onUpdate={updateAdminTournament}
+                onDelete={deleteAdminTournament}
+              />
             </>
           ) : null}
 
@@ -4411,6 +4600,18 @@ function App() {
             >
               {t('games.randomPairings')}
             </button>
+            <button
+              className={`games__tab${
+                activeGameSection === 'tournaments' ? ' is-active' : ''
+              }`}
+              type="button"
+              aria-current={
+                activeGameSection === 'tournaments' ? 'page' : undefined
+              }
+              onClick={() => setActiveGameSection('tournaments')}
+            >
+              {t('games.tournaments')}
+            </button>
           </nav>
 
           {activeGameSection === 'bingo' && bingoCard ? (
@@ -4439,6 +4640,14 @@ function App() {
             <RandomPairings
               assignments={randomPairingAssignments}
               error={randomPairingsError}
+              isLoading={isLoadingData}
+            />
+          ) : null}
+
+          {activeGameSection === 'tournaments' ? (
+            <Tournaments
+              tournaments={tournaments}
+              error={tournamentsError}
               isLoading={isLoadingData}
             />
           ) : null}

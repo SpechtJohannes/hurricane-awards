@@ -200,6 +200,13 @@ const randomPairingsMigration = readFileSync(
   ),
   'utf8',
 )
+const tournamentsMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260708130000_create_tournaments.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -608,6 +615,11 @@ describe('Supabase Sicherheitsmigration', () => {
         timetablePerformancesManagementMigration,
         'ha_delete_timetable_performance',
       ],
+      [tournamentsMigration, 'ha_admin_list_tournaments'],
+      [tournamentsMigration, 'ha_admin_create_tournament'],
+      [tournamentsMigration, 'ha_admin_update_tournament'],
+      [tournamentsMigration, 'ha_admin_delete_tournament'],
+      [tournamentsMigration, 'ha_admin_set_tournament_qualification_ranking'],
     ] as const
 
     for (const [migration, functionName] of adminRpcExpectations) {
@@ -1168,6 +1180,76 @@ describe('Supabase Sicherheitsmigration', () => {
     }
   })
 
+  it('legt Turniere mit geschuetzter Tabelle und KO Baum Erzeugung an', () => {
+    expect(tournamentsMigration).toContain(
+      'create table if not exists public.tournaments',
+    )
+    expect(tournamentsMigration).toContain(
+      'alter table public.tournaments enable row level security',
+    )
+    expect(tournamentsMigration).toContain(
+      'revoke all on table public.tournaments from anon, authenticated',
+    )
+    expect(tournamentsMigration).toContain(
+      'create policy "deny direct tournament access"',
+    )
+    expect(tournamentsMigration).toContain('festival_id text not null')
+    expect(tournamentsMigration).toContain('mode text not null default')
+    expect(tournamentsMigration).toContain('selected_participant_ids text[]')
+    expect(tournamentsMigration).toContain('draw_participant_ids text[]')
+    expect(tournamentsMigration).toContain('qualification_ranking_ids text[]')
+    expect(tournamentsMigration).toContain('bracket jsonb not null')
+    expect(tournamentsMigration).toContain(
+      "check (status in ('draft', 'active'))",
+    )
+    expect(tournamentsMigration).toContain(
+      "check (mode in ('knockout', 'qualification_knockout'))",
+    )
+    expect(tournamentsMigration).toContain(
+      'public.ha_generate_tournament_bracket',
+    )
+    expect(tournamentsMigration).toContain(
+      "'type', 'single_elimination'",
+    )
+    expect(tournamentsMigration).toContain("'type', 'main'")
+    expect(tournamentsMigration).toContain('v_main_participant_count')
+    expect(tournamentsMigration).toContain('v_bye_count')
+    expect(tournamentsMigration).toContain("'byes', v_byes")
+    expect(tournamentsMigration).toContain('order by random()')
+    expect(tournamentsMigration).toContain('ha_seed_tournament_participants')
+    expect(tournamentsMigration).toContain("'status', 'scheduled'")
+    expect(tournamentsMigration).not.toContain(
+      'knockout tournament requires a power of two participant count',
+    )
+    expect(tournamentsMigration).not.toContain(
+      'knockout bracket requires a power of two participant count',
+    )
+    expect(tournamentsMigration).toContain("'winnerParticipantId'")
+    expect(tournamentsMigration).toContain('at least two participants are required')
+    expect(tournamentsMigration).toContain(
+      'selected participant is inactive or unknown',
+    )
+    expect(tournamentsMigration).toContain(
+      'public.ha_participant_id_for_access(p_participant_access_code) is null',
+    )
+
+    for (const functionName of [
+      'ha_admin_list_tournaments',
+      'ha_admin_create_tournament',
+      'ha_admin_update_tournament',
+      'ha_admin_delete_tournament',
+      'ha_admin_set_tournament_qualification_ranking',
+      'ha_list_tournaments',
+    ]) {
+      expect(tournamentsMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(tournamentsMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+  })
+
   it('legt die technische Timetable Basis mit getrennten Entitaeten an', () => {
     for (const table of [
       'festival_days',
@@ -1506,6 +1588,7 @@ describe('Supabase Sicherheitsmigration', () => {
       horseRacingMigration,
       horseRacingRpcFixMigration,
       randomPairingsMigration,
+      tournamentsMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')

@@ -156,6 +156,7 @@
           "bingo": "Bingo is beschikbaar.",
           "horseRacing": "Paardenrennen is open.",
           "randomPairings": "{{count}} koppeling beschikbaar.",
+          "tournaments": "{{count}} toernooi beschikbaar.",
           "empty": "Er is momenteel geen spel actief."
         },
         "detail": "Naar spellen"
@@ -513,6 +514,41 @@
         "draw": "De loting kon net niet worden gestart. Er moeten minstens twee actieve personen geselecteerd zijn."
       }
     },
+    "tournaments": {
+      "eyebrow": "Spellen",
+      "title": "Toernooien",
+      "loading": "Toernooien worden geladen...",
+      "empty": "Er zijn nog geen toernooien aangemaakt.",
+      "createButton": "Toernooi aanmaken",
+      "nameLabel": "Toernooinaam",
+      "modeLabel": "Toernooimodus",
+      "modes": {
+        "knockout": "Knock-outtoernooi",
+        "qualificationKnockout": "Kwalificatie plus knock-outronde"
+      },
+      "participantsLabel": "Deelnemerselectie voor het toernooi",
+      "noActiveParticipants": "Er zijn momenteel geen actieve deelnemers.",
+      "byeNotice": "Voor een puur knock-outtoernooi heb je 2, 4, 8, 16 of 32 deelnemers nodig. Bij dit deelnemersaantal krijgt iemand een vrijloting. Als je doorgaat, bepaalt de loting dat.",
+      "rankingLabel": "Kwalificatievolgorde",
+      "rankingHelp": "Zet per regel een persoon. De eerste regel is plaats 1.",
+      "saveRanking": "Plaatsing opslaan",
+      "save": "Opslaan",
+      "cancel": "Annuleren",
+      "edit": "Bewerken",
+      "delete": "Verwijderen",
+      "deleting": "Verwijderen...",
+      "confirmDelete": "Toernooi \"{{name}}\" echt verwijderen?",
+      "status": "{{count}} deelnemers geselecteerd.",
+      "errors": {
+        "load": "Het toernooibeheer kon net niet worden geladen.",
+        "save": "Het toernooi kon net niet worden opgeslagen.",
+        "delete": "Het toernooi kon net niet worden verwijderd.",
+        "nameRequired": "De toernooinaam is verplicht.",
+        "participantsRequired": "Kies minimaal twee actieve deelnemers.",
+        "rankingInvalid": "De plaatsing moet elke geselecteerde persoon precies een keer bevatten.",
+        "rankingSave": "De plaatsing kon net niet worden opgeslagen."
+      }
+    },
     "festival": {
       "eyebrow": "Admin",
       "title": "Festival",
@@ -651,6 +687,31 @@
       "load": "Je koppelingen konden net niet worden geladen."
     }
   },
+  "tournaments": {
+    "eyebrow": "Knock-outsysteem",
+    "title": "Toernooien",
+    "description": "Hier zie je alle aangemaakte toernooien en de actuele toernooiboom.",
+    "loading": "Toernooien worden geladen...",
+    "empty": "Er zijn momenteel nog geen toernooien. Zodra een admin er een aanmaakt, verschijnt de toernooiboom hier.",
+    "qualificationOpen": "Kwalificatie open. De knock-outboom verschijnt zodra de plaatsing is ingevoerd.",
+    "participantCount": "{{count}} deelnemers",
+    "bracket": {
+      "label": "Toernooiboom voor {{name}}",
+      "preliminary": "Voorronde",
+      "roundOf16": "Achtste finale",
+      "quarterFinal": "Kwartfinale",
+      "semiFinal": "Halve finale",
+      "final": "Finale",
+      "round": "Ronde {{round}}",
+      "match": "Wedstrijd {{position}}",
+      "openSlot": "Open",
+      "byeNotice": "Vrijloting: {{name}} gaat direct door naar de volgende ronde.",
+      "empty": "Voor dit toernooi is nog geen toernooiboom beschikbaar."
+    },
+    "errors": {
+      "load": "De toernooien konden net niet worden geladen."
+    }
+  },
   "games": {
     "eyebrow": "Spellen",
     "title": "Spellen",
@@ -659,6 +720,7 @@
     "bingo": "Bingo",
     "horseRacing": "Paardenrennen",
     "randomPairings": "Koppelingen",
+    "tournaments": "Toernooien",
     "empty": "Er is momenteel geen spel actief."
   },
   "timetable": {

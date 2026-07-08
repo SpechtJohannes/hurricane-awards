@@ -93,6 +93,42 @@ describe('i18n test infrastructure', () => {
     )
   })
 
+  it('enthaelt Turniertexte auf Deutsch und Niederlaendisch', async () => {
+    await i18n.changeLanguage('de')
+
+    expect(i18n.t('games.tournaments')).toBe('Turniere')
+    expect(i18n.t('tournaments.empty')).toContain('noch keine Turniere')
+    expect(i18n.t('tournaments.bracket.final')).toBe('Finale')
+    expect(i18n.t('tournaments.bracket.openSlot')).toBe('Offen')
+    expect(i18n.t('tournaments.bracket.byeNotice', { name: 'Alice' })).toContain(
+      'Freilos: Alice',
+    )
+    expect(i18n.t('admin.tournaments.createButton')).toBe('Turnier anlegen')
+    expect(i18n.t('admin.tournaments.modes.knockout')).toBe('KO Turnier')
+    expect(i18n.t('admin.tournaments.byeNotice')).toContain('Freilos')
+    expect(i18n.t('admin.tournaments.errors.participantsRequired')).toContain(
+      'mindestens zwei',
+    )
+
+    await i18n.changeLanguage('nl')
+
+    expect(i18n.t('games.tournaments')).toBe('Toernooien')
+    expect(i18n.t('tournaments.empty')).toContain('nog geen toernooien')
+    expect(i18n.t('tournaments.bracket.final')).toBe('Finale')
+    expect(i18n.t('tournaments.bracket.openSlot')).toBe('Open')
+    expect(i18n.t('tournaments.bracket.byeNotice', { name: 'Alice' })).toContain(
+      'Vrijloting: Alice',
+    )
+    expect(i18n.t('admin.tournaments.createButton')).toBe('Toernooi aanmaken')
+    expect(i18n.t('admin.tournaments.modes.knockout')).toBe(
+      'Knock-outtoernooi',
+    )
+    expect(i18n.t('admin.tournaments.byeNotice')).toContain('vrijloting')
+    expect(i18n.t('admin.tournaments.errors.participantsRequired')).toContain(
+      'minimaal twee',
+    )
+  })
+
   it('enthaelt Abstimmungs-Empty-State-Texte auf Deutsch und Niederlaendisch', async () => {
     await i18n.changeLanguage('de')
 

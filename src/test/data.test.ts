@@ -102,6 +102,15 @@ import {
   updateRandomPairingParticipants,
 } from '../data/randomPairings'
 import {
+  createTournament,
+  deleteTournament,
+  drawTournamentParticipants,
+  generateTournamentBracket,
+  loadAdminTournaments,
+  loadTournaments,
+  updateTournament,
+} from '../data/tournaments'
+import {
   addTimetableFavorite,
   createFestivalDay,
   createTimetableAct,
@@ -1051,6 +1060,265 @@ describe('Supabase Datenzugriffe', () => {
         p_replace_existing: false,
       },
     )
+  })
+
+  it.each([
+    {
+      participantCount: 7,
+      fieldSize: 8,
+      firstRoundMatches: 3,
+      byeCount: 1,
+      totalMatches: 6,
+    },
+    {
+      participantCount: 10,
+      fieldSize: 16,
+      firstRoundMatches: 2,
+      byeCount: 6,
+      totalMatches: 9,
+    },
+  ])(
+    'erzeugt KO Freilose fuer $participantCount Teilnehmende',
+    ({ participantCount, fieldSize, firstRoundMatches, byeCount, totalMatches }) => {
+      const bracket = generateTournamentBracket(
+        Array.from({ length: participantCount }, (_, index) => ({
+          participantId: `participant-${index + 1}`,
+          participantName: `Person ${index + 1}`,
+        })),
+      )
+      const firstRound = bracket.rounds[0]
+      const matchCount = bracket.rounds.reduce(
+        (count, round) => count + round.matches.length,
+        0,
+      )
+
+      expect(bracket.mainParticipantCount).toBe(fieldSize)
+      expect(firstRound.type).toBe('main')
+      expect(firstRound.matches).toHaveLength(firstRoundMatches)
+      expect(firstRound.byes).toHaveLength(byeCount)
+      expect(matchCount).toBe(totalMatches)
+      expect(
+        firstRound.matches.every(
+          (match) =>
+            match.participantA.participant !== null &&
+            match.participantB.participant !== null,
+        ),
+      ).toBe(true)
+    },
+  )
+
+  it('erzeugt fuer acht Teilnehmende im KO Modus direkt einen KO Baum', () => {
+    const bracket = generateTournamentBracket(
+      Array.from({ length: 8 }, (_, index) => ({
+        participantId: `participant-${index + 1}`,
+        participantName: `Person ${index + 1}`,
+      })),
+    )
+
+    expect(bracket.mainParticipantCount).toBe(8)
+    expect(bracket.rounds).toHaveLength(3)
+    expect(bracket.rounds[0].type).toBe('main')
+    expect(bracket.rounds[0].matches).toHaveLength(4)
+    expect(bracket.rounds[0].byes).toHaveLength(0)
+  })
+
+  it('lost Teilnehmende zufaellig statt alphabetisch aus', () => {
+    const drawnParticipants = drawTournamentParticipants(
+      [
+        { participantId: 'alice', participantName: 'Alice' },
+        { participantId: 'bob', participantName: 'Bob' },
+        { participantId: 'carla', participantName: 'Carla' },
+        { participantId: 'dina', participantName: 'Dina' },
+      ],
+      () => 0,
+    )
+
+    expect(drawnParticipants.map((participant) => participant.participantId)).toEqual([
+      'bob',
+      'carla',
+      'dina',
+      'alice',
+    ])
+  })
+
+  it('erzeugt Freilose aus der gespeicherten Auslosung stabil', () => {
+    const drawnParticipants = drawTournamentParticipants(
+      Array.from({ length: 7 }, (_, index) => ({
+        participantId: `participant-${index + 1}`,
+        participantName: `Person ${index + 1}`,
+      })),
+      () => 0,
+    )
+    const bracket = generateTournamentBracket(drawnParticipants)
+
+    expect(drawnParticipants.map((participant) => participant.participantId)).toEqual([
+      'participant-2',
+      'participant-3',
+      'participant-4',
+      'participant-5',
+      'participant-6',
+      'participant-7',
+      'participant-1',
+    ])
+    expect(bracket.rounds[0].byes?.map((participant) => participant.participantId)).toEqual([
+      'participant-1',
+    ])
+  })
+
+  it('laedt Turniere fuer Teilnehmende', async () => {
+    const bracket = generateTournamentBracket([
+      { participantId: 'alice', participantName: 'Alice' },
+      { participantId: 'bob', participantName: 'Bob' },
+    ])
+
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          id: 'tournament-1',
+          festival_id: 'hurricane-awards-2026',
+          name: 'Kicker Cup',
+          mode: 'knockout',
+          status: 'active',
+          selected_participant_ids: ['alice', 'bob'],
+          draw_participant_ids: ['bob', 'alice'],
+          qualification_ranking_ids: [],
+          bracket,
+          created_at: '2026-07-08T12:00:00.000Z',
+          updated_at: '2026-07-08T12:00:00.000Z',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      loadTournaments('hurricane-awards-2026', participantContext),
+    ).resolves.toEqual([
+      {
+        id: 'tournament-1',
+        festivalId: 'hurricane-awards-2026',
+        name: 'Kicker Cup',
+        mode: 'knockout',
+        status: 'active',
+        selectedParticipantIds: ['alice', 'bob'],
+        drawParticipantIds: ['bob', 'alice'],
+        qualificationRankingIds: [],
+        bracket,
+        createdAt: '2026-07-08T12:00:00.000Z',
+        updatedAt: '2026-07-08T12:00:00.000Z',
+      },
+    ])
+    expect(rpcMock).toHaveBeenCalledWith('ha_list_tournaments', {
+      ...expectedParticipantRpcContext,
+      p_festival_id: 'hurricane-awards-2026',
+    })
+  })
+
+  it('verwaltet Turniere ueber Admin RPCs', async () => {
+    const bracket = generateTournamentBracket([
+      { participantId: 'alice', participantName: 'Alice' },
+      { participantId: 'bob', participantName: 'Bob' },
+    ])
+    const tournamentRow = {
+      id: 'tournament-1',
+      festival_id: 'hurricane-awards-2026',
+      name: 'Kicker Cup',
+      mode: 'knockout',
+      status: 'active',
+      selected_participant_ids: ['alice', 'bob'],
+      draw_participant_ids: ['bob', 'alice'],
+      qualification_ranking_ids: [],
+      bracket: JSON.stringify(bracket),
+      created_at: '2026-07-08T12:00:00.000Z',
+      updated_at: '2026-07-08T12:00:00.000Z',
+    }
+
+    rpcMock.mockResolvedValueOnce({
+      data: [tournamentRow],
+      error: null,
+    })
+
+    await expect(
+      loadAdminTournaments('hurricane-awards-2026', participantContext),
+    ).resolves.toMatchObject([
+      {
+        id: 'tournament-1',
+        name: 'Kicker Cup',
+        mode: 'knockout',
+        selectedParticipantIds: ['alice', 'bob'],
+        drawParticipantIds: ['bob', 'alice'],
+        bracket,
+      },
+    ])
+    expect(rpcMock).toHaveBeenNthCalledWith(1, 'ha_admin_list_tournaments', {
+      ...expectedParticipantRpcContext,
+      p_festival_id: 'hurricane-awards-2026',
+    })
+
+    rpcMock.mockResolvedValueOnce({
+      data: [tournamentRow],
+      error: null,
+    })
+
+    await expect(
+      createTournament(
+        'hurricane-awards-2026',
+        {
+          name: ' Kicker Cup ',
+          mode: 'knockout',
+          participantIds: ['alice', 'bob'],
+        },
+        participantContext,
+      ),
+    ).resolves.toMatchObject({
+      id: 'tournament-1',
+      name: 'Kicker Cup',
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(2, 'ha_admin_create_tournament', {
+      ...expectedParticipantRpcContext,
+      p_festival_id: 'hurricane-awards-2026',
+      p_name: 'Kicker Cup',
+      p_mode: 'knockout',
+      p_participant_ids: ['alice', 'bob'],
+    })
+
+    rpcMock.mockResolvedValueOnce({
+      data: [{ ...tournamentRow, name: 'Kicker Cup Finale' }],
+      error: null,
+    })
+
+    await expect(
+      updateTournament(
+        'tournament-1',
+        {
+          name: 'Kicker Cup Finale',
+          mode: 'knockout',
+          participantIds: ['alice', 'bob'],
+        },
+        participantContext,
+      ),
+    ).resolves.toMatchObject({
+      name: 'Kicker Cup Finale',
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(3, 'ha_admin_update_tournament', {
+      ...expectedParticipantRpcContext,
+      p_tournament_id: 'tournament-1',
+      p_name: 'Kicker Cup Finale',
+      p_mode: 'knockout',
+      p_participant_ids: ['alice', 'bob'],
+    })
+
+    rpcMock.mockResolvedValueOnce({
+      data: null,
+      error: null,
+    })
+
+    await expect(
+      deleteTournament('tournament-1', participantContext),
+    ).resolves.toBeUndefined()
+    expect(rpcMock).toHaveBeenNthCalledWith(4, 'ha_admin_delete_tournament', {
+      ...expectedParticipantRpcContext,
+      p_tournament_id: 'tournament-1',
+    })
   })
 
   it('laedt die Timetable Basisdaten ueber eine geschuetzte RPC Funktion', async () => {
