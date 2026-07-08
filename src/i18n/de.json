@@ -155,6 +155,7 @@
         "status": {
           "bingo": "Bingo ist verfuegbar.",
           "horseRacing": "Pferderennen ist offen.",
+          "randomPairings": "{{count}} Zuordnung vorhanden.",
           "empty": "Aktuell ist kein Spiel aktiv."
         },
         "detail": "Zu den Spielen"
@@ -488,6 +489,30 @@
         "save": "Pferderennen konnte gerade nicht aktualisiert werden."
       }
     },
+    "randomPairings": {
+      "eyebrow": "Spiele",
+      "title": "Zufällige Paarungen",
+      "loading": "Aktionen werden geladen...",
+      "empty": "Es wurden noch keine Aktionen angelegt.",
+      "nameLabel": "Aktionsname",
+      "create": "Aktion anlegen",
+      "draw": "Auslosung starten",
+      "redraw": "Neu auslosen",
+      "confirmRedraw": "Diese Aktion wurde bereits ausgelost. Wirklich neu auslosen und bestehende Paarungen ersetzen?",
+      "participantsLabel": "Teilnehmerauswahl fuer {{name}}",
+      "resultsTitle": "Ergebnis",
+      "status": {
+        "draft": "{{count}} Personen ausgewaehlt.",
+        "drawn": "{{count}} Paarungen ausgelost."
+      },
+      "errors": {
+        "load": "Die Aktionen konnten gerade nicht geladen werden.",
+        "create": "Die Aktion konnte gerade nicht angelegt werden.",
+        "nameRequired": "Der Aktionsname ist erforderlich.",
+        "participants": "Die Teilnehmerauswahl konnte gerade nicht gespeichert werden.",
+        "draw": "Die Auslosung konnte gerade nicht gestartet werden. Es muessen mindestens zwei aktive Personen ausgewaehlt sein."
+      }
+    },
     "festival": {
       "eyebrow": "Admin",
       "title": "Festival",
@@ -615,6 +640,17 @@
       "save": "Deine Wette konnte gerade nicht gespeichert werden."
     }
   },
+  "randomPairings": {
+    "eyebrow": "Aktionen",
+    "title": "Dein Secret Buddy",
+    "description": "Hier siehst du ausschliesslich deine eigene Zuordnung je ausgeloster Aktion.",
+    "loading": "Zuordnungen werden geladen...",
+    "empty": "Aktuell gibt es keine Zuordnung fuer dich.",
+    "assignedTo": "Du bist zugeordnet zu",
+    "errors": {
+      "load": "Deine Zuordnungen konnten gerade nicht geladen werden."
+    }
+  },
   "games": {
     "eyebrow": "Spiele",
     "title": "Spiele",
@@ -622,6 +658,7 @@
     "navigationLabel": "Spielauswahl",
     "bingo": "Bingo",
     "horseRacing": "Pferderennen",
+    "randomPairings": "Zuordnungen",
     "empty": "Aktuell ist kein Spiel aktiv."
   },
   "timetable": {

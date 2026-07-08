@@ -107,6 +107,7 @@ Admin-RPCs umfassen unter anderem:
 - Timetable: `ha_get_timetable`, `ha_add_timetable_favorite`, `ha_remove_timetable_favorite`, `ha_admin_list_festival_days`, `ha_create_festival_day`, `ha_update_festival_day`, `ha_delete_festival_day`, `ha_admin_list_timetable_stages`, `ha_create_timetable_stage`, `ha_update_timetable_stage`, `ha_delete_timetable_stage`, `ha_admin_list_timetable_acts`, `ha_create_timetable_act`, `ha_update_timetable_act`, `ha_delete_timetable_act`, `ha_admin_list_timetable_performances`, `ha_create_timetable_performance`, `ha_update_timetable_performance`, `ha_delete_timetable_performance`
 - Bingo: `ha_admin_get_bingo_round`, `ha_start_bingo_round`, `ha_close_bingo_round`
 - Pferderennen: `ha_admin_get_horse_racing_state`, `ha_admin_set_horse_racing_state`, `ha_admin_list_horse_racing_bets`
+- Zufaellige Paarungen: `ha_admin_list_random_pairing_actions`, `ha_admin_create_random_pairing_action`, `ha_admin_set_random_pairing_participants`, `ha_admin_draw_random_pairing_action`
 
 ### Festivalinfos und Dokumente
 
@@ -131,6 +132,14 @@ Pferderennen ist ein festivalbezogenes Partyspiel im Spielebereich. Die App verw
 Der Status liegt in `horse_racing_settings` mit genau einem Datensatz pro `festival_id`. Admins aktivieren oder deaktivieren das Spiel und oeffnen oder schliessen die Wettphase ueber `ha_admin_set_horse_racing_state`. Beim Deaktivieren wird die Wettphase serverseitig geschlossen. Admins koennen den Status ueber `ha_admin_get_horse_racing_state` laden und die abgegebenen Wetten ueber `ha_admin_list_horse_racing_bets` einsehen.
 
 Teilnehmende laden ihren Status und die eigene Auswahl ueber `ha_get_horse_racing_state`. Wetten werden in `horse_racing_bets` pro Festival und Teilnehmer gespeichert; der Unique Constraint auf `(festival_id, participant_id)` verhindert mehrere aktive Wetten. `ha_place_horse_racing_bet` erlaubt Einfuegen und Aendern nur, wenn Pferderennen aktiv und die Wettphase offen ist. Nach dem Schliessen bleibt die eigene Auswahl lesbar, aber nicht mehr aenderbar.
+
+### Zufaellige Paarungen
+
+Zufaellige Paarungen sind im Spielebereich verortet. Admins legen festivalbezogene Aktionen mit frei waehlbarem Namen an, waehlen aktive Teilnehmende aus und starten eine Auslosung. Die Daten liegen in `random_pairing_actions`, `random_pairing_participants` und `random_pairing_assignments`. Direkte Browserrechte sind entzogen; alle Zugriffe laufen ueber Security-Definer-RPCs.
+
+Die Auslosung in `ha_admin_draw_random_pairing_action` verlangt mindestens zwei aktive ausgewaehlte Personen. Sie sortiert die Auswahl zufaellig und ordnet jede Person der jeweils naechsten Person zu; die letzte Person wird der ersten zugeordnet. Dadurch entstehen bei mindestens zwei Personen keine Selbstzuordnungen. Bereits ausgeloste Aktionen koennen nicht versehentlich ueberschrieben werden: Ein erneutes Auslosen ist nur ueber den expliziten Parameter `p_replace_existing = true` erlaubt und ersetzt bestehende Paarungen.
+
+Teilnehmende laden ausschliesslich ihre eigenen Zuordnungen ueber `ha_list_random_pairing_assignments`. Die RPC ermittelt die Person serverseitig aus dem Teilnehmercode und filtert auf `random_pairing_assignments.participant_id`. Andere Paarungen derselben Aktion werden fuer Teilnehmende nicht ausgeliefert. Admins koennen ueber die Admin-RPCs Aktionen, Auswahl und alle Paarungen einsehen.
 
 ### Timetable
 
@@ -199,6 +208,9 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `bingo_marks`: Persistierte Markierungen fuer Zahlen auf einer Bingokarte.
 - `horse_racing_settings`: Festivalbezogener Pferderennen-Status mit Aktivierung und Wettphasenstatus; genau ein Datensatz pro Festival.
 - `horse_racing_bets`: Pferderennen-Wetten pro Festival und Teilnehmer mit Kartenfarbe; eindeutig ueber `(festival_id, participant_id)`.
+- `random_pairing_actions`: Festivalbezogene Aktionen fuer zufaellige Paarungen mit Name, Status und Auslosungszeitpunkt.
+- `random_pairing_participants`: Ausgewaehlte Teilnehmende pro Paarungsaktion; deaktivierte Teilnehmende werden serverseitig beim Speichern abgelehnt.
+- `random_pairing_assignments`: Ausgeloste Zuordnungen pro Aktion; Primaerschluessel `(action_id, participant_id)` und Check Constraint verhindern doppelte oder eigene Zuordnungen.
 - `participant_login_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Teilnehmerlogin.
 - `festival_access_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Festivalcode.
 

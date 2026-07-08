@@ -91,6 +91,15 @@ import {
   type HorseRacingState,
 } from '../data/horseRacing'
 import {
+  createRandomPairingAction,
+  drawRandomPairingAction,
+  loadAdminRandomPairingActions,
+  loadRandomPairingAssignments,
+  updateRandomPairingParticipants,
+  type AdminRandomPairingAction,
+  type RandomPairingParticipantAssignment,
+} from '../data/randomPairings'
+import {
   addTimetableFavorite,
   createFestivalDay,
   createTimetableAct,
@@ -204,6 +213,14 @@ vi.mock('../data/horseRacing', () => ({
   loadHorseRacingState: vi.fn(),
   saveHorseRacingBet: vi.fn(),
   updateAdminHorseRacingState: vi.fn(),
+}))
+
+vi.mock('../data/randomPairings', () => ({
+  createRandomPairingAction: vi.fn(),
+  drawRandomPairingAction: vi.fn(),
+  loadAdminRandomPairingActions: vi.fn(),
+  loadRandomPairingAssignments: vi.fn(),
+  updateRandomPairingParticipants: vi.fn(),
 }))
 
 vi.mock('../data/timetable', () => ({
@@ -346,6 +363,45 @@ const disabledAdminHorseRacingState: AdminHorseRacingState = {
   updatedAt: null,
 }
 
+const randomPairingAction: AdminRandomPairingAction = {
+  id: 'random-action-1',
+  festivalId: 'hurricane-awards-2026',
+  name: 'Getraenk holen',
+  status: 'draft',
+  selectedParticipantIds: ['alice', 'bob'],
+  assignments: [],
+  createdAt: '2026-07-08T11:00:00.000Z',
+  drawnAt: null,
+}
+
+const drawnRandomPairingAction: AdminRandomPairingAction = {
+  ...randomPairingAction,
+  status: 'drawn',
+  assignments: [
+    {
+      participantId: 'alice',
+      participantName: 'Alice',
+      assignedParticipantId: 'bob',
+      assignedParticipantName: 'Bob',
+    },
+    {
+      participantId: 'bob',
+      participantName: 'Bob',
+      assignedParticipantId: 'alice',
+      assignedParticipantName: 'Alice',
+    },
+  ],
+  drawnAt: '2026-07-08T12:00:00.000Z',
+}
+
+const randomPairingAssignment: RandomPairingParticipantAssignment = {
+  actionId: 'random-action-1',
+  actionName: 'Getraenk holen',
+  assignedParticipantId: 'bob',
+  assignedParticipantName: 'Bob',
+  drawnAt: '2026-07-08T12:00:00.000Z',
+}
+
 const emptyTimetable: Timetable = {
   festivalDays: [],
   stages: [],
@@ -459,6 +515,8 @@ function mockLoadedData({
   loadedHorseRacingState = disabledHorseRacingState,
   loadedAdminHorseRacingState = disabledAdminHorseRacingState,
   loadedAdminHorseRacingBets = [],
+  loadedRandomPairingAssignments = [],
+  loadedAdminRandomPairingActions = [],
   loadedTimetable = emptyTimetable,
   loadedAdminFestivalDays = loadedTimetable.festivalDays,
   loadedAdminTimetableStages = loadedTimetable.stages,
@@ -485,6 +543,8 @@ function mockLoadedData({
   loadedHorseRacingState?: HorseRacingState | null
   loadedAdminHorseRacingState?: AdminHorseRacingState | null
   loadedAdminHorseRacingBets?: Awaited<ReturnType<typeof loadAdminHorseRacingBets>>
+  loadedRandomPairingAssignments?: RandomPairingParticipantAssignment[]
+  loadedAdminRandomPairingActions?: AdminRandomPairingAction[]
   loadedTimetable?: Timetable
   loadedAdminFestivalDays?: FestivalDay[]
   loadedAdminTimetableStages?: TimetableStage[]
@@ -566,6 +626,37 @@ function mockLoadedData({
       bettingStatus: input.isEnabled ? input.bettingStatus : 'closed',
     }),
   )
+  vi.mocked(loadRandomPairingAssignments).mockResolvedValue(
+    loadedRandomPairingAssignments,
+  )
+  vi.mocked(loadAdminRandomPairingActions).mockResolvedValue(
+    loadedAdminRandomPairingActions,
+  )
+  vi.mocked(createRandomPairingAction).mockImplementation(
+    async (_festivalId, actionName) => ({
+      ...randomPairingAction,
+      id: 'created-random-action',
+      name: actionName,
+      selectedParticipantIds: [],
+    }),
+  )
+  vi.mocked(updateRandomPairingParticipants).mockImplementation(
+    async (actionId, participantIds) => ({
+      ...(loadedAdminRandomPairingActions.find(
+        (action) => action.id === actionId,
+      ) ?? randomPairingAction),
+      id: actionId,
+      selectedParticipantIds: participantIds,
+    }),
+  )
+  vi.mocked(drawRandomPairingAction).mockImplementation(async (actionId) => ({
+    ...(loadedAdminRandomPairingActions.find((action) => action.id === actionId) ??
+      drawnRandomPairingAction),
+    id: actionId,
+    status: 'drawn',
+    assignments: drawnRandomPairingAction.assignments,
+    drawnAt: drawnRandomPairingAction.drawnAt,
+  }))
   vi.mocked(loadTimetable).mockResolvedValue(loadedTimetable)
   vi.mocked(loadAdminFestivalDays).mockResolvedValue(loadedAdminFestivalDays)
   vi.mocked(loadAdminTimetableStages).mockResolvedValue(loadedAdminTimetableStages)
@@ -1465,12 +1556,14 @@ describe('Login', () => {
       name: /^profil/i,
     })
 
-    expect(awardsTile).toHaveTextContent(/2/)
-    expect(awardsTile).toHaveTextContent(/gesamtclassement/i)
-    expect(timetableTile).toHaveTextContent(/1/)
-    expect(gamesTile).toHaveTextContent(/bingo/i)
-    expect(infoTile).toHaveTextContent(/4/)
-    expect(votingTile).toHaveTextContent(/1/)
+    await waitFor(() => {
+      expect(awardsTile).toHaveTextContent(/2/)
+      expect(awardsTile).toHaveTextContent(/gesamtclassement/i)
+      expect(timetableTile).toHaveTextContent(/1/)
+      expect(gamesTile).toHaveTextContent(/bingo/i)
+      expect(infoTile).toHaveTextContent(/4/)
+      expect(votingTile).toHaveTextContent(/1/)
+    })
     expect(profileTile).toHaveTextContent(/alice/i)
     expect(
       within(dashboardSection).getByRole('img', { name: 'Alice: Camp Sunrise' }),
@@ -1867,6 +1960,46 @@ describe('Login', () => {
     ).toBeDisabled()
     expect(screen.getByRole('button', { name: /herz/i })).toBeDisabled()
     expect(saveHorseRacingBet).not.toHaveBeenCalled()
+  })
+
+  it('zeigt Teilnehmenden nur die eigene zufaellige Zuordnung', async () => {
+    mockLoadedData({
+      loadedRandomPairingAssignments: [randomPairingAssignment],
+    })
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^spiele$/i)
+
+    await userEvent.click(
+      within(screen.getByRole('navigation', { name: /spielauswahl/i }))
+        .getByRole('button', { name: /^zuordnungen$/i }),
+    )
+
+    expect(
+      screen.getByRole('heading', { name: /dein secret buddy/i }),
+    ).toBeVisible()
+    expect(screen.getByText('Getraenk holen')).toBeVisible()
+    expect(screen.getByText('Bob')).toBeVisible()
+    expect(screen.queryByText('Carla')).not.toBeInTheDocument()
+    expect(loadRandomPairingAssignments).toHaveBeenCalledWith(
+      'hurricane-awards-2026',
+      { participantAccessCode: 'ALICE42' },
+    )
+  })
+
+  it('zeigt einen Hinweis, wenn keine zufaellige Zuordnung existiert', async () => {
+    await renderLoadedApp()
+    await loginWith('ALICE42')
+    await switchMainSection(/^spiele$/i)
+
+    await userEvent.click(
+      within(screen.getByRole('navigation', { name: /spielauswahl/i }))
+        .getByRole('button', { name: /^zuordnungen$/i }),
+    )
+
+    expect(
+      screen.getByText(/keine zuordnung fuer dich/i),
+    ).toBeVisible()
   })
 
   it('laedt die Timetable Basisdaten und zeigt einen leeren vorbereiteten Bereich', async () => {
@@ -3826,6 +3959,65 @@ describe('Admin', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /abstimmung/i })).toBeVisible()
     })
+  })
+
+  it('verwaltet zufaellige Paarungen im Adminbereich Spiele', async () => {
+    mockLoadedData({
+      loadedAdminRandomPairingActions: [randomPairingAction],
+    })
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+
+    await user.click(screen.getByRole('button', { name: /^admin$/i }))
+    await switchAdminSection(/^spiele$/i)
+
+    const pairingsSection = sectionForHeading(/zufällige paarungen/i)
+
+    await user.type(
+      within(pairingsSection).getByRole('textbox', { name: /aktionsname/i }),
+      'Bar-Team',
+    )
+    await user.click(
+      within(pairingsSection).getByRole('button', { name: /aktion anlegen/i }),
+    )
+
+    expect(createRandomPairingAction).toHaveBeenCalledWith(
+      'hurricane-awards-2026',
+      'Bar-Team',
+      { participantAccessCode: 'ALICE42' },
+    )
+
+    const existingAction = within(pairingsSection)
+      .getByRole('heading', { name: /getraenk holen/i })
+      .closest('article')
+
+    expect(existingAction).not.toBeNull()
+
+    const existingActionView = within(existingAction as HTMLElement)
+    const carlaCheckbox = existingActionView.getByLabelText(/carla/i)
+
+    await user.click(carlaCheckbox)
+
+    expect(updateRandomPairingParticipants).toHaveBeenCalledWith(
+      'random-action-1',
+      ['alice', 'bob', 'carla'],
+      { participantAccessCode: 'ALICE42' },
+    )
+
+    await user.click(
+      existingActionView.getByRole('button', { name: /auslosung starten/i }),
+    )
+
+    expect(drawRandomPairingAction).toHaveBeenCalledWith(
+      'random-action-1',
+      false,
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(
+      await within(pairingsSection).findByText(/paarungen ausgelost/i),
+    ).toBeVisible()
+    expect(within(pairingsSection).getAllByText('Alice').length).toBeGreaterThan(0)
+    expect(within(pairingsSection).getAllByText('Bob').length).toBeGreaterThan(0)
   })
 
   it('verwaltet Festivaldokumente im Adminbereich Infos', async () => {

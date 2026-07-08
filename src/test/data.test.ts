@@ -95,6 +95,13 @@ import {
   updateAdminHorseRacingState,
 } from '../data/horseRacing'
 import {
+  createRandomPairingAction,
+  drawRandomPairingAction,
+  loadAdminRandomPairingActions,
+  loadRandomPairingAssignments,
+  updateRandomPairingParticipants,
+} from '../data/randomPairings'
+import {
   addTimetableFavorite,
   createFestivalDay,
   createTimetableAct,
@@ -879,6 +886,169 @@ describe('Supabase Datenzugriffe', () => {
       {
         ...expectedParticipantRpcContext,
         p_festival_id: 'hurricane-awards-2026',
+      },
+    )
+  })
+
+  it('laedt eigene zufaellige Paarungen fuer Teilnehmende', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          action_id: 'action-1',
+          action_name: 'Getraenk holen',
+          assigned_participant_id: 'bob',
+          assigned_participant_name: 'Bob',
+          drawn_at: '2026-07-08T12:00:00.000Z',
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      loadRandomPairingAssignments('hurricane-awards-2026', participantContext),
+    ).resolves.toEqual([
+      {
+        actionId: 'action-1',
+        actionName: 'Getraenk holen',
+        assignedParticipantId: 'bob',
+        assignedParticipantName: 'Bob',
+        drawnAt: '2026-07-08T12:00:00.000Z',
+      },
+    ])
+    expect(rpcMock).toHaveBeenCalledWith('ha_list_random_pairing_assignments', {
+      ...expectedParticipantRpcContext,
+      p_festival_id: 'hurricane-awards-2026',
+    })
+  })
+
+  it('verwaltet zufaellige Paarungen ueber Admin RPCs', async () => {
+    const actionRow = {
+      id: 'action-1',
+      festival_id: 'hurricane-awards-2026',
+      name: 'Getraenk holen',
+      status: 'draft',
+      selected_participant_ids: ['alice', 'bob'],
+      assignments: [],
+      created_at: '2026-07-08T11:00:00.000Z',
+      drawn_at: null,
+    }
+
+    rpcMock.mockResolvedValueOnce({
+      data: [actionRow],
+      error: null,
+    })
+
+    await expect(
+      loadAdminRandomPairingActions('hurricane-awards-2026', participantContext),
+    ).resolves.toEqual([
+      {
+        id: 'action-1',
+        festivalId: 'hurricane-awards-2026',
+        name: 'Getraenk holen',
+        status: 'draft',
+        selectedParticipantIds: ['alice', 'bob'],
+        assignments: [],
+        createdAt: '2026-07-08T11:00:00.000Z',
+        drawnAt: null,
+      },
+    ])
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      1,
+      'ha_admin_list_random_pairing_actions',
+      {
+        ...expectedParticipantRpcContext,
+        p_festival_id: 'hurricane-awards-2026',
+      },
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: [{ ...actionRow, selected_participant_ids: [] }],
+      error: null,
+    })
+
+    await expect(
+      createRandomPairingAction(
+        'hurricane-awards-2026',
+        ' Getraenk holen ',
+        participantContext,
+      ),
+    ).resolves.toMatchObject({
+      id: 'action-1',
+      name: 'Getraenk holen',
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      2,
+      'ha_admin_create_random_pairing_action',
+      {
+        ...expectedParticipantRpcContext,
+        p_festival_id: 'hurricane-awards-2026',
+        p_name: 'Getraenk holen',
+      },
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: [actionRow],
+      error: null,
+    })
+
+    await expect(
+      updateRandomPairingParticipants(
+        'action-1',
+        ['alice', 'bob'],
+        participantContext,
+      ),
+    ).resolves.toMatchObject({
+      selectedParticipantIds: ['alice', 'bob'],
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      3,
+      'ha_admin_set_random_pairing_participants',
+      {
+        ...expectedParticipantRpcContext,
+        p_action_id: 'action-1',
+        p_participant_ids: ['alice', 'bob'],
+      },
+    )
+
+    rpcMock.mockResolvedValueOnce({
+      data: [
+        {
+          ...actionRow,
+          status: 'drawn',
+          drawn_at: '2026-07-08T12:00:00.000Z',
+          assignments: [
+            {
+              participant_id: 'alice',
+              participant_name: 'Alice',
+              assigned_participant_id: 'bob',
+              assigned_participant_name: 'Bob',
+            },
+          ],
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      drawRandomPairingAction('action-1', false, participantContext),
+    ).resolves.toMatchObject({
+      status: 'drawn',
+      assignments: [
+        {
+          participantId: 'alice',
+          participantName: 'Alice',
+          assignedParticipantId: 'bob',
+          assignedParticipantName: 'Bob',
+        },
+      ],
+    })
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      4,
+      'ha_admin_draw_random_pairing_action',
+      {
+        ...expectedParticipantRpcContext,
+        p_action_id: 'action-1',
+        p_replace_existing: false,
       },
     )
   })
