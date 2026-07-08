@@ -155,6 +155,7 @@
         "status": {
           "bingo": "Bingo is beschikbaar.",
           "horseRacing": "Paardenrennen is open.",
+          "randomPairings": "{{count}} koppeling beschikbaar.",
           "empty": "Er is momenteel geen spel actief."
         },
         "detail": "Naar spellen"
@@ -488,6 +489,30 @@
         "save": "Paardenrennen kon net niet worden bijgewerkt."
       }
     },
+    "randomPairings": {
+      "eyebrow": "Spellen",
+      "title": "Willekeurige koppelingen",
+      "loading": "Acties worden geladen...",
+      "empty": "Er zijn nog geen acties aangemaakt.",
+      "nameLabel": "Actienaam",
+      "create": "Actie aanmaken",
+      "draw": "Loting starten",
+      "redraw": "Opnieuw loten",
+      "confirmRedraw": "Deze actie is al geloot. Echt opnieuw loten en bestaande koppelingen vervangen?",
+      "participantsLabel": "Deelnemerselectie voor {{name}}",
+      "resultsTitle": "Resultaat",
+      "status": {
+        "draft": "{{count}} personen geselecteerd.",
+        "drawn": "{{count}} koppelingen geloot."
+      },
+      "errors": {
+        "load": "De acties konden net niet worden geladen.",
+        "create": "De actie kon net niet worden aangemaakt.",
+        "nameRequired": "De actienaam is verplicht.",
+        "participants": "De deelnemerselectie kon net niet worden opgeslagen.",
+        "draw": "De loting kon net niet worden gestart. Er moeten minstens twee actieve personen geselecteerd zijn."
+      }
+    },
     "festival": {
       "eyebrow": "Admin",
       "title": "Festival",
@@ -615,6 +640,17 @@
       "save": "Je weddenschap kon net niet worden opgeslagen."
     }
   },
+  "randomPairings": {
+    "eyebrow": "Acties",
+    "title": "Jouw koppelingen",
+    "description": "Hier zie je uitsluitend je eigen koppeling per gelote actie.",
+    "loading": "Koppelingen worden geladen...",
+    "empty": "Er is momenteel geen koppeling voor jou.",
+    "assignedTo": "Jij bent gekoppeld aan",
+    "errors": {
+      "load": "Je koppelingen konden net niet worden geladen."
+    }
+  },
   "games": {
     "eyebrow": "Spellen",
     "title": "Spellen",
@@ -622,6 +658,7 @@
     "navigationLabel": "Spelkeuze",
     "bingo": "Bingo",
     "horseRacing": "Paardenrennen",
+    "randomPairings": "Koppelingen",
     "empty": "Er is momenteel geen spel actief."
   },
   "timetable": {

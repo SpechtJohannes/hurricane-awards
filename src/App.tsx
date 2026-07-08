@@ -97,6 +97,15 @@ import {
   type HorseRacingSuit,
 } from './data/horseRacing'
 import {
+  createRandomPairingAction,
+  drawRandomPairingAction,
+  loadAdminRandomPairingActions,
+  loadRandomPairingAssignments,
+  updateRandomPairingParticipants,
+  type AdminRandomPairingAction,
+  type RandomPairingParticipantAssignment,
+} from './data/randomPairings'
+import {
   addTimetableFavorite,
   createFestivalDay,
   createTimetableAct,
@@ -144,12 +153,14 @@ import { AdminCategories } from './components/AdminCategories'
 import { AdminFestivalDocuments } from './components/AdminFestivalDocuments'
 import { AdminBingo } from './components/AdminBingo'
 import { AdminHorseRacing } from './components/AdminHorseRacing'
+import { AdminRandomPairings } from './components/AdminRandomPairings'
 import { AdminTimetableActs } from './components/AdminTimetableActs'
 import { AdminTimetableDays } from './components/AdminTimetableDays'
 import { AdminTimetablePerformances } from './components/AdminTimetablePerformances'
 import { AdminTimetableStages } from './components/AdminTimetableStages'
 import { Bingo } from './components/Bingo'
 import { HorseRacing } from './components/HorseRacing'
+import { RandomPairings } from './components/RandomPairings'
 import { FestivalInfo } from './components/FestivalInfo'
 import { Avatar, ParticipantName } from './components/Avatar'
 import { SectionHeader } from './components/SectionHeader'
@@ -270,7 +281,7 @@ type AdminSection =
   | 'games'
   | 'info'
   | 'archive'
-type GameSection = 'bingo' | 'horseRacing'
+type GameSection = 'bingo' | 'horseRacing' | 'randomPairings'
 
 type ResultCardProps = {
   category: Category
@@ -1433,6 +1444,10 @@ function App() {
   const [horseRacingError, setHorseRacingError] = useState('')
   const [savingHorseRacingSuit, setSavingHorseRacingSuit] =
     useState<HorseRacingSuit | null>(null)
+  const [randomPairingAssignments, setRandomPairingAssignments] = useState<
+    RandomPairingParticipantAssignment[]
+  >([])
+  const [randomPairingsError, setRandomPairingsError] = useState('')
   const [timetable, setTimetable] = useState<Timetable | null>(null)
   const [timetableError, setTimetableError] = useState('')
   const [isLoadingTimetable, setIsLoadingTimetable] = useState(
@@ -1492,6 +1507,16 @@ function App() {
     useState(false)
   const [isSavingHorseRacingState, setIsSavingHorseRacingState] =
     useState(false)
+  const [adminRandomPairingActions, setAdminRandomPairingActions] = useState<
+    AdminRandomPairingAction[]
+  >([])
+  const [adminRandomPairingsError, setAdminRandomPairingsError] = useState('')
+  const [isLoadingAdminRandomPairings, setIsLoadingAdminRandomPairings] =
+    useState(false)
+  const [isCreatingRandomPairingAction, setIsCreatingRandomPairingAction] =
+    useState(false)
+  const [savingRandomPairingActionId, setSavingRandomPairingActionId] =
+    useState<string | null>(null)
   const [adminFestivalDocumentsError, setAdminFestivalDocumentsError] =
     useState('')
   const [isLoadingAdminFestivalDocuments, setIsLoadingAdminFestivalDocuments] =
@@ -1644,6 +1669,7 @@ function App() {
       setFestivalDocumentsError('')
       setBingoError('')
       setHorseRacingError('')
+      setRandomPairingsError('')
       setTimetableError('')
 
       try {
@@ -1656,6 +1682,7 @@ function App() {
           loadedMusicPlaylist,
           loadedBingoCard,
           loadedHorseRacingState,
+          loadedRandomPairingAssignments,
           loadedTimetable,
           loadedStandingsResult,
         ] = await Promise.all([
@@ -1667,6 +1694,7 @@ function App() {
           loadMusicPlaylist(accessContext),
           loadOrCreateBingoCard(accessContext),
           loadHorseRacingState(activeFestival.id, accessContext),
+          loadRandomPairingAssignments(activeFestival.id, accessContext),
           loadTimetable(accessContext),
           loadAllTimeStandings(accessContext).then(
             (loadedStandings) =>
@@ -1690,6 +1718,7 @@ function App() {
           setMusicPlaylist(loadedMusicPlaylist)
           setBingoCard(loadedBingoCard)
           setHorseRacingState(loadedHorseRacingState)
+          setRandomPairingAssignments(loadedRandomPairingAssignments)
           setTimetable(loadedTimetable)
           setCampLocationOpenError('')
 
@@ -1713,6 +1742,7 @@ function App() {
           setFestivalDocumentsError(i18n.t('info.errors.load'))
           setBingoError(i18n.t('bingo.errors.load'))
           setHorseRacingError(i18n.t('horseRacing.errors.load'))
+          setRandomPairingsError(i18n.t('randomPairings.errors.load'))
           setTimetableError(i18n.t('timetable.errors.load'))
         }
       } finally {
@@ -1824,7 +1854,11 @@ function App() {
       title: t('dashboard.tiles.games.title'),
       description: t('dashboard.tiles.games.description'),
       status:
-        horseRacingState?.isEnabled && horseRacingState.bettingStatus === 'open'
+        randomPairingAssignments.length > 0
+          ? t('dashboard.tiles.games.status.randomPairings', {
+              count: randomPairingAssignments.length,
+            })
+          : horseRacingState?.isEnabled && horseRacingState.bettingStatus === 'open'
           ? t('dashboard.tiles.games.status.horseRacing')
           : bingoCard
             ? t('dashboard.tiles.games.status.bingo')
@@ -1983,6 +2017,11 @@ function App() {
     setIsSavingMusicPlaylist(false)
     setBingoCard(null)
     setBingoError('')
+    setHorseRacingState(null)
+    setHorseRacingError('')
+    setSavingHorseRacingSuit(null)
+    setRandomPairingAssignments([])
+    setRandomPairingsError('')
     setTimetable(null)
     setTimetableError('')
     setIsLoadingTimetable(false)
@@ -2010,6 +2049,16 @@ function App() {
     setAdminBingoError('')
     setIsLoadingAdminBingo(false)
     setIsSavingBingoRound(false)
+    setAdminHorseRacingState(null)
+    setAdminHorseRacingBets([])
+    setAdminHorseRacingError('')
+    setIsLoadingAdminHorseRacing(false)
+    setIsSavingHorseRacingState(false)
+    setAdminRandomPairingActions([])
+    setAdminRandomPairingsError('')
+    setIsLoadingAdminRandomPairings(false)
+    setIsCreatingRandomPairingAction(false)
+    setSavingRandomPairingActionId(null)
     setAdminFestivalDocumentsError('')
     setIsLoadingAdminFestivalDocuments(false)
     setUploadingDocumentType(null)
@@ -2104,6 +2153,7 @@ function App() {
         void reloadAdminFestivalDocuments()
         void reloadAdminBingoRound()
         void reloadAdminHorseRacing()
+        void reloadAdminRandomPairings()
 
         window.setTimeout(() => {
           document.getElementById('admin')?.scrollIntoView({ behavior: 'smooth' })
@@ -2514,6 +2564,30 @@ function App() {
       setAdminHorseRacingError(t('admin.horseRacing.errors.load'))
     } finally {
       setIsLoadingAdminHorseRacing(false)
+    }
+  }
+
+  async function reloadAdminRandomPairings() {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsLoadingAdminRandomPairings(true)
+    setAdminRandomPairingsError('')
+
+    try {
+      const loadedActions = await loadAdminRandomPairingActions(
+        activeFestival.id,
+        adminContext,
+      )
+
+      setAdminRandomPairingActions(loadedActions)
+    } catch {
+      setAdminRandomPairingsError(t('admin.randomPairings.errors.load'))
+    } finally {
+      setIsLoadingAdminRandomPairings(false)
     }
   }
 
@@ -3566,6 +3640,103 @@ function App() {
     }
   }
 
+  function replaceAdminRandomPairingAction(action: AdminRandomPairingAction) {
+    setAdminRandomPairingActions((currentActions) => {
+      const existingIndex = currentActions.findIndex(
+        (currentAction) => currentAction.id === action.id,
+      )
+
+      if (existingIndex === -1) {
+        return [action, ...currentActions]
+      }
+
+      return currentActions.map((currentAction) =>
+        currentAction.id === action.id ? action : currentAction,
+      )
+    })
+  }
+
+  async function createAdminRandomPairingAction(name: string) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setIsCreatingRandomPairingAction(true)
+    setAdminRandomPairingsError('')
+
+    try {
+      const createdAction = await createRandomPairingAction(
+        activeFestival.id,
+        name,
+        adminContext,
+      )
+
+      replaceAdminRandomPairingAction(createdAction)
+    } finally {
+      setIsCreatingRandomPairingAction(false)
+    }
+  }
+
+  async function updateAdminRandomPairingParticipants(
+    actionId: string,
+    participantIds: string[],
+  ) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setSavingRandomPairingActionId(actionId)
+    setAdminRandomPairingsError('')
+
+    try {
+      const updatedAction = await updateRandomPairingParticipants(
+        actionId,
+        participantIds,
+        adminContext,
+      )
+
+      replaceAdminRandomPairingAction(updatedAction)
+    } finally {
+      setSavingRandomPairingActionId(null)
+    }
+  }
+
+  async function drawAdminRandomPairingAction(
+    actionId: string,
+    replaceExisting: boolean,
+  ) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) {
+      return
+    }
+
+    setSavingRandomPairingActionId(actionId)
+    setAdminRandomPairingsError('')
+
+    try {
+      const drawnAction = await drawRandomPairingAction(
+        actionId,
+        replaceExisting,
+        adminContext,
+      )
+      const loadedAssignments = await loadRandomPairingAssignments(
+        activeFestival.id,
+        adminContext,
+      )
+
+      replaceAdminRandomPairingAction(drawnAction)
+      setRandomPairingAssignments(loadedAssignments)
+      setRandomPairingsError('')
+    } finally {
+      setSavingRandomPairingActionId(null)
+    }
+  }
+
   async function toggleBingoNumber(number: number) {
     if (!selectedParticipant || !bingoCard) {
       return
@@ -3969,6 +4140,17 @@ function App() {
                 isSaving={isSavingHorseRacingState}
                 onUpdate={updateHorseRacingAdminState}
               />
+              <AdminRandomPairings
+                actions={adminRandomPairingActions}
+                participants={adminParticipants}
+                error={adminRandomPairingsError}
+                isLoading={isLoadingAdminRandomPairings}
+                savingActionId={savingRandomPairingActionId}
+                isCreating={isCreatingRandomPairingAction}
+                onCreate={createAdminRandomPairingAction}
+                onUpdateParticipants={updateAdminRandomPairingParticipants}
+                onDraw={drawAdminRandomPairingAction}
+              />
             </>
           ) : null}
 
@@ -4217,6 +4399,18 @@ function App() {
             >
               {t('games.horseRacing')}
             </button>
+            <button
+              className={`games__tab${
+                activeGameSection === 'randomPairings' ? ' is-active' : ''
+              }`}
+              type="button"
+              aria-current={
+                activeGameSection === 'randomPairings' ? 'page' : undefined
+              }
+              onClick={() => setActiveGameSection('randomPairings')}
+            >
+              {t('games.randomPairings')}
+            </button>
           </nav>
 
           {activeGameSection === 'bingo' && bingoCard ? (
@@ -4238,6 +4432,14 @@ function App() {
               error={horseRacingError}
               isSaving={savingHorseRacingSuit !== null}
               onSelectSuit={selectHorseRacingSuit}
+            />
+          ) : null}
+
+          {activeGameSection === 'randomPairings' ? (
+            <RandomPairings
+              assignments={randomPairingAssignments}
+              error={randomPairingsError}
+              isLoading={isLoadingData}
             />
           ) : null}
         </section>

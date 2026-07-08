@@ -193,6 +193,13 @@ const horseRacingRpcFixMigration = readFileSync(
   ),
   'utf8',
 )
+const randomPairingsMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260708120000_create_random_pairings.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -1100,6 +1107,67 @@ describe('Supabase Sicherheitsmigration', () => {
     )
   })
 
+  it('legt zufaellige Paarungen mit geschuetzten Tabellen und zyklischer Auslosung an', () => {
+    for (const table of [
+      'random_pairing_actions',
+      'random_pairing_participants',
+      'random_pairing_assignments',
+    ]) {
+      expect(randomPairingsMigration).toContain(
+        `create table if not exists public.${table}`,
+      )
+      expect(randomPairingsMigration).toContain(
+        `alter table public.${table} enable row level security`,
+      )
+      expect(randomPairingsMigration).toContain(
+        `revoke all on table public.${table} from anon, authenticated`,
+      )
+    }
+
+    expect(randomPairingsMigration).toContain('festival_id text not null')
+    expect(randomPairingsMigration).toContain(
+      'primary key (action_id, participant_id)',
+    )
+    expect(randomPairingsMigration).toContain(
+      'constraint random_pairing_assignments_no_self',
+    )
+    expect(randomPairingsMigration).toContain(
+      'check (participant_id <> assigned_participant_id)',
+    )
+    expect(randomPairingsMigration).toContain(
+      'if not public.ha_has_admin_access(p_participant_access_code) then',
+    )
+    expect(randomPairingsMigration).toContain('and p.is_active = true')
+    expect(randomPairingsMigration).toContain('order by random()')
+    expect(randomPairingsMigration).toContain(
+      'when current_participant.position = current_participant.total_count then 1',
+    )
+    expect(randomPairingsMigration).toContain(
+      'random pairing action is already drawn',
+    )
+    expect(randomPairingsMigration).toContain(
+      'at least two participants are required',
+    )
+    expect(randomPairingsMigration).toContain(
+      'and rpas.participant_id = v_participant_id',
+    )
+
+    for (const functionName of [
+      'ha_admin_list_random_pairing_actions',
+      'ha_admin_create_random_pairing_action',
+      'ha_admin_set_random_pairing_participants',
+      'ha_admin_draw_random_pairing_action',
+      'ha_list_random_pairing_assignments',
+    ]) {
+      expect(randomPairingsMigration).toContain(
+        `create or replace function public.${functionName}`,
+      )
+      expect(randomPairingsMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      )
+    }
+  })
+
   it('legt die technische Timetable Basis mit getrennten Entitaeten an', () => {
     for (const table of [
       'festival_days',
@@ -1437,6 +1505,7 @@ describe('Supabase Sicherheitsmigration', () => {
       timetableStageColorsMigration,
       horseRacingMigration,
       horseRacingRpcFixMigration,
+      randomPairingsMigration,
     ].join('\n')
 
     expect(migrations).not.toContain('create table if not exists public.festivals')
