@@ -207,6 +207,20 @@ const tournamentsMigration = readFileSync(
   ),
   'utf8',
 )
+const tournamentCreateRpcSignatureFixMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260708140000_fix_tournament_create_rpc_signature.sql',
+  ),
+  'utf8',
+)
+const tournamentModeColumnMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260708150000_add_tournament_mode_column.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
@@ -1248,6 +1262,79 @@ describe('Supabase Sicherheitsmigration', () => {
         `grant execute on function public.${functionName}`,
       )
     }
+  })
+
+  it('korrigiert die Turnier-Anlegen-RPC Signatur fuer den Supabase Schema Cache', () => {
+    expect(tournamentCreateRpcSignatureFixMigration).toContain(
+      'drop function if exists public.ha_admin_create_tournament(text, text, text, text[])',
+    )
+    expect(tournamentCreateRpcSignatureFixMigration).toContain(
+      'drop function if exists public.ha_admin_create_tournament(text, text, text, text, text[])',
+    )
+    expect(tournamentCreateRpcSignatureFixMigration).toContain(
+      'create or replace function public.ha_admin_create_tournament',
+    )
+    expect(tournamentCreateRpcSignatureFixMigration).toContain(
+      'p_mode text',
+    )
+    expect(tournamentCreateRpcSignatureFixMigration).toContain(
+      'p_name text',
+    )
+    expect(tournamentCreateRpcSignatureFixMigration).toContain(
+      'if not public.ha_has_admin_access(p_participant_access_code)',
+    )
+    expect(tournamentCreateRpcSignatureFixMigration).toContain(
+      'mode,',
+    )
+    expect(tournamentCreateRpcSignatureFixMigration).toContain(
+      'p_mode,',
+    )
+    expect(tournamentCreateRpcSignatureFixMigration).toContain(
+      'grant execute on function public.ha_admin_create_tournament(text, text, text, text, text[])',
+    )
+    expect(tournamentCreateRpcSignatureFixMigration).toContain(
+      'to anon, authenticated',
+    )
+    expect(tournamentCreateRpcSignatureFixMigration).toContain(
+      "notify pgrst, 'reload schema'",
+    )
+  })
+
+  it('ruestet die Turniermodus-Spalte fuer bestehende Datenbanken nach', () => {
+    expect(tournamentModeColumnMigration).toContain(
+      'alter table public.tournaments',
+    )
+    expect(tournamentModeColumnMigration).toContain(
+      'add column if not exists mode text',
+    )
+    expect(tournamentModeColumnMigration).toContain("set mode = 'ko'")
+    expect(tournamentModeColumnMigration).toContain(
+      "alter column mode set default 'ko'",
+    )
+    expect(tournamentModeColumnMigration).toContain(
+      'alter column mode set not null',
+    )
+    expect(tournamentModeColumnMigration).toContain(
+      'drop constraint if exists tournaments_mode_check',
+    )
+    expect(tournamentModeColumnMigration).toContain(
+      "check (mode in ('ko', 'knockout', 'qualification_knockout'))",
+    )
+    expect(tournamentModeColumnMigration).toContain(
+      "if p_mode not in ('ko', 'knockout', 'qualification_knockout')",
+    )
+    expect(tournamentModeColumnMigration).toContain(
+      "when p_mode in ('ko', 'knockout')",
+    )
+    expect(tournamentModeColumnMigration).toContain(
+      'grant execute on function public.ha_admin_create_tournament(text, text, text, text, text[])',
+    )
+    expect(tournamentModeColumnMigration).toContain(
+      'grant execute on function public.ha_admin_update_tournament(text, uuid, text, text, text[])',
+    )
+    expect(tournamentModeColumnMigration).toContain(
+      "notify pgrst, 'reload schema'",
+    )
   })
 
   it('legt die technische Timetable Basis mit getrennten Entitaeten an', () => {

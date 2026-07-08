@@ -369,7 +369,7 @@ Wichtigste Spalten:
 - `id`: Turnier-ID.
 - `festival_id`: Technischer Festivalbezug.
 - `name`: Anzeigename des Turniers.
-- `mode`: Turniermodus, aktuell wird `knockout` in der UI verwendet.
+- `mode`: Turniermodus. Bestehende Datenbanken werden mit dem Legacy-Default `ko` nachgeruestet; die UI verwendet aktuell `knockout`.
 - `status`: Sichtbarkeits-/Arbeitsstatus, aktuell `draft` oder `active`.
 - `selected_participant_ids`: Ausgewaehlte aktive Teilnehmende in Setzreihenfolge.
 - `draw_participant_ids`: Einmalig zufaellig ausgeloste Reihenfolge der Teilnehmenden.
@@ -384,6 +384,7 @@ Besonderheiten:
 - Direkte Browserzugriffe sind gesperrt.
 - Admin-RPCs validieren mindestens zwei aktive Teilnehmende.
 - Beim Anlegen wird `draw_participant_ids` serverseitig zufaellig erzeugt und gespeichert.
+- Die Nachruestmigration `20260708150000_add_tournament_mode_column.sql` fuegt `mode` fuer bereits bestehende `tournaments`-Tabellen per `add column if not exists` hinzu.
 - KO-Turniere erzeugen den KO-Baum sofort. Wenn die Teilnehmerzahl keine Zweierpotenz ist, werden Freilose ueber die gespeicherte Auslosung bestimmt und nicht als normale Begegnungen gespeichert.
 
 ## Beziehungen

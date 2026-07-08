@@ -6,7 +6,7 @@ import {
 } from './accessContext'
 
 export type TournamentStatus = 'draft' | 'active'
-export type TournamentMode = 'knockout' | 'qualification_knockout'
+export type TournamentMode = 'ko' | 'knockout' | 'qualification_knockout'
 
 export type TournamentBracketParticipant = {
   type: 'participant'
