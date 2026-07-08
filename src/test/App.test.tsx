@@ -1976,7 +1976,7 @@ describe('Login', () => {
     )
 
     expect(
-      screen.getByRole('heading', { name: /deine zuordnungen/i }),
+      screen.getByRole('heading', { name: /dein secret buddy/i }),
     ).toBeVisible()
     expect(screen.getByText('Getraenk holen')).toBeVisible()
     expect(screen.getByText('Bob')).toBeVisible()
