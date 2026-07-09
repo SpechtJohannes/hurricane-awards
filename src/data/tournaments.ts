@@ -23,7 +23,7 @@ export type TournamentBracketMatch = {
   id: string
   round: number
   position: number
-  status: 'scheduled'
+  status: 'scheduled' | 'completed'
   participantA: TournamentBracketSlot
   participantB: TournamentBracketSlot
   winnerParticipantId: string | null
@@ -396,4 +396,34 @@ export async function deleteTournament(
   if (error) {
     throw error
   }
+}
+
+export async function setTournamentMatchWinner(
+  tournamentId: string,
+  matchId: string,
+  winnerParticipantId: string,
+  context: AdminAccessContext,
+): Promise<Tournament> {
+  const supabase = getSupabase()
+  const { data, error } = await supabase.rpc(
+    'ha_admin_set_tournament_match_winner',
+    {
+      ...participantRpcParams(context),
+      p_tournament_id: tournamentId,
+      p_match_id: matchId,
+      p_winner_participant_id: winnerParticipantId,
+    },
+  )
+
+  if (error) {
+    throw error
+  }
+
+  const row = firstRow<TournamentRow>(data)
+
+  if (!row) {
+    throw new Error('tournament was not returned')
+  }
+
+  return mapTournament(row)
 }

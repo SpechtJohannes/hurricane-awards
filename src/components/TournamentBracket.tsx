@@ -9,56 +9,79 @@ import { ParticipantName } from './Avatar'
 
 type TournamentBracketProps = {
   tournament: Tournament
+  onSetWinner?: (matchId: string, winnerParticipantId: string) => Promise<void>
+  savingMatchId?: string | null
 }
 
-function winnerNamesByMatch(tournament: Tournament) {
-  const participantNames = new Map<string, string>()
-  const winners = new Map<string, string>()
+type ResolvedParticipant = { id: string; name: string }
+
+function resolveBracket(tournament: Tournament) {
+  const participants = new Map<string, ResolvedParticipant>()
+  const winners = new Map<string, ResolvedParticipant>()
+  const matchParticipants = new Map<string, ResolvedParticipant[]>()
 
   for (const round of tournament.bracket.rounds) {
     for (const match of round.matches) {
       for (const slot of [match.participantA, match.participantB]) {
         if (slot.participant) {
-          participantNames.set(
-            slot.participant.participantId,
-            slot.participant.participantName,
-          )
+          participants.set(slot.participant.participantId, {
+            id: slot.participant.participantId,
+            name: slot.participant.participantName,
+          })
         }
       }
+    }
+    for (const bye of round.byes ?? []) {
+      participants.set(bye.participantId, {
+        id: bye.participantId,
+        name: bye.participantName,
+      })
     }
   }
 
   for (const round of tournament.bracket.rounds) {
     for (const match of round.matches) {
-      if (match.winnerParticipantId) {
-        winners.set(
-          match.id,
-          participantNames.get(match.winnerParticipantId) ??
-            match.winnerParticipantId,
+      const resolved = [match.participantA, match.participantB]
+        .map((slot) =>
+          slot.participant
+            ? participants.get(slot.participant.participantId)
+            : winners.get(slot.sourceMatchId ?? ''),
         )
+        .filter((participant): participant is ResolvedParticipant =>
+          Boolean(participant),
+        )
+      matchParticipants.set(match.id, resolved)
+
+      if (match.winnerParticipantId) {
+        const winner = resolved.find(
+          (participant) => participant.id === match.winnerParticipantId,
+        )
+        if (winner) winners.set(match.id, winner)
       }
     }
   }
 
-  return winners
+  return { winners, matchParticipants }
 }
 
 function slotLabel(
   slot: TournamentBracketSlot,
-  winners: Map<string, string>,
+  winners: Map<string, ResolvedParticipant>,
   openLabel: string,
 ) {
   if (slot.participant) {
     return {
       text: slot.participant.participantName,
       isOpen: false,
+      participantId: slot.participant.participantId,
     }
   }
 
   if (slot.sourceMatchId) {
     return {
-      text: winners.get(slot.sourceMatchId) ?? openLabel,
+      text: winners.get(slot.sourceMatchId)?.name ?? openLabel,
       isOpen: !winners.has(slot.sourceMatchId),
+      participantId: winners.get(slot.sourceMatchId)?.id,
     }
   }
 
@@ -73,7 +96,7 @@ function MatchSlot({
 }: {
   match: TournamentBracketMatch
   slot: TournamentBracketSlot
-  winners: Map<string, string>
+  winners: Map<string, ResolvedParticipant>
   openLabel: string
 }) {
   const label = slotLabel(slot, winners, openLabel)
@@ -82,11 +105,7 @@ function MatchSlot({
     return null
   }
 
-  const isWinner =
-    slot.participant?.participantId === match.winnerParticipantId ||
-    (slot.sourceMatchId
-      ? winners.get(slot.sourceMatchId) === label.text
-      : false)
+  const isWinner = label.participantId === match.winnerParticipantId
 
   return (
     <div className={`tournament-match__slot${isWinner ? ' is-winner' : ''}`}>
@@ -126,10 +145,19 @@ function roundLabel(
   })
 }
 
-export function TournamentBracket({ tournament }: TournamentBracketProps) {
+export function TournamentBracket({
+  tournament,
+  onSetWinner,
+  savingMatchId,
+}: TournamentBracketProps) {
   const { t } = useTranslation()
-  const winners = useMemo(() => winnerNamesByMatch(tournament), [tournament])
+  const { winners, matchParticipants } = useMemo(
+    () => resolveBracket(tournament),
+    [tournament],
+  )
   const openLabel = t('tournaments.bracket.openSlot')
+  const finalMatch = tournament.bracket.rounds.at(-1)?.matches[0]
+  const champion = finalMatch ? winners.get(finalMatch.id) : undefined
 
   if (tournament.bracket.rounds.length === 0) {
     return (
@@ -170,7 +198,12 @@ export function TournamentBracket({ tournament }: TournamentBracketProps) {
                   )
                 })
                 .map((match) => (
-                  <article className="tournament-match" key={match.id}>
+                  <article
+                    className={`tournament-match${
+                      match.winnerParticipantId ? ' is-completed' : ''
+                    }`}
+                    key={match.id}
+                  >
                     <p className="tournament-match__label">
                       {t('tournaments.bracket.match', {
                         position: match.position,
@@ -188,12 +221,45 @@ export function TournamentBracket({ tournament }: TournamentBracketProps) {
                       winners={winners}
                       openLabel={openLabel}
                     />
+                    {onSetWinner &&
+                    matchParticipants.get(match.id)?.length === 2 ? (
+                      <label className="tournament-match__winner">
+                        <span>{t('admin.tournaments.winnerLabel')}</span>
+                        <select
+                          aria-label={t('admin.tournaments.winnerForMatch', {
+                            match: match.position,
+                            round: roundLabel(round, tournament, t),
+                          })}
+                          value={match.winnerParticipantId ?? ''}
+                          disabled={savingMatchId !== null}
+                          onChange={(event) => {
+                            if (event.target.value) {
+                              void onSetWinner(match.id, event.target.value)
+                            }
+                          }}
+                        >
+                          <option value="">
+                            {t('admin.tournaments.selectWinner')}
+                          </option>
+                          {matchParticipants.get(match.id)?.map((participant) => (
+                            <option value={participant.id} key={participant.id}>
+                              {participant.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    ) : null}
                   </article>
                 ))}
             </div>
           </section>
         ))}
       </div>
+      {champion ? (
+        <p className="tournament-bracket__champion" role="status">
+          {t('tournaments.bracket.champion', { name: champion.name })}
+        </p>
+      ) : null}
     </div>
   )
 }

@@ -206,7 +206,7 @@ const tournamentsMigration = readFileSync(
     'supabase/migrations/20260708130000_create_tournaments.sql',
   ),
   'utf8',
-)
+).replaceAll('\r\n', '\n')
 const tournamentCreateRpcSignatureFixMigration = readFileSync(
   resolve(
     process.cwd(),
@@ -234,16 +234,44 @@ const tournamentCreateReturnShapeFixMigration = readFileSync(
     'supabase/migrations/20260708170000_fix_tournament_create_return_shape.sql',
   ),
   'utf8',
-)
+).replaceAll('\r\n', '\n')
 const tournamentUpdateReturnShapeFixMigration = readFileSync(
   resolve(
     process.cwd(),
     'supabase/migrations/20260708180000_fix_tournament_update_return_shape.sql',
   ),
   'utf8',
+).replaceAll('\r\n', '\n')
+const tournamentResultsMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260709100000_manage_tournament_results.sql',
+  ),
+  'utf8',
 )
 
 describe('Supabase Sicherheitsmigration', () => {
+  it('verwaltet Turnierergebnisse atomar ueber eine geschuetzte Admin RPC', () => {
+    expect(tournamentResultsMigration).toContain(
+      'public.ha_admin_set_tournament_match_winner',
+    )
+    expect(tournamentResultsMigration).toContain(
+      'public.ha_has_admin_access(p_participant_access_code)',
+    )
+    expect(tournamentResultsMigration).toContain('for update')
+    expect(tournamentResultsMigration).toContain(
+      'winner must participate in the match',
+    )
+    expect(tournamentResultsMigration).toContain(
+      'v_winner_id is distinct from v_slot_a_id',
+    )
+    expect(tournamentResultsMigration).toContain(
+      "'winnerParticipantId'",
+    )
+    expect(tournamentResultsMigration).toContain(
+      'revoke all on function public.ha_admin_set_tournament_match_winner',
+    )
+  })
   it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
     for (const table of [
       'participants',

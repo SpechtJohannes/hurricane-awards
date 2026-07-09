@@ -539,6 +539,9 @@
       "deleting": "LÃ¶sche...",
       "confirmDelete": "Turnier \"{{name}}\" wirklich lÃ¶schen?",
       "status": "{{count}} Teilnehmende ausgewaehlt.",
+      "winnerLabel": "Gewinner",
+      "winnerForMatch": "Gewinner für {{round}}, Begegnung {{match}}",
+      "selectWinner": "Gewinner auswählen",
       "errors": {
         "load": "Die Turnierverwaltung konnte gerade nicht geladen werden.",
         "save": "Das Turnier konnte gerade nicht gespeichert werden.",
@@ -546,7 +549,8 @@
         "nameRequired": "Der Turniername ist erforderlich.",
         "participantsRequired": "Bitte waehle mindestens zwei aktive Teilnehmende aus.",
         "rankingInvalid": "Die Platzierung muss jede ausgewählte Person genau einmal enthalten.",
-        "rankingSave": "Die Platzierung konnte gerade nicht gespeichert werden."
+        "rankingSave": "Die Platzierung konnte gerade nicht gespeichert werden.",
+        "winnerSave": "Das Ergebnis konnte gerade nicht gespeichert werden."
       }
     },
     "festival": {
@@ -706,7 +710,8 @@
       "match": "Begegnung {{position}}",
       "openSlot": "Offen",
       "byeNotice": "Freilos: {{name}} ist direkt in der naechsten Runde.",
-      "empty": "Fuer dieses Turnier ist noch kein Turnierbaum vorhanden."
+      "empty": "Fuer dieses Turnier ist noch kein Turnierbaum vorhanden.",
+      "champion": "Turniersieger: {{name}}"
     },
     "errors": {
       "load": "Die Turniere konnten gerade nicht geladen werden."
