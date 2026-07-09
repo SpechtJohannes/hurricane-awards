@@ -108,6 +108,7 @@ import {
   generateTournamentBracket,
   loadAdminTournaments,
   loadTournaments,
+  recalculateTournamentBracket,
   setTournamentMatchWinner,
   updateTournament,
 } from '../data/tournaments'
@@ -1319,6 +1320,40 @@ describe('Supabase Datenzugriffe', () => {
     expect(rpcMock).toHaveBeenNthCalledWith(4, 'ha_admin_delete_tournament', {
       ...expectedParticipantRpcContext,
       p_tournament_id: 'tournament-1',
+    })
+  })
+
+  it('schreibt bei elf Teilnehmenden einen spaeteren Freilos-Gewinner bis ins Finale fort', () => {
+    const bracket = generateTournamentBracket(
+      Array.from({ length: 11 }, (_, index) => ({
+        participantId: `participant-${index + 1}`,
+        participantName: `Person ${index + 1}`,
+      })),
+    )
+    const afterFirstResult = recalculateTournamentBracket(
+      bracket,
+      'r1-m1',
+      'participant-1',
+    )
+    const recalculated = recalculateTournamentBracket(
+      afterFirstResult,
+      'r1-m2',
+      'participant-3',
+    )
+    const semiFinalWithBye = recalculated.rounds[2].matches[0]
+    const final = recalculated.rounds[3].matches[0]
+
+    expect(semiFinalWithBye).toMatchObject({
+      id: 'r3-m1',
+      winnerParticipantId: 'participant-7',
+      winnerResolution: 'automatic',
+      status: 'completed',
+    })
+    expect(final.participantA.sourceMatchId).toBe(semiFinalWithBye.id)
+    expect(final).toMatchObject({
+      winnerParticipantId: 'participant-7',
+      winnerResolution: 'automatic',
+      status: 'completed',
     })
   })
 
