@@ -24,6 +24,7 @@ type AdminTournamentsProps = {
   isLoading: boolean
   savingTournamentId: string | null
   deletingTournamentId: string | null
+  savingMatchId: string | null
   onCreate: (input: {
     name: string
     mode: TournamentMode
@@ -34,6 +35,11 @@ type AdminTournamentsProps = {
     input: { name: string; mode: TournamentMode; participantIds: string[] },
   ) => Promise<void>
   onDelete: (tournamentId: string) => Promise<void>
+  onSetWinner: (
+    tournamentId: string,
+    matchId: string,
+    winnerParticipantId: string,
+  ) => Promise<void>
 }
 
 function emptyForm(): TournamentFormState {
@@ -52,9 +58,11 @@ export function AdminTournaments({
   isLoading,
   savingTournamentId,
   deletingTournamentId,
+  savingMatchId,
   onCreate,
   onUpdate,
   onDelete,
+  onSetWinner,
 }: AdminTournamentsProps) {
   const { t } = useTranslation()
   const [form, setForm] = useState<TournamentFormState | null>(null)
@@ -302,7 +310,13 @@ export function AdminTournaments({
                   </button>
                 </div>
               </div>
-              <TournamentBracket tournament={tournament} />
+              <TournamentBracket
+                tournament={tournament}
+                savingMatchId={savingMatchId}
+                onSetWinner={(matchId, winnerParticipantId) =>
+                  onSetWinner(tournament.id, matchId, winnerParticipantId)
+                }
+              />
             </article>
           ))}
         </div>

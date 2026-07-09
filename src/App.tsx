@@ -110,6 +110,7 @@ import {
   deleteTournament,
   loadAdminTournaments,
   loadTournaments,
+  setTournamentMatchWinner,
   updateTournament,
   type Tournament,
   type TournamentMode,
@@ -1540,6 +1541,9 @@ function App() {
   const [deletingTournamentId, setDeletingTournamentId] = useState<string | null>(
     null,
   )
+  const [savingTournamentMatchId, setSavingTournamentMatchId] = useState<
+    string | null
+  >(null)
   const [adminFestivalDocumentsError, setAdminFestivalDocumentsError] =
     useState('')
   const [isLoadingAdminFestivalDocuments, setIsLoadingAdminFestivalDocuments] =
@@ -3916,6 +3920,34 @@ function App() {
     }
   }
 
+  async function saveAdminTournamentMatchWinner(
+    tournamentId: string,
+    matchId: string,
+    winnerParticipantId: string,
+  ) {
+    const adminContext = getParticipantAdminContext()
+
+    if (!adminContext) return
+
+    setSavingTournamentMatchId(matchId)
+    setAdminTournamentsError('')
+
+    try {
+      const updatedTournament = await setTournamentMatchWinner(
+        tournamentId,
+        matchId,
+        winnerParticipantId,
+        adminContext,
+      )
+      replaceTournament(updatedTournament)
+      setTournamentsError('')
+    } catch {
+      setAdminTournamentsError(t('admin.tournaments.errors.winnerSave'))
+    } finally {
+      setSavingTournamentMatchId(null)
+    }
+  }
+
   async function toggleBingoNumber(number: number) {
     if (!selectedParticipant || !bingoCard) {
       return
@@ -4337,9 +4369,11 @@ function App() {
                 isLoading={isLoadingAdminTournaments}
                 savingTournamentId={savingTournamentId}
                 deletingTournamentId={deletingTournamentId}
+                savingMatchId={savingTournamentMatchId}
                 onCreate={createAdminTournament}
                 onUpdate={updateAdminTournament}
                 onDelete={deleteAdminTournament}
+                onSetWinner={saveAdminTournamentMatchWinner}
               />
             </>
           ) : null}

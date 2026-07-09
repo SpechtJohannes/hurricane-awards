@@ -108,6 +108,7 @@ import {
   generateTournamentBracket,
   loadAdminTournaments,
   loadTournaments,
+  setTournamentMatchWinner,
   updateTournament,
 } from '../data/tournaments'
 import {
@@ -1319,6 +1320,49 @@ describe('Supabase Datenzugriffe', () => {
       ...expectedParticipantRpcContext,
       p_tournament_id: 'tournament-1',
     })
+  })
+
+  it('speichert Turniergewinner ueber die geschuetzte Admin RPC', async () => {
+    const bracket = generateTournamentBracket([
+      { participantId: 'alice', participantName: 'Alice' },
+      { participantId: 'bob', participantName: 'Bob' },
+    ])
+    bracket.rounds[0].matches[0].winnerParticipantId = 'alice'
+    bracket.rounds[0].matches[0].status = 'completed'
+    rpcMock.mockResolvedValueOnce({
+      data: [{
+        id: 'tournament-1',
+        festival_id: 'hurricane-awards-2026',
+        name: 'Kicker Cup',
+        mode: 'knockout',
+        status: 'active',
+        selected_participant_ids: ['alice', 'bob'],
+        draw_participant_ids: ['alice', 'bob'],
+        qualification_ranking_ids: [],
+        bracket,
+        created_at: '2026-07-08T12:00:00.000Z',
+        updated_at: '2026-07-09T10:00:00.000Z',
+      }],
+      error: null,
+    })
+
+    await expect(setTournamentMatchWinner(
+      'tournament-1',
+      'r1-m1',
+      'alice',
+      participantContext,
+    )).resolves.toMatchObject({
+      bracket: { rounds: [{ matches: [{ winnerParticipantId: 'alice' }] }] },
+    })
+    expect(rpcMock).toHaveBeenCalledWith(
+      'ha_admin_set_tournament_match_winner',
+      {
+        ...expectedParticipantRpcContext,
+        p_tournament_id: 'tournament-1',
+        p_match_id: 'r1-m1',
+        p_winner_participant_id: 'alice',
+      },
+    )
   })
 
   it('laedt die Timetable Basisdaten ueber eine geschuetzte RPC Funktion', async () => {

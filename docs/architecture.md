@@ -220,7 +220,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `random_pairing_actions`: Festivalbezogene Aktionen fuer zufaellige Paarungen mit Name, Status und Auslosungszeitpunkt.
 - `random_pairing_participants`: Ausgewaehlte Teilnehmende pro Paarungsaktion; deaktivierte Teilnehmende werden serverseitig beim Speichern abgelehnt.
 - `random_pairing_assignments`: Ausgeloste Zuordnungen pro Aktion; Primaerschluessel `(action_id, participant_id)` und Check Constraint verhindern doppelte oder eigene Zuordnungen.
-- `tournaments`: Festivalbezogene Turniere mit Namen, Modus, Teilnehmendenauswahl, gespeicherter Auslosung und gespeichertem Single-Elimination-Baum inklusive optionaler Freilose.
+- `tournaments`: Festivalbezogene Turniere mit Namen, Modus, Teilnehmendenauswahl, gespeicherter Auslosung und gespeichertem Single-Elimination-Baum inklusive optionaler Freilose und Begegnungsergebnissen. Gewinner werden ausschliesslich ueber `ha_admin_set_tournament_match_winner` gesetzt; die RPC sperrt das Turnier waehrend der Aenderung, validiert die Teilnahme an der Begegnung und verwirft atomar ungueltig gewordene Ergebnisse in allen Folgerunden.
 - `participant_login_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Teilnehmerlogin.
 - `festival_access_attempts`: Minimale technische Daten fuer serverseitiges Rate Limiting beim Festivalcode.
 

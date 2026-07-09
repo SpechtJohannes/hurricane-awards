@@ -539,6 +539,9 @@
       "deleting": "Verwijderen...",
       "confirmDelete": "Toernooi \"{{name}}\" echt verwijderen?",
       "status": "{{count}} deelnemers geselecteerd.",
+      "winnerLabel": "Winnaar",
+      "winnerForMatch": "Winnaar van {{round}}, wedstrijd {{match}}",
+      "selectWinner": "Winnaar kiezen",
       "errors": {
         "load": "Het toernooibeheer kon net niet worden geladen.",
         "save": "Het toernooi kon net niet worden opgeslagen.",
@@ -546,7 +549,8 @@
         "nameRequired": "De toernooinaam is verplicht.",
         "participantsRequired": "Kies minimaal twee actieve deelnemers.",
         "rankingInvalid": "De plaatsing moet elke geselecteerde persoon precies een keer bevatten.",
-        "rankingSave": "De plaatsing kon net niet worden opgeslagen."
+        "rankingSave": "De plaatsing kon net niet worden opgeslagen.",
+        "winnerSave": "Het resultaat kon net niet worden opgeslagen."
       }
     },
     "festival": {
@@ -706,7 +710,8 @@
       "match": "Wedstrijd {{position}}",
       "openSlot": "Open",
       "byeNotice": "Vrijloting: {{name}} gaat direct door naar de volgende ronde.",
-      "empty": "Voor dit toernooi is nog geen toernooiboom beschikbaar."
+      "empty": "Voor dit toernooi is nog geen toernooiboom beschikbaar.",
+      "champion": "Toernooiwinnaar: {{name}}"
     },
     "errors": {
       "load": "De toernooien konden net niet worden geladen."

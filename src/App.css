@@ -1713,6 +1713,11 @@ h1 {
   border-radius: 8px;
 }
 
+.tournament-match.is-completed {
+  border-color: color-mix(in srgb, var(--color-games) 58%, transparent);
+  box-shadow: inset 3px 0 0 var(--color-games);
+}
+
 .tournament-match__label {
   margin: 0;
   color: var(--color-text-muted);
@@ -1737,6 +1742,54 @@ h1 {
   color: var(--color-accent-contrast);
   background: var(--color-games);
   border-color: var(--color-games);
+}
+
+.tournament-match__winner {
+  display: grid;
+  gap: 5px;
+  margin-top: 4px;
+  color: var(--color-text-primary);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.tournament-match__winner select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 10px;
+  color: var(--color-text-primary);
+  font: inherit;
+  background: var(--color-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}
+
+.tournament-bracket__champion {
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  color: var(--color-accent-contrast);
+  font-size: 1.05rem;
+  font-weight: 950;
+  text-align: center;
+  background: var(--color-games);
+  border-radius: 8px;
+}
+
+@media (max-width: 640px) {
+  .tournament-bracket {
+    margin-inline: -10px;
+    padding-inline: 10px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .tournament-bracket__rounds {
+    grid-auto-columns: minmax(82vw, 300px);
+    gap: 10px;
+  }
+
+  .tournament-round {
+    scroll-snap-align: start;
+  }
 }
 
 .timetable {
