@@ -28,6 +28,7 @@ Wichtigste Spalten:
 - `id`: Teilnehmer-ID.
 - `name`: Interner Name, aktuell beim Anlegen aus dem Anzeigenamen gesetzt.
 - `display_name`: Anzeigename in der UI.
+- `avatar_id`: Optionale stabile ID aus der lokal gebuendelten Avatarbibliothek.
 - `access_code`: Persoenlicher Teilnehmercode.
 - `is_admin`: Kennzeichnet Adminteilnehmer.
 - `is_active`: Steuert, ob ein Teilnehmer sich anmelden und Zugriff erhalten kann.
@@ -459,6 +460,7 @@ Dies ist keine vollstaendige API-Referenz, sondern eine Gruppierung der wichtigs
 - `ha_suggest_participant_access_code`: Generiert einen neuen Codevorschlag.
 - `ha_create_participant`, `ha_update_participant`: Admin-RPCs fuer Teilnehmerpflege.
 - `ha_deactivate_participant`, `ha_reactivate_participant`: Admin-RPCs fuer Aktivstatus.
+- `ha_update_own_profile`: Aktualisiert Anzeigenamen und Avatar des aus dem persoenlichen Teilnehmercode ermittelten aktiven Teilnehmers. Die Funktion akzeptiert keine frei waehlbare Teilnehmer-ID, begrenzt Namen auf 50 Zeichen und validiert Avatar-IDs gegen die feste Bibliothek.
 
 ### Kategorien
 

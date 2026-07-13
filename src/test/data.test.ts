@@ -55,6 +55,7 @@ import {
   suggestParticipantAccessCode,
   updateParticipant,
   updateParticipantAvatar,
+  updateOwnProfile,
 } from '../data/participants'
 import { avatarById, avatars, defaultAvatarId } from '../data/avatars'
 import {
@@ -2441,6 +2442,38 @@ describe('Supabase Datenzugriffe', () => {
     expect(rpcMock).toHaveBeenCalledWith('ha_update_participant_avatar', {
       ...expectedParticipantRpcContext,
       p_participant_id: 'alice',
+      p_avatar_id: 'neon-tent',
+    })
+  })
+
+  it('speichert das eigene Profil ohne frei waehlbare Teilnehmer ID', async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        {
+          id: 'alice',
+          name: 'alice',
+          display_name: 'Alicia',
+          avatar_id: 'neon-tent',
+          is_admin: false,
+          is_active: true,
+        },
+      ],
+      error: null,
+    })
+
+    await expect(
+      updateOwnProfile(
+        { displayName: 'Alicia', avatarId: 'neon-tent' },
+        participantContext,
+      ),
+    ).resolves.toEqual({
+      ...mappedParticipant,
+      displayName: 'Alicia',
+      avatarId: 'neon-tent',
+    })
+    expect(rpcMock).toHaveBeenCalledWith('ha_update_own_profile', {
+      ...expectedParticipantRpcContext,
+      p_display_name: 'Alicia',
       p_avatar_id: 'neon-tent',
     })
   })

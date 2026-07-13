@@ -58,6 +58,11 @@ export type UpdateParticipantAvatarInput = {
   avatarId: string
 }
 
+export type UpdateOwnProfileInput = {
+  displayName: string
+  avatarId: string
+}
+
 function mapParticipant(row: ParticipantRow, accessCode = ''): Participant {
   return {
     id: row.id,
@@ -227,6 +232,27 @@ export async function updateParticipantAvatar(
   }
 
   return mapParticipantResult(data)
+}
+
+export async function updateOwnProfile(
+  input: UpdateOwnProfileInput,
+  context: ParticipantAccessContext,
+): Promise<Participant> {
+  const supabase = getSupabase()
+
+  const { data, error } = await supabase.rpc('ha_update_own_profile', {
+    ...participantRpcParams(context),
+    p_display_name: input.displayName,
+    p_avatar_id: input.avatarId,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  const participant = Array.isArray(data) ? data[0] : data
+
+  return mapParticipant(participant as ParticipantRow, context.participantAccessCode)
 }
 
 export async function deactivateParticipant(

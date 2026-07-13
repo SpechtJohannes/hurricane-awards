@@ -187,7 +187,9 @@ Teilnehmercodes werden nicht in `festival_archive_participants` gespeichert. Arc
 
 Admins koennen den aktuellen Festivalstand als JSON exportieren. Der Standardexport entfernt Teilnehmercodes aus den Teilnehmerdaten. Eine explizite Exportoption kann Codes einschliessen; die UI zeigt dafuer einen Warnhinweis an, weil solche Dateien vertraulich sind.
 
-Teilnehmer koennen ihren Avatar ueber `ha_update_participant_avatar` selbst aendern. Die RPC prueft, dass der uebergebene Teilnehmercode zum bearbeiteten Teilnehmer passt, und speichert nur die stabile Avatar-ID aus der App-Bibliothek. Die Avatarbilder liegen als versionierte SVG-Dateien in `src/assets/avatars`; `src/config/avatars.ts` ordnet stabile IDs den lokal gebuendelten Bildpfaden zu.
+Teilnehmer koennen Anzeigenamen und Avatar gemeinsam ueber `ha_update_own_profile` aendern. Die RPC nimmt bewusst keine Teilnehmer-ID entgegen, sondern ermittelt den aktiven Teilnehmer ausschliesslich aus dem persoenlichen Teilnehmercode. Sie trimmt und validiert den Anzeigenamen und akzeptiert nur stabile IDs aus der festen Avatarbibliothek. Die Avatarbilder liegen als versionierte SVG-Dateien in `src/assets/avatars`; `src/config/avatars.ts` ordnet stabile IDs den lokal gebuendelten Bildpfaden zu.
+
+Der von der RPC zurueckgegebene Teilnehmer ersetzt nach erfolgreichem Speichern den zentralen `selectedParticipant` Zustand und den Session-Eintrag. Die App aktualisiert zugleich ihre bereits geladenen Teilnehmerreferenzen in Ergebnislisten, Timetable-Favoriten, Zufallspaarungen, Pferderennen und Turnierbaeumen. Dadurch werden Name und Avatar ohne Seitenreload in allen aktuell geladenen Ansichten konsistent angezeigt; es entsteht kein zweiter persistenter Zustand fuer den angemeldeten Teilnehmer.
 
 ## Datenmodell
 
