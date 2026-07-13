@@ -23,7 +23,7 @@ supabase/migrations/20260705100000_create_timetable.sql
 
 Diese Migration ist auf das aktuelle Live-Schema zugeschnitten:
 
-- `participants(id, name, display_name, access_code, ...)`
+- `participants(id, name, display_name, avatar_id, access_code, ...)`
 - `categories(id, title, description, status, sort_order)`
 - `votes(id, voter_id, voted_for_id, category_id, created_at, timestamp)`
 - `archived_votes(id, festival, voter_id, voted_for_id, category_id, created_at, archived_at)`
@@ -93,6 +93,7 @@ Normale Teilnehmer muessen ihren persoenlichen Teilnehmercode liefern. Die RPCs 
 - Wiederholte ungueltige Loginversuche werden in `participant_login_attempts` serverseitig gezaehlt und temporaer gesperrt.
 - Fuer das Rate Limiting wird ein technischer Hash aus Festivalkontext und Request-Metadaten gespeichert, nicht der Teilnehmercode im Klartext.
 - Teilnehmerlisten enthalten keine Access Codes.
+- `ha_update_own_profile` erlaubt die Aenderung von Anzeigename und Avatar nur fuer den Teilnehmer, den `ha_participant_id_for_access` aus dem persoenlichen Code ermittelt. Eine Teilnehmer-ID kann nicht uebergeben werden; Namen und Avatar-IDs werden serverseitig validiert.
 - Teilnehmer duerfen nur ihre eigenen bereits abgegebenen Stimmen als persoenliche Stimmen laden.
 - Stimmen koennen nur fuer offene Kategorien, fuer andere existierende Teilnehmer und nur ueber `ha_save_vote` gespeichert werden.
 - Ergebnis- und Ranglistendaten werden nur nach gueltigem Teilnehmercode geliefert.

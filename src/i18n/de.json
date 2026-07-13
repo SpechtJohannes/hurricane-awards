@@ -253,11 +253,24 @@
     "avatar": {
       "title": "Avatar auswählen",
       "description": "Wähle einen Avatar aus der festen Bibliothek. Du kannst ihn jederzeit ändern.",
+      "toggleHint": "Auswahl ein- oder ausklappen",
       "selectLabel": "Avatar {{avatar}} auswählen",
       "selected": "Ausgewählt",
       "saving": "Avatar wird gespeichert...",
       "errors": {
         "save": "Der Avatar konnte gerade nicht gespeichert werden. Versuch es bitte gleich nochmal."
+      }
+    },
+    "profile": {
+      "editTitle": "Profil bearbeiten",
+      "displayName": "Angezeigter Name",
+      "save": "Änderungen speichern",
+      "saving": "Wird gespeichert...",
+      "saved": "Profil wurde gespeichert.",
+      "errors": {
+        "nameRequired": "Name darf nicht leer sein.",
+        "nameTooLong": "Name darf höchstens 50 Zeichen lang sein.",
+        "save": "Profil konnte nicht gespeichert werden. Versuch es bitte gleich nochmal."
       }
     }
   },

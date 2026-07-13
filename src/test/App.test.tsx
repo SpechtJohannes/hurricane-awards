@@ -29,6 +29,7 @@ import {
   type Participant,
   updateParticipant,
   updateParticipantAvatar,
+  updateOwnProfile,
 } from '../data/participants'
 import {
   loadVotes,
@@ -156,6 +157,7 @@ vi.mock('../data/participants', () => ({
   suggestParticipantAccessCode: vi.fn(),
   updateParticipant: vi.fn(),
   updateParticipantAvatar: vi.fn(),
+  updateOwnProfile: vi.fn(),
 }))
 
 vi.mock('../data/votes', () => ({
@@ -901,6 +903,19 @@ function mockLoadedData({
       avatarId: input.avatarId,
     }
   })
+  vi.mocked(updateOwnProfile).mockImplementation(async (input) => {
+    const participant = loadedParticipants[0]
+
+    if (!participant) {
+      throw new Error('Unknown participant')
+    }
+
+    return {
+      ...participant,
+      displayName: input.displayName.trim(),
+      avatarId: input.avatarId,
+    }
+  })
   vi.mocked(deactivateParticipant).mockImplementation(async (participantId) => {
     const participant = loadedAdminParticipants.find(
       (currentParticipant) => currentParticipant.id === participantId,
@@ -1571,13 +1586,155 @@ describe('Login', () => {
       await within(profileSection).findByRole('heading', { name: 'Alice' }),
     ).toBeVisible()
     expect(
-      within(profileSection).getByRole('img', { name: 'Alice: Camp Sunrise' }),
+      within(profileSection).getAllByRole('img', { name: 'Alice: Camp Sunrise' })[0],
     ).toBeVisible()
     expect(
       within(profileSection).queryByRole('heading', {
         name: /mit teilnehmercode anmelden/i,
       }),
     ).not.toBeInTheDocument()
+  })
+
+  it('zeigt den aktuellen Namen und speichert einen neuen Anzeigenamen', async () => {
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+    await switchMainSection(/profil/i)
+
+    const nameInput = screen.getByRole('textbox', {
+      name: /angezeigter name/i,
+    })
+    const saveButton = screen.getByRole('button', {
+      name: /nderungen speichern/i,
+    })
+
+    expect(nameInput).toHaveValue('Alice')
+    expect(saveButton).toBeDisabled()
+
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Alicia')
+    await user.click(saveButton)
+
+    expect(updateOwnProfile).toHaveBeenCalledWith(
+      { displayName: 'Alicia', avatarId: 'camp-sunrise' },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(
+      await screen.findByRole('heading', { name: 'Alicia' }),
+    ).toBeVisible()
+    expect(screen.getByText(/profil wurde gespeichert/i)).toBeVisible()
+    expect(
+      sessionStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
+    ).toContain('"displayName":"Alicia"')
+
+    await user.click(
+      screen.getByRole('button', { name: /zur dashboard/i }),
+    )
+    expect(
+      screen.getByRole('heading', { name: /hallo alicia/i }),
+    ).toBeVisible()
+  })
+
+  it('trimmt den Anzeigenamen vor dem Speichern', async () => {
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+    await switchMainSection(/profil/i)
+
+    const nameInput = screen.getByRole('textbox', {
+      name: /angezeigter name/i,
+    })
+    await user.clear(nameInput)
+    await user.type(nameInput, '  Alicia  ')
+    await user.click(
+      screen.getByRole('button', { name: /nderungen speichern/i }),
+    )
+
+    expect(updateOwnProfile).toHaveBeenCalledWith(
+      { displayName: 'Alicia', avatarId: 'camp-sunrise' },
+      { participantAccessCode: 'ALICE42' },
+    )
+    expect(nameInput).toHaveValue('Alicia')
+  })
+
+  it('lehnt einen leeren Anzeigenamen ab und begrenzt die Eingabe auf 50 Zeichen', async () => {
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+    await switchMainSection(/profil/i)
+
+    const nameInput = screen.getByRole('textbox', {
+      name: /angezeigter name/i,
+    })
+    const saveButton = screen.getByRole('button', {
+      name: /nderungen speichern/i,
+    })
+
+    expect(nameInput).toHaveAttribute('maxlength', '50')
+    await user.clear(nameInput)
+    await user.type(nameInput, '   ')
+    await user.click(saveButton)
+
+    expect(updateOwnProfile).not.toHaveBeenCalled()
+    expect(screen.getByText(/name darf nicht leer sein/i)).toBeVisible()
+
+    await user.clear(nameInput)
+    await user.type(nameInput, 'A'.repeat(51))
+    expect(nameInput).toHaveValue('A'.repeat(50))
+  })
+
+  it('deaktiviert das Speichern waehrend der Anfrage und verhindert Doppel-Submits', async () => {
+    let resolveProfileUpdate!: (participant: Participant) => void
+    vi.mocked(updateOwnProfile).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveProfileUpdate = resolve
+        }),
+    )
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+    await switchMainSection(/profil/i)
+
+    const nameInput = screen.getByRole('textbox', {
+      name: /angezeigter name/i,
+    })
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Alicia')
+    await user.click(
+      screen.getByRole('button', { name: /nderungen speichern/i }),
+    )
+
+    const savingButton = screen.getByRole('button', {
+      name: /wird gespeichert/i,
+    })
+    expect(savingButton).toBeDisabled()
+    await user.click(savingButton)
+    expect(updateOwnProfile).toHaveBeenCalledTimes(1)
+
+    resolveProfileUpdate({
+      ...participants[0],
+      displayName: 'Alicia',
+      avatarId: 'camp-sunrise',
+    })
+    expect(await screen.findByText(/profil wurde gespeichert/i)).toBeVisible()
+  })
+
+  it('zeigt einen verstaendlichen Fehler, wenn das Profil nicht gespeichert wird', async () => {
+    vi.mocked(updateOwnProfile).mockRejectedValueOnce(new Error('save failed'))
+    await renderLoadedApp()
+    const user = await loginWith('ALICE42')
+    await switchMainSection(/profil/i)
+
+    const nameInput = screen.getByRole('textbox', {
+      name: /angezeigter name/i,
+    })
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Alicia')
+    await user.click(
+      screen.getByRole('button', { name: /nderungen speichern/i }),
+    )
+
+    expect(
+      await screen.findByText(/profil konnte nicht gespeichert werden/i),
+    ).toBeVisible()
+    expect(screen.getByRole('heading', { name: 'Alice' })).toBeVisible()
   })
 
   it('zeigt nach der Anmeldung ein persoenliches Dashboard statt der alten Hero Startansicht', async () => {
@@ -1836,15 +1993,19 @@ describe('Login', () => {
 
   it('zeigt fuer Teilnehmer ohne gespeicherten Avatar den Default Avatar', async () => {
     await renderLoadedApp()
-    await loginWith('ALICE42')
+    const user = await loginWith('ALICE42')
     await switchMainSection(/profil/i)
+
+    await user.click(
+      screen.getByRole('button', { name: /avatar ausw/i }),
+    )
 
     const selectedAvatarButton = screen.getByRole('button', {
       name: /avatar camp sunrise ausw/i,
     })
 
     expect(
-      screen.getByRole('img', { name: 'Alice: Camp Sunrise' }),
+      screen.getAllByRole('img', { name: 'Alice: Camp Sunrise' })[0],
     ).toBeVisible()
     expect(selectedAvatarButton).toHaveAttribute('aria-pressed', 'true')
     expect(selectedAvatarButton).toHaveClass('is-selected')
@@ -1853,9 +2014,19 @@ describe('Login', () => {
 
   it('zeigt die Avatar Auswahl im Profil', async () => {
     await renderLoadedApp()
-    await loginWith('ALICE42')
+    const user = await loginWith('ALICE42')
     await switchMainSection(/profil/i)
 
+    const toggle = screen.getByRole('button', { name: /avatar ausw/i })
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(
+      screen.queryByRole('button', { name: /avatar neon tent ausw/i }),
+    ).not.toBeInTheDocument()
+
+    await user.click(toggle)
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByRole('heading', { name: /avatar ausw/i })).toBeVisible()
     expect(
       screen.getAllByRole('button', { name: /avatar .* ausw/i }).length,
@@ -1870,17 +2041,34 @@ describe('Login', () => {
     const user = await loginWith('ALICE42')
     await switchMainSection(/profil/i)
 
+    await user.click(
+      screen.getByRole('button', { name: /avatar ausw/i }),
+    )
+
     const previousAvatarButton = screen.getByRole('button', {
       name: /avatar camp sunrise ausw/i,
     })
+    expect(previousAvatarButton).toHaveClass('is-selected')
 
     await user.click(
       screen.getByRole('button', { name: /avatar neon tent ausw/i }),
     )
 
-    expect(updateParticipantAvatar).toHaveBeenCalledWith(
-      { participantId: 'alice', avatarId: 'neon-tent' },
+    expect(
+      screen.queryByRole('button', { name: /avatar neon tent ausw/i }),
+    ).not.toBeInTheDocument()
+
+    await user.click(
+      screen.getByRole('button', { name: /nderungen speichern/i }),
+    )
+
+    expect(updateOwnProfile).toHaveBeenCalledWith(
+      { displayName: 'Alice', avatarId: 'neon-tent' },
       { participantAccessCode: 'ALICE42' },
+    )
+
+    await user.click(
+      screen.getByRole('button', { name: /avatar ausw/i }),
     )
     const selectedAvatarButton = await screen.findByRole('button', {
       name: /avatar neon tent ausw/i,
@@ -1890,9 +2078,14 @@ describe('Login', () => {
     expect(selectedAvatarButton).toBeVisible()
     expect(selectedAvatarButton).toHaveClass('is-selected')
     expect(within(selectedAvatarButton).getByText(/ausgew/i)).toBeVisible()
-    expect(previousAvatarButton).not.toHaveClass('is-selected')
-    expect(previousAvatarButton).toHaveAttribute('aria-pressed', 'false')
-    expect(within(previousAvatarButton).queryByText(/ausgew/i)).not.toBeInTheDocument()
+    const updatedPreviousAvatarButton = screen.getByRole('button', {
+      name: /avatar camp sunrise ausw/i,
+    })
+    expect(updatedPreviousAvatarButton).not.toHaveClass('is-selected')
+    expect(updatedPreviousAvatarButton).toHaveAttribute('aria-pressed', 'false')
+    expect(
+      within(updatedPreviousAvatarButton).queryByText(/ausgew/i),
+    ).not.toBeInTheDocument()
     expect(
       sessionStorage.getItem('hurricane-awards:hurricane-awards-2026:participant'),
     ).toContain('"avatarId":"neon-tent"')
@@ -1910,6 +2103,10 @@ describe('Login', () => {
 
     render(<App />)
     await switchMainSection(/profil/i)
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /avatar ausw/i }),
+    )
 
     const selectedAvatarButton = await screen.findByRole('button', {
       name: /avatar neon tent ausw/i,

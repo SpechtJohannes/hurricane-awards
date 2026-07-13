@@ -29,7 +29,7 @@ import {
   reactivateParticipant,
   suggestParticipantAccessCode,
   updateParticipant,
-  updateParticipantAvatar,
+  updateOwnProfile,
   type Participant,
 } from './data/participants'
 import {
@@ -276,6 +276,47 @@ function clearStoredParticipant() {
 
 function technicalErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error)
+}
+
+function updateTournamentParticipantName(
+  tournament: Tournament,
+  participant: Participant,
+): Tournament {
+  const updateBracketParticipant = <
+    T extends { participantId: string; participantName: string } | null,
+  >(
+    bracketParticipant: T,
+  ): T =>
+    bracketParticipant?.participantId === participant.id
+      ? ({
+          ...bracketParticipant,
+          participantName: participant.displayName,
+        } as T)
+      : bracketParticipant
+
+  return {
+    ...tournament,
+    bracket: {
+      ...tournament.bracket,
+      rounds: tournament.bracket.rounds.map((round) => ({
+        ...round,
+        matches: round.matches.map((match) => ({
+          ...match,
+          participantA: {
+            ...match.participantA,
+            participant: updateBracketParticipant(match.participantA.participant),
+          },
+          participantB: {
+            ...match.participantB,
+            participant: updateBracketParticipant(match.participantB.participant),
+          },
+        })),
+        ...(round.byes
+          ? { byes: round.byes.map(updateBracketParticipant) }
+          : {}),
+      })),
+    },
+  }
 }
 
 type MainSection =
@@ -1556,8 +1597,17 @@ function App() {
     useState<ParticipantFormState | null>(null)
   const [participantFormError, setParticipantFormError] = useState('')
   const [isSavingParticipant, setIsSavingParticipant] = useState(false)
-  const [avatarError, setAvatarError] = useState('')
-  const [savingAvatarId, setSavingAvatarId] = useState<string | null>(null)
+  const [profileDisplayName, setProfileDisplayName] = useState(
+    selectedParticipant?.displayName ?? '',
+  )
+  const [profileAvatarId, setProfileAvatarId] = useState(
+    selectedParticipant?.avatarId ?? avatars[0]?.id ?? '',
+  )
+  const [profileError, setProfileError] = useState('')
+  const [profileSuccess, setProfileSuccess] = useState('')
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const [isAvatarPickerExpanded, setIsAvatarPickerExpanded] = useState(false)
+  const isSavingProfileRef = useRef(false)
   const [togglingParticipantId, setTogglingParticipantId] = useState<
     string | null
   >(null)
@@ -1612,6 +1662,15 @@ function App() {
     { section: 'info', label: t('admin.navigation.info') },
     { section: 'archive', label: t('admin.navigation.archive') },
   ]
+
+  const savedProfileAvatarId =
+    selectedParticipant?.avatarId ?? avatars[0]?.id ?? ''
+  const normalizedProfileDisplayName = profileDisplayName.trim()
+  const hasProfileChanges = Boolean(
+    selectedParticipant &&
+      (normalizedProfileDisplayName !== selectedParticipant.displayName ||
+        profileAvatarId !== savedProfileAvatarId),
+  )
 
   useEffect(() => {
     function handleHashChange() {
@@ -2005,6 +2064,11 @@ function App() {
 
       storeAuthenticatedParticipant(loginResult.participant)
       setSelectedParticipant(loginResult.participant)
+      setProfileDisplayName(loginResult.participant.displayName)
+      setProfileAvatarId(loginResult.participant.avatarId ?? avatars[0]?.id ?? '')
+      setProfileError('')
+      setProfileSuccess('')
+      setIsAvatarPickerExpanded(false)
       setActiveMainSection('dashboard')
       setSelectedVotesByCategory({})
       setAccessCode('')
@@ -2107,8 +2171,13 @@ function App() {
     setRemovingDocumentType(null)
     setParticipantForm(null)
     setParticipantFormError('')
-    setAvatarError('')
-    setSavingAvatarId(null)
+    setProfileError('')
+    setProfileSuccess('')
+    setProfileDisplayName('')
+    setProfileAvatarId(avatars[0]?.id ?? '')
+    setIsSavingProfile(false)
+    isSavingProfileRef.current = false
+    setIsAvatarPickerExpanded(false)
     setIsAdminVisible(false)
     setActiveMainSection('dashboard')
     setActiveAdminSection('festival')
@@ -2130,19 +2199,40 @@ function App() {
     }))
   }
 
-  async function saveParticipantAvatar(avatarId: string) {
-    if (!selectedParticipant || savingAvatarId) {
+  async function saveOwnProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    if (!selectedParticipant || isSavingProfileRef.current) {
       return
     }
 
-    setSavingAvatarId(avatarId)
-    setAvatarError('')
+    const displayName = profileDisplayName.trim()
+
+    setProfileError('')
+    setProfileSuccess('')
+
+    if (!displayName) {
+      setProfileError(t('identity.profile.errors.nameRequired'))
+      return
+    }
+
+    if (displayName.length > 50) {
+      setProfileError(t('identity.profile.errors.nameTooLong'))
+      return
+    }
+
+    if (!hasProfileChanges) {
+      return
+    }
+
+    isSavingProfileRef.current = true
+    setIsSavingProfile(true)
 
     try {
-      const updatedParticipant = await updateParticipantAvatar(
+      const updatedParticipant = await updateOwnProfile(
         {
-          participantId: selectedParticipant.id,
-          avatarId,
+          displayName,
+          avatarId: profileAvatarId,
         },
         {
           participantAccessCode: selectedParticipant.accessCode,
@@ -2151,30 +2241,97 @@ function App() {
 
       storeAuthenticatedParticipant(updatedParticipant)
       setSelectedParticipant(updatedParticipant)
+      setProfileDisplayName(updatedParticipant.displayName)
+      setProfileAvatarId(updatedParticipant.avatarId ?? avatars[0]?.id ?? '')
       setParticipants((currentParticipants) =>
         currentParticipants.map((participant) =>
           participant.id === updatedParticipant.id
-            ? {
-                ...participant,
-                avatarId: updatedParticipant.avatarId,
-              }
+            ? { ...participant, ...updatedParticipant }
             : participant,
         ),
       )
       setAdminParticipants((currentParticipants) =>
         currentParticipants.map((participant) =>
           participant.id === updatedParticipant.id
-            ? {
-                ...participant,
-                avatarId: updatedParticipant.avatarId,
-              }
+            ? { ...participant, ...updatedParticipant }
             : participant,
         ),
       )
+      setAllTimeStandings((currentStandings) =>
+        currentStandings.map((standing) =>
+          standing.participantId === updatedParticipant.id
+            ? { ...standing, participantName: updatedParticipant.displayName }
+            : standing,
+        ),
+      )
+      setTimetable((currentTimetable) =>
+        currentTimetable
+          ? {
+              ...currentTimetable,
+              performanceFavorites: currentTimetable.performanceFavorites.map(
+                (favorite) => ({
+                  ...favorite,
+                  participants: favorite.participants.map((participant) =>
+                    participant.participantId === updatedParticipant.id
+                      ? {
+                          ...participant,
+                          displayName: updatedParticipant.displayName,
+                          avatarId: updatedParticipant.avatarId ?? null,
+                        }
+                      : participant,
+                  ),
+                }),
+              ),
+            }
+          : currentTimetable,
+      )
+      setRandomPairingAssignments((currentAssignments) =>
+        currentAssignments.map((assignment) =>
+          assignment.assignedParticipantId === updatedParticipant.id
+            ? {
+                ...assignment,
+                assignedParticipantName: updatedParticipant.displayName,
+              }
+            : assignment,
+        ),
+      )
+      setAdminRandomPairingActions((currentActions) =>
+        currentActions.map((action) => ({
+          ...action,
+          assignments: action.assignments.map((assignment) => ({
+            ...assignment,
+            ...(assignment.participantId === updatedParticipant.id
+              ? { participantName: updatedParticipant.displayName }
+              : {}),
+            ...(assignment.assignedParticipantId === updatedParticipant.id
+              ? { assignedParticipantName: updatedParticipant.displayName }
+              : {}),
+          })),
+        })),
+      )
+      setAdminHorseRacingBets((currentBets) =>
+        currentBets.map((bet) =>
+          bet.participantId === updatedParticipant.id
+            ? { ...bet, participantName: updatedParticipant.displayName }
+            : bet,
+        ),
+      )
+      setTournaments((currentTournaments) =>
+        currentTournaments.map((tournament) =>
+          updateTournamentParticipantName(tournament, updatedParticipant),
+        ),
+      )
+      setAdminTournaments((currentTournaments) =>
+        currentTournaments.map((tournament) =>
+          updateTournamentParticipantName(tournament, updatedParticipant),
+        ),
+      )
+      setProfileSuccess(t('identity.profile.saved'))
     } catch {
-      setAvatarError(t('identity.avatar.errors.save'))
+      setProfileError(t('identity.profile.errors.save'))
     } finally {
-      setSavingAvatarId(null)
+      isSavingProfileRef.current = false
+      setIsSavingProfile(false)
     }
   }
 
@@ -4453,8 +4610,8 @@ function App() {
 
                 <div className="identity__selected identity__profile-card">
                   <Avatar
-                    avatarId={selectedParticipant.avatarId}
-                    name={selectedParticipant.displayName}
+                    avatarId={profileAvatarId}
+                    name={profileDisplayName.trim() || selectedParticipant.displayName}
                     size="large"
                   />
                   <div className="identity__profile-copy">
@@ -4470,59 +4627,127 @@ function App() {
                   </button>
                 </div>
 
-                <div className="avatar-picker" aria-labelledby="avatar-picker-title">
-                  <div className="avatar-picker__header">
-                    <h3 id="avatar-picker-title">{t('identity.avatar.title')}</h3>
-                    <p>{t('identity.avatar.description')}</p>
-                  </div>
-                  <div className="avatar-picker__grid">
-                    {avatars.map((avatar) => {
-                      const isSelected =
-                        avatar.id ===
-                        (selectedParticipant.avatarId ?? avatars[0]?.id)
+                <form className="profile-editor" onSubmit={saveOwnProfile}>
+                  <h3>{t('identity.profile.editTitle')}</h3>
 
-                      return (
-                        <button
-                          className={`avatar-picker__option${
-                            isSelected ? ' is-selected' : ''
-                          }`}
-                          type="button"
-                          key={avatar.id}
-                          onClick={() => {
-                            void saveParticipantAvatar(avatar.id)
-                          }}
-                          disabled={savingAvatarId !== null}
-                          aria-pressed={isSelected}
-                          aria-label={t('identity.avatar.selectLabel', {
-                            avatar: avatar.label,
+                  <label htmlFor="profile-display-name">
+                    {t('identity.profile.displayName')}
+                  </label>
+                  <input
+                    id="profile-display-name"
+                    type="text"
+                    value={profileDisplayName}
+                    maxLength={50}
+                    disabled={isSavingProfile}
+                    onChange={(event) => {
+                      setProfileDisplayName(event.target.value)
+                      setProfileError('')
+                      setProfileSuccess('')
+                    }}
+                  />
+
+                  <div className="avatar-picker">
+                    <button
+                      className="avatar-picker__toggle"
+                      type="button"
+                      aria-expanded={isAvatarPickerExpanded}
+                      aria-controls="avatar-picker-options"
+                      onClick={() =>
+                        setIsAvatarPickerExpanded((isExpanded) => !isExpanded)
+                      }
+                      disabled={isSavingProfile}
+                    >
+                      <span className="avatar-picker__toggle-current">
+                        <Avatar
+                          avatarId={profileAvatarId}
+                          name={profileDisplayName.trim() || selectedParticipant.displayName}
+                          size="medium"
+                        />
+                        <span>
+                          <strong>{t('identity.avatar.title')}</strong>
+                          <small>{t('identity.avatar.toggleHint')}</small>
+                        </span>
+                      </span>
+                      <span aria-hidden="true">
+                        {isAvatarPickerExpanded ? '−' : '+'}
+                      </span>
+                    </button>
+
+                    {isAvatarPickerExpanded ? (
+                      <div
+                        id="avatar-picker-options"
+                        className="avatar-picker__panel"
+                        aria-labelledby="avatar-picker-title"
+                      >
+                        <div className="avatar-picker__header">
+                          <h4 id="avatar-picker-title">
+                            {t('identity.avatar.title')}
+                          </h4>
+                          <p>{t('identity.avatar.description')}</p>
+                        </div>
+                        <div className="avatar-picker__grid">
+                          {avatars.map((avatar) => {
+                            const isSelected = avatar.id === profileAvatarId
+
+                            return (
+                              <button
+                                className={`avatar-picker__option${
+                                  isSelected ? ' is-selected' : ''
+                                }`}
+                                type="button"
+                                key={avatar.id}
+                                onClick={() => {
+                                  setProfileAvatarId(avatar.id)
+                                  setProfileError('')
+                                  setProfileSuccess('')
+                                  setIsAvatarPickerExpanded(false)
+                                }}
+                                disabled={isSavingProfile}
+                                aria-pressed={isSelected}
+                                aria-label={t('identity.avatar.selectLabel', {
+                                  avatar: avatar.label,
+                                })}
+                              >
+                                <Avatar
+                                  avatarId={avatar.id}
+                                  name={avatar.label}
+                                  size="large"
+                                />
+                                <span>{avatar.label}</span>
+                                {isSelected ? (
+                                  <span className="avatar-picker__selected-badge">
+                                    {t('identity.avatar.selected')}
+                                  </span>
+                                ) : null}
+                              </button>
+                            )
                           })}
-                        >
-                          <Avatar
-                            avatarId={avatar.id}
-                            name={avatar.label}
-                            size="large"
-                          />
-                          <span>{avatar.label}</span>
-                          {isSelected ? (
-                            <span className="avatar-picker__selected-badge">
-                              {t('identity.avatar.selected')}
-                            </span>
-                          ) : null}
-                        </button>
-                      )
-                    })}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
-                  {savingAvatarId ? (
-                    <p className="identity__error" role="status">
-                      {t('identity.avatar.saving')}
-                    </p>
-                  ) : null}
-                  {avatarError ? (
+
+                  {profileError ? (
                     <p className="identity__error" role="alert">
-                      {avatarError}
+                      {profileError}
                     </p>
                   ) : null}
-                </div>
+                  {profileSuccess ? (
+                    <p className="profile-editor__success" role="status">
+                      {profileSuccess}
+                    </p>
+                  ) : null}
+
+                  <button
+                    className="identity__submit profile-editor__submit"
+                    type="submit"
+                    disabled={isSavingProfile || !hasProfileChanges}
+                  >
+                    {isSavingProfile
+                      ? t('identity.profile.saving')
+                      : t('identity.profile.save')}
+                  </button>
+                </form>
 
                 {participantsError ? (
                   <p className="identity__error">{participantsError}</p>

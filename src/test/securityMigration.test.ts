@@ -256,8 +256,43 @@ const tournamentByePropagationMigration = readFileSync(
   ),
   'utf8',
 )
+const ownProfileMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260713100000_update_own_participant_profile.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
+  it('aktualisiert ausschliesslich das Profil des authentifizierten Teilnehmers', () => {
+    expect(ownProfileMigration).toContain(
+      'create or replace function public.ha_update_own_profile',
+    )
+    expect(ownProfileMigration).toContain('security definer')
+    expect(ownProfileMigration).toContain('set search_path = public')
+    expect(ownProfileMigration).toContain(
+      'public.ha_participant_id_for_access(',
+    )
+    expect(ownProfileMigration).not.toContain('p_participant_id')
+    expect(ownProfileMigration).toContain(
+      'where p.id::text = v_participant_id',
+    )
+    expect(ownProfileMigration).toContain(
+      "raise exception 'display name is required'",
+    )
+    expect(ownProfileMigration).toContain('char_length(v_display_name) > 50')
+    expect(ownProfileMigration).toContain('v_avatar_id = any(v_allowed_avatar_ids)')
+    expect(ownProfileMigration).toContain(
+      'revoke all on function public.ha_update_own_profile(text, text, text) from public',
+    )
+    expect(ownProfileMigration).toContain(
+      'grant execute on function public.ha_update_own_profile(text, text, text) to anon, authenticated',
+    )
+    expect(ownProfileMigration).toContain("notify pgrst, 'reload schema'")
+    expect(ownProfileMigration).not.toContain('grant update on table')
+  })
+
   it('verwaltet Turnierergebnisse atomar ueber eine geschuetzte Admin RPC', () => {
     expect(tournamentResultsMigration).toContain(
       'public.ha_admin_set_tournament_match_winner',

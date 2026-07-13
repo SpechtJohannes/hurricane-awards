@@ -253,11 +253,24 @@
     "avatar": {
       "title": "Avatar kiezen",
       "description": "Kies een avatar uit de vaste bibliotheek. Je kunt hem op elk moment wijzigen.",
+      "toggleHint": "Keuze in- of uitklappen",
       "selectLabel": "Avatar {{avatar}} kiezen",
       "selected": "Gekozen",
       "saving": "Avatar wordt opgeslagen...",
       "errors": {
         "save": "De avatar kon net niet worden opgeslagen. Probeer het zo nog eens."
+      }
+    },
+    "profile": {
+      "editTitle": "Profiel bewerken",
+      "displayName": "Weergavenaam",
+      "save": "Wijzigingen opslaan",
+      "saving": "Wordt opgeslagen...",
+      "saved": "Profiel is opgeslagen.",
+      "errors": {
+        "nameRequired": "De naam mag niet leeg zijn.",
+        "nameTooLong": "De naam mag maximaal 50 tekens lang zijn.",
+        "save": "Het profiel kon niet worden opgeslagen. Probeer het zo nog eens."
       }
     }
   },
