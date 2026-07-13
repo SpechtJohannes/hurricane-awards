@@ -4,6 +4,22 @@ All notable changes between releases of this project are documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.5.0 – Festivalspiele
+
+### ✨ Neue Features
+
+- KO Turniere können vollständig innerhalb der App erstellt und verwaltet werden.
+- Automatische Auslosung inklusive Freilosen bei ungerader Teilnehmerzahl.
+- Turnierbaum mit mobiler Darstellung und automatischer Fortschreibung der Gewinner.
+- Ergebnisse können nachträglich geändert werden, abhängige Begegnungen werden konsistent neu berechnet.
+- Zufällige Paarungen für beliebige Aktionen wie Secret Buddy oder Wichteln.
+- Teilnehmende sehen ausschließlich ihre eigene Zuordnung.
+
+### 🛠 Verbesserungen
+
+- Automatische Fortschreibung von Freilosen über alle Turnierrunden hinweg verbessert.
+- Zusätzliche automatisierte Tests für Turnierlogik und Migrationen.
+
 ## v1.4.0
 
 ### UI und Nutzerführung
