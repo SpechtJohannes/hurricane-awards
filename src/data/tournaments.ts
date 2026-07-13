@@ -27,6 +27,7 @@ export type TournamentBracketMatch = {
   participantA: TournamentBracketSlot
   participantB: TournamentBracketSlot
   winnerParticipantId: string | null
+  winnerResolution?: 'manual' | 'automatic' | null
 }
 
 export type TournamentBracketRound = {
@@ -396,6 +397,64 @@ export async function deleteTournament(
   if (error) {
     throw error
   }
+}
+
+export function recalculateTournamentBracket(
+  bracket: TournamentBracket,
+  changedMatchId: string,
+  winnerParticipantId: string,
+): TournamentBracket {
+  const recalculated = structuredClone(bracket)
+  const winners = new Map<string, string>()
+  let changedMatchFound = false
+
+  for (const round of recalculated.rounds) {
+    for (const match of round.matches) {
+      const participantIds = [match.participantA, match.participantB].map(
+        (slot) =>
+          slot.participant?.participantId ??
+          winners.get(slot.sourceMatchId ?? '') ??
+          null,
+      )
+
+      if (match.id === changedMatchId) {
+        if (!participantIds.includes(winnerParticipantId)) {
+          throw new Error('winner must participate in the match')
+        }
+        changedMatchFound = true
+        match.winnerParticipantId = winnerParticipantId
+        match.winnerResolution = 'manual'
+      } else {
+        const realParticipants = participantIds.filter(
+          (participantId): participantId is string => participantId !== null,
+        )
+
+        if (realParticipants.length === 1) {
+          match.winnerParticipantId = realParticipants[0]
+          match.winnerResolution = 'automatic'
+        } else if (
+          realParticipants.length === 0 ||
+          match.winnerResolution === 'automatic' ||
+          (match.winnerParticipantId !== null &&
+            !realParticipants.includes(match.winnerParticipantId))
+        ) {
+          match.winnerParticipantId = null
+          match.winnerResolution = null
+        }
+      }
+
+      match.status = match.winnerParticipantId ? 'completed' : 'scheduled'
+      if (match.winnerParticipantId) {
+        winners.set(match.id, match.winnerParticipantId)
+      }
+    }
+  }
+
+  if (!changedMatchFound) {
+    throw new Error('match not found')
+  }
+
+  return recalculated
 }
 
 export async function setTournamentMatchWinner(

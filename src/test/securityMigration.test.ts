@@ -249,6 +249,13 @@ const tournamentResultsMigration = readFileSync(
   ),
   'utf8',
 )
+const tournamentByePropagationMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/20260709110000_fix_tournament_bye_propagation.sql',
+  ),
+  'utf8',
+)
 
 describe('Supabase Sicherheitsmigration', () => {
   it('verwaltet Turnierergebnisse atomar ueber eine geschuetzte Admin RPC', () => {
@@ -264,6 +271,12 @@ describe('Supabase Sicherheitsmigration', () => {
     )
     expect(tournamentResultsMigration).toContain(
       'v_winner_id is distinct from v_slot_a_id',
+    )
+    expect(tournamentByePropagationMigration).toContain(
+      "(v_slot_a_id is null) <> (v_slot_b_id is null)",
+    )
+    expect(tournamentByePropagationMigration).toContain(
+      "v_winner_resolution := 'automatic'",
     )
     expect(tournamentResultsMigration).toContain(
       "'winnerParticipantId'",
