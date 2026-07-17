@@ -1065,10 +1065,10 @@ async function loginWith(code: string) {
     expect(screen.queryByText("Lade...")).not.toBeInTheDocument();
   });
 
-  const awardsButton = screen.queryByRole("button", { name: /^awards/i });
+  const votingButton = screen.queryByRole("button", { name: /abstimmungen/i });
 
-  if (awardsButton) {
-    await user.click(awardsButton);
+  if (votingButton) {
+    await user.click(votingButton);
   }
 
   return user;
@@ -1887,7 +1887,11 @@ describe("Login", () => {
     ).toBeVisible();
 
     await user.click(awardsTile);
-    expect(screen.getByRole("heading", { name: /ergebnisse/i })).toBeVisible();
+    expect(screen.getByRole("heading", { name: /^awards$/i })).toBeVisible();
+    expect(window.location.hash).toBe("#awards");
+    expect(
+      screen.queryByRole("heading", { name: /abstimmungen/i }),
+    ).not.toBeInTheDocument();
 
     await switchMainSection(/^start$/i);
     await user.click(
@@ -1921,8 +1925,12 @@ describe("Login", () => {
       }),
     );
     expect(
-      screen.getByRole("heading", { name: /^abstimmung$/i }),
+      screen.getByRole("heading", { name: /^abstimmungen$/i }),
     ).toBeVisible();
+    expect(window.location.hash).toBe("#voting");
+    expect(
+      screen.queryByRole("heading", { name: /^awards$/i }),
+    ).not.toBeInTheDocument();
 
     await switchMainSection(/^start$/i);
     await user.click(
@@ -1979,12 +1987,66 @@ describe("Login", () => {
       ).toBeVisible();
     }
 
-    await expectDashboardReturn(/^awards/i, /^abstimmung$/i);
+    await expectDashboardReturn(/^awards/i, /^awards$/i);
     await expectDashboardReturn(/^timetable/i, /^timetable$/i);
     await expectDashboardReturn(/^spiele/i, /^spiele$/i);
     await expectDashboardReturn(/^festivalinfos/i, /^infos$/i);
-    await expectDashboardReturn(/^abstimmungen/i, /^abstimmung$/i);
+    await expectDashboardReturn(/^abstimmungen/i, /^abstimmungen$/i);
     await expectDashboardReturn(/^profil/i, /dein profil/i);
+  });
+
+  it("trennt Abstimmungen und Awards in Inhalt und Hash Route", async () => {
+    await renderLoadedApp();
+    await loginWith("ALICE42");
+
+    expect(window.location.hash).toBe("#voting");
+    expect(screen.getByLabelText(/stimme geht an/i)).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: /gesamtclassement/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: /ergebnisse/i }),
+    ).not.toBeInTheDocument();
+
+    await switchMainSection(/awards/i);
+
+    expect(window.location.hash).toBe("#awards");
+    expect(screen.getByRole("heading", { name: /^awards$/i })).toBeVisible();
+    expect(screen.getByRole("heading", { name: /ergebnisse/i })).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: /gesamtclassement/i }),
+    ).toBeVisible();
+    expect(screen.queryByLabelText(/stimme geht an/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /stimme abgeben/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("unterstuetzt direkte Voting und Awards Routen sowie Browsernavigation", async () => {
+    localStorage.setItem(
+      festivalAccessStorageKey,
+      JSON.stringify({ version: festivalAccessVersion }),
+    );
+    sessionStorage.setItem(
+      "hurricane-awards:hurricane-awards-2026:participant",
+      JSON.stringify(participants[0]),
+    );
+    window.location.hash = "#voting";
+
+    render(<App />);
+    expect(
+      await screen.findByRole("heading", { name: /^abstimmungen$/i }),
+    ).toBeVisible();
+
+    window.location.hash = "#awards";
+    expect(
+      await screen.findByRole("heading", { name: /^awards$/i }),
+    ).toBeVisible();
+
+    window.location.hash = "#voting";
+    expect(
+      await screen.findByRole("heading", { name: /^abstimmungen$/i }),
+    ).toBeVisible();
   });
 
   it("zeigt das Dashboard auch nicht angemeldet sinnvoll an", async () => {
@@ -2194,6 +2256,7 @@ describe("Login", () => {
 
     await renderLoadedApp();
     await loginWith("ALICE42");
+    await switchMainSection(/awards/i);
 
     const resultsSection = sectionForHeading(/ergebnisse/i);
 
@@ -3193,7 +3256,7 @@ describe("Kategorien", () => {
 
     const votingSection = sectionForHeading(/abstimmung/i);
     expect(
-      within(votingSection).getByText(/keine abstimmungen aktiv/i),
+      within(votingSection).getByText(/keine abstimmungen geöffnet/i),
     ).toBeVisible();
     expect(
       within(votingSection).queryByLabelText(/stimme geht an/i),
@@ -3206,7 +3269,7 @@ describe("Kategorien", () => {
 
     const votingSection = sectionForHeading(/abstimmung/i);
     expect(
-      within(votingSection).queryByText(/keine abstimmungen aktiv/i),
+      within(votingSection).queryByText(/keine abstimmungen geöffnet/i),
     ).toBeNull();
     expect(
       within(votingSection).getByLabelText(/stimme geht an/i),
@@ -3319,6 +3382,7 @@ describe("Ergebnisse", () => {
 
     await renderLoadedApp();
     await loginWith("ALICE42");
+    await switchMainSection(/awards/i);
 
     const resultsSection = sectionForHeading(/ergebnisse/i);
     expect(
@@ -3347,6 +3411,7 @@ describe("Ergebnisse", () => {
 
     await renderLoadedApp();
     await loginWith("ALICE42");
+    await switchMainSection(/awards/i);
 
     expect(screen.getByText(/noch keine stimmen abgegeben/i)).toBeVisible();
   });
@@ -3356,6 +3421,7 @@ describe("Ewige Tabelle", () => {
   it("laedt und zeigt Daten in geladener Rangfolge", async () => {
     await renderLoadedApp();
     await loginWith("ALICE42");
+    await switchMainSection(/awards/i);
 
     const standingsSection = sectionForHeading(/gesamtclassement/i);
     const rows = within(standingsSection).getAllByRole("row");
@@ -3371,6 +3437,7 @@ describe("Ewige Tabelle", () => {
 
     await renderLoadedApp();
     await loginWith("ALICE42");
+    await switchMainSection(/awards/i);
 
     expect(
       screen.getByText(/noch keine gesamtpunkte vorhanden/i),
@@ -4497,7 +4564,7 @@ describe("Admin", () => {
     });
     await waitFor(() => {
       expect(
-        screen.getByRole("heading", { name: /abstimmung/i }),
+        screen.getByRole("heading", { name: /^awards$/i }),
       ).toBeVisible();
     });
   });

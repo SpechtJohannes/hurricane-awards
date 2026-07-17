@@ -783,9 +783,9 @@
   },
   "categories": {
     "eyebrow": "{{count}} Teilnehmende",
-    "title": "Abstimmung",
+    "title": "Abstimmungen",
     "loginRequired": "Gib zuerst deinen Teilnehmercode ein. Danach kannst du abstimmen.",
-    "empty": "Aktuell sind keine Abstimmungen aktiv. Schau später wieder vorbei.",
+    "empty": "Aktuell sind keine Abstimmungen geöffnet.",
     "alreadyVoted": "Du hast bereits abgestimmt.",
     "voteTargetLabel": "Stimme geht an",
     "selectPerson": "Person auswählen",
@@ -793,6 +793,11 @@
     "errors": {
       "voteSave": "Deine Stimme konnte gerade nicht gespeichert werden."
     }
+  },
+  "awards": {
+    "eyebrow": "Ergebnisse und Ranglisten",
+    "title": "Awards",
+    "description": "Gewinner, Award Ergebnisse und Gesamtclassement."
   },
   "results": {
     "eyebrow": "Zwischenstand",
