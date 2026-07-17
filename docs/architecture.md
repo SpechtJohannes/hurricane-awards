@@ -162,6 +162,22 @@ Die Datenbank erzwingt, dass die Endzeit nach der Startzeit liegt und dass sich 
 
 Teilnehmende markieren und entfernen Favoriten direkt in der Timetable-Leseansicht ueber `ha_add_timetable_favorite` und `ha_remove_timetable_favorite`. Favorisierte Auftritte werden in der Timetable-Karte optisch hervorgehoben und tragen zusaetzlich ein sichtbares Favoriten-Label, damit die Markierung nicht nur ueber Farbe vermittelt wird. Andere interessierte Teilnehmende werden pro Auftritt kompakt mit den ohnehin sichtbaren Namen und Avataren angezeigt; bei vielen Personen fasst die UI weitere Eintraege als Anzahl zusammen. Die UI berechnet Zuordnungen fuer Acts, Buehnen, Tage und Favoriten memoisiert aus dem geladenen Timetable, damit Favoriten-Toggles und Navigationswechsel keine unnoetige Gruppierungsarbeit wiederholen. Beide Schreib-RPCs ermitteln den Teilnehmer serverseitig aus dem Teilnehmercode. Direkte Browserrechte auf die Favoritentabelle sind entzogen.
 
+### Kontextbezogenes Dashboard
+
+Die Eventphase wird zentral und ohne React-Abhaengigkeit in `src/domain/eventPhase.ts`
+als `before`, `during` oder `after` ermittelt. Als bestehende Datenquelle dienen der
+frueheste und spaeteste `festival_days.date` Wert aus dem Timetable. Reine
+Datumswerte gelten als vollstaendige Kalendertage in `Europe/Berlin`; der erste und
+letzte Tag gehoeren jeweils noch zur laufenden Phase.
+
+`src/domain/dashboardModules.ts` ordnet vorhandenen Dashboard-Modulen ihre
+Prioritaet je Phase und optional sichtbare Phasen zu. Vor dem Festival stehen
+Timetable, Infos und Spiele vorn, waehrenddessen Timetable, Spiele und Abstimmungen,
+danach Awards, Abstimmungen und Timetable. Allgemeine Module bleiben sichtbar.
+
+Fehlt eine Datumsgrenze, ist das Intervall dort offen. Fehlen beide Grenzen, gilt
+`during` als neutrales Fallback. Eine Datenbankmigration ist nicht erforderlich.
+
 ### Festivaleinstellungen
 
 Der Festivalname liegt zentral in `app_settings` unter dem Key `festival_name`. Das Frontend liest ihn ueber `ha_get_festival_name`. Admins aendern ihn ueber `ha_update_festival_name`; die RPC validiert einen nicht-leeren Namen.

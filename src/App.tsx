@@ -180,6 +180,14 @@ import { useFestivalAccess } from './hooks/useFestivalAccess'
 import { avatars } from './config/avatars'
 import i18n from './i18n'
 import { supportedLanguages, type SupportedLanguage } from './i18n'
+import {
+  determineEventPhase,
+  eventDateRangeFromDays,
+} from './domain/eventPhase'
+import {
+  dashboardModuleConfig,
+  selectDashboardModules,
+} from './domain/dashboardModules'
 import './App.css'
 
 type CategoryResult = {
@@ -1907,7 +1915,7 @@ function App() {
     festivalDocuments.length +
     (campLocationLink ? 1 : 0) +
     (musicPlaylist ? 1 : 0)
-  const dashboardTiles: DashboardTile[] = [
+  const unsortedDashboardTiles: DashboardTile[] = [
     {
       id: 'awards',
       section: 'awards',
@@ -2006,6 +2014,14 @@ function App() {
         : undefined,
     },
   ]
+  const eventPhase = determineEventPhase(
+    eventDateRangeFromDays(timetable?.festivalDays.map(({ date }) => date) ?? []),
+  )
+  const dashboardTiles = selectDashboardModules(
+    unsortedDashboardTiles,
+    dashboardModuleConfig,
+    eventPhase,
+  )
 
   async function submitAccessCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
