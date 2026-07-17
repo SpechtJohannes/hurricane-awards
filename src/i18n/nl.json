@@ -783,9 +783,9 @@
   },
   "categories": {
     "eyebrow": "{{count}} deelnemers",
-    "title": "Stemming",
+    "title": "Stemmingen",
     "loginRequired": "Voer eerst je deelnemerscode in. Daarna kun je stemmen.",
-    "empty": "Er zijn momenteel geen actieve stemmingen. Kijk later nog eens.",
+    "empty": "Er zijn momenteel geen open stemmingen.",
     "alreadyVoted": "Je hebt al gestemd.",
     "voteTargetLabel": "Stem gaat naar",
     "selectPerson": "Persoon kiezen",
@@ -793,6 +793,11 @@
     "errors": {
       "voteSave": "Je stem kon net niet worden opgeslagen."
     }
+  },
+  "awards": {
+    "eyebrow": "Resultaten en ranglijsten",
+    "title": "Awards",
+    "description": "Winnaars, awardresultaten en het algemeen klassement."
   },
   "results": {
     "eyebrow": "Tussenstand",

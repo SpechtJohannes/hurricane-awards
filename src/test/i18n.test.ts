@@ -126,11 +126,11 @@ describe("i18n test infrastructure", () => {
   it("enthaelt Abstimmungs-Empty-State-Texte auf Deutsch und Niederlaendisch", async () => {
     await i18n.changeLanguage("de");
 
-    expect(i18n.t("categories.empty")).toContain("keine Abstimmungen aktiv");
+    expect(i18n.t("categories.empty")).toContain("keine Abstimmungen geöffnet");
 
     await i18n.changeLanguage("nl");
 
-    expect(i18n.t("categories.empty")).toContain("geen actieve stemmingen");
+    expect(i18n.t("categories.empty")).toContain("geen open stemmingen");
   });
 
   it("enthaelt Profiltexte fuer Login- und Profilzustand", async () => {

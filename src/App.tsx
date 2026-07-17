@@ -334,7 +334,13 @@ function updateTournamentParticipantName(
 }
 
 type MainSection =
-  "dashboard" | "awards" | "timetable" | "games" | "info" | "profile";
+  | "dashboard"
+  | "voting"
+  | "awards"
+  | "timetable"
+  | "games"
+  | "info"
+  | "profile";
 type AdminSection =
   | "festival"
   | "participants"
@@ -344,6 +350,22 @@ type AdminSection =
   | "info"
   | "archive";
 type GameSection = "bingo" | "horseRacing" | "randomPairings" | "tournaments";
+
+const mainSectionHashes: Record<Exclude<MainSection, "dashboard">, string> = {
+  voting: "#voting",
+  awards: "#awards",
+  timetable: "#timetable",
+  games: "#games",
+  info: "#info",
+  profile: "#profile",
+};
+
+function mainSectionFromHash(hash: string): MainSection | null {
+  const entry = Object.entries(mainSectionHashes).find(
+    ([, sectionHash]) => sectionHash === hash,
+  );
+  return (entry?.[0] as MainSection | undefined) ?? null;
+}
 
 type ResultCardProps = {
   category: Category;
@@ -1676,7 +1698,7 @@ function App() {
   );
   const [isAdminVisible, setIsAdminVisible] = useState(false);
   const [activeMainSection, setActiveMainSection] =
-    useState<MainSection>("dashboard");
+    useState<MainSection>(() => mainSectionFromHash(window.location.hash) ?? "dashboard");
   const [activeAdminSection, setActiveAdminSection] =
     useState<AdminSection>("festival");
   const [activeGameSection, setActiveGameSection] =
@@ -1752,6 +1774,12 @@ function App() {
   useEffect(() => {
     function handleHashChange() {
       setLocationHash(window.location.hash);
+      const section = mainSectionFromHash(window.location.hash);
+      if (section) {
+        setActiveMainSection(section);
+      } else if (!window.location.hash) {
+        setActiveMainSection("dashboard");
+      }
     }
 
     window.addEventListener("hashchange", handleHashChange);
@@ -1760,6 +1788,15 @@ function App() {
       window.removeEventListener("hashchange", handleHashChange);
     };
   }, []);
+
+  function navigateMainSection(section: MainSection) {
+    const hash = section === "dashboard" ? "" : mainSectionHashes[section];
+    if (window.location.hash === hash) {
+      setActiveMainSection(section);
+      return;
+    }
+    window.location.hash = hash;
+  }
 
   useEffect(() => {
     let isCurrent = true;
@@ -2047,7 +2084,7 @@ function App() {
     },
     {
       id: "voting",
-      section: "awards",
+      section: "voting",
       title: t("dashboard.tiles.voting.title"),
       description: t("dashboard.tiles.voting.description"),
       status:
@@ -2152,7 +2189,7 @@ function App() {
       setProfileError("");
       setProfileSuccess("");
       setIsAvatarPickerExpanded(false);
-      setActiveMainSection("dashboard");
+      navigateMainSection("dashboard");
       setSelectedVotesByCategory({});
       setAccessCode("");
       setAccessCodeError("");
@@ -2262,7 +2299,7 @@ function App() {
     isSavingProfileRef.current = false;
     setIsAvatarPickerExpanded(false);
     setIsAdminVisible(false);
-    setActiveMainSection("dashboard");
+    navigateMainSection("dashboard");
     setActiveAdminSection("festival");
     setSelectedVotesByCategory({});
 
@@ -3935,7 +3972,7 @@ function App() {
       setBingoError("");
 
       if (activeMainSection === "games") {
-        setActiveMainSection("awards");
+        navigateMainSection("awards");
       }
     } finally {
       setIsSavingBingoRound(false);
@@ -4438,7 +4475,7 @@ function App() {
         <button
           className="app-header__brand"
           type="button"
-          onClick={() => setActiveMainSection("dashboard")}
+          onClick={() => navigateMainSection("dashboard")}
         >
           <p>{t("dashboard.festivalLabel")}</p>
           <h1 id="app-title">{displayedFestivalName}</h1>
@@ -4711,7 +4748,7 @@ function App() {
           eventEndDate={eventEndDate}
           eventPhase={eventPhase}
           referenceInstant={eventReferenceInstant}
-          onNavigate={setActiveMainSection}
+          onNavigate={navigateMainSection}
         />
       ) : null}
 
@@ -4723,7 +4760,7 @@ function App() {
         >
           <div className="identity__content">
             <DashboardBackButton
-              onClick={() => setActiveMainSection("dashboard")}
+              onClick={() => navigateMainSection("dashboard")}
             />
 
             {selectedParticipant ? (
@@ -4943,7 +4980,7 @@ function App() {
           aria-labelledby="games-title"
         >
           <DashboardBackButton
-            onClick={() => setActiveMainSection("dashboard")}
+            onClick={() => navigateMainSection("dashboard")}
             width="narrow"
           />
 
@@ -5054,7 +5091,7 @@ function App() {
           isLoading={isLoadingTimetable}
           currentParticipantId={selectedParticipant?.id ?? null}
           togglingPerformanceId={togglingFavoritePerformanceId}
-          onBackToDashboard={() => setActiveMainSection("dashboard")}
+          onBackToDashboard={() => navigateMainSection("dashboard")}
           onToggleFavorite={toggleTimetableFavorite}
         />
       ) : null}
@@ -5069,22 +5106,22 @@ function App() {
           isLoading={isLoadingFestivalDocuments}
           dashboardBackButton={
             <DashboardBackButton
-              onClick={() => setActiveMainSection("dashboard")}
+              onClick={() => navigateMainSection("dashboard")}
             />
           }
           onOpenCampLocation={openCampLocationLink}
         />
       ) : null}
 
-      {selectedParticipant && activeMainSection === "awards" ? (
-        <div id="main-awards">
+      {selectedParticipant && activeMainSection === "voting" ? (
+        <div id="main-voting">
           <section
             className="categories"
             id="abstimmung"
             aria-labelledby="categories-title"
           >
             <DashboardBackButton
-              onClick={() => setActiveMainSection("dashboard")}
+              onClick={() => navigateMainSection("dashboard")}
             />
 
             <SectionHeader
@@ -5190,6 +5227,23 @@ function App() {
                 );
               })}
             </div>
+          </section>
+        </div>
+      ) : null}
+
+      {selectedParticipant && activeMainSection === "awards" ? (
+        <div id="main-awards">
+          <section className="results" aria-labelledby="awards-title">
+            <DashboardBackButton
+              onClick={() => navigateMainSection("dashboard")}
+            />
+
+            <SectionHeader
+              title={t("awards.title")}
+              titleId="awards-title"
+              eyebrow={t("awards.eyebrow")}
+              description={t("awards.description")}
+            />
           </section>
 
           <section

@@ -186,6 +186,21 @@ admin-geschuetzte RPC `ha_admin_update_event_settings` speichert sie atomar und
 erzwingt entweder zwei leere oder zwei gueltige, chronologisch geordnete Datumswerte.
 Diese Felder sind die zentrale Quelle fuer alle zeitabhaengigen Funktionen.
 
+### Abstimmungen und Awards
+
+Die Teilnehmeransichten fuer Abstimmungen und Awards haben getrennte fachliche
+Verantwortlichkeiten und eigene Hash-Routen. `#voting` zeigt ausschliesslich offene
+Kategorien mit den bestehenden Auswahl- und Stimmabgabefunktionen. Gibt es keine
+offene Kategorie, erscheint der internationalisierte Abstimmungs-Leerzustand; Award
+Ergebnisse und Ranglisten werden dort nicht gerendert.
+
+`#awards` zeigt ausschliesslich die bestehenden Ergebnis-Karten und das
+Gesamtclassement. Die Ansicht enthaelt keine Auswahlfelder oder Aktionen zur
+Stimmabgabe und bleibt mit den vorhandenen Leerzustaenden fuer fehlende Stimmen und
+fehlende Gesamtpunkte nutzbar. Beide Dashboard-Kacheln verwenden die gemeinsame
+Dashboard-Konfiguration, besitzen aber unterschiedliche `MainSection` Ziele. Die
+Hash-Navigation ermoeglicht direkte Aufrufe sowie Browser Vor- und Zuruecknavigation.
+
 ### Eventeinstellungen
 
 Der in der Oberflaeche als Eventname bezeichnete Wert liegt zentral in `app_settings` unter dem technischen Key `festival_name`. Das Frontend liest ihn ueber `ha_get_festival_name`. Admins aendern ihn ueber `ha_update_festival_name`; die RPC validiert einen nicht-leeren Namen.
