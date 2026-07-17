@@ -1028,16 +1028,16 @@ async function unlockFestivalWith(code = "HURRICANE2026") {
   const user = userEvent.setup();
 
   await user.type(
-    screen.getByRole("textbox", { name: /^festivalcode$/i }),
+    screen.getByRole("textbox", { name: /^eventcode$/i }),
     code,
   );
   await user.click(
-    screen.getByRole("button", { name: /festival freischalten/i }),
+    screen.getByRole("button", { name: /event freischalten/i }),
   );
 
   await waitFor(() => {
     expect(
-      screen.queryByRole("heading", { name: /hallo festivalcrew/i }) ??
+      screen.queryByRole("heading", { name: /hallo eventcrew/i }) ??
         screen.queryByRole("alert"),
     ).not.toBeNull();
   });
@@ -1407,17 +1407,17 @@ describe("Datenschutz", () => {
 });
 
 describe("Login", () => {
-  it("zeigt vor der Festivalfreischaltung nur Festivalname und Festivalcodeformular", async () => {
+  it("zeigt vor der Eventfreischaltung nur Eventname und Eventcodeformular", async () => {
     await renderLoadedApp();
 
     expect(
       await screen.findByRole("heading", { name: "Hurricane Awards 2026" }),
     ).toBeVisible();
     expect(
-      screen.getByRole("textbox", { name: /^festivalcode$/i }),
+      screen.getByRole("textbox", { name: /^eventcode$/i }),
     ).toBeVisible();
     expect(
-      screen.getByRole("button", { name: /festival freischalten/i }),
+      screen.getByRole("button", { name: /event freischalten/i }),
     ).toBeVisible();
     expect(
       screen.queryByRole("textbox", { name: /^teilnehmercode$/i }),
@@ -1440,7 +1440,7 @@ describe("Login", () => {
     expect(loadEventSettings).toHaveBeenCalled();
   });
 
-  it("zeigt nach gueltigem Festivalcode das Dashboard und speichert die Freischaltung", async () => {
+  it("zeigt nach gueltigem Eventcode das Dashboard und speichert die Freischaltung", async () => {
     await renderLoadedApp();
 
     await unlockFestivalWith(" hurricane2026 ");
@@ -1450,7 +1450,7 @@ describe("Login", () => {
     );
     expect(verifyFestivalAccessCode).toHaveBeenCalledWith("HURRICANE2026");
     expect(
-      await screen.findByRole("heading", { name: /hallo festivalcrew/i }),
+      await screen.findByRole("heading", { name: /hallo eventcrew/i }),
     ).toBeVisible();
     expect(screen.getAllByText("Hurricane Awards 2026").length).toBeGreaterThan(
       0,
@@ -1462,12 +1462,12 @@ describe("Login", () => {
     expect(loadVotes).not.toHaveBeenCalled();
   });
 
-  it("behaelt die manuelle Festivalcode Eingabe neben der Scan-Funktion bei", async () => {
+  it("behaelt die manuelle Eventcode Eingabe neben der Scan-Funktion bei", async () => {
     setQrScannerSupport();
     await renderLoadedApp();
 
     expect(
-      screen.getByRole("textbox", { name: /^festivalcode$/i }),
+      screen.getByRole("textbox", { name: /^eventcode$/i }),
     ).toBeVisible();
     expect(
       await screen.findByRole("button", { name: /qr-code scannen/i }),
@@ -1476,7 +1476,7 @@ describe("Login", () => {
     await unlockFestivalWith("HURRICANE2026");
 
     expect(
-      await screen.findByRole("heading", { name: /hallo festivalcrew/i }),
+      await screen.findByRole("heading", { name: /hallo eventcrew/i }),
     ).toBeVisible();
   });
 
@@ -1490,11 +1490,11 @@ describe("Login", () => {
       screen.getByText(/qr-code scannen ist auf diesem ger/i),
     ).toBeVisible();
     expect(
-      screen.getByRole("textbox", { name: /^festivalcode$/i }),
+      screen.getByRole("textbox", { name: /^eventcode$/i }),
     ).toBeVisible();
   });
 
-  it("uebernimmt einen gueltigen QR-Scan als Festivalcode", async () => {
+  it("uebernimmt einen gueltigen QR-Scan als Eventcode", async () => {
     const qrScanner = setQrScannerSupport(["HURRICANE2026"]);
     await renderLoadedApp();
 
@@ -1507,7 +1507,7 @@ describe("Login", () => {
       audio: false,
     });
     expect(
-      await screen.findByRole("heading", { name: /hallo festivalcrew/i }),
+      await screen.findByRole("heading", { name: /hallo eventcrew/i }),
     ).toBeVisible();
     expect(verifyFestivalAccessCode).toHaveBeenCalledWith("HURRICANE2026");
     expect(stopCameraTrack).toHaveBeenCalled();
@@ -1526,7 +1526,7 @@ describe("Login", () => {
       screen.queryByRole("textbox", { name: /^teilnehmercode$/i }),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("textbox", { name: /^festivalcode$/i }),
+      screen.getByRole("textbox", { name: /^eventcode$/i }),
     ).toHaveValue("FALSCH");
     expect(
       screen.getByRole("button", { name: /qr-code scannen/i }),
@@ -1542,7 +1542,7 @@ describe("Login", () => {
     );
 
     expect(
-      await screen.findByRole("heading", { name: /hallo festivalcrew/i }),
+      await screen.findByRole("heading", { name: /hallo eventcrew/i }),
     ).toBeVisible();
 
     await userEvent.click(screen.getByRole("button", { name: /^profil/i }));
@@ -1555,13 +1555,13 @@ describe("Login", () => {
     expect(loadParticipants).not.toHaveBeenCalled();
   });
 
-  it("verhindert Zugriff mit ungueltigem Festivalcode", async () => {
+  it("verhindert Zugriff mit ungueltigem Eventcode", async () => {
     await renderLoadedApp();
 
     await unlockFestivalWith("FALSCH");
 
     expect(screen.getByRole("alert")).toHaveTextContent(
-      /festivalcode ist ungültig/i,
+      /eventcode ist ungültig/i,
     );
     expect(localStorage.getItem(festivalAccessStorageKey)).toBeNull();
     expect(
@@ -1575,7 +1575,7 @@ describe("Login", () => {
     expect(loadAllTimeStandings).not.toHaveBeenCalled();
   });
 
-  it("ueberspringt den Festivalcode nach gespeicherter Freischaltung", async () => {
+  it("ueberspringt den Eventcode nach gespeicherter Freischaltung", async () => {
     localStorage.setItem(
       festivalAccessStorageKey,
       JSON.stringify({ version: festivalAccessVersion }),
@@ -1584,10 +1584,10 @@ describe("Login", () => {
     render(<App />);
 
     expect(
-      await screen.findByRole("heading", { name: /hallo festivalcrew/i }),
+      await screen.findByRole("heading", { name: /hallo eventcrew/i }),
     ).toBeVisible();
     expect(
-      screen.queryByRole("textbox", { name: /^festivalcode$/i }),
+      screen.queryByRole("textbox", { name: /^eventcode$/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -1991,7 +1991,7 @@ describe("Login", () => {
     await renderLoadedApp();
     const user = await unlockFestivalWith();
 
-    const dashboardSection = sectionForHeading(/hallo festivalcrew/i);
+    const dashboardSection = sectionForHeading(/hallo eventcrew/i);
 
     expect(
       within(dashboardSection).getByText("Hurricane Awards 2026"),
@@ -3134,7 +3134,7 @@ describe("Login", () => {
     render(<App />);
 
     expect(
-      await screen.findByRole("heading", { name: /hallo festivalcrew/i }),
+      await screen.findByRole("heading", { name: /hallo eventcrew/i }),
     ).toBeVisible();
     expect(screen.queryByText(/angemeldet als:/i)).not.toBeInTheDocument();
     expect(
@@ -3159,7 +3159,7 @@ describe("Login", () => {
       await screen.findByRole("heading", { name: "Hurricane Awards 2026" }),
     ).toBeVisible();
     expect(
-      screen.getByRole("heading", { name: /hallo festivalcrew/i }),
+      screen.getByRole("heading", { name: /hallo eventcrew/i }),
     ).toBeVisible();
     expect(
       screen.queryByRole("textbox", { name: /^teilnehmercode$/i }),
@@ -3387,7 +3387,7 @@ describe("Admin", () => {
       screen.queryByRole("button", { name: /^admin$/i }),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /festival archivieren/i }),
+      screen.queryByRole("button", { name: /event archivieren/i }),
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /json exportieren/i }),
@@ -3449,14 +3449,14 @@ describe("Admin", () => {
     });
   });
 
-  it("bearbeitet den Festivalnamen und zeigt ihn sofort in der App", async () => {
+  it("bearbeitet den Eventnamen und zeigt ihn sofort in der App", async () => {
     await renderLoadedApp();
     const user = await loginWith("ALICE42");
 
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
 
-    const festivalSection = sectionForHeading(/^festival$/i);
-    const nameInput = within(festivalSection).getByLabelText(/^festivalname$/i);
+    const festivalSection = sectionForHeading(/^event$/i);
+    const nameInput = within(festivalSection).getByLabelText(/^eventname$/i);
 
     expect(nameInput).toHaveValue("Hurricane Awards 2026");
 
@@ -3482,14 +3482,14 @@ describe("Admin", () => {
     ).toBeVisible();
   });
 
-  it("validiert einen leeren Festivalnamen clientseitig", async () => {
+  it("validiert einen leeren Eventnamen clientseitig", async () => {
     await renderLoadedApp();
     const user = await loginWith("ALICE42");
 
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
 
-    const festivalSection = sectionForHeading(/^festival$/i);
-    const nameInput = within(festivalSection).getByLabelText(/^festivalname$/i);
+    const festivalSection = sectionForHeading(/^event$/i);
+    const nameInput = within(festivalSection).getByLabelText(/^eventname$/i);
 
     await user.clear(nameInput);
     await user.click(
@@ -3501,7 +3501,7 @@ describe("Admin", () => {
     expect(updateEventSettings).not.toHaveBeenCalled();
     expect(
       await within(festivalSection).findByText(
-        /festivalname ist erforderlich/i,
+        /eventname ist erforderlich/i,
       ),
     ).toBeVisible();
   });
@@ -3516,8 +3516,8 @@ describe("Admin", () => {
 
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
 
-    const festivalSection = sectionForHeading(/^festival$/i);
-    const nameInput = within(festivalSection).getByLabelText(/^festivalname$/i);
+    const festivalSection = sectionForHeading(/^event$/i);
+    const nameInput = within(festivalSection).getByLabelText(/^eventname$/i);
 
     await user.clear(nameInput);
     await user.type(nameInput, "Hurricane Crew Awards");
@@ -3529,7 +3529,7 @@ describe("Admin", () => {
 
     expect(
       await within(festivalSection).findByText(
-        /festivalname konnte gerade nicht gespeichert werden/i,
+        /eventname konnte gerade nicht gespeichert werden/i,
       ),
     ).toBeVisible();
     expect(
@@ -3537,15 +3537,15 @@ describe("Admin", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("zeigt und bearbeitet den Festivalcode im Adminbereich", async () => {
+  it("zeigt und bearbeitet den Eventcode im Adminbereich", async () => {
     await renderLoadedApp();
     const user = await loginWith("ALICE42");
 
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
 
-    const festivalSection = sectionForHeading(/^festival$/i);
+    const festivalSection = sectionForHeading(/^event$/i);
     const codeInput =
-      await within(festivalSection).findByLabelText(/^festivalcode$/i);
+      await within(festivalSection).findByLabelText(/^eventcode$/i);
 
     expect(codeInput).toHaveValue("HURRICANE2026");
 
@@ -3553,7 +3553,7 @@ describe("Admin", () => {
     await user.type(codeInput, "neuercode");
     await user.click(
       within(festivalSection).getByRole("button", {
-        name: /festivalcode speichern/i,
+        name: /eventcode speichern/i,
       }),
     );
 
@@ -3566,27 +3566,27 @@ describe("Admin", () => {
     );
   });
 
-  it("validiert einen leeren Festivalcode clientseitig", async () => {
+  it("validiert einen leeren Eventcode clientseitig", async () => {
     await renderLoadedApp();
     const user = await loginWith("ALICE42");
 
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
 
-    const festivalSection = sectionForHeading(/^festival$/i);
+    const festivalSection = sectionForHeading(/^event$/i);
     const codeInput =
-      await within(festivalSection).findByLabelText(/^festivalcode$/i);
+      await within(festivalSection).findByLabelText(/^eventcode$/i);
 
     await user.clear(codeInput);
     await user.click(
       within(festivalSection).getByRole("button", {
-        name: /festivalcode speichern/i,
+        name: /eventcode speichern/i,
       }),
     );
 
     expect(updateFestivalAccessCode).not.toHaveBeenCalled();
     expect(
       await within(festivalSection).findByText(
-        /festivalcode ist erforderlich/i,
+        /eventcode ist erforderlich/i,
       ),
     ).toBeVisible();
   });
@@ -3601,7 +3601,7 @@ describe("Admin", () => {
     const festivalSection = sectionForHeading(/^archiv$/i);
     await user.click(
       within(festivalSection).getByRole("button", {
-        name: /festival archivieren/i,
+        name: /event archivieren/i,
       }),
     );
 

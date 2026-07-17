@@ -4,19 +4,19 @@
 
 1. Einleitung
 2. Anmeldung als Administrator
-3. Ein neues Festival vorbereiten
+3. Ein neues Event vorbereiten
 4. Teilnehmer verwalten
 5. Kategorien verwalten
-6. Festivaleinstellungen
-7. Während des Festivals
-8. Nach dem Festival
+6. Eventeinstellungen
+7. Während des Events
+8. Nach dem Event
 9. Häufige Probleme
 
 ## Einleitung
 
-Dieses Handbuch begleitet den gesamten Lebenszyklus eines Festivals, von der Vorbereitung über die Durchführung bis zur Archivierung der Ergebnisse.
+Dieses Handbuch begleitet den gesamten Lebenszyklus eines Events, von der Vorbereitung über die Durchführung bis zur Archivierung der Ergebnisse.
 
-Dieses Handbuch richtet sich an Administratoren der Festival App. Es erklärt, wie du ein Festival vorbereitest, Teilnehmer und Kategorien verwaltest, Abstimmungen während des Festivals begleitest und die Ergebnisse nach dem Festival sicherst.
+Dieses Handbuch richtet sich an Administratoren der Event App. Es erklärt, wie du ein Event vorbereitest, Teilnehmer und Kategorien verwaltest, Abstimmungen während des Events begleitest und die Ergebnisse nach dem Event sicherst.
 
 Das Handbuch setzt keine Entwicklerkenntnisse voraus. Es beschreibt nur Funktionen, die in der App für Administratoren verfügbar sind.
 
@@ -24,25 +24,25 @@ Das Handbuch setzt keine Entwicklerkenntnisse voraus. Es beschreibt nur Funktion
 
 Die App hat zwei Zugangsschritte:
 
-1. Öffne die Festival App.
-2. Gib den Festivalcode ein, wenn die App danach fragt.
+1. Öffne die Event App.
+2. Gib den Eventcode ein, wenn die App danach fragt.
 3. Gib deinen persönlichen Teilnehmercode ein.
 
-Wenn dein Teilnehmerkonto Administratorrechte hat, erscheint oben rechts die Schaltfläche **Admin**. Über diese Schaltfläche öffnest du den Adminbereich. Dort kannst du Festivalname, Teilnehmer, Kategorien und Bingo verwalten, das Festival archivieren und einen JSON-Export erstellen.
+Wenn dein Teilnehmerkonto Administratorrechte hat, erscheint oben rechts die Schaltfläche **Admin**. Über diese Schaltfläche öffnest du den Adminbereich. Dort kannst du Eventname, Teilnehmer, Kategorien und Bingo verwalten, das Event archivieren und einen JSON-Export erstellen.
 
 Wenn die Schaltfläche **Admin** nicht sichtbar ist, bist du entweder nicht angemeldet, dein Teilnehmercode gehört nicht zu einem Administrator, oder dein Teilnehmerkonto ist deaktiviert.
 
-## Ein neues Festival vorbereiten
+## Ein neues Event vorbereiten
 
 Empfohlene Reihenfolge:
 
-1. **Festivalname festlegen**
+1. **Eventname festlegen**
 
-   Öffne den Adminbereich und ändere im Abschnitt **Festival** den Festivalnamen. Speichere die Änderung. Der neue Name wird direkt in der App angezeigt.
+   Öffne den Adminbereich und ändere im Abschnitt **Event** den Eventnamen. Speichere die Änderung. Der neue Name wird direkt in der App angezeigt.
 
-2. **Festivalcode festlegen**
+2. **Eventcode festlegen**
 
-   Der Festivalcode schützt den ersten Zugang zur App. Öffne den Adminbereich und lege im Abschnitt **Festival** den gemeinsamen Festivalcode fest. Nach dem Speichern ist der neue Code für den Festivalzugang gültig.
+   Der Eventcode schützt den ersten Zugang zur App. Öffne den Adminbereich und lege im Abschnitt **Event** den gemeinsamen Eventcode fest. Nach dem Speichern ist der neue Code für den Eventzugang gültig.
 
 3. **Teilnehmer anlegen**
 
@@ -54,16 +54,16 @@ Empfohlene Reihenfolge:
 
 5. **Funktionstest durchführen**
 
-   Prüfe vor dem Festival mindestens:
+   Prüfe vor dem Event mindestens:
 
-   - Kann sich ein normaler Teilnehmer mit Festivalcode und Teilnehmercode anmelden?
+   - Kann sich ein normaler Teilnehmer mit Eventcode und Teilnehmercode anmelden?
    - Sieht ein normaler Teilnehmer keinen Adminbereich?
    - Kann sich ein Administrator anmelden und den Adminbereich öffnen?
    - Werden Teilnehmer und Kategorien korrekt angezeigt?
    - Werden offene Kategorien zur Abstimmung angeboten?
    - Werden Ergebnisse angezeigt, sobald Stimmen vorhanden sind?
 
-   Wichtig: Stimmen können aktuell nicht im Adminbereich zurückgesetzt werden. Gib Teststimmen deshalb nur ab, wenn diese im Festivalstand bleiben dürfen.
+   Wichtig: Stimmen können aktuell nicht im Adminbereich zurückgesetzt werden. Gib Teststimmen deshalb nur ab, wenn diese im Eventstand bleiben dürfen.
 
 ## Teilnehmer verwalten
 
@@ -168,45 +168,45 @@ Wenn eine Kategorie Stimmen enthält, werden diese Stimmen weiterhin für die Er
 
 Eine Kategorie kann nur gelöscht werden, wenn noch keine Stimmen für sie vorhanden sind. Kategorien mit vorhandenen Stimmen können im Adminbereich nicht gelöscht werden. Wenn du es trotzdem versuchst, zeigt die App eine Fehlermeldung an. In diesem Fall kannst du die Kategorie schließen, aber nicht löschen.
 
-## Festivaleinstellungen
+## Eventeinstellungen
 
-### Festivalname ändern
+### Eventname ändern
 
 1. Öffne den Adminbereich.
-2. Gehe zum Abschnitt **Festival**.
-3. Ändere den Festivalnamen.
-4. Klicke auf **Festivalname speichern**.
+2. Gehe zum Abschnitt **Event**.
+3. Ändere den Eventnamen.
+4. Klicke auf **Eventeinstellungen speichern**.
 
 Der neue Name wird direkt in der App verwendet.
 
-### Festivalcode ändern
+### Eventcode ändern
 
 1. Öffne den Adminbereich.
-2. Gehe zum Abschnitt **Festival**.
-3. Ändere den Festivalcode.
-4. Klicke auf **Festivalcode speichern**.
+2. Gehe zum Abschnitt **Event**.
+3. Ändere den Eventcode.
+4. Klicke auf **Eventcode speichern**.
 
-Nach dem Speichern ist der neue Festivalcode für den Festivalzugang gültig. Leere Festivalcodes werden nicht akzeptiert.
+Nach dem Speichern ist der neue Eventcode für den Eventzugang gültig. Leere Eventcodes werden nicht akzeptiert.
 
-### Festival archivieren
+### Event archivieren
 
-Mit **Festival archivieren** erstellt die App einen Snapshot des aktuellen Festivalstands. Dazu gehören Teilnehmer, Kategorien und Stimmen zum Zeitpunkt der Archivierung. Teilnehmercodes werden dabei nicht im Archiv gespeichert.
+Mit **Event archivieren** erstellt die App einen Snapshot des aktuellen Eventstands. Dazu gehören Teilnehmer, Kategorien und Stimmen zum Zeitpunkt der Archivierung. Teilnehmercodes werden dabei nicht im Archiv gespeichert.
 
-Die Archivierung setzt die laufende App nicht zurück. Der aktuelle Festivalstand bleibt nach der Archivierung unverändert.
+Die Archivierung setzt die laufende App nicht zurück. Der aktuelle Eventstand bleibt nach der Archivierung unverändert.
 
 Empfehlung: Erstelle vor der Archivierung zuerst einen JSON-Export der Ergebnisse.
 
 ### Archiv öffnen
 
-Das Öffnen oder Auswählen archivierter Festivals ist aktuell nicht als Adminfunktion in der App verfügbar. Im Adminbereich gibt es keine Archivliste und keine Schaltfläche, um ein archiviertes Festival zu laden.
+Das Öffnen oder Auswählen archivierter Events ist aktuell nicht als Adminfunktion in der App verfügbar. Im Adminbereich gibt es keine Archivliste und keine Schaltfläche, um ein archiviertes Event zu laden.
 
 ### Ergebnisse als JSON exportieren
 
 1. Öffne den Adminbereich.
-2. Gehe zum Abschnitt **Festival**.
+2. Gehe zum Abschnitt **Event**.
 3. Klicke auf **JSON exportieren**.
 
-Die App lädt eine JSON-Datei herunter. Der Standardexport enthält Rohdaten des aktuellen Festivals, darunter Festivalinformationen, Teilnehmer ohne Zugangscodes, Adminstatus, Kategorien, abgegebene Stimmen, Exportzeitpunkt und Formatversion.
+Die App lädt eine JSON-Datei herunter. Der Standardexport enthält Rohdaten des aktuellen Events, darunter Eventinformationen, Teilnehmer ohne Zugangscodes, Adminstatus, Kategorien, abgegebene Stimmen, Exportzeitpunkt und Formatversion.
 
 Wenn du Teilnehmercodes fachlich mit exportieren musst, aktiviere vorher die Option **Teilnehmercodes in Export aufnehmen**. Die App zeigt dafür eine Warnung an. Diese Datei enthält Zugangsdaten und muss vertraulich behandelt werden.
 
@@ -232,9 +232,9 @@ Ab diesem Zeitpunkt sehen angemeldete Teilnehmer den Hauptbereich **Bingo**. Bei
 
 Danach wird der Bingo-Bereich für Teilnehmer ausgeblendet. Es gibt keine Historie vergangener Bingorunden.
 
-## Während des Festivals
+## Während des Events
 
-Typische administrative Aufgaben während des Festivals:
+Typische administrative Aufgaben während des Events:
 
 - Teilnehmer bei Loginproblemen unterstützen.
 - Teilnehmercodes prüfen oder bei Bedarf manuell ändern.
@@ -245,7 +245,7 @@ Typische administrative Aufgaben während des Festivals:
 - Ergebnisse prüfen, sobald Stimmen abgegeben wurden.
 - Kategorien nur dann löschen, wenn sicher noch keine Stimmen vorhanden sind.
 
-## Nach dem Festival
+## Nach dem Event
 
 Empfohlener Ablauf:
 
@@ -253,15 +253,15 @@ Empfohlener Ablauf:
 
    Erstelle zuerst einen JSON-Export und bewahre die Datei sicher auf.
 
-2. **Festival archivieren**
+2. **Event archivieren**
 
-   Archiviere danach das Festival über den Adminbereich.
+   Archiviere danach das Event über den Adminbereich.
 
-3. **Neues Festival vorbereiten**
+3. **Neues Event vorbereiten**
 
-   Bereite anschließend den nächsten Festivalstand vor: Festivalnamen anpassen, Teilnehmer prüfen oder neu anlegen und Kategorien vorbereiten.
+   Bereite anschließend den nächsten Eventstand vor: Eventnamen anpassen, Teilnehmer prüfen oder neu anlegen und Kategorien vorbereiten.
 
-   Beachte: Ein vollständiges Zurücksetzen aller Stimmen ist aktuell nicht als Adminfunktion in der App verfügbar. Plane den nächsten Festivalstand deshalb entsprechend sorgfältig.
+   Beachte: Ein vollständiges Zurücksetzen aller Stimmen ist aktuell nicht als Adminfunktion in der App verfügbar. Plane den nächsten Eventstand deshalb entsprechend sorgfältig.
 
 ## Häufige Probleme
 
@@ -269,7 +269,7 @@ Empfohlener Ablauf:
 
 Prüfe:
 
-- Wurde zuerst der richtige Festivalcode eingegeben?
+- Wurde zuerst der richtige Eventcode eingegeben?
 - Ist der Teilnehmercode korrekt geschrieben?
 - Ist der Teilnehmer aktiv?
 - Wurde der Teilnehmercode kürzlich geändert?

@@ -51,19 +51,19 @@
       },
       "processedData": {
         "title": "Verarbeitete Daten",
-        "body": "Die App verarbeitet Festivalname, Festivalcode, Teilnehmernamen, Teilnehmercodes, Adminstatus, Aktivstatus, Kategorien, abgegebene Stimmen und technische Zeitpunkte wie Stimm- und Exportzeitpunkte."
+        "body": "Die App verarbeitet Eventname, Eventcode, Teilnehmernamen, Teilnehmercodes, Adminstatus, Aktivstatus, Kategorien, abgegebene Stimmen und technische Zeitpunkte wie Stimm- und Exportzeitpunkte."
       },
       "purpose": {
         "title": "Zweck der Verarbeitung",
-        "body": "Die Daten werden verarbeitet, um den Zugang zur Festival App zu ermöglichen, Teilnehmer zu verwalten, Abstimmungen durchzuführen, Ergebnisse anzuzeigen, Exporte zu erstellen und Festivalstände zu archivieren."
+        "body": "Die Daten werden verarbeitet, um den Zugang zur Event App zu ermöglichen, Teilnehmer zu verwalten, Abstimmungen durchzuführen, Ergebnisse anzuzeigen, Exporte zu erstellen und Eventstände zu archivieren."
       },
       "legalBasis": {
         "title": "Rechtsgrundlage",
-        "body": "Die Verarbeitung erfolgt, damit die Festival App für die teilnehmenden Personen bereitgestellt und administriert werden kann."
+        "body": "Die Verarbeitung erfolgt, damit die Event App für die teilnehmenden Personen bereitgestellt und administriert werden kann."
       },
       "retention": {
         "title": "Speicherdauer",
-        "body": "Die Daten werden gespeichert, solange sie für die Durchführung, Auswertung oder Archivierung des Festivals benötigt werden. Administratoren können Teilnehmer deaktivieren, Kategorien verwalten, JSON-Exporte erstellen und Festivalstände archivieren."
+        "body": "Die Daten werden gespeichert, solange sie für die Durchführung, Auswertung oder Archivierung des Events benötigt werden. Administratoren können Teilnehmer deaktivieren, Kategorien verwalten, JSON-Exporte erstellen und Eventstände archivieren."
       },
       "supabase": {
         "title": "Nutzung von Supabase",
@@ -80,10 +80,10 @@
     }
   },
   "festivalAccess": {
-    "ariaLabel": "{{festivalName}} Festivalzugang",
-    "codeLabel": "Festivalcode",
-    "codePlaceholder": "Festivalcode eingeben",
-    "submit": "Festival freischalten",
+    "ariaLabel": "{{festivalName}} Eventzugang",
+    "codeLabel": "Eventcode",
+    "codePlaceholder": "Eventcode eingeben",
+    "submit": "Event freischalten",
     "qr": {
       "label": "QR-Code Scanner",
       "start": "QR-Code scannen",
@@ -91,20 +91,20 @@
       "stop": "Scan abbrechen",
       "videoLabel": "Kamerabild zum Scannen des QR-Codes",
       "errors": {
-        "unsupported": "QR-Code Scannen ist auf diesem Gerät nicht verfügbar. Du kannst den Festivalcode manuell eingeben.",
-        "camera": "Die Kamera konnte nicht gestartet werden. Du kannst den Festivalcode manuell eingeben oder den Scan erneut versuchen.",
-        "scan": "Der QR-Code konnte nicht gelesen werden. Bitte versuche es erneut oder gib den Festivalcode manuell ein.",
-        "invalidCode": "Dieser QR-Code enthält keinen gültigen Festivalcode. Bitte versuche es erneut oder gib den Festivalcode manuell ein."
+        "unsupported": "QR-Code Scannen ist auf diesem Gerät nicht verfügbar. Du kannst den Eventcode manuell eingeben.",
+        "camera": "Die Kamera konnte nicht gestartet werden. Du kannst den Eventcode manuell eingeben oder den Scan erneut versuchen.",
+        "scan": "Der QR-Code konnte nicht gelesen werden. Bitte versuche es erneut oder gib den Eventcode manuell ein.",
+        "invalidCode": "Dieser QR-Code enthält keinen gültigen Eventcode. Bitte versuche es erneut oder gib den Eventcode manuell ein."
       }
     },
     "errors": {
-      "invalidCode": "Der Festivalcode ist ungültig. Prüfe deine Eingabe und versuche es erneut.",
-      "verify": "Der Festivalcode konnte gerade nicht geprüft werden. Versuch es bitte gleich nochmal."
+      "invalidCode": "Der Eventcode ist ungültig. Prüfe deine Eingabe und versuche es erneut.",
+      "verify": "Der Eventcode konnte gerade nicht geprüft werden. Versuch es bitte gleich nochmal."
     }
   },
   "festival": {
     "errors": {
-      "load": "Der Festivalname konnte gerade nicht geladen werden."
+      "load": "Der Eventname konnte gerade nicht geladen werden."
     }
   },
   "hero": {
@@ -133,10 +133,10 @@
   },
   "dashboard": {
     "eyebrow": "Dein Dashboard",
-    "festivalLabel": "Festival",
-    "guestName": "Festivalcrew",
+    "festivalLabel": "Event",
+    "guestName": "Eventcrew",
     "greeting": "Hallo {{name}}",
-    "description": "Alles Wichtige fuer dein Festival auf einen Blick.",
+    "description": "Alles Wichtige fuer dein Event auf einen Blick.",
     "guestDescription": "Melde dich mit deinem Teilnehmercode an, um alle Bereiche persoenlich zu nutzen.",
     "quickAccess": "Schnellzugriff",
     "eventStatus": {
@@ -151,7 +151,7 @@
     "tiles": {
       "timetable": {
         "title": "Timetable",
-        "description": "Deine Festivalplanung und Favoriten.",
+        "description": "Deine Eventplanung und Favoriten.",
         "status": {
           "available": "{{count}} Auftritte hinterlegt.",
           "empty": "Noch kein Timetable vorhanden."
@@ -160,7 +160,7 @@
       },
       "games": {
         "title": "Spiele",
-        "description": "Bingo und spaetere Festivalspiele.",
+        "description": "Bingo und weitere Eventspiele.",
         "status": {
           "bingo": "Bingo ist verfuegbar.",
           "horseRacing": "Pferderennen ist offen.",
@@ -191,7 +191,7 @@
       },
       "voting": {
         "title": "Abstimmungen",
-        "description": "Aktive Abstimmungen fuer die Festivalcrew.",
+        "description": "Aktive Abstimmungen fuer die Eventcrew.",
         "status": {
           "available": "{{count}} aktive Abstimmungen.",
           "empty": "Keine Abstimmung aktiv."
@@ -243,9 +243,9 @@
   "identity": {
     "title": "Gib deinen Teilnehmercode ein",
     "loginTitle": "Mit Teilnehmercode anmelden",
-    "loginDescription": "Gib deinen Teilnehmercode ein, um dein Profil, Abstimmungen und persönliche Festivalbereiche freizuschalten.",
+    "loginDescription": "Gib deinen Teilnehmercode ein, um dein Profil, Abstimmungen und persönliche Eventbereiche freizuschalten.",
     "profileTitle": "Dein Profil",
-    "profileDescription": "Hier siehst du, mit welchem Namen und Avatar du im Festival unterwegs bist.",
+    "profileDescription": "Hier siehst du, mit welchem Namen und Avatar du beim Event dabei bist.",
     "loggedInAs": "Angemeldet als:",
     "logout": "Abmelden",
     "participantCodeLabel": "Teilnehmercode",
@@ -289,7 +289,7 @@
     "changeStatus": "Status ändern",
     "navigation": {
       "label": "Adminbereiche",
-      "festival": "Festival",
+      "festival": "Event",
       "participants": "Teilnehmer",
       "awards": "Awards",
       "timetable": "Timetable",
@@ -577,35 +577,35 @@
     },
     "festival": {
       "eyebrow": "Admin",
-      "title": "Festival",
-      "nameLabel": "Festivalname",
+      "title": "Event",
+      "nameLabel": "Eventname",
       "startDateLabel": "Startdatum",
       "endDateLabel": "Enddatum",
       "periodMissing": "Es ist noch kein Eventzeitraum hinterlegt.",
       "save": "Eventeinstellungen speichern",
       "saveSuccess": "Eventeinstellungen wurden gespeichert.",
-      "codeLabel": "Festivalcode",
-      "codeLoading": "Festivalcode wird geladen...",
-      "codeSave": "Festivalcode speichern",
+      "codeLabel": "Eventcode",
+      "codeLoading": "Eventcode wird geladen...",
+      "codeSave": "Eventcode speichern",
       "export": "JSON exportieren",
       "exporting": "Exportiere...",
       "exportSuccess": "JSON-Export wurde erstellt.",
       "exportIncludeAccessCodes": "Teilnehmercodes in Export aufnehmen",
       "exportAccessCodeWarning": "Warnung: Dieser Export enthält Teilnehmercodes und muss vertraulich behandelt werden.",
-      "archive": "Festival archivieren",
+      "archive": "Event archivieren",
       "archiving": "Archiviere...",
-      "archiveConfirm": "Aktuelles Festival wirklich archivieren? Die aktiven Daten bleiben unverändert.",
-      "archiveSuccess": "Festival wurde archiviert. Archiv ID: {{archiveId}}",
+      "archiveConfirm": "Aktuelles Event wirklich archivieren? Die aktiven Daten bleiben unverändert.",
+      "archiveSuccess": "Event wurde archiviert. Archiv ID: {{archiveId}}",
       "errors": {
-        "save": "Der Festivalname konnte gerade nicht gespeichert werden.",
-        "nameRequired": "Der Festivalname ist erforderlich.",
+        "save": "Der Eventname konnte gerade nicht gespeichert werden.",
+        "nameRequired": "Der Eventname ist erforderlich.",
         "periodIncomplete": "Startdatum und Enddatum müssen gemeinsam ausgefüllt werden.",
         "periodOrder": "Das Enddatum darf nicht vor dem Startdatum liegen.",
-        "codeLoad": "Der Festivalcode konnte gerade nicht geladen werden.",
-        "codeSave": "Der Festivalcode konnte gerade nicht gespeichert werden.",
-        "codeRequired": "Der Festivalcode ist erforderlich.",
+        "codeLoad": "Der Eventcode konnte gerade nicht geladen werden.",
+        "codeSave": "Der Eventcode konnte gerade nicht gespeichert werden.",
+        "codeRequired": "Der Eventcode ist erforderlich.",
         "export": "Der JSON-Export konnte gerade nicht erstellt werden.",
-        "archive": "Das Festival konnte gerade nicht archiviert werden."
+        "archive": "Das Event konnte gerade nicht archiviert werden."
       }
     },
     "categories": {

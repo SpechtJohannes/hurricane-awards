@@ -51,19 +51,19 @@
       },
       "processedData": {
         "title": "Verwerkte gegevens",
-        "body": "De app verwerkt festivalnaam, festivalcode, deelnemersnamen, deelnemerscodes, adminstatus, actieve status, categorieën, uitgebrachte stemmen en technische tijdstippen zoals stem- en exporttijdstippen."
+        "body": "De app verwerkt evenementnaam, evenementcode, deelnemersnamen, deelnemerscodes, adminstatus, actieve status, categorieën, uitgebrachte stemmen en technische tijdstippen zoals stem- en exporttijdstippen."
       },
       "purpose": {
         "title": "Doel van de verwerking",
-        "body": "De gegevens worden verwerkt om toegang tot de Festival App mogelijk te maken, deelnemers te beheren, stemmingen uit te voeren, resultaten te tonen, exports te maken en festivalstanden te archiveren."
+        "body": "De gegevens worden verwerkt om toegang tot de Evenement App mogelijk te maken, deelnemers te beheren, stemmingen uit te voeren, resultaten te tonen, exports te maken en evenementstanden te archiveren."
       },
       "legalBasis": {
         "title": "Rechtsgrond",
-        "body": "De verwerking vindt plaats zodat de Festival App voor de deelnemende personen beschikbaar gesteld en beheerd kan worden."
+        "body": "De verwerking vindt plaats zodat de Evenement App voor de deelnemende personen beschikbaar gesteld en beheerd kan worden."
       },
       "retention": {
         "title": "Bewaartermijn",
-        "body": "De gegevens worden bewaard zolang ze nodig zijn voor de uitvoering, evaluatie of archivering van het festival. Administrators kunnen deelnemers deactiveren, categorieën beheren, JSON-exports maken en festivalstanden archiveren."
+        "body": "De gegevens worden bewaard zolang ze nodig zijn voor de uitvoering, evaluatie of archivering van het evenement. Administrators kunnen deelnemers deactiveren, categorieën beheren, JSON-exports maken en evenementstanden archiveren."
       },
       "supabase": {
         "title": "Gebruik van Supabase",
@@ -80,10 +80,10 @@
     }
   },
   "festivalAccess": {
-    "ariaLabel": "{{festivalName}} festivaltoegang",
-    "codeLabel": "Festivalcode",
-    "codePlaceholder": "Festivalcode invoeren",
-    "submit": "Festival ontgrendelen",
+    "ariaLabel": "{{festivalName}} evenementtoegang",
+    "codeLabel": "Evenementcode",
+    "codePlaceholder": "Evenementcode invoeren",
+    "submit": "Evenement ontgrendelen",
     "qr": {
       "label": "QR-codescanner",
       "start": "QR-code scannen",
@@ -91,20 +91,20 @@
       "stop": "Scan annuleren",
       "videoLabel": "Camerabeeld om de QR-code te scannen",
       "errors": {
-        "unsupported": "QR-code scannen is op dit apparaat niet beschikbaar. Je kunt de festivalcode handmatig invoeren.",
-        "camera": "De camera kon niet worden gestart. Je kunt de festivalcode handmatig invoeren of opnieuw scannen.",
-        "scan": "De QR-code kon niet worden gelezen. Probeer het opnieuw of voer de festivalcode handmatig in.",
-        "invalidCode": "Deze QR-code bevat geen geldige festivalcode. Probeer het opnieuw of voer de festivalcode handmatig in."
+        "unsupported": "QR-code scannen is op dit apparaat niet beschikbaar. Je kunt de evenementcode handmatig invoeren.",
+        "camera": "De camera kon niet worden gestart. Je kunt de evenementcode handmatig invoeren of opnieuw scannen.",
+        "scan": "De QR-code kon niet worden gelezen. Probeer het opnieuw of voer de evenementcode handmatig in.",
+        "invalidCode": "Deze QR-code bevat geen geldige evenementcode. Probeer het opnieuw of voer de evenementcode handmatig in."
       }
     },
     "errors": {
-      "invalidCode": "De festivalcode is ongeldig. Controleer je invoer en probeer het opnieuw.",
-      "verify": "De festivalcode kon net niet worden gecontroleerd. Probeer het zo nog eens."
+      "invalidCode": "De evenementcode is ongeldig. Controleer je invoer en probeer het opnieuw.",
+      "verify": "De evenementcode kon net niet worden gecontroleerd. Probeer het zo nog eens."
     }
   },
   "festival": {
     "errors": {
-      "load": "De festivalnaam kon net niet worden geladen."
+      "load": "De evenementnaam kon net niet worden geladen."
     }
   },
   "hero": {
@@ -133,10 +133,10 @@
   },
   "dashboard": {
     "eyebrow": "Je dashboard",
-    "festivalLabel": "Festival",
-    "guestName": "festivalcrew",
+    "festivalLabel": "Evenement",
+    "guestName": "evenementgroep",
     "greeting": "Hallo {{name}}",
-    "description": "Alles wat belangrijk is voor je festival in een overzicht.",
+    "description": "Alles wat belangrijk is voor je evenement in een overzicht.",
     "guestDescription": "Meld je aan met je deelnemerscode om alle onderdelen persoonlijk te gebruiken.",
     "quickAccess": "Snelle toegang",
     "eventStatus": {
@@ -151,7 +151,7 @@
     "tiles": {
       "timetable": {
         "title": "Timetable",
-        "description": "Je festivalplanning en favorieten.",
+        "description": "Je evenementplanning en favorieten.",
         "status": {
           "available": "{{count}} optredens beschikbaar.",
           "empty": "Nog geen timetable beschikbaar."
@@ -160,7 +160,7 @@
       },
       "games": {
         "title": "Spellen",
-        "description": "Bingo en latere festivalspellen.",
+        "description": "Bingo en andere evenementspellen.",
         "status": {
           "bingo": "Bingo is beschikbaar.",
           "horseRacing": "Paardenrennen is open.",
@@ -191,7 +191,7 @@
       },
       "voting": {
         "title": "Stemmingen",
-        "description": "Actieve stemmingen voor de festivalcrew.",
+        "description": "Actieve stemmingen voor de evenementgroep.",
         "status": {
           "available": "{{count}} actieve stemmingen.",
           "empty": "Geen stemming actief."
@@ -243,9 +243,9 @@
   "identity": {
     "title": "Voer je deelnemerscode in",
     "loginTitle": "Aanmelden met deelnemerscode",
-    "loginDescription": "Voer je deelnemerscode in om je profiel, stemmingen en persoonlijke festivalonderdelen te ontgrendelen.",
+    "loginDescription": "Voer je deelnemerscode in om je profiel, stemmingen en persoonlijke evenementonderdelen te ontgrendelen.",
     "profileTitle": "Je profiel",
-    "profileDescription": "Hier zie je met welke naam en avatar je op het festival meedoet.",
+    "profileDescription": "Hier zie je met welke naam en avatar je aan het evenement deelneemt.",
     "loggedInAs": "Aangemeld als:",
     "logout": "Afmelden",
     "participantCodeLabel": "Deelnemerscode",
@@ -289,7 +289,7 @@
     "changeStatus": "Status wijzigen",
     "navigation": {
       "label": "Adminonderdelen",
-      "festival": "Festival",
+      "festival": "Evenement",
       "participants": "Deelnemers",
       "awards": "Awards",
       "timetable": "Timetable",
@@ -577,35 +577,35 @@
     },
     "festival": {
       "eyebrow": "Admin",
-      "title": "Festival",
-      "nameLabel": "Festivalnaam",
+      "title": "Evenement",
+      "nameLabel": "Evenementnaam",
       "startDateLabel": "Startdatum",
       "endDateLabel": "Einddatum",
       "periodMissing": "Er is nog geen evenementperiode ingesteld.",
       "save": "Evenementinstellingen opslaan",
       "saveSuccess": "Evenementinstellingen zijn opgeslagen.",
-      "codeLabel": "Festivalcode",
-      "codeLoading": "Festivalcode wordt geladen...",
-      "codeSave": "Festivalcode opslaan",
+      "codeLabel": "Evenementcode",
+      "codeLoading": "Evenementcode wordt geladen...",
+      "codeSave": "Evenementcode opslaan",
       "export": "JSON exporteren",
       "exporting": "Exporteren...",
       "exportSuccess": "JSON-export is aangemaakt.",
       "exportIncludeAccessCodes": "Deelnemerscodes opnemen in export",
       "exportAccessCodeWarning": "Waarschuwing: deze export bevat deelnemerscodes en moet vertrouwelijk worden behandeld.",
-      "archive": "Festival archiveren",
+      "archive": "Evenement archiveren",
       "archiving": "Archiveren...",
-      "archiveConfirm": "Huidig festival echt archiveren? De actieve gegevens blijven ongewijzigd.",
-      "archiveSuccess": "Festival is gearchiveerd. Archief-ID: {{archiveId}}",
+      "archiveConfirm": "Huidig evenement echt archiveren? De actieve gegevens blijven ongewijzigd.",
+      "archiveSuccess": "Evenement is gearchiveerd. Archief-ID: {{archiveId}}",
       "errors": {
-        "save": "De festivalnaam kon net niet worden opgeslagen.",
-        "nameRequired": "De festivalnaam is verplicht.",
+        "save": "De evenementnaam kon net niet worden opgeslagen.",
+        "nameRequired": "De evenementnaam is verplicht.",
         "periodIncomplete": "Start- en einddatum moeten samen worden ingevuld.",
         "periodOrder": "De einddatum mag niet voor de startdatum liggen.",
-        "codeLoad": "De festivalcode kon net niet worden geladen.",
-        "codeSave": "De festivalcode kon net niet worden opgeslagen.",
-        "codeRequired": "De festivalcode is verplicht.",
+        "codeLoad": "De evenementcode kon net niet worden geladen.",
+        "codeSave": "De evenementcode kon net niet worden opgeslagen.",
+        "codeRequired": "De evenementcode is verplicht.",
         "export": "De JSON-export kon net niet worden aangemaakt.",
-        "archive": "Het festival kon net niet worden gearchiveerd."
+        "archive": "Het evenement kon net niet worden gearchiveerd."
       }
     },
     "categories": {

@@ -34,9 +34,9 @@ flowchart LR
 ## Projektstruktur
 
 - `src`: React App, Datenadapter, Konfiguration, Styles, Internationalisierung und Tests.
-- `src/App.tsx`: Zentrale App-Komponente mit Festivalzugang, Teilnehmerlogin, Datenladen, Abstimmung, Ergebnisanzeige und Admin-Interaktionen.
+- `src/App.tsx`: Zentrale App-Komponente mit Eventzugang, Teilnehmerlogin, Datenladen, Abstimmung, Ergebnisanzeige und Admin-Interaktionen.
 - `src/App.css` und `src/index.css`: Globale UI-Styles.
-- `src/components`: Wiederverwendbare Admin-Komponenten, aktuell fuer Teilnehmer, Kategorien und Festivalaktionen.
+- `src/components`: Wiederverwendbare Admin-Komponenten, aktuell fuer Teilnehmer, Kategorien und Eventaktionen.
 - `src/data`: Supabase-Datenadapter. Diese Dateien kapseln RPC-Aufrufe und mappen Datenbank-Rows auf Frontend-Typen.
 - `src/data/accessContext.ts`: Einheitliche Struktur fuer Teilnehmer-/Admin-Kontext bei RPC-Aufrufen.
 - `src/config/festivals.ts`: Lokale Festivalkonfiguration, unter anderem Storage-Key-Namensraeume.
@@ -55,7 +55,7 @@ flowchart LR
 
 Es gibt zwei Zugangsebenen:
 
-1. Der gemeinsame Festivalcode wird ueber `ha_verify_festival_access_code` geprueft. Die App speichert danach eine technische Access-Version in `localStorage`, nicht den Festivalcode selbst.
+1. Der gemeinsame Eventcode wird ueber `ha_verify_festival_access_code` geprueft. Die App speichert danach eine technische Access-Version in `localStorage`, nicht den Eventcode selbst.
 2. Der persoenliche Teilnehmercode wird serverseitig ueber `ha_login_participant` geprueft und nur fuer die aktuelle Browser-Session in `sessionStorage` gehalten.
 
 Der Teilnehmerlogin laeuft ueber `loginParticipant` in `src/data/participants.ts`. Bei Erfolg erhaelt das Frontend nur die fuer die Session benoetigten Teilnehmerdaten: `id`, `name`, `displayName`, `avatarId`, `isAdmin`, `isActive` sowie den eingegebenen Code fuer weitere RPC-Kontexte.
@@ -186,15 +186,15 @@ admin-geschuetzte RPC `ha_admin_update_event_settings` speichert sie atomar und
 erzwingt entweder zwei leere oder zwei gueltige, chronologisch geordnete Datumswerte.
 Diese Felder sind die zentrale Quelle fuer alle zeitabhaengigen Funktionen.
 
-### Festivaleinstellungen
+### Eventeinstellungen
 
-Der Festivalname liegt zentral in `app_settings` unter dem Key `festival_name`. Das Frontend liest ihn ueber `ha_get_festival_name`. Admins aendern ihn ueber `ha_update_festival_name`; die RPC validiert einen nicht-leeren Namen.
+Der in der Oberflaeche als Eventname bezeichnete Wert liegt zentral in `app_settings` unter dem technischen Key `festival_name`. Das Frontend liest ihn ueber `ha_get_festival_name`. Admins aendern ihn ueber `ha_update_festival_name`; die RPC validiert einen nicht-leeren Namen.
 
-Der gemeinsame Festivalcode liegt ebenfalls in `app_settings` unter dem Key `festival_access_code`. Die App prueft eingegebene Codes ueber `ha_verify_festival_access_code`, ohne den Codewert oeffentlich auszulesen. Admins lesen und aendern den Code ueber `ha_get_festival_access_code` und `ha_update_festival_access_code`; die Update-RPC validiert einen nicht-leeren Code. Frische Deployments installieren keinen bekannten Default-Code; der initiale Code wird projektspezifisch im Deployment gesetzt.
+Der in der Oberflaeche als Eventcode bezeichnete gemeinsame Zugangscode liegt ebenfalls in `app_settings` unter dem technischen Key `festival_access_code`. Die App prueft eingegebene Codes ueber `ha_verify_festival_access_code`, ohne den Codewert oeffentlich auszulesen. Admins lesen und aendern den Code ueber `ha_get_festival_access_code` und `ha_update_festival_access_code`; die Update-RPC validiert einen nicht-leeren Code. Frische Deployments installieren keinen bekannten Default-Code; der initiale Code wird projektspezifisch im Deployment gesetzt.
 
 Es gibt aktuell keine separate Tabelle `festival_settings`.
 
-### Festivalarchivierung
+### Eventarchivierung
 
 Admins starten die Archivierung ueber `ha_archive_festival`. Die RPC kopiert den aktuellen Stand in eigene Archivtabellen:
 
@@ -209,7 +209,7 @@ Teilnehmercodes werden nicht in `festival_archive_participants` gespeichert. Arc
 
 ### JSON-Export
 
-Admins koennen den aktuellen Festivalstand als JSON exportieren. Der Standardexport entfernt Teilnehmercodes aus den Teilnehmerdaten. Eine explizite Exportoption kann Codes einschliessen; die UI zeigt dafuer einen Warnhinweis an, weil solche Dateien vertraulich sind.
+Admins koennen den aktuellen Eventstand als JSON exportieren. Der Standardexport entfernt Teilnehmercodes aus den Teilnehmerdaten. Eine explizite Exportoption kann Codes einschliessen; die UI zeigt dafuer einen Warnhinweis an, weil solche Dateien vertraulich sind.
 
 Teilnehmer koennen Anzeigenamen und Avatar gemeinsam ueber `ha_update_own_profile` aendern. Die RPC nimmt bewusst keine Teilnehmer-ID entgegen, sondern ermittelt den aktiven Teilnehmer ausschliesslich aus dem persoenlichen Teilnehmercode. Sie trimmt und validiert den Anzeigenamen und akzeptiert nur stabile IDs aus der festen Avatarbibliothek. Die Avatarbilder liegen als versionierte SVG-Dateien in `src/assets/avatars`; `src/config/avatars.ts` ordnet stabile IDs den lokal gebuendelten Bildpfaden zu.
 
