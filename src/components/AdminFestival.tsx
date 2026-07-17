@@ -1,26 +1,31 @@
-import { useState, type FormEvent } from 'react'
-import { useTranslation } from 'react-i18next'
-import { SectionHeader } from './SectionHeader'
+import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
+import { SectionHeader } from "./SectionHeader";
+import type { EventSettings } from "../data/festival";
 
 type AdminFestivalProps = {
-  mode?: 'settings' | 'archive'
-  festivalName: string
-  error: string
-  isSaving: boolean
-  festivalCode: string
-  festivalCodeError: string
-  isLoadingFestivalCode: boolean
-  isSavingFestivalCode: boolean
-  isExporting: boolean
-  onSave: (name: string) => Promise<void>
-  onSaveFestivalCode: (code: string) => Promise<void>
-  onArchive: () => Promise<string>
-  onExport: (includeParticipantAccessCodes: boolean) => Promise<void>
-}
+  mode?: "settings" | "archive";
+  festivalName: string;
+  eventStartDate: string | null;
+  eventEndDate: string | null;
+  error: string;
+  isSaving: boolean;
+  festivalCode: string;
+  festivalCodeError: string;
+  isLoadingFestivalCode: boolean;
+  isSavingFestivalCode: boolean;
+  isExporting: boolean;
+  onSave: (settings: EventSettings) => Promise<void>;
+  onSaveFestivalCode: (code: string) => Promise<void>;
+  onArchive: () => Promise<string>;
+  onExport: (includeParticipantAccessCodes: boolean) => Promise<void>;
+};
 
 export function AdminFestival({
-  mode = 'settings',
+  mode = "settings",
   festivalName,
+  eventStartDate,
+  eventEndDate,
   error,
   isSaving,
   festivalCode,
@@ -33,110 +38,129 @@ export function AdminFestival({
   onArchive,
   onExport,
 }: AdminFestivalProps) {
-  const { t } = useTranslation()
-  const [name, setName] = useState(festivalName)
-  const [code, setCode] = useState(festivalCode)
-  const [formError, setFormError] = useState('')
-  const [codeFormError, setCodeFormError] = useState('')
-  const [archiveMessage, setArchiveMessage] = useState('')
-  const [archiveError, setArchiveError] = useState('')
-  const [exportMessage, setExportMessage] = useState('')
-  const [exportError, setExportError] = useState('')
+  const { t } = useTranslation();
+  const [name, setName] = useState(festivalName);
+  const [startDate, setStartDate] = useState(eventStartDate ?? "");
+  const [endDate, setEndDate] = useState(eventEndDate ?? "");
+  const [code, setCode] = useState(festivalCode);
+  const [formError, setFormError] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
+  const [codeFormError, setCodeFormError] = useState("");
+  const [archiveMessage, setArchiveMessage] = useState("");
+  const [archiveError, setArchiveError] = useState("");
+  const [exportMessage, setExportMessage] = useState("");
+  const [exportError, setExportError] = useState("");
   const [includeParticipantAccessCodes, setIncludeParticipantAccessCodes] =
-    useState(false)
-  const [isArchiving, setIsArchiving] = useState(false)
+    useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
 
   async function submitForm(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
-    const trimmedName = name.trim()
+    const trimmedName = name.trim();
 
     if (!trimmedName) {
-      setFormError(t('admin.festival.errors.nameRequired'))
-      return
+      setFormError(t("admin.festival.errors.nameRequired"));
+      return;
     }
 
-    setFormError('')
+    if (Boolean(startDate) !== Boolean(endDate)) {
+      setFormError(t("admin.festival.errors.periodIncomplete"));
+      return;
+    }
+
+    if (startDate && endDate && endDate < startDate) {
+      setFormError(t("admin.festival.errors.periodOrder"));
+      return;
+    }
+
+    setFormError("");
+    setSaveMessage("");
 
     try {
-      await onSave(trimmedName)
+      await onSave({
+        name: trimmedName,
+        startDate: startDate || null,
+        endDate: endDate || null,
+      });
+      setSaveMessage(t("admin.festival.saveSuccess"));
     } catch (saveError) {
       setFormError(
         saveError instanceof Error
           ? saveError.message
-          : t('admin.festival.errors.save'),
-      )
+          : t("admin.festival.errors.save"),
+      );
     }
   }
 
   async function submitCodeForm(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
-    const trimmedCode = code.trim().toUpperCase()
+    const trimmedCode = code.trim().toUpperCase();
 
     if (!trimmedCode) {
-      setCodeFormError(t('admin.festival.errors.codeRequired'))
-      return
+      setCodeFormError(t("admin.festival.errors.codeRequired"));
+      return;
     }
 
-    setCodeFormError('')
+    setCodeFormError("");
 
     try {
-      await onSaveFestivalCode(trimmedCode)
+      await onSaveFestivalCode(trimmedCode);
     } catch (saveError) {
       setCodeFormError(
         saveError instanceof Error
           ? saveError.message
-          : t('admin.festival.errors.codeSave'),
-      )
+          : t("admin.festival.errors.codeSave"),
+      );
     }
   }
 
   async function archiveCurrentFestival() {
-    const shouldArchive = window.confirm(t('admin.festival.archiveConfirm'))
+    const shouldArchive = window.confirm(t("admin.festival.archiveConfirm"));
 
     if (!shouldArchive) {
-      return
+      return;
     }
 
-    setIsArchiving(true)
-    setArchiveMessage('')
-    setArchiveError('')
+    setIsArchiving(true);
+    setArchiveMessage("");
+    setArchiveError("");
 
     try {
-      const archiveId = await onArchive()
+      const archiveId = await onArchive();
 
       setArchiveMessage(
-        t('admin.festival.archiveSuccess', {
+        t("admin.festival.archiveSuccess", {
           archiveId,
         }),
-      )
+      );
     } catch {
-      setArchiveError(t('admin.festival.errors.archive'))
+      setArchiveError(t("admin.festival.errors.archive"));
     } finally {
-      setIsArchiving(false)
+      setIsArchiving(false);
     }
   }
 
   async function exportCurrentFestival() {
-    setExportMessage('')
-    setExportError('')
+    setExportMessage("");
+    setExportError("");
 
     try {
-      await onExport(includeParticipantAccessCodes)
-      setExportMessage(t('admin.festival.exportSuccess'))
+      await onExport(includeParticipantAccessCodes);
+      setExportMessage(t("admin.festival.exportSuccess"));
     } catch {
-      setExportError(t('admin.festival.errors.export'))
+      setExportError(t("admin.festival.errors.export"));
     }
   }
 
-  if (mode === 'archive') {
+  if (mode === "archive") {
     return (
       <>
         <SectionHeader
-          title={t('admin.archive.title')}
+          title={t("admin.archive.title")}
           titleId="admin-archive-title"
-          eyebrow={t('admin.archive.eyebrow')}
+          eyebrow={t("admin.archive.eyebrow")}
         />
 
         <div className="admin-festival-actions">
@@ -155,12 +179,12 @@ export function AdminFestival({
                 setIncludeParticipantAccessCodes(event.target.checked)
               }
             />
-            {t('admin.festival.exportIncludeAccessCodes')}
+            {t("admin.festival.exportIncludeAccessCodes")}
           </label>
 
           {includeParticipantAccessCodes ? (
             <p className="admin-participant-form__error" role="alert">
-              {t('admin.festival.exportAccessCodeWarning')}
+              {t("admin.festival.exportAccessCodeWarning")}
             </p>
           ) : null}
 
@@ -177,8 +201,8 @@ export function AdminFestival({
             onClick={exportCurrentFestival}
           >
             {isExporting
-              ? t('admin.festival.exporting')
-              : t('admin.festival.export')}
+              ? t("admin.festival.exporting")
+              : t("admin.festival.export")}
           </button>
 
           {exportMessage ? (
@@ -202,8 +226,8 @@ export function AdminFestival({
             onClick={archiveCurrentFestival}
           >
             {isArchiving
-              ? t('admin.festival.archiving')
-              : t('admin.festival.archive')}
+              ? t("admin.festival.archiving")
+              : t("admin.festival.archive")}
           </button>
 
           {archiveMessage ? (
@@ -215,15 +239,15 @@ export function AdminFestival({
           ) : null}
         </div>
       </>
-    )
+    );
   }
 
   return (
     <>
       <SectionHeader
-        title={t('admin.festival.title')}
+        title={t("admin.festival.title")}
         titleId="admin-title"
-        eyebrow={t('admin.festival.eyebrow')}
+        eyebrow={t("admin.festival.eyebrow")}
       />
 
       {error ? <p className="admin__notice">{error}</p> : null}
@@ -231,7 +255,7 @@ export function AdminFestival({
       <form className="admin-festival" onSubmit={submitForm}>
         <div>
           <label htmlFor="admin-festival-name">
-            {t('admin.festival.nameLabel')}
+            {t("admin.festival.nameLabel")}
           </label>
           <input
             id="admin-festival-name"
@@ -239,14 +263,61 @@ export function AdminFestival({
             value={name}
             disabled={isSaving}
             onChange={(event) => {
-              setName(event.target.value)
-              setFormError('')
+              setName(event.target.value);
+              setFormError("");
             }}
           />
         </div>
 
+        <div className="admin-festival__dates">
+          <div>
+            <label htmlFor="admin-event-start-date">
+              {t("admin.festival.startDateLabel")}
+            </label>
+            <input
+              id="admin-event-start-date"
+              type="date"
+              value={startDate}
+              disabled={isSaving}
+              onChange={(event) => {
+                setStartDate(event.target.value);
+                setFormError("");
+                setSaveMessage("");
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="admin-event-end-date">
+              {t("admin.festival.endDateLabel")}
+            </label>
+            <input
+              id="admin-event-end-date"
+              type="date"
+              value={endDate}
+              disabled={isSaving}
+              onChange={(event) => {
+                setEndDate(event.target.value);
+                setFormError("");
+                setSaveMessage("");
+              }}
+            />
+          </div>
+        </div>
+
+        {!startDate && !endDate ? (
+          <p className="admin__notice">{t("admin.festival.periodMissing")}</p>
+        ) : null}
+
         {formError ? (
-          <p className="admin-participant-form__error">{formError}</p>
+          <p className="admin-participant-form__error" role="alert">
+            {formError}
+          </p>
+        ) : null}
+
+        {saveMessage ? (
+          <p className="admin-festival-actions__success" role="status">
+            {saveMessage}
+          </p>
         ) : null}
 
         <button
@@ -260,14 +331,14 @@ export function AdminFestival({
             isSavingFestivalCode
           }
         >
-          {isSaving ? t('common.saving') : t('admin.festival.save')}
+          {isSaving ? t("common.saving") : t("admin.festival.save")}
         </button>
       </form>
 
       <form className="admin-festival" onSubmit={submitCodeForm}>
         <div>
           <label htmlFor="admin-festival-code">
-            {t('admin.festival.codeLabel')}
+            {t("admin.festival.codeLabel")}
           </label>
           <input
             id="admin-festival-code"
@@ -275,14 +346,14 @@ export function AdminFestival({
             value={code}
             disabled={isLoadingFestivalCode || isSavingFestivalCode}
             onChange={(event) => {
-              setCode(event.target.value.toUpperCase())
-              setCodeFormError('')
+              setCode(event.target.value.toUpperCase());
+              setCodeFormError("");
             }}
             autoComplete="off"
             inputMode="text"
             placeholder={
               isLoadingFestivalCode
-                ? t('admin.festival.codeLoading')
+                ? t("admin.festival.codeLoading")
                 : undefined
             }
           />
@@ -308,10 +379,10 @@ export function AdminFestival({
           }
         >
           {isSavingFestivalCode
-            ? t('common.saving')
-            : t('admin.festival.codeSave')}
+            ? t("common.saving")
+            : t("admin.festival.codeSave")}
         </button>
       </form>
     </>
-  )
+  );
 }

@@ -139,6 +139,15 @@
     "description": "Alles wat belangrijk is voor je festival in een overzicht.",
     "guestDescription": "Meld je aan met je deelnemerscode om alle onderdelen persoonlijk te gebruiken.",
     "quickAccess": "Snelle toegang",
+    "eventStatus": {
+      "label": "Evenementstatus",
+      "countdown_one": "Nog {{count}} dag tot het evenement",
+      "countdown_other": "Nog {{count}} dagen tot het evenement",
+      "tomorrow": "Morgen begint het evenement",
+      "singleDay": "Vandaag is het evenement",
+      "eventDay": "Dag {{current}} van {{total}}",
+      "finished": "Het evenement is afgelopen"
+    },
     "tiles": {
       "timetable": {
         "title": "Timetable",
@@ -570,7 +579,11 @@
       "eyebrow": "Admin",
       "title": "Festival",
       "nameLabel": "Festivalnaam",
-      "save": "Festivalnaam opslaan",
+      "startDateLabel": "Startdatum",
+      "endDateLabel": "Einddatum",
+      "periodMissing": "Er is nog geen evenementperiode ingesteld.",
+      "save": "Evenementinstellingen opslaan",
+      "saveSuccess": "Evenementinstellingen zijn opgeslagen.",
       "codeLabel": "Festivalcode",
       "codeLoading": "Festivalcode wordt geladen...",
       "codeSave": "Festivalcode opslaan",
@@ -586,6 +599,8 @@
       "errors": {
         "save": "De festivalnaam kon net niet worden opgeslagen.",
         "nameRequired": "De festivalnaam is verplicht.",
+        "periodIncomplete": "Start- en einddatum moeten samen worden ingevuld.",
+        "periodOrder": "De einddatum mag niet voor de startdatum liggen.",
         "codeLoad": "De festivalcode kon net niet worden geladen.",
         "codeSave": "De festivalcode kon net niet worden opgeslagen.",
         "codeRequired": "De festivalcode is verplicht.",

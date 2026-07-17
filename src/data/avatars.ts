@@ -3,4 +3,4 @@ export {
   avatars,
   defaultAvatarId,
   type Avatar,
-} from '../config/avatars'
+} from "../config/avatars";

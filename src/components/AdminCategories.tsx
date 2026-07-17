@@ -1,32 +1,32 @@
-import { useState, type FormEvent } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import {
   type Category,
   type CategoryStatus,
   type CreateCategoryInput,
   type UpdateCategoryInput,
-} from '../data/categories'
-import { SectionHeader } from './SectionHeader'
+} from "../data/categories";
+import { SectionHeader } from "./SectionHeader";
 
 type CategoryFormState = {
-  id: string | null
-  title: string
-  description: string
-  status: CategoryStatus
-  sortOrder: string
-}
+  id: string | null;
+  title: string;
+  description: string;
+  status: CategoryStatus;
+  sortOrder: string;
+};
 
 type AdminCategoriesProps = {
-  categories: Category[]
-  error: string
-  isLoading: boolean
-  updatingCategoryId: string | null
-  deletingCategoryId: string | null
-  onCreate: (input: CreateCategoryInput) => Promise<void>
-  onUpdate: (input: UpdateCategoryInput) => Promise<void>
-  onChangeStatus: (categoryId: string, status: CategoryStatus) => void
-  onDelete: (category: Category) => void
-}
+  categories: Category[];
+  error: string;
+  isLoading: boolean;
+  updatingCategoryId: string | null;
+  deletingCategoryId: string | null;
+  onCreate: (input: CreateCategoryInput) => Promise<void>;
+  onUpdate: (input: UpdateCategoryInput) => Promise<void>;
+  onChangeStatus: (categoryId: string, status: CategoryStatus) => void;
+  onDelete: (category: Category) => void;
+};
 
 export function AdminCategories({
   categories,
@@ -39,71 +39,71 @@ export function AdminCategories({
   onChangeStatus,
   onDelete,
 }: AdminCategoriesProps) {
-  const { t } = useTranslation()
-  const [form, setForm] = useState<CategoryFormState | null>(null)
-  const [formError, setFormError] = useState('')
-  const [isSaving, setIsSaving] = useState(false)
+  const { t } = useTranslation();
+  const [form, setForm] = useState<CategoryFormState | null>(null);
+  const [formError, setFormError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const statusLabels: Record<CategoryStatus, string> = {
-    upcoming: t('status.upcoming'),
-    open: t('status.open'),
-    closed: t('status.closed'),
-  }
+    upcoming: t("status.upcoming"),
+    open: t("status.open"),
+    closed: t("status.closed"),
+  };
 
   function startCreate() {
-    setFormError('')
+    setFormError("");
     setForm({
       id: null,
-      title: '',
-      description: '',
-      status: 'upcoming',
-      sortOrder: '',
-    })
+      title: "",
+      description: "",
+      status: "upcoming",
+      sortOrder: "",
+    });
   }
 
   function startEdit(category: Category) {
-    setFormError('')
+    setFormError("");
     setForm({
       id: category.id,
       title: category.title,
       description: category.description,
       status: category.status,
       sortOrder:
-        category.sortOrder === undefined ? '' : String(category.sortOrder),
-    })
+        category.sortOrder === undefined ? "" : String(category.sortOrder),
+    });
   }
 
   function cancelForm() {
-    setForm(null)
-    setFormError('')
+    setForm(null);
+    setFormError("");
   }
 
   async function submitForm(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
     if (!form) {
-      return
+      return;
     }
 
-    const title = form.title.trim()
-    const description = form.description.trim()
+    const title = form.title.trim();
+    const description = form.description.trim();
     const parsedSortOrder =
-      form.sortOrder.trim() === '' ? undefined : Number(form.sortOrder)
+      form.sortOrder.trim() === "" ? undefined : Number(form.sortOrder);
 
     if (!title) {
-      setFormError(t('admin.categories.errors.titleRequired'))
-      return
+      setFormError(t("admin.categories.errors.titleRequired"));
+      return;
     }
 
     if (
       parsedSortOrder !== undefined &&
       (!Number.isInteger(parsedSortOrder) || parsedSortOrder < 0)
     ) {
-      setFormError(t('admin.categories.errors.sortOrderInvalid'))
-      return
+      setFormError(t("admin.categories.errors.sortOrderInvalid"));
+      return;
     }
 
-    setIsSaving(true)
-    setFormError('')
+    setIsSaving(true);
+    setFormError("");
 
     try {
       if (form.id) {
@@ -113,30 +113,30 @@ export function AdminCategories({
           description,
           status: form.status,
           sortOrder: parsedSortOrder,
-        })
+        });
       } else {
         await onCreate({
           title,
           description,
           status: form.status,
           sortOrder: parsedSortOrder,
-        })
+        });
       }
 
-      setForm(null)
+      setForm(null);
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : String(error))
+      setFormError(error instanceof Error ? error.message : String(error));
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
   }
 
   return (
     <>
       <SectionHeader
-        title={t('admin.title')}
+        title={t("admin.title")}
         titleId="admin-title"
-        eyebrow={t('admin.eyebrow')}
+        eyebrow={t("admin.eyebrow")}
       />
 
       {error ? <p className="admin__notice">{error}</p> : null}
@@ -148,7 +148,7 @@ export function AdminCategories({
             type="button"
             onClick={startCreate}
           >
-            {t('admin.categories.createButton')}
+            {t("admin.categories.createButton")}
           </button>
         </div>
 
@@ -156,39 +156,39 @@ export function AdminCategories({
           <form className="admin-category-form" onSubmit={submitForm}>
             <h3>
               {form.id
-                ? t('admin.categories.editTitle')
-                : t('admin.categories.createTitle')}
+                ? t("admin.categories.editTitle")
+                : t("admin.categories.createTitle")}
             </h3>
 
             <label htmlFor="admin-category-title">
-              {t('admin.categories.titleLabel')}
+              {t("admin.categories.titleLabel")}
               <input
                 id="admin-category-title"
                 type="text"
                 value={form.title}
                 disabled={isSaving}
                 onChange={(event) => {
-                  setForm({ ...form, title: event.target.value })
-                  setFormError('')
+                  setForm({ ...form, title: event.target.value });
+                  setFormError("");
                 }}
               />
             </label>
 
             <label htmlFor="admin-category-description">
-              {t('admin.categories.descriptionLabel')}
+              {t("admin.categories.descriptionLabel")}
               <textarea
                 id="admin-category-description"
                 value={form.description}
                 disabled={isSaving}
                 onChange={(event) => {
-                  setForm({ ...form, description: event.target.value })
-                  setFormError('')
+                  setForm({ ...form, description: event.target.value });
+                  setFormError("");
                 }}
               />
             </label>
 
             <label htmlFor="admin-category-status">
-              {t('admin.categories.statusLabel')}
+              {t("admin.categories.statusLabel")}
               <select
                 id="admin-category-status"
                 value={form.status}
@@ -197,26 +197,30 @@ export function AdminCategories({
                   setForm({
                     ...form,
                     status: event.target.value as CategoryStatus,
-                  })
-                  setFormError('')
+                  });
+                  setFormError("");
                 }}
               >
-                <option value="upcoming">{t('admin.statusOptions.upcoming')}</option>
-                <option value="open">{t('admin.statusOptions.open')}</option>
-                <option value="closed">{t('admin.statusOptions.closed')}</option>
+                <option value="upcoming">
+                  {t("admin.statusOptions.upcoming")}
+                </option>
+                <option value="open">{t("admin.statusOptions.open")}</option>
+                <option value="closed">
+                  {t("admin.statusOptions.closed")}
+                </option>
               </select>
             </label>
 
             <label htmlFor="admin-category-sort-order">
-              {t('admin.categories.sortOrderLabel')}
+              {t("admin.categories.sortOrderLabel")}
               <input
                 id="admin-category-sort-order"
                 type="number"
                 value={form.sortOrder}
                 disabled={isSaving}
                 onChange={(event) => {
-                  setForm({ ...form, sortOrder: event.target.value })
-                  setFormError('')
+                  setForm({ ...form, sortOrder: event.target.value });
+                  setFormError("");
                 }}
                 inputMode="numeric"
               />
@@ -232,7 +236,7 @@ export function AdminCategories({
                 type="submit"
                 disabled={isSaving}
               >
-                {isSaving ? t('common.saving') : t('admin.categories.save')}
+                {isSaving ? t("common.saving") : t("admin.categories.save")}
               </button>
               <button
                 className="admin-card__reset admin-card__reset--secondary"
@@ -240,7 +244,7 @@ export function AdminCategories({
                 disabled={isSaving}
                 onClick={cancelForm}
               >
-                {t('admin.categories.cancel')}
+                {t("admin.categories.cancel")}
               </button>
             </div>
           </form>
@@ -248,7 +252,7 @@ export function AdminCategories({
 
         {isLoading ? (
           <p className="admin__notice" role="status">
-            {t('admin.categories.loading')}
+            {t("admin.categories.loading")}
           </p>
         ) : (
           <div className="admin-categories__list">
@@ -259,19 +263,19 @@ export function AdminCategories({
                   <p>{category.description}</p>
                   <dl>
                     <div>
-                      <dt>{t('admin.categories.statusLabel')}</dt>
+                      <dt>{t("admin.categories.statusLabel")}</dt>
                       <dd>{statusLabels[category.status]}</dd>
                     </div>
                     <div>
-                      <dt>{t('admin.categories.sortOrderLabel')}</dt>
-                      <dd>{category.sortOrder ?? '-'}</dd>
+                      <dt>{t("admin.categories.sortOrderLabel")}</dt>
+                      <dd>{category.sortOrder ?? "-"}</dd>
                     </div>
                   </dl>
                 </div>
 
                 <div className="admin-category-card__controls">
                   <label>
-                    {t('admin.changeStatus')}
+                    {t("admin.changeStatus")}
                     <select
                       value={category.status}
                       disabled={
@@ -286,11 +290,13 @@ export function AdminCategories({
                       }
                     >
                       <option value="upcoming">
-                        {t('admin.statusOptions.upcoming')}
+                        {t("admin.statusOptions.upcoming")}
                       </option>
-                      <option value="open">{t('admin.statusOptions.open')}</option>
+                      <option value="open">
+                        {t("admin.statusOptions.open")}
+                      </option>
                       <option value="closed">
-                        {t('admin.statusOptions.closed')}
+                        {t("admin.statusOptions.closed")}
                       </option>
                     </select>
                   </label>
@@ -302,7 +308,7 @@ export function AdminCategories({
                       disabled={deletingCategoryId === category.id}
                       onClick={() => startEdit(category)}
                     >
-                      {t('admin.categories.edit')}
+                      {t("admin.categories.edit")}
                     </button>
                     <button
                       className="admin-card__reset"
@@ -311,8 +317,8 @@ export function AdminCategories({
                       onClick={() => onDelete(category)}
                     >
                       {deletingCategoryId === category.id
-                        ? t('admin.categories.deleting')
-                        : t('admin.categories.delete')}
+                        ? t("admin.categories.deleting")
+                        : t("admin.categories.delete")}
                     </button>
                   </div>
                 </div>
@@ -322,5 +328,5 @@ export function AdminCategories({
         )}
       </div>
     </>
-  )
+  );
 }

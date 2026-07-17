@@ -7,8 +7,8 @@ import {
   type CSSProperties,
   type FormEvent,
   type MouseEvent,
-} from 'react'
-import { useTranslation } from 'react-i18next'
+} from "react";
+import { useTranslation } from "react-i18next";
 import {
   createCategory,
   deleteCategory,
@@ -19,7 +19,7 @@ import {
   type CategoryStatus,
   type CreateCategoryInput,
   type UpdateCategoryInput,
-} from './data/categories'
+} from "./data/categories";
 import {
   createParticipant,
   deactivateParticipant,
@@ -31,29 +31,30 @@ import {
   updateParticipant,
   updateOwnProfile,
   type Participant,
-} from './data/participants'
+} from "./data/participants";
 import {
   loadVotes,
   loadVotesForParticipant,
   saveVote,
   type Vote,
-} from './data/votes'
+} from "./data/votes";
 import {
   loadAllTimeStandings,
   type AllTimeStanding,
-} from './data/allTimeStandings'
+} from "./data/allTimeStandings";
 import {
   archiveFestival,
   loadFestivalAccessCode,
-  loadFestivalName,
+  loadEventSettings,
   updateFestivalAccessCode,
-  updateFestivalName,
-} from './data/festival'
+  updateEventSettings,
+  type EventSettings,
+} from "./data/festival";
 import {
   festivalExportFileName,
   loadFestivalExportData,
   serializeFestivalExport,
-} from './data/export'
+} from "./data/export";
 import {
   deleteFestivalDocument,
   deleteCampLocationLink,
@@ -68,13 +69,13 @@ import {
   type CampLocationLink,
   type FestivalDocument,
   type FestivalDocumentType,
-} from './data/festivalDocuments'
+} from "./data/festivalDocuments";
 import {
   deleteMusicPlaylist,
   loadAdminMusicPlaylist,
   loadMusicPlaylist,
   updateMusicPlaylist,
-} from './data/festivalMusic'
+} from "./data/festivalMusic";
 import {
   closeBingoRound,
   loadAdminBingoRound,
@@ -83,7 +84,7 @@ import {
   startBingoRound,
   type BingoCard,
   type BingoRound,
-} from './data/bingo'
+} from "./data/bingo";
 import {
   loadAdminHorseRacingBets,
   loadAdminHorseRacingState,
@@ -95,7 +96,7 @@ import {
   type HorseRacingBettingStatus,
   type HorseRacingState,
   type HorseRacingSuit,
-} from './data/horseRacing'
+} from "./data/horseRacing";
 import {
   createRandomPairingAction,
   drawRandomPairingAction,
@@ -104,7 +105,7 @@ import {
   updateRandomPairingParticipants,
   type AdminRandomPairingAction,
   type RandomPairingParticipantAssignment,
-} from './data/randomPairings'
+} from "./data/randomPairings";
 import {
   createTournament,
   deleteTournament,
@@ -114,7 +115,7 @@ import {
   updateTournament,
   type Tournament,
   type TournamentMode,
-} from './data/tournaments'
+} from "./data/tournaments";
 import {
   addTimetableFavorite,
   createFestivalDay,
@@ -148,142 +149,143 @@ import {
   type UpdateTimetableActInput,
   type UpdateTimetablePerformanceInput,
   type UpdateTimetableStageInput,
-} from './data/timetable'
+} from "./data/timetable";
 import {
   isSupportedMusicPlaylistLink,
   type MusicPlaylist,
-} from './data/musicEmbeds'
-import { activeFestival, festivalStorageKey } from './config/festivals'
+} from "./data/musicEmbeds";
+import { activeFestival, festivalStorageKey } from "./config/festivals";
 import {
   AdminParticipants,
   type ParticipantFormState,
-} from './components/AdminParticipants'
-import { AdminFestival } from './components/AdminFestival'
-import { AdminCategories } from './components/AdminCategories'
-import { AdminFestivalDocuments } from './components/AdminFestivalDocuments'
-import { AdminBingo } from './components/AdminBingo'
-import { AdminHorseRacing } from './components/AdminHorseRacing'
-import { AdminRandomPairings } from './components/AdminRandomPairings'
-import { AdminTournaments } from './components/AdminTournaments'
-import { AdminTimetableActs } from './components/AdminTimetableActs'
-import { AdminTimetableDays } from './components/AdminTimetableDays'
-import { AdminTimetablePerformances } from './components/AdminTimetablePerformances'
-import { AdminTimetableStages } from './components/AdminTimetableStages'
-import { Bingo } from './components/Bingo'
-import { HorseRacing } from './components/HorseRacing'
-import { RandomPairings } from './components/RandomPairings'
-import { Tournaments } from './components/Tournaments'
-import { FestivalInfo } from './components/FestivalInfo'
-import { Avatar, ParticipantName } from './components/Avatar'
-import { SectionHeader } from './components/SectionHeader'
-import { useFestivalAccess } from './hooks/useFestivalAccess'
-import { avatars } from './config/avatars'
-import i18n from './i18n'
-import { supportedLanguages, type SupportedLanguage } from './i18n'
-import {
-  determineEventPhase,
-  eventDateRangeFromDays,
-} from './domain/eventPhase'
+} from "./components/AdminParticipants";
+import { AdminFestival } from "./components/AdminFestival";
+import { AdminCategories } from "./components/AdminCategories";
+import { AdminFestivalDocuments } from "./components/AdminFestivalDocuments";
+import { AdminBingo } from "./components/AdminBingo";
+import { AdminHorseRacing } from "./components/AdminHorseRacing";
+import { AdminRandomPairings } from "./components/AdminRandomPairings";
+import { AdminTournaments } from "./components/AdminTournaments";
+import { AdminTimetableActs } from "./components/AdminTimetableActs";
+import { AdminTimetableDays } from "./components/AdminTimetableDays";
+import { AdminTimetablePerformances } from "./components/AdminTimetablePerformances";
+import { AdminTimetableStages } from "./components/AdminTimetableStages";
+import { Bingo } from "./components/Bingo";
+import { HorseRacing } from "./components/HorseRacing";
+import { RandomPairings } from "./components/RandomPairings";
+import { Tournaments } from "./components/Tournaments";
+import { FestivalInfo } from "./components/FestivalInfo";
+import { Avatar, ParticipantName } from "./components/Avatar";
+import { SectionHeader } from "./components/SectionHeader";
+import { EventStatusCard } from "./components/EventStatusCard";
+import { useFestivalAccess } from "./hooks/useFestivalAccess";
+import { avatars } from "./config/avatars";
+import i18n from "./i18n";
+import { supportedLanguages, type SupportedLanguage } from "./i18n";
+import { determineEventPhase } from "./domain/eventPhase";
+import type { EventPhase } from "./domain/eventPhase";
 import {
   dashboardModuleConfig,
   selectDashboardModules,
-} from './domain/dashboardModules'
-import './App.css'
+} from "./domain/dashboardModules";
+import "./App.css";
 
 type CategoryResult = {
-  participant: Participant
-  voteCount: number
-}
+  participant: Participant;
+  voteCount: number;
+};
 
 type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>
+  prompt: () => Promise<void>;
   userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed'
-    platform: string
-  }>
-}
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
+};
 
 type DetectedBarcode = {
-  rawValue?: string
-}
+  rawValue?: string;
+};
 
 type BarcodeDetectorInstance = {
-  detect: (source: HTMLVideoElement) => Promise<DetectedBarcode[]>
-}
+  detect: (source: HTMLVideoElement) => Promise<DetectedBarcode[]>;
+};
 
 type BarcodeDetectorConstructor = {
-  new (options: { formats: string[] }): BarcodeDetectorInstance
-  getSupportedFormats?: () => Promise<string[]>
-}
+  new (options: { formats: string[] }): BarcodeDetectorInstance;
+  getSupportedFormats?: () => Promise<string[]>;
+};
 
 type WindowWithBarcodeDetector = Window &
   typeof globalThis & {
-    BarcodeDetector?: BarcodeDetectorConstructor
-  }
+    BarcodeDetector?: BarcodeDetectorConstructor;
+  };
 
-const fallbackFestivalName = ''
+const fallbackFestivalName = "";
 
 const authenticatedParticipantSessionStorageKey = festivalStorageKey(
   activeFestival.id,
-  'participant',
-)
+  "participant",
+);
 const legacyAuthenticatedParticipantStorageKey =
-  authenticatedParticipantSessionStorageKey
+  authenticatedParticipantSessionStorageKey;
 
 function readStoredParticipant(): Participant | null {
-  localStorage.removeItem(legacyAuthenticatedParticipantStorageKey)
+  localStorage.removeItem(legacyAuthenticatedParticipantStorageKey);
 
   const storedParticipant = sessionStorage.getItem(
     authenticatedParticipantSessionStorageKey,
-  )
+  );
 
   if (!storedParticipant) {
-    return null
+    return null;
   }
 
   try {
-    const parsedParticipant = JSON.parse(storedParticipant) as Partial<Participant>
+    const parsedParticipant = JSON.parse(
+      storedParticipant,
+    ) as Partial<Participant>;
 
     if (
-      typeof parsedParticipant.id === 'string' &&
-      typeof parsedParticipant.name === 'string' &&
-      typeof parsedParticipant.displayName === 'string' &&
-      typeof parsedParticipant.accessCode === 'string'
+      typeof parsedParticipant.id === "string" &&
+      typeof parsedParticipant.name === "string" &&
+      typeof parsedParticipant.displayName === "string" &&
+      typeof parsedParticipant.accessCode === "string"
     ) {
       return {
         id: parsedParticipant.id,
         name: parsedParticipant.name,
         displayName: parsedParticipant.displayName,
-        ...(typeof parsedParticipant.avatarId === 'string'
+        ...(typeof parsedParticipant.avatarId === "string"
           ? { avatarId: parsedParticipant.avatarId }
           : {}),
         accessCode: parsedParticipant.accessCode,
         isAdmin: parsedParticipant.isAdmin === true,
         isActive: parsedParticipant.isActive !== false,
-      }
+      };
     }
   } catch {
-    sessionStorage.removeItem(authenticatedParticipantSessionStorageKey)
+    sessionStorage.removeItem(authenticatedParticipantSessionStorageKey);
   }
 
-  return null
+  return null;
 }
 
 function storeAuthenticatedParticipant(participant: Participant) {
-  localStorage.removeItem(legacyAuthenticatedParticipantStorageKey)
+  localStorage.removeItem(legacyAuthenticatedParticipantStorageKey);
   sessionStorage.setItem(
     authenticatedParticipantSessionStorageKey,
     JSON.stringify(participant),
-  )
+  );
 }
 
 function clearStoredParticipant() {
-  localStorage.removeItem(legacyAuthenticatedParticipantStorageKey)
-  sessionStorage.removeItem(authenticatedParticipantSessionStorageKey)
+  localStorage.removeItem(legacyAuthenticatedParticipantStorageKey);
+  sessionStorage.removeItem(authenticatedParticipantSessionStorageKey);
 }
 
 function technicalErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : String(error)
+  return error instanceof Error ? error.message : String(error);
 }
 
 function updateTournamentParticipantName(
@@ -300,7 +302,7 @@ function updateTournamentParticipantName(
           ...bracketParticipant,
           participantName: participant.displayName,
         } as T)
-      : bracketParticipant
+      : bracketParticipant;
 
   return {
     ...tournament,
@@ -312,11 +314,15 @@ function updateTournamentParticipantName(
           ...match,
           participantA: {
             ...match.participantA,
-            participant: updateBracketParticipant(match.participantA.participant),
+            participant: updateBracketParticipant(
+              match.participantA.participant,
+            ),
           },
           participantB: {
             ...match.participantB,
-            participant: updateBracketParticipant(match.participantB.participant),
+            participant: updateBracketParticipant(
+              match.participantB.participant,
+            ),
           },
         })),
         ...(round.byes
@@ -324,50 +330,45 @@ function updateTournamentParticipantName(
           : {}),
       })),
     },
-  }
+  };
 }
 
 type MainSection =
-  | 'dashboard'
-  | 'awards'
-  | 'timetable'
-  | 'games'
-  | 'info'
-  | 'profile'
+  "dashboard" | "awards" | "timetable" | "games" | "info" | "profile";
 type AdminSection =
-  | 'festival'
-  | 'participants'
-  | 'awards'
-  | 'timetable'
-  | 'games'
-  | 'info'
-  | 'archive'
-type GameSection = 'bingo' | 'horseRacing' | 'randomPairings' | 'tournaments'
+  | "festival"
+  | "participants"
+  | "awards"
+  | "timetable"
+  | "games"
+  | "info"
+  | "archive";
+type GameSection = "bingo" | "horseRacing" | "randomPairings" | "tournaments";
 
 type ResultCardProps = {
-  category: Category
-  results: CategoryResult[]
-  highestVoteCount: number
-}
+  category: Category;
+  results: CategoryResult[];
+  highestVoteCount: number;
+};
 
 function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   const statusLabels: Record<CategoryStatus, string> = {
-    upcoming: t('status.upcoming'),
-    open: t('status.open'),
-    closed: t('status.closed'),
-  }
-  const isClosed = category.status === 'closed'
-  const [isClosedResultExpanded, setIsClosedResultExpanded] = useState(false)
-  const isCollapsed = isClosed && !isClosedResultExpanded
-  const resultListId = `result-list-${category.id}`
+    upcoming: t("status.upcoming"),
+    open: t("status.open"),
+    closed: t("status.closed"),
+  };
+  const isClosed = category.status === "closed";
+  const [isClosedResultExpanded, setIsClosedResultExpanded] = useState(false);
+  const isCollapsed = isClosed && !isClosedResultExpanded;
+  const resultListId = `result-list-${category.id}`;
   const leaders = results.filter(
     ({ voteCount }) => highestVoteCount > 0 && voteCount === highestVoteCount,
-  )
+  );
 
   return (
     <article
-      className={`result-card${isCollapsed ? ' result-card--collapsed' : ''}`}
+      className={`result-card${isCollapsed ? " result-card--collapsed" : ""}`}
     >
       <div className="result-card__header">
         <div>
@@ -381,11 +382,13 @@ function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
           <button
             className="result-card__toggle"
             type="button"
-            onClick={() => setIsClosedResultExpanded((isExpanded) => !isExpanded)}
+            onClick={() =>
+              setIsClosedResultExpanded((isExpanded) => !isExpanded)
+            }
             aria-expanded={!isCollapsed}
             aria-controls={resultListId}
             aria-label={`${category.title} ${
-              isCollapsed ? t('results.expand') : t('results.collapse')
+              isCollapsed ? t("results.expand") : t("results.collapse")
             }`}
           >
             <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24">
@@ -397,7 +400,7 @@ function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
 
       {isCollapsed ? (
         <div className="result-card__leaders">
-          <span>{t('results.leading')}</span>
+          <span>{t("results.leading")}</span>
           {leaders.length > 0 ? (
             <ul>
               {leaders.map(({ participant, voteCount }) => (
@@ -413,7 +416,7 @@ function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
               ))}
             </ul>
           ) : (
-            <p>{t('results.emptyCategory')}</p>
+            <p>{t("results.emptyCategory")}</p>
           )}
         </div>
       ) : null}
@@ -423,14 +426,14 @@ function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
           const width =
             highestVoteCount > 0
               ? `${(voteCount / highestVoteCount) * 100}%`
-              : '0%'
+              : "0%";
           const isLeader =
-            highestVoteCount > 0 && voteCount === highestVoteCount
+            highestVoteCount > 0 && voteCount === highestVoteCount;
 
           return (
             <div
               className={`result-card__row${
-                isLeader ? ' result-card__row--leader' : ''
+                isLeader ? " result-card__row--leader" : ""
               }`}
               key={participant.id}
             >
@@ -445,27 +448,29 @@ function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
                 <span style={{ width }} />
               </div>
             </div>
-          )
+          );
         })}
       </div>
     </article>
-  )
+  );
 }
 
 function LanguageSwitcher() {
-  const { i18n, t } = useTranslation()
-  const activeLanguage = i18n.resolvedLanguage?.split('-')[0] ?? 'de'
+  const { i18n, t } = useTranslation();
+  const activeLanguage = i18n.resolvedLanguage?.split("-")[0] ?? "de";
 
   function changeLanguage(language: SupportedLanguage) {
-    void i18n.changeLanguage(language)
+    void i18n.changeLanguage(language);
   }
 
   return (
-    <div className="language-switcher" aria-label={t('language.label')}>
+    <div className="language-switcher" aria-label={t("language.label")}>
       {supportedLanguages.map((language) => (
         <button
           className={
-            activeLanguage === language ? 'language-switcher__button is-active' : 'language-switcher__button'
+            activeLanguage === language
+              ? "language-switcher__button is-active"
+              : "language-switcher__button"
           }
           type="button"
           key={language}
@@ -477,81 +482,85 @@ function LanguageSwitcher() {
         </button>
       ))}
     </div>
-  )
+  );
 }
 
 function isStandaloneDisplay() {
   const navigatorWithStandalone = navigator as Navigator & {
-    standalone?: boolean
-  }
+    standalone?: boolean;
+  };
 
   return (
-    window.matchMedia?.('(display-mode: standalone)').matches === true ||
+    window.matchMedia?.("(display-mode: standalone)").matches === true ||
     navigatorWithStandalone.standalone === true
-  )
+  );
 }
 
 function isIosSafari() {
-  const userAgent = window.navigator.userAgent
-  const isIos = /iphone|ipad|ipod/i.test(userAgent)
-  const isSafari = /safari/i.test(userAgent) && !/crios|fxios|edgios/i.test(userAgent)
+  const userAgent = window.navigator.userAgent;
+  const isIos = /iphone|ipad|ipod/i.test(userAgent);
+  const isSafari =
+    /safari/i.test(userAgent) && !/crios|fxios|edgios/i.test(userAgent);
 
-  return isIos && isSafari
+  return isIos && isSafari;
 }
 
 function PwaInstallPrompt() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   const [installPrompt, setInstallPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null)
-  const [isInstalled, setIsInstalled] = useState(() => isStandaloneDisplay())
-  const [showIosHelp, setShowIosHelp] = useState(false)
-  const isIos = isIosSafari()
-  const canShowPrompt = Boolean(installPrompt)
-  const shouldShow = !isInstalled && (canShowPrompt || isIos)
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(() => isStandaloneDisplay());
+  const [showIosHelp, setShowIosHelp] = useState(false);
+  const isIos = isIosSafari();
+  const canShowPrompt = Boolean(installPrompt);
+  const shouldShow = !isInstalled && (canShowPrompt || isIos);
 
   useEffect(() => {
     function handleBeforeInstallPrompt(event: Event) {
-      event.preventDefault()
-      setInstallPrompt(event as BeforeInstallPromptEvent)
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
     }
 
     function handleAppInstalled() {
-      setIsInstalled(true)
-      setInstallPrompt(null)
-      setShowIosHelp(false)
+      setIsInstalled(true);
+      setInstallPrompt(null);
+      setShowIosHelp(false);
     }
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    window.addEventListener('appinstalled', handleAppInstalled)
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-      window.removeEventListener('appinstalled', handleAppInstalled)
-    }
-  }, [])
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
 
   async function installApp() {
     if (isIos) {
-      setShowIosHelp((isVisible) => !isVisible)
-      return
+      setShowIosHelp((isVisible) => !isVisible);
+      return;
     }
 
     if (!installPrompt) {
-      return
+      return;
     }
 
-    await installPrompt.prompt()
-    const choice = await installPrompt.userChoice
+    await installPrompt.prompt();
+    const choice = await installPrompt.userChoice;
 
-    if (choice.outcome === 'accepted') {
-      setIsInstalled(true)
+    if (choice.outcome === "accepted") {
+      setIsInstalled(true);
     }
 
-    setInstallPrompt(null)
+    setInstallPrompt(null);
   }
 
   if (!shouldShow) {
-    return null
+    return null;
   }
 
   return (
@@ -560,114 +569,114 @@ function PwaInstallPrompt() {
         className="install-prompt__button"
         type="button"
         onClick={installApp}
-        aria-describedby={showIosHelp ? 'install-prompt-help' : undefined}
+        aria-describedby={showIosHelp ? "install-prompt-help" : undefined}
       >
-        {t('installPrompt.button')}
+        {t("installPrompt.button")}
       </button>
       {showIosHelp ? (
         <p className="install-prompt__help" id="install-prompt-help">
-          {t('installPrompt.iosHelp')}
+          {t("installPrompt.iosHelp")}
         </p>
       ) : null}
     </div>
-  )
+  );
 }
 
 function AppFooter() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   return (
     <footer className="app-footer">
-      <a href="#impressum">{t('legal.link')}</a>
-      <a href="#datenschutz">{t('privacy.link')}</a>
+      <a href="#impressum">{t("legal.link")}</a>
+      <a href="#datenschutz">{t("privacy.link")}</a>
     </footer>
-  )
+  );
 }
 
 type LegalNoticeProps = {
-  festivalName: string
-}
+  festivalName: string;
+};
 
 function LegalNotice({ festivalName }: LegalNoticeProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   function goBack(event: MouseEvent<HTMLAnchorElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
     if (window.history.length > 1) {
-      window.history.back()
-      return
+      window.history.back();
+      return;
     }
 
-    window.location.hash = ''
+    window.location.hash = "";
   }
 
   return (
     <main
       className="home legal-page"
-      aria-label={t('legal.ariaLabel', {
-        festivalName: festivalName || t('common.loading'),
+      aria-label={t("legal.ariaLabel", {
+        festivalName: festivalName || t("common.loading"),
       })}
     >
       <section className="legal-page__content" aria-labelledby="legal-title">
-        <p className="legal-page__eyebrow">{t('legal.eyebrow')}</p>
-        <h1 id="legal-title">{t('legal.title')}</h1>
+        <p className="legal-page__eyebrow">{t("legal.eyebrow")}</p>
+        <h1 id="legal-title">{t("legal.title")}</h1>
         <dl className="legal-page__details">
           <div>
-            <dt>{t('legal.fields.name')}</dt>
-            <dd>{t('legal.placeholders.name')}</dd>
+            <dt>{t("legal.fields.name")}</dt>
+            <dd>{t("legal.placeholders.name")}</dd>
           </div>
           <div>
-            <dt>{t('legal.fields.address')}</dt>
-            <dd>{t('legal.placeholders.address')}</dd>
+            <dt>{t("legal.fields.address")}</dt>
+            <dd>{t("legal.placeholders.address")}</dd>
           </div>
           <div>
-            <dt>{t('legal.fields.email')}</dt>
-            <dd>{t('legal.placeholders.email')}</dd>
+            <dt>{t("legal.fields.email")}</dt>
+            <dd>{t("legal.placeholders.email")}</dd>
           </div>
         </dl>
         <a className="legal-page__back" href="#" onClick={goBack}>
-          {t('legal.back')}
+          {t("legal.back")}
         </a>
       </section>
     </main>
-  )
+  );
 }
 
 function PrivacyNotice({ festivalName }: LegalNoticeProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   const sections = [
-    'controller',
-    'processedData',
-    'purpose',
-    'legalBasis',
-    'retention',
-    'supabase',
-    'rights',
-    'contact',
-  ]
+    "controller",
+    "processedData",
+    "purpose",
+    "legalBasis",
+    "retention",
+    "supabase",
+    "rights",
+    "contact",
+  ];
 
   function goBack(event: MouseEvent<HTMLAnchorElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
     if (window.history.length > 1) {
-      window.history.back()
-      return
+      window.history.back();
+      return;
     }
 
-    window.location.hash = ''
+    window.location.hash = "";
   }
 
   return (
     <main
       className="home legal-page"
-      aria-label={t('privacy.ariaLabel', {
-        festivalName: festivalName || t('common.loading'),
+      aria-label={t("privacy.ariaLabel", {
+        festivalName: festivalName || t("common.loading"),
       })}
     >
       <section className="legal-page__content" aria-labelledby="privacy-title">
-        <p className="legal-page__eyebrow">{t('privacy.eyebrow')}</p>
-        <h1 id="privacy-title">{t('privacy.title')}</h1>
+        <p className="legal-page__eyebrow">{t("privacy.eyebrow")}</p>
+        <h1 id="privacy-title">{t("privacy.title")}</h1>
         <div className="legal-page__sections">
           {sections.map((sectionKey) => (
             <article className="legal-page__section" key={sectionKey}>
@@ -677,78 +686,82 @@ function PrivacyNotice({ festivalName }: LegalNoticeProps) {
           ))}
         </div>
         <a className="legal-page__back" href="#" onClick={goBack}>
-          {t('privacy.back')}
+          {t("privacy.back")}
         </a>
       </section>
     </main>
-  )
+  );
 }
 
 type TimetableSectionProps = {
-  timetable: Timetable | null
-  error: string
-  isLoading: boolean
-  currentParticipantId: string | null
-  togglingPerformanceId: string | null
-  onBackToDashboard: () => void
-  onToggleFavorite: (performanceId: string, isFavorite: boolean) => void
-}
+  timetable: Timetable | null;
+  error: string;
+  isLoading: boolean;
+  currentParticipantId: string | null;
+  togglingPerformanceId: string | null;
+  onBackToDashboard: () => void;
+  onToggleFavorite: (performanceId: string, isFavorite: boolean) => void;
+};
 
 type TimetableDaySchedule = {
-  day: Timetable['festivalDays'][number]
-  performances: Timetable['performances']
-  timeSlots: string[]
-  timeRows: string[]
-}
+  day: Timetable["festivalDays"][number];
+  performances: Timetable["performances"];
+  timeSlots: string[];
+  timeRows: string[];
+};
 
 type DashboardTile = {
-  id: string
-  section: MainSection
-  title: string
-  description: string
-  status: string
-  detail: string
+  id: string;
+  section: MainSection;
+  title: string;
+  description: string;
+  status: string;
+  detail: string;
   avatar?: {
-    avatarId?: string | null
-    name: string
-  }
-}
+    avatarId?: string | null;
+    name: string;
+  };
+};
 
 type DashboardSectionProps = {
-  festivalName: string
-  participantName: string | null
-  tiles: DashboardTile[]
-  isAuthenticated: boolean
-  onNavigate: (section: MainSection) => void
-}
+  festivalName: string;
+  participantName: string | null;
+  tiles: DashboardTile[];
+  isAuthenticated: boolean;
+  eventStartDate: string | null;
+  eventEndDate: string | null;
+  eventPhase: EventPhase;
+  referenceInstant: Date;
+  onNavigate: (section: MainSection) => void;
+};
 
 function timeLabel(value: string) {
-  return value.slice(11, 16)
+  return value.slice(11, 16);
 }
 
 function stageColorStyle(color: string | null): CSSProperties | undefined {
   return color
     ? ({
-        '--stage-color': color,
+        "--stage-color": color,
       } as CSSProperties)
-    : undefined
+    : undefined;
 }
 
 type DashboardBackButtonProps = {
-  onClick: () => void
-  width?: 'standard' | 'narrow'
-}
+  onClick: () => void;
+  width?: "standard" | "narrow";
+};
 
 function DashboardBackButton({
   onClick,
-  width = 'standard',
+  width = "standard",
 }: DashboardBackButtonProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   return (
     <div
       className={`dashboard-back${
-        width === 'narrow' ? ' dashboard-back--narrow' : ''
+        width === "narrow" ? " dashboard-back--narrow" : ""
       }`}
     >
       <button
@@ -759,10 +772,10 @@ function DashboardBackButton({
         <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20">
           <path d="M10.7 6.3 5 12l5.7 5.7 1.4-1.4-3.3-3.3H19v-2H8.8l3.3-3.3-1.4-1.4Z" />
         </svg>
-        <span>{t('navigation.backToDashboard')}</span>
+        <span>{t("navigation.backToDashboard")}</span>
       </button>
     </div>
-  )
+  );
 }
 
 function DashboardSection({
@@ -770,10 +783,20 @@ function DashboardSection({
   participantName,
   tiles,
   isAuthenticated,
+  eventStartDate,
+  eventEndDate,
+  eventPhase,
+  referenceInstant,
   onNavigate,
 }: DashboardSectionProps) {
-  const { t } = useTranslation()
-  const greetingName = participantName ?? t('dashboard.guestName')
+  const { t } = useTranslation();
+  const greetingName = participantName ?? t("dashboard.guestName");
+  const showEventStatus =
+    selectDashboardModules(
+      [{ id: "eventStatus" }],
+      dashboardModuleConfig,
+      eventPhase,
+    ).length > 0;
 
   return (
     <section
@@ -782,25 +805,35 @@ function DashboardSection({
       aria-labelledby="dashboard-title"
     >
       <div className="dashboard__intro">
-        <p className="dashboard__eyebrow">{t('dashboard.eyebrow')}</p>
+        <p className="dashboard__eyebrow">{t("dashboard.eyebrow")}</p>
         <h2 id="dashboard-title">
-          {t('dashboard.greeting', { name: greetingName })}
+          {t("dashboard.greeting", { name: greetingName })}
         </h2>
         <p className="dashboard__festival">{festivalName}</p>
         <p className="dashboard__description">
           {isAuthenticated
-            ? t('dashboard.description')
-            : t('dashboard.guestDescription')}
+            ? t("dashboard.description")
+            : t("dashboard.guestDescription")}
         </p>
       </div>
 
-      <div className="dashboard__grid" aria-label={t('dashboard.quickAccess')}>
+      {showEventStatus ? (
+        <EventStatusCard
+          startDate={eventStartDate}
+          endDate={eventEndDate}
+          referenceInstant={referenceInstant}
+        />
+      ) : null}
+
+      <div className="dashboard__grid" aria-label={t("dashboard.quickAccess")}>
         {tiles.map((tile) => (
           <button
             className={`dashboard-tile dashboard-tile--${tile.section}`}
             type="button"
             key={tile.id}
-            onClick={() => onNavigate(isAuthenticated ? tile.section : 'profile')}
+            onClick={() =>
+              onNavigate(isAuthenticated ? tile.section : "profile")
+            }
           >
             <span className="dashboard-tile__title">{tile.title}</span>
             <span className="dashboard-tile__description">
@@ -808,7 +841,10 @@ function DashboardSection({
             </span>
             {tile.avatar ? (
               <span className="dashboard-tile__profile">
-                <Avatar avatarId={tile.avatar.avatarId} name={tile.avatar.name} />
+                <Avatar
+                  avatarId={tile.avatar.avatarId}
+                  name={tile.avatar.name}
+                />
                 <span>{tile.avatar.name}</span>
               </span>
             ) : null}
@@ -818,7 +854,7 @@ function DashboardSection({
         ))}
       </div>
     </section>
-  )
+  );
 }
 
 function TimetableSection({
@@ -830,25 +866,26 @@ function TimetableSection({
   onBackToDashboard,
   onToggleFavorite,
 }: TimetableSectionProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   const hasTimetableStructure = Boolean(
     timetable &&
-      timetable.festivalDays.length > 0 &&
-      timetable.stages.length > 0 &&
-      timetable.performances.length > 0,
-  )
+    timetable.festivalDays.length > 0 &&
+    timetable.stages.length > 0 &&
+    timetable.performances.length > 0,
+  );
   const actById = useMemo(
     () => new Map(timetable?.acts.map((act) => [act.id, act]) ?? []),
     [timetable?.acts],
-  )
+  );
   const stageIndexById = useMemo(
-    () => new Map(timetable?.stages.map((stage, index) => [stage.id, index]) ?? []),
+    () =>
+      new Map(timetable?.stages.map((stage, index) => [stage.id, index]) ?? []),
     [timetable?.stages],
-  )
+  );
   const favoritePerformanceIds = useMemo(
     () => new Set(timetable?.favoritePerformanceIds ?? []),
     [timetable?.favoritePerformanceIds],
-  )
+  );
   const favoriteParticipantsByPerformanceId = useMemo(
     () =>
       new Map(
@@ -858,19 +895,20 @@ function TimetableSection({
         ]) ?? [],
       ),
     [timetable?.performanceFavorites],
-  )
+  );
   const daySchedules = useMemo<TimetableDaySchedule[]>(() => {
     if (!timetable) {
-      return []
+      return [];
     }
 
-    const performancesByDay = new Map<string, Timetable['performances']>()
+    const performancesByDay = new Map<string, Timetable["performances"]>();
 
     for (const performance of timetable.performances) {
-      const performances = performancesByDay.get(performance.festivalDayId) ?? []
+      const performances =
+        performancesByDay.get(performance.festivalDayId) ?? [];
 
-      performances.push(performance)
-      performancesByDay.set(performance.festivalDayId, performances)
+      performances.push(performance);
+      performancesByDay.set(performance.festivalDayId, performances);
     }
 
     return timetable.festivalDays
@@ -879,7 +917,7 @@ function TimetableSection({
           .slice()
           .sort((firstPerformance, secondPerformance) =>
             firstPerformance.startsAt.localeCompare(secondPerformance.startsAt),
-          )
+          );
         const timeSlots = Array.from(
           new Set(
             performances
@@ -889,17 +927,17 @@ function TimetableSection({
               ])
               .filter((value): value is string => Boolean(value)),
           ),
-        ).sort()
+        ).sort();
 
         return {
           day,
           performances,
           timeSlots,
           timeRows: timeSlots.length > 1 ? timeSlots.slice(0, -1) : timeSlots,
-        }
+        };
       })
-      .filter(({ performances }) => performances.length > 0)
-  }, [timetable])
+      .filter(({ performances }) => performances.length > 0);
+  }, [timetable]);
 
   return (
     <section
@@ -910,15 +948,15 @@ function TimetableSection({
       <DashboardBackButton onClick={onBackToDashboard} width="narrow" />
 
       <SectionHeader
-        title={t('timetable.title')}
+        title={t("timetable.title")}
         titleId="timetable-title"
-        eyebrow={t('timetable.eyebrow')}
+        eyebrow={t("timetable.eyebrow")}
         width="narrow"
       />
 
       {isLoading ? (
         <p className="timetable__notice" role="status">
-          {t('timetable.loading')}
+          {t("timetable.loading")}
         </p>
       ) : null}
       {error ? (
@@ -930,7 +968,7 @@ function TimetableSection({
       !error &&
       timetable &&
       timetable.performances.length === 0 ? (
-        <p className="timetable__notice">{t('timetable.empty')}</p>
+        <p className="timetable__notice">{t("timetable.empty")}</p>
       ) : null}
       {!isLoading &&
       !error &&
@@ -938,7 +976,7 @@ function TimetableSection({
       timetable.festivalDays.length > 0 &&
       timetable.performances.length > 0 &&
       timetable.stages.length === 0 ? (
-        <p className="timetable__notice">{t('timetable.emptyStages')}</p>
+        <p className="timetable__notice">{t("timetable.emptyStages")}</p>
       ) : null}
 
       {!isLoading && !error && hasTimetableStructure && timetable ? (
@@ -953,7 +991,7 @@ function TimetableSection({
 
                 <div className="timetable-grid" role="table">
                   <p className="timetable-grid__hint">
-                    {t('timetable.scrollHint')}
+                    {t("timetable.scrollHint")}
                   </p>
                   <div
                     className="timetable-grid__inner"
@@ -968,389 +1006,389 @@ function TimetableSection({
                       aria-hidden="true"
                     />
                     {timetable.stages.map((stage, stageIndex) => (
+                      <div
+                        className="timetable-grid__stage"
+                        key={stage.id}
+                        role="columnheader"
+                        style={{
+                          gridColumn: stageIndex + 2,
+                          gridRow: 1,
+                          ...stageColorStyle(stage.color),
+                        }}
+                      >
+                        {stage.name}
+                      </div>
+                    ))}
+
+                    {timeRows.map((slot, slotIndex) => (
+                      <div
+                        className="timetable-grid__time"
+                        key={slot}
+                        role="rowheader"
+                        style={{ gridColumn: 1, gridRow: slotIndex + 2 }}
+                      >
+                        {timeLabel(slot)}
+                      </div>
+                    ))}
+
+                    {timeRows.flatMap((slot, slotIndex) =>
+                      timetable.stages.map((stage, stageIndex) => (
                         <div
-                          className="timetable-grid__stage"
-                          key={stage.id}
-                          role="columnheader"
+                          className="timetable-grid__cell"
+                          key={`${slot}-${stage.id}`}
                           style={{
                             gridColumn: stageIndex + 2,
-                            gridRow: 1,
+                            gridRow: slotIndex + 2,
+                            ...stageColorStyle(stage.color),
+                          }}
+                        />
+                      )),
+                    )}
+
+                    {performances.map((performance) => {
+                      const stageIndex = stageIndexById.get(
+                        performance.stageId,
+                      );
+                      const startsAtIndex = timeSlots.indexOf(
+                        performance.startsAt,
+                      );
+                      const endsAtIndex = performance.endsAt
+                        ? timeSlots.indexOf(performance.endsAt)
+                        : startsAtIndex + 1;
+                      const act = actById.get(performance.actId);
+                      const isFavorite = favoritePerformanceIds.has(
+                        performance.id,
+                      );
+                      const isToggling =
+                        togglingPerformanceId === performance.id;
+                      const sharedFavoriteParticipants = (
+                        favoriteParticipantsByPerformanceId.get(
+                          performance.id,
+                        ) ?? []
+                      ).filter(
+                        (participant) =>
+                          participant.participantId !== currentParticipantId,
+                      );
+                      const visibleFavoriteParticipants =
+                        sharedFavoriteParticipants.slice(0, 3);
+                      const hiddenFavoriteParticipantCount =
+                        sharedFavoriteParticipants.length -
+                        visibleFavoriteParticipants.length;
+                      const sharedFavoriteNames = sharedFavoriteParticipants
+                        .map((participant) => participant.displayName)
+                        .join(", ");
+
+                      if (
+                        stageIndex === undefined ||
+                        startsAtIndex < 0 ||
+                        endsAtIndex < 0
+                      ) {
+                        return null;
+                      }
+
+                      const stage = timetable.stages[stageIndex];
+
+                      return (
+                        <article
+                          className={`timetable-performance${isFavorite ? " timetable-performance--favorite" : ""}`}
+                          key={performance.id}
+                          style={{
+                            gridColumn: stageIndex + 2,
+                            gridRow: `${startsAtIndex + 2} / ${endsAtIndex + 2}`,
                             ...stageColorStyle(stage.color),
                           }}
                         >
-                          {stage.name}
-                        </div>
-                      ))}
-
-                      {timeRows.map((slot, slotIndex) => (
-                        <div
-                          className="timetable-grid__time"
-                          key={slot}
-                          role="rowheader"
-                          style={{ gridColumn: 1, gridRow: slotIndex + 2 }}
-                        >
-                          {timeLabel(slot)}
-                        </div>
-                      ))}
-
-                      {timeRows.flatMap((slot, slotIndex) =>
-                        timetable.stages.map((stage, stageIndex) => (
-                          <div
-                            className="timetable-grid__cell"
-                            key={`${slot}-${stage.id}`}
-                            style={{
-                              gridColumn: stageIndex + 2,
-                              gridRow: slotIndex + 2,
-                              ...stageColorStyle(stage.color),
-                            }}
-                          />
-                        )),
-                      )}
-
-                      {performances.map((performance) => {
-                        const stageIndex = stageIndexById.get(performance.stageId)
-                        const startsAtIndex = timeSlots.indexOf(performance.startsAt)
-                        const endsAtIndex = performance.endsAt
-                          ? timeSlots.indexOf(performance.endsAt)
-                          : startsAtIndex + 1
-                        const act = actById.get(performance.actId)
-                        const isFavorite = favoritePerformanceIds.has(
-                          performance.id,
-                        )
-                        const isToggling =
-                          togglingPerformanceId === performance.id
-                        const sharedFavoriteParticipants = (
-                          favoriteParticipantsByPerformanceId.get(
-                            performance.id,
-                          ) ?? []
-                        ).filter(
-                          (participant) =>
-                            participant.participantId !== currentParticipantId,
-                        )
-                        const visibleFavoriteParticipants =
-                          sharedFavoriteParticipants.slice(0, 3)
-                        const hiddenFavoriteParticipantCount =
-                          sharedFavoriteParticipants.length -
-                          visibleFavoriteParticipants.length
-                        const sharedFavoriteNames = sharedFavoriteParticipants
-                          .map((participant) => participant.displayName)
-                          .join(', ')
-
-                        if (
-                          stageIndex === undefined ||
-                          startsAtIndex < 0 ||
-                          endsAtIndex < 0
-                        ) {
-                          return null
-                        }
-
-                        const stage = timetable.stages[stageIndex]
-
-                        return (
-                          <article
-                            className={`timetable-performance${isFavorite ? ' timetable-performance--favorite' : ''}`}
-                            key={performance.id}
-                            style={{
-                              gridColumn: stageIndex + 2,
-                              gridRow: `${startsAtIndex + 2} / ${endsAtIndex + 2}`,
-                              ...stageColorStyle(stage.color),
-                            }}
-                          >
-                            {isFavorite ? (
-                              <span className="timetable-performance__badge">
-                                {t('timetable.favorite.badge')}
-                              </span>
-                            ) : null}
-                            <p className="timetable-performance__time">
-                              {timeLabel(performance.startsAt)} -{' '}
-                              {performance.endsAt
-                                ? timeLabel(performance.endsAt)
-                                : ''}
-                            </p>
-                            <h4>
-                              {act?.name ?? t('timetable.unknownAct')}
-                            </h4>
-                            {act?.description ? <p>{act.description}</p> : null}
-                            {sharedFavoriteParticipants.length > 0 ? (
-                              <div
-                                className="timetable-performance__shared"
-                                aria-label={t(
-                                  'timetable.favorite.sharedAria',
-                                  {
-                                    names: sharedFavoriteNames,
-                                  },
-                                )}
-                              >
-                                <span className="timetable-performance__shared-label">
-                                  {t('timetable.favorite.sharedLabel')}
-                                </span>
-                                <span className="timetable-performance__shared-list">
-                                  {visibleFavoriteParticipants.map(
-                                    (participant) => (
-                                      <span
-                                        className="timetable-performance__shared-person"
-                                        key={participant.participantId}
-                                      >
-                                        <Avatar
-                                          avatarId={participant.avatarId}
-                                          name={participant.displayName}
-                                          size="small"
-                                        />
-                                        <span>{participant.displayName}</span>
-                                      </span>
-                                    ),
-                                  )}
-                                  {hiddenFavoriteParticipantCount > 0 ? (
-                                    <span
-                                      className="timetable-performance__shared-more"
-                                      aria-label={t(
-                                        'timetable.favorite.sharedMoreAria',
-                                        {
-                                          count:
-                                            hiddenFavoriteParticipantCount,
-                                        },
-                                      )}
-                                    >
-                                      {t('timetable.favorite.sharedMore', {
-                                        count: hiddenFavoriteParticipantCount,
-                                      })}
-                                    </span>
-                                  ) : null}
-                                </span>
-                              </div>
-                            ) : null}
-                            <button
-                              className="timetable-performance__favorite"
-                              type="button"
-                              aria-pressed={isFavorite}
-                              disabled={isToggling}
-                              onClick={() =>
-                                onToggleFavorite(performance.id, isFavorite)
-                              }
+                          {isFavorite ? (
+                            <span className="timetable-performance__badge">
+                              {t("timetable.favorite.badge")}
+                            </span>
+                          ) : null}
+                          <p className="timetable-performance__time">
+                            {timeLabel(performance.startsAt)} -{" "}
+                            {performance.endsAt
+                              ? timeLabel(performance.endsAt)
+                              : ""}
+                          </p>
+                          <h4>{act?.name ?? t("timetable.unknownAct")}</h4>
+                          {act?.description ? <p>{act.description}</p> : null}
+                          {sharedFavoriteParticipants.length > 0 ? (
+                            <div
+                              className="timetable-performance__shared"
+                              aria-label={t("timetable.favorite.sharedAria", {
+                                names: sharedFavoriteNames,
+                              })}
                             >
-                              {isFavorite
-                                ? t('timetable.favorite.remove')
-                                : t('timetable.favorite.add')}
-                            </button>
-                          </article>
-                        )
-                      })}
-                    </div>
+                              <span className="timetable-performance__shared-label">
+                                {t("timetable.favorite.sharedLabel")}
+                              </span>
+                              <span className="timetable-performance__shared-list">
+                                {visibleFavoriteParticipants.map(
+                                  (participant) => (
+                                    <span
+                                      className="timetable-performance__shared-person"
+                                      key={participant.participantId}
+                                    >
+                                      <Avatar
+                                        avatarId={participant.avatarId}
+                                        name={participant.displayName}
+                                        size="small"
+                                      />
+                                      <span>{participant.displayName}</span>
+                                    </span>
+                                  ),
+                                )}
+                                {hiddenFavoriteParticipantCount > 0 ? (
+                                  <span
+                                    className="timetable-performance__shared-more"
+                                    aria-label={t(
+                                      "timetable.favorite.sharedMoreAria",
+                                      {
+                                        count: hiddenFavoriteParticipantCount,
+                                      },
+                                    )}
+                                  >
+                                    {t("timetable.favorite.sharedMore", {
+                                      count: hiddenFavoriteParticipantCount,
+                                    })}
+                                  </span>
+                                ) : null}
+                              </span>
+                            </div>
+                          ) : null}
+                          <button
+                            className="timetable-performance__favorite"
+                            type="button"
+                            aria-pressed={isFavorite}
+                            disabled={isToggling}
+                            onClick={() =>
+                              onToggleFavorite(performance.id, isFavorite)
+                            }
+                          >
+                            {isFavorite
+                              ? t("timetable.favorite.remove")
+                              : t("timetable.favorite.add")}
+                          </button>
+                        </article>
+                      );
+                    })}
+                  </div>
                 </div>
               </article>
-            )
+            );
           })}
         </div>
       ) : null}
     </section>
-  )
+  );
 }
 
 type FestivalAccessProps = {
-  festivalName: string
-  onUnlock: (code: string) => Promise<boolean>
-}
+  festivalName: string;
+  onUnlock: (code: string) => Promise<boolean>;
+};
 
 function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
-  const { t } = useTranslation()
-  const [festivalCode, setFestivalCode] = useState('')
-  const [festivalCodeError, setFestivalCodeError] = useState('')
-  const [isSubmittingFestivalCode, setIsSubmittingFestivalCode] = useState(false)
+  const { t } = useTranslation();
+  const [festivalCode, setFestivalCode] = useState("");
+  const [festivalCodeError, setFestivalCodeError] = useState("");
+  const [isSubmittingFestivalCode, setIsSubmittingFestivalCode] =
+    useState(false);
   const [qrScannerSupport, setQrScannerSupport] = useState<
-    'checking' | 'supported' | 'unsupported'
-  >('checking')
-  const [isScanningQrCode, setIsScanningQrCode] = useState(false)
-  const videoRef = useRef<HTMLVideoElement | null>(null)
-  const cameraStreamRef = useRef<MediaStream | null>(null)
-  const scanAnimationFrameRef = useRef<number | null>(null)
-  const isScanningQrCodeRef = useRef(false)
+    "checking" | "supported" | "unsupported"
+  >("checking");
+  const [isScanningQrCode, setIsScanningQrCode] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const scanAnimationFrameRef = useRef<number | null>(null);
+  const isScanningQrCodeRef = useRef(false);
 
   const stopQrScanner = useCallback(() => {
-    isScanningQrCodeRef.current = false
-    setIsScanningQrCode(false)
+    isScanningQrCodeRef.current = false;
+    setIsScanningQrCode(false);
 
     if (scanAnimationFrameRef.current !== null) {
-      window.cancelAnimationFrame(scanAnimationFrameRef.current)
-      scanAnimationFrameRef.current = null
+      window.cancelAnimationFrame(scanAnimationFrameRef.current);
+      scanAnimationFrameRef.current = null;
     }
 
-    cameraStreamRef.current?.getTracks().forEach((track) => track.stop())
-    cameraStreamRef.current = null
+    cameraStreamRef.current?.getTracks().forEach((track) => track.stop());
+    cameraStreamRef.current = null;
 
     if (videoRef.current) {
-      videoRef.current.srcObject = null
+      videoRef.current.srcObject = null;
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    let isCurrent = true
+    let isCurrent = true;
 
     async function checkQrScannerSupport() {
       const BarcodeDetector = (window as WindowWithBarcodeDetector)
-        .BarcodeDetector
+        .BarcodeDetector;
       const hasCameraSupport =
-        typeof navigator.mediaDevices?.getUserMedia === 'function'
+        typeof navigator.mediaDevices?.getUserMedia === "function";
 
       if (!BarcodeDetector || !hasCameraSupport) {
         if (isCurrent) {
-          setQrScannerSupport('unsupported')
+          setQrScannerSupport("unsupported");
         }
 
-        return
+        return;
       }
 
       try {
         const supportedFormats = BarcodeDetector.getSupportedFormats
           ? await BarcodeDetector.getSupportedFormats()
-          : ['qr_code']
+          : ["qr_code"];
 
         if (isCurrent) {
           setQrScannerSupport(
-            supportedFormats.includes('qr_code') ? 'supported' : 'unsupported',
-          )
+            supportedFormats.includes("qr_code") ? "supported" : "unsupported",
+          );
         }
       } catch {
         if (isCurrent) {
-          setQrScannerSupport('unsupported')
+          setQrScannerSupport("unsupported");
         }
       }
     }
 
-    void checkQrScannerSupport()
+    void checkQrScannerSupport();
 
     return () => {
-      isCurrent = false
-      stopQrScanner()
-    }
-  }, [stopQrScanner])
+      isCurrent = false;
+      stopQrScanner();
+    };
+  }, [stopQrScanner]);
 
   async function unlockFestivalCode(
     code: string,
     invalidMessage: string,
   ): Promise<boolean> {
-    const normalizedFestivalCode = code.trim().toUpperCase()
+    const normalizedFestivalCode = code.trim().toUpperCase();
 
     if (!normalizedFestivalCode) {
-      setFestivalCodeError(invalidMessage)
-      return false
+      setFestivalCodeError(invalidMessage);
+      return false;
     }
 
-    setFestivalCodeError('')
-    setIsSubmittingFestivalCode(true)
+    setFestivalCodeError("");
+    setIsSubmittingFestivalCode(true);
 
     try {
       if (!(await onUnlock(normalizedFestivalCode))) {
-        setFestivalCodeError(invalidMessage)
-        return false
+        setFestivalCodeError(invalidMessage);
+        return false;
       }
 
-      setFestivalCode('')
-      return true
+      setFestivalCode("");
+      return true;
     } catch {
-      setFestivalCodeError(t('festivalAccess.errors.verify'))
-      return false
+      setFestivalCodeError(t("festivalAccess.errors.verify"));
+      return false;
     } finally {
-      setIsSubmittingFestivalCode(false)
+      setIsSubmittingFestivalCode(false);
     }
   }
 
   async function submitFestivalCode(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
     await unlockFestivalCode(
       festivalCode,
-      t('festivalAccess.errors.invalidCode'),
-    )
+      t("festivalAccess.errors.invalidCode"),
+    );
   }
 
   async function unlockScannedFestivalCode(code: string) {
-    const normalizedFestivalCode = code.trim().toUpperCase()
+    const normalizedFestivalCode = code.trim().toUpperCase();
 
-    setFestivalCode(normalizedFestivalCode)
-    stopQrScanner()
+    setFestivalCode(normalizedFestivalCode);
+    stopQrScanner();
 
     await unlockFestivalCode(
       normalizedFestivalCode,
-      t('festivalAccess.qr.errors.invalidCode'),
-    )
+      t("festivalAccess.qr.errors.invalidCode"),
+    );
   }
 
   async function startQrScanner() {
-    const BarcodeDetector = (window as WindowWithBarcodeDetector).BarcodeDetector
+    const BarcodeDetector = (window as WindowWithBarcodeDetector)
+      .BarcodeDetector;
 
     if (
       !BarcodeDetector ||
-      typeof navigator.mediaDevices?.getUserMedia !== 'function' ||
-      qrScannerSupport !== 'supported'
+      typeof navigator.mediaDevices?.getUserMedia !== "function" ||
+      qrScannerSupport !== "supported"
     ) {
-      setFestivalCodeError(t('festivalAccess.qr.errors.unsupported'))
-      return
+      setFestivalCodeError(t("festivalAccess.qr.errors.unsupported"));
+      return;
     }
 
-    setFestivalCodeError('')
-    setIsScanningQrCode(true)
-    isScanningQrCodeRef.current = true
+    setFestivalCodeError("");
+    setIsScanningQrCode(true);
+    isScanningQrCodeRef.current = true;
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
+        video: { facingMode: "environment" },
         audio: false,
-      })
-      const video = videoRef.current
+      });
+      const video = videoRef.current;
 
       if (!video) {
-        stream.getTracks().forEach((track) => track.stop())
-        setFestivalCodeError(t('festivalAccess.qr.errors.camera'))
-        setIsScanningQrCode(false)
-        isScanningQrCodeRef.current = false
-        return
+        stream.getTracks().forEach((track) => track.stop());
+        setFestivalCodeError(t("festivalAccess.qr.errors.camera"));
+        setIsScanningQrCode(false);
+        isScanningQrCodeRef.current = false;
+        return;
       }
 
-      cameraStreamRef.current = stream
-      video.srcObject = stream
-      await video.play()
+      cameraStreamRef.current = stream;
+      video.srcObject = stream;
+      await video.play();
 
-      const detector = new BarcodeDetector({ formats: ['qr_code'] })
+      const detector = new BarcodeDetector({ formats: ["qr_code"] });
 
       async function scanFrame() {
         if (!isScanningQrCodeRef.current || !videoRef.current) {
-          return
+          return;
         }
 
         try {
-          const barcodes = await detector.detect(videoRef.current)
+          const barcodes = await detector.detect(videoRef.current);
           const scannedCode = barcodes.find((barcode) =>
             Boolean(barcode.rawValue?.trim()),
-          )?.rawValue
+          )?.rawValue;
 
           if (scannedCode) {
-            await unlockScannedFestivalCode(scannedCode)
-            return
+            await unlockScannedFestivalCode(scannedCode);
+            return;
           }
 
           scanAnimationFrameRef.current = window.requestAnimationFrame(() => {
-            void scanFrame()
-          })
+            void scanFrame();
+          });
         } catch {
-          setFestivalCodeError(t('festivalAccess.qr.errors.scan'))
-          stopQrScanner()
+          setFestivalCodeError(t("festivalAccess.qr.errors.scan"));
+          stopQrScanner();
         }
       }
 
       scanAnimationFrameRef.current = window.requestAnimationFrame(() => {
-        void scanFrame()
-      })
+        void scanFrame();
+      });
     } catch {
-      setFestivalCodeError(t('festivalAccess.qr.errors.camera'))
-      stopQrScanner()
+      setFestivalCodeError(t("festivalAccess.qr.errors.camera"));
+      stopQrScanner();
     }
   }
 
   return (
     <main
       className="home home--locked"
-      aria-label={t('festivalAccess.ariaLabel', {
-        festivalName: festivalName || t('common.loading'),
+      aria-label={t("festivalAccess.ariaLabel", {
+        festivalName: festivalName || t("common.loading"),
       })}
     >
       <header className="hero hero--locked" aria-labelledby="hero-title">
@@ -1359,13 +1397,13 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
         </div>
 
         <div className="hero__content hero__content--locked">
-          <h1 id="hero-title">{festivalName || t('common.loading')}</h1>
+          <h1 id="hero-title">{festivalName || t("common.loading")}</h1>
           <form
             className="identity__form identity__form--locked"
             onSubmit={submitFestivalCode}
           >
             <label htmlFor="festival-access-code">
-              {t('festivalAccess.codeLabel')}
+              {t("festivalAccess.codeLabel")}
             </label>
             <input
               id="festival-access-code"
@@ -1373,12 +1411,12 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
               value={festivalCode}
               disabled={isSubmittingFestivalCode}
               onChange={(event) => {
-                setFestivalCode(event.target.value)
-                setFestivalCodeError('')
+                setFestivalCode(event.target.value);
+                setFestivalCodeError("");
               }}
               autoComplete="off"
               inputMode="text"
-              placeholder={t('festivalAccess.codePlaceholder')}
+              placeholder={t("festivalAccess.codePlaceholder")}
             />
             {festivalCodeError ? (
               <p className="identity__error" role="alert">
@@ -1391,11 +1429,11 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
               disabled={isSubmittingFestivalCode}
             >
               {isSubmittingFestivalCode
-                ? t('common.loading')
-                : t('festivalAccess.submit')}
+                ? t("common.loading")
+                : t("festivalAccess.submit")}
             </button>
           </form>
-          <div className="qr-access" aria-label={t('festivalAccess.qr.label')}>
+          <div className="qr-access" aria-label={t("festivalAccess.qr.label")}>
             <button
               className="qr-access__button"
               type="button"
@@ -1403,16 +1441,16 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
               disabled={
                 isSubmittingFestivalCode ||
                 isScanningQrCode ||
-                qrScannerSupport !== 'supported'
+                qrScannerSupport !== "supported"
               }
             >
               {isScanningQrCode
-                ? t('festivalAccess.qr.scanning')
-                : t('festivalAccess.qr.start')}
+                ? t("festivalAccess.qr.scanning")
+                : t("festivalAccess.qr.start")}
             </button>
-            {qrScannerSupport === 'unsupported' ? (
+            {qrScannerSupport === "unsupported" ? (
               <p className="qr-access__status" role="status">
-                {t('festivalAccess.qr.errors.unsupported')}
+                {t("festivalAccess.qr.errors.unsupported")}
               </p>
             ) : null}
             <div className="qr-access__camera" hidden={!isScanningQrCode}>
@@ -1420,7 +1458,7 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
                 ref={videoRef}
                 muted
                 playsInline
-                aria-label={t('festivalAccess.qr.videoLabel')}
+                aria-label={t("festivalAccess.qr.videoLabel")}
               />
               {isScanningQrCode ? (
                 <button
@@ -1428,7 +1466,7 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
                   type="button"
                   onClick={stopQrScanner}
                 >
-                  {t('festivalAccess.qr.stop')}
+                  {t("festivalAccess.qr.stop")}
                 </button>
               ) : null}
             </div>
@@ -1443,328 +1481,361 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
       </header>
       <AppFooter />
     </main>
-  )
+  );
 }
 
 function App() {
-  const { t } = useTranslation()
-  const festivalAccess = useFestivalAccess(activeFestival)
-  const [locationHash, setLocationHash] = useState(() => window.location.hash)
-  const [festivalName, setFestivalName] = useState(fallbackFestivalName)
-  const [festivalNameError, setFestivalNameError] = useState('')
-  const [isSavingFestivalName, setIsSavingFestivalName] = useState(false)
-  const [festivalCode, setFestivalCode] = useState('')
-  const [festivalCodeError, setFestivalCodeError] = useState('')
-  const [isLoadingFestivalCode, setIsLoadingFestivalCode] = useState(false)
-  const [isSavingFestivalCode, setIsSavingFestivalCode] = useState(false)
-  const [isExportingFestival, setIsExportingFestival] = useState(false)
-  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(
-    () => (festivalAccess.isUnlocked ? readStoredParticipant() : null),
-  )
-  const [participants, setParticipants] = useState<Participant[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [participantsError, setParticipantsError] = useState('')
-  const [categoriesError, setCategoriesError] = useState('')
-  const [adminError, setAdminError] = useState('')
-  const [adminCategories, setAdminCategories] = useState<Category[]>([])
-  const [adminCategoriesError, setAdminCategoriesError] = useState('')
+  const { t } = useTranslation();
+  const festivalAccess = useFestivalAccess(activeFestival);
+  const [locationHash, setLocationHash] = useState(() => window.location.hash);
+  const [festivalName, setFestivalName] = useState(fallbackFestivalName);
+  const [eventStartDate, setEventStartDate] = useState<string | null>(null);
+  const [eventEndDate, setEventEndDate] = useState<string | null>(null);
+  const [eventReferenceInstant, setEventReferenceInstant] = useState(
+    () => new Date(),
+  );
+  const [festivalNameError, setFestivalNameError] = useState("");
+  const [isSavingFestivalName, setIsSavingFestivalName] = useState(false);
+  const [festivalCode, setFestivalCode] = useState("");
+  const [festivalCodeError, setFestivalCodeError] = useState("");
+  const [isLoadingFestivalCode, setIsLoadingFestivalCode] = useState(false);
+  const [isSavingFestivalCode, setIsSavingFestivalCode] = useState(false);
+  const [isExportingFestival, setIsExportingFestival] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] =
+    useState<Participant | null>(() =>
+      festivalAccess.isUnlocked ? readStoredParticipant() : null,
+    );
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [participantsError, setParticipantsError] = useState("");
+  const [categoriesError, setCategoriesError] = useState("");
+  const [adminError, setAdminError] = useState("");
+  const [adminCategories, setAdminCategories] = useState<Category[]>([]);
+  const [adminCategoriesError, setAdminCategoriesError] = useState("");
   const [isLoadingAdminCategories, setIsLoadingAdminCategories] =
-    useState(false)
+    useState(false);
   const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(
     null,
-  )
-  const [adminParticipants, setAdminParticipants] = useState<Participant[]>([])
-  const [adminParticipantsError, setAdminParticipantsError] = useState('')
+  );
+  const [adminParticipants, setAdminParticipants] = useState<Participant[]>([]);
+  const [adminParticipantsError, setAdminParticipantsError] = useState("");
   const [isLoadingAdminParticipants, setIsLoadingAdminParticipants] =
-    useState(false)
-  const [festivalDocuments, setFestivalDocuments] = useState<FestivalDocument[]>(
-    [],
-  )
+    useState(false);
+  const [festivalDocuments, setFestivalDocuments] = useState<
+    FestivalDocument[]
+  >([]);
   const [campLocationLink, setCampLocationLink] =
-    useState<CampLocationLink>(null)
-  const [campLocationOpenError, setCampLocationOpenError] = useState('')
-  const [musicPlaylist, setMusicPlaylist] = useState<MusicPlaylist | null>(null)
-  const [festivalDocumentsError, setFestivalDocumentsError] = useState('')
-  const [isLoadingFestivalDocuments, setIsLoadingFestivalDocuments] =
-    useState(Boolean(selectedParticipant))
+    useState<CampLocationLink>(null);
+  const [campLocationOpenError, setCampLocationOpenError] = useState("");
+  const [musicPlaylist, setMusicPlaylist] = useState<MusicPlaylist | null>(
+    null,
+  );
+  const [festivalDocumentsError, setFestivalDocumentsError] = useState("");
+  const [isLoadingFestivalDocuments, setIsLoadingFestivalDocuments] = useState(
+    Boolean(selectedParticipant),
+  );
   const [adminFestivalDocuments, setAdminFestivalDocuments] = useState<
     FestivalDocument[]
-  >([])
+  >([]);
   const [adminCampLocationLink, setAdminCampLocationLink] =
-    useState<CampLocationLink>(null)
-  const [adminCampLocationError, setAdminCampLocationError] = useState('')
-  const [isSavingCampLocation, setIsSavingCampLocation] = useState(false)
+    useState<CampLocationLink>(null);
+  const [adminCampLocationError, setAdminCampLocationError] = useState("");
+  const [isSavingCampLocation, setIsSavingCampLocation] = useState(false);
   const [adminMusicPlaylist, setAdminMusicPlaylist] =
-    useState<MusicPlaylist | null>(null)
-  const [adminMusicPlaylistError, setAdminMusicPlaylistError] = useState('')
-  const [isSavingMusicPlaylist, setIsSavingMusicPlaylist] = useState(false)
-  const [bingoCard, setBingoCard] = useState<BingoCard | null>(null)
-  const [bingoError, setBingoError] = useState('')
+    useState<MusicPlaylist | null>(null);
+  const [adminMusicPlaylistError, setAdminMusicPlaylistError] = useState("");
+  const [isSavingMusicPlaylist, setIsSavingMusicPlaylist] = useState(false);
+  const [bingoCard, setBingoCard] = useState<BingoCard | null>(null);
+  const [bingoError, setBingoError] = useState("");
   const [horseRacingState, setHorseRacingState] =
-    useState<HorseRacingState | null>(null)
-  const [horseRacingError, setHorseRacingError] = useState('')
+    useState<HorseRacingState | null>(null);
+  const [horseRacingError, setHorseRacingError] = useState("");
   const [savingHorseRacingSuit, setSavingHorseRacingSuit] =
-    useState<HorseRacingSuit | null>(null)
+    useState<HorseRacingSuit | null>(null);
   const [randomPairingAssignments, setRandomPairingAssignments] = useState<
     RandomPairingParticipantAssignment[]
-  >([])
-  const [randomPairingsError, setRandomPairingsError] = useState('')
-  const [tournaments, setTournaments] = useState<Tournament[]>([])
-  const [tournamentsError, setTournamentsError] = useState('')
-  const [timetable, setTimetable] = useState<Timetable | null>(null)
-  const [timetableError, setTimetableError] = useState('')
+  >([]);
+  const [randomPairingsError, setRandomPairingsError] = useState("");
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [tournamentsError, setTournamentsError] = useState("");
+  const [timetable, setTimetable] = useState<Timetable | null>(null);
+  const [timetableError, setTimetableError] = useState("");
   const [isLoadingTimetable, setIsLoadingTimetable] = useState(
     Boolean(selectedParticipant),
-  )
+  );
   const [togglingFavoritePerformanceId, setTogglingFavoritePerformanceId] =
-    useState<string | null>(null)
-  const [adminFestivalDays, setAdminFestivalDays] = useState<FestivalDay[]>([])
-  const [adminFestivalDaysError, setAdminFestivalDaysError] = useState('')
+    useState<string | null>(null);
+  const [adminFestivalDays, setAdminFestivalDays] = useState<FestivalDay[]>([]);
+  const [adminFestivalDaysError, setAdminFestivalDaysError] = useState("");
   const [isLoadingAdminFestivalDays, setIsLoadingAdminFestivalDays] =
-    useState(false)
+    useState(false);
   const [savingFestivalDayId, setSavingFestivalDayId] = useState<string | null>(
     null,
-  )
+  );
   const [deletingFestivalDayId, setDeletingFestivalDayId] = useState<
     string | null
-  >(null)
+  >(null);
   const [adminTimetableStages, setAdminTimetableStages] = useState<
     TimetableStage[]
-  >([])
-  const [adminTimetableStagesError, setAdminTimetableStagesError] = useState('')
+  >([]);
+  const [adminTimetableStagesError, setAdminTimetableStagesError] =
+    useState("");
   const [isLoadingAdminTimetableStages, setIsLoadingAdminTimetableStages] =
-    useState(false)
-  const [savingStageId, setSavingStageId] = useState<string | null>(null)
-  const [deletingStageId, setDeletingStageId] = useState<string | null>(null)
-  const [adminTimetableActs, setAdminTimetableActs] = useState<TimetableAct[]>([])
-  const [adminTimetableActsError, setAdminTimetableActsError] = useState('')
+    useState(false);
+  const [savingStageId, setSavingStageId] = useState<string | null>(null);
+  const [deletingStageId, setDeletingStageId] = useState<string | null>(null);
+  const [adminTimetableActs, setAdminTimetableActs] = useState<TimetableAct[]>(
+    [],
+  );
+  const [adminTimetableActsError, setAdminTimetableActsError] = useState("");
   const [isLoadingAdminTimetableActs, setIsLoadingAdminTimetableActs] =
-    useState(false)
-  const [deletingActId, setDeletingActId] = useState<string | null>(null)
+    useState(false);
+  const [deletingActId, setDeletingActId] = useState<string | null>(null);
   const [adminTimetablePerformances, setAdminTimetablePerformances] = useState<
     TimetablePerformance[]
-  >([])
+  >([]);
   const [adminTimetablePerformancesError, setAdminTimetablePerformancesError] =
-    useState('')
+    useState("");
   const [
     isLoadingAdminTimetablePerformances,
     setIsLoadingAdminTimetablePerformances,
-  ] = useState(false)
+  ] = useState(false);
   const [deletingPerformanceId, setDeletingPerformanceId] = useState<
     string | null
-  >(null)
+  >(null);
   const [togglingBingoNumber, setTogglingBingoNumber] = useState<number | null>(
     null,
-  )
-  const [adminBingoRound, setAdminBingoRound] = useState<BingoRound | null>(null)
-  const [adminBingoError, setAdminBingoError] = useState('')
-  const [isLoadingAdminBingo, setIsLoadingAdminBingo] = useState(false)
-  const [isSavingBingoRound, setIsSavingBingoRound] = useState(false)
+  );
+  const [adminBingoRound, setAdminBingoRound] = useState<BingoRound | null>(
+    null,
+  );
+  const [adminBingoError, setAdminBingoError] = useState("");
+  const [isLoadingAdminBingo, setIsLoadingAdminBingo] = useState(false);
+  const [isSavingBingoRound, setIsSavingBingoRound] = useState(false);
   const [adminHorseRacingState, setAdminHorseRacingState] =
-    useState<AdminHorseRacingState | null>(null)
+    useState<AdminHorseRacingState | null>(null);
   const [adminHorseRacingBets, setAdminHorseRacingBets] = useState<
     AdminHorseRacingBet[]
-  >([])
-  const [adminHorseRacingError, setAdminHorseRacingError] = useState('')
+  >([]);
+  const [adminHorseRacingError, setAdminHorseRacingError] = useState("");
   const [isLoadingAdminHorseRacing, setIsLoadingAdminHorseRacing] =
-    useState(false)
+    useState(false);
   const [isSavingHorseRacingState, setIsSavingHorseRacingState] =
-    useState(false)
+    useState(false);
   const [adminRandomPairingActions, setAdminRandomPairingActions] = useState<
     AdminRandomPairingAction[]
-  >([])
-  const [adminRandomPairingsError, setAdminRandomPairingsError] = useState('')
+  >([]);
+  const [adminRandomPairingsError, setAdminRandomPairingsError] = useState("");
   const [isLoadingAdminRandomPairings, setIsLoadingAdminRandomPairings] =
-    useState(false)
+    useState(false);
   const [isCreatingRandomPairingAction, setIsCreatingRandomPairingAction] =
-    useState(false)
+    useState(false);
   const [savingRandomPairingActionId, setSavingRandomPairingActionId] =
-    useState<string | null>(null)
-  const [adminTournaments, setAdminTournaments] = useState<Tournament[]>([])
-  const [adminTournamentsError, setAdminTournamentsError] = useState('')
+    useState<string | null>(null);
+  const [adminTournaments, setAdminTournaments] = useState<Tournament[]>([]);
+  const [adminTournamentsError, setAdminTournamentsError] = useState("");
   const [isLoadingAdminTournaments, setIsLoadingAdminTournaments] =
-    useState(false)
+    useState(false);
   const [savingTournamentId, setSavingTournamentId] = useState<string | null>(
     null,
-  )
-  const [deletingTournamentId, setDeletingTournamentId] = useState<string | null>(
-    null,
-  )
+  );
+  const [deletingTournamentId, setDeletingTournamentId] = useState<
+    string | null
+  >(null);
   const [savingTournamentMatchId, setSavingTournamentMatchId] = useState<
     string | null
-  >(null)
+  >(null);
   const [adminFestivalDocumentsError, setAdminFestivalDocumentsError] =
-    useState('')
+    useState("");
   const [isLoadingAdminFestivalDocuments, setIsLoadingAdminFestivalDocuments] =
-    useState(false)
+    useState(false);
   const [uploadingDocumentType, setUploadingDocumentType] =
-    useState<FestivalDocumentType | null>(null)
+    useState<FestivalDocumentType | null>(null);
   const [removingDocumentType, setRemovingDocumentType] =
-    useState<FestivalDocumentType | null>(null)
+    useState<FestivalDocumentType | null>(null);
   const [participantForm, setParticipantForm] =
-    useState<ParticipantFormState | null>(null)
-  const [participantFormError, setParticipantFormError] = useState('')
-  const [isSavingParticipant, setIsSavingParticipant] = useState(false)
+    useState<ParticipantFormState | null>(null);
+  const [participantFormError, setParticipantFormError] = useState("");
+  const [isSavingParticipant, setIsSavingParticipant] = useState(false);
   const [profileDisplayName, setProfileDisplayName] = useState(
-    selectedParticipant?.displayName ?? '',
-  )
+    selectedParticipant?.displayName ?? "",
+  );
   const [profileAvatarId, setProfileAvatarId] = useState(
-    selectedParticipant?.avatarId ?? avatars[0]?.id ?? '',
-  )
-  const [profileError, setProfileError] = useState('')
-  const [profileSuccess, setProfileSuccess] = useState('')
-  const [isSavingProfile, setIsSavingProfile] = useState(false)
-  const [isAvatarPickerExpanded, setIsAvatarPickerExpanded] = useState(false)
-  const isSavingProfileRef = useRef(false)
+    selectedParticipant?.avatarId ?? avatars[0]?.id ?? "",
+  );
+  const [profileError, setProfileError] = useState("");
+  const [profileSuccess, setProfileSuccess] = useState("");
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isAvatarPickerExpanded, setIsAvatarPickerExpanded] = useState(false);
+  const isSavingProfileRef = useRef(false);
   const [togglingParticipantId, setTogglingParticipantId] = useState<
     string | null
-  >(null)
-  const [updatingCategoryId, setUpdatingCategoryId] = useState<string | null>(null)
-  const [isAdminVisible, setIsAdminVisible] = useState(false)
+  >(null);
+  const [updatingCategoryId, setUpdatingCategoryId] = useState<string | null>(
+    null,
+  );
+  const [isAdminVisible, setIsAdminVisible] = useState(false);
   const [activeMainSection, setActiveMainSection] =
-    useState<MainSection>('dashboard')
+    useState<MainSection>("dashboard");
   const [activeAdminSection, setActiveAdminSection] =
-    useState<AdminSection>('festival')
+    useState<AdminSection>("festival");
   const [activeGameSection, setActiveGameSection] =
-    useState<GameSection>('bingo')
-  const [isLoadingData, setIsLoadingData] = useState(Boolean(selectedParticipant))
-  const [isSubmittingAccessCode, setIsSubmittingAccessCode] = useState(false)
-  const [loginLockedUntil, setLoginLockedUntil] = useState<number | null>(null)
-  const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now())
-  const participantCount = participants.length
-  const displayedFestivalName = festivalName || t('common.loading')
-  const openCategories = categories.filter((category) => category.status === 'open')
+    useState<GameSection>("bingo");
+  const [isLoadingData, setIsLoadingData] = useState(
+    Boolean(selectedParticipant),
+  );
+  const [isSubmittingAccessCode, setIsSubmittingAccessCode] = useState(false);
+  const [loginLockedUntil, setLoginLockedUntil] = useState<number | null>(null);
+  const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now());
+  const participantCount = participants.length;
+  const displayedFestivalName = festivalName || t("common.loading");
+  const openCategories = categories.filter(
+    (category) => category.status === "open",
+  );
   const statusLabels: Record<CategoryStatus, string> = {
-    upcoming: t('status.upcoming'),
-    open: t('status.open'),
-    closed: t('status.closed'),
-  }
-  const [accessCode, setAccessCode] = useState('')
-  const [accessCodeError, setAccessCodeError] = useState('')
-  const [votes, setVotes] = useState<Vote[]>([])
-  const [allVotes, setAllVotes] = useState<Vote[]>([])
-  const [votesError, setVotesError] = useState('')
-  const [resultsError, setResultsError] = useState('')
-  const [allTimeStandings, setAllTimeStandings] = useState<AllTimeStanding[]>([])
-  const [standingsError, setStandingsError] = useState('')
+    upcoming: t("status.upcoming"),
+    open: t("status.open"),
+    closed: t("status.closed"),
+  };
+  const [accessCode, setAccessCode] = useState("");
+  const [accessCodeError, setAccessCodeError] = useState("");
+  const [votes, setVotes] = useState<Vote[]>([]);
+  const [allVotes, setAllVotes] = useState<Vote[]>([]);
+  const [votesError, setVotesError] = useState("");
+  const [resultsError, setResultsError] = useState("");
+  const [allTimeStandings, setAllTimeStandings] = useState<AllTimeStanding[]>(
+    [],
+  );
+  const [standingsError, setStandingsError] = useState("");
   const [isStandingsLoading, setIsStandingsLoading] = useState(
     Boolean(selectedParticipant),
-  )
+  );
   const [selectedVotesByCategory, setSelectedVotesByCategory] = useState<
     Record<string, string>
-  >({})
-  const [submittingCategoryId, setSubmittingCategoryId] = useState<string | null>(
-    null,
-  )
+  >({});
+  const [submittingCategoryId, setSubmittingCategoryId] = useState<
+    string | null
+  >(null);
   const loginLockRemainingMs = loginLockedUntil
     ? Math.max(0, loginLockedUntil - currentTimeMs)
-    : 0
-  const loginLockRemainingSeconds = Math.ceil(loginLockRemainingMs / 1000)
-  const isLoginLocked = loginLockRemainingMs > 0
-  const adminNavigationItems: Array<{ section: AdminSection; label: string }> = [
-    { section: 'festival', label: t('admin.navigation.festival') },
-    { section: 'participants', label: t('admin.navigation.participants') },
-    { section: 'awards', label: t('admin.navigation.awards') },
-    { section: 'timetable', label: t('admin.navigation.timetable') },
-    { section: 'games', label: t('admin.navigation.games') },
-    { section: 'info', label: t('admin.navigation.info') },
-    { section: 'archive', label: t('admin.navigation.archive') },
-  ]
+    : 0;
+  const loginLockRemainingSeconds = Math.ceil(loginLockRemainingMs / 1000);
+  const isLoginLocked = loginLockRemainingMs > 0;
+  const adminNavigationItems: Array<{ section: AdminSection; label: string }> =
+    [
+      { section: "festival", label: t("admin.navigation.festival") },
+      { section: "participants", label: t("admin.navigation.participants") },
+      { section: "awards", label: t("admin.navigation.awards") },
+      { section: "timetable", label: t("admin.navigation.timetable") },
+      { section: "games", label: t("admin.navigation.games") },
+      { section: "info", label: t("admin.navigation.info") },
+      { section: "archive", label: t("admin.navigation.archive") },
+    ];
 
   const savedProfileAvatarId =
-    selectedParticipant?.avatarId ?? avatars[0]?.id ?? ''
-  const normalizedProfileDisplayName = profileDisplayName.trim()
+    selectedParticipant?.avatarId ?? avatars[0]?.id ?? "";
+  const normalizedProfileDisplayName = profileDisplayName.trim();
   const hasProfileChanges = Boolean(
     selectedParticipant &&
-      (normalizedProfileDisplayName !== selectedParticipant.displayName ||
-        profileAvatarId !== savedProfileAvatarId),
-  )
+    (normalizedProfileDisplayName !== selectedParticipant.displayName ||
+      profileAvatarId !== savedProfileAvatarId),
+  );
+
+  useEffect(() => {
+    const timerId = window.setInterval(
+      () => setEventReferenceInstant(new Date()),
+      60 * 60 * 1000,
+    );
+    return () => window.clearInterval(timerId);
+  }, []);
 
   useEffect(() => {
     function handleHashChange() {
-      setLocationHash(window.location.hash)
+      setLocationHash(window.location.hash);
     }
 
-    window.addEventListener('hashchange', handleHashChange)
+    window.addEventListener("hashchange", handleHashChange);
 
     return () => {
-      window.removeEventListener('hashchange', handleHashChange)
-    }
-  }, [])
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, []);
 
   useEffect(() => {
-    let isCurrent = true
+    let isCurrent = true;
 
-    async function loadName() {
-      setFestivalNameError('')
+    async function loadSettings() {
+      setFestivalNameError("");
 
       try {
-        const loadedFestivalName = await loadFestivalName()
+        const settings = await loadEventSettings();
 
         if (isCurrent) {
-          setFestivalName(loadedFestivalName)
+          setFestivalName(settings.name);
+          setEventStartDate(settings.startDate);
+          setEventEndDate(settings.endDate);
         }
       } catch {
         if (isCurrent) {
-          setFestivalNameError(i18n.t('festival.errors.load'))
+          setFestivalNameError(i18n.t("festival.errors.load"));
         }
       }
     }
 
-    void loadName()
+    void loadSettings();
 
     return () => {
-      isCurrent = false
-    }
-  }, [])
+      isCurrent = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!isLoginLocked) {
-      return
+      return;
     }
 
     const timerId = window.setInterval(() => {
-      const now = Date.now()
+      const now = Date.now();
 
-      setCurrentTimeMs(now)
+      setCurrentTimeMs(now);
 
       if (loginLockedUntil && loginLockedUntil <= now) {
-        setLoginLockedUntil(null)
+        setLoginLockedUntil(null);
       }
-    }, 1000)
+    }, 1000);
 
     return () => {
-      window.clearInterval(timerId)
-    }
-  }, [isLoginLocked, loginLockedUntil])
+      window.clearInterval(timerId);
+    };
+  }, [isLoginLocked, loginLockedUntil]);
 
   useEffect(() => {
     if (!festivalAccess.isUnlocked || !selectedParticipant) {
-      return
+      return;
     }
 
-    const authenticatedParticipant = selectedParticipant
-    let isCurrent = true
+    const authenticatedParticipant = selectedParticipant;
+    let isCurrent = true;
 
     async function loadData() {
       const accessContext = {
         participantAccessCode: authenticatedParticipant.accessCode,
-      }
+      };
 
-      setIsLoadingData(true)
-      setIsStandingsLoading(true)
-      setIsLoadingFestivalDocuments(true)
-      setIsLoadingTimetable(true)
-      setParticipantsError('')
-      setCategoriesError('')
-      setVotesError('')
-      setResultsError('')
-      setStandingsError('')
-      setFestivalDocumentsError('')
-      setBingoError('')
-      setHorseRacingError('')
-      setRandomPairingsError('')
-      setTimetableError('')
+      setIsLoadingData(true);
+      setIsStandingsLoading(true);
+      setIsLoadingFestivalDocuments(true);
+      setIsLoadingTimetable(true);
+      setParticipantsError("");
+      setCategoriesError("");
+      setVotesError("");
+      setResultsError("");
+      setStandingsError("");
+      setFestivalDocumentsError("");
+      setBingoError("");
+      setHorseRacingError("");
+      setRandomPairingsError("");
+      setTimetableError("");
 
       try {
         const [
@@ -1795,86 +1866,79 @@ function App() {
           loadAllTimeStandings(accessContext).then(
             (loadedStandings) =>
               ({
-                status: 'fulfilled',
+                status: "fulfilled",
                 value: loadedStandings,
               }) as const,
             () =>
               ({
-                status: 'rejected',
+                status: "rejected",
               }) as const,
           ),
-        ])
+        ]);
 
         if (isCurrent) {
-          setParticipants(loadedParticipants)
-          setCategories(loadedCategories)
-          setVotes(loadedParticipantVotes)
-          setFestivalDocuments(loadedFestivalDocuments)
-          setCampLocationLink(loadedCampLocationLink)
-          setMusicPlaylist(loadedMusicPlaylist)
-          setBingoCard(loadedBingoCard)
-          setHorseRacingState(loadedHorseRacingState)
-          setRandomPairingAssignments(loadedRandomPairingAssignments)
-          setTournaments(loadedTournaments)
-          setTimetable(loadedTimetable)
-          setCampLocationOpenError('')
+          setParticipants(loadedParticipants);
+          setCategories(loadedCategories);
+          setVotes(loadedParticipantVotes);
+          setFestivalDocuments(loadedFestivalDocuments);
+          setCampLocationLink(loadedCampLocationLink);
+          setMusicPlaylist(loadedMusicPlaylist);
+          setBingoCard(loadedBingoCard);
+          setHorseRacingState(loadedHorseRacingState);
+          setRandomPairingAssignments(loadedRandomPairingAssignments);
+          setTournaments(loadedTournaments);
+          setTimetable(loadedTimetable);
+          setCampLocationOpenError("");
 
-          if (loadedStandingsResult.status === 'fulfilled') {
-            setAllTimeStandings(loadedStandingsResult.value)
+          if (loadedStandingsResult.status === "fulfilled") {
+            setAllTimeStandings(loadedStandingsResult.value);
           } else {
-            setStandingsError(
-              i18n.t('standings.errors.load'),
-            )
+            setStandingsError(i18n.t("standings.errors.load"));
           }
         }
       } catch {
         if (isCurrent) {
-          setParticipantsError(
-            i18n.t('identity.errors.participantsLoad'),
-          )
-          setCategoriesError(
-            i18n.t('admin.errors.categoriesLoad'),
-          )
-          setVotesError(i18n.t('identity.errors.participantVotesLoad'))
-          setFestivalDocumentsError(i18n.t('info.errors.load'))
-          setBingoError(i18n.t('bingo.errors.load'))
-          setHorseRacingError(i18n.t('horseRacing.errors.load'))
-          setRandomPairingsError(i18n.t('randomPairings.errors.load'))
-          setTournamentsError(i18n.t('tournaments.errors.load'))
-          setTimetableError(i18n.t('timetable.errors.load'))
+          setParticipantsError(i18n.t("identity.errors.participantsLoad"));
+          setCategoriesError(i18n.t("admin.errors.categoriesLoad"));
+          setVotesError(i18n.t("identity.errors.participantVotesLoad"));
+          setFestivalDocumentsError(i18n.t("info.errors.load"));
+          setBingoError(i18n.t("bingo.errors.load"));
+          setHorseRacingError(i18n.t("horseRacing.errors.load"));
+          setRandomPairingsError(i18n.t("randomPairings.errors.load"));
+          setTournamentsError(i18n.t("tournaments.errors.load"));
+          setTimetableError(i18n.t("timetable.errors.load"));
         }
       } finally {
         if (isCurrent) {
-          setIsLoadingFestivalDocuments(false)
-          setIsLoadingTimetable(false)
-          setIsStandingsLoading(false)
+          setIsLoadingFestivalDocuments(false);
+          setIsLoadingTimetable(false);
+          setIsStandingsLoading(false);
         }
       }
 
       try {
-        const loadedVotes = await loadVotes(accessContext)
+        const loadedVotes = await loadVotes(accessContext);
 
         if (isCurrent) {
-          setAllVotes(loadedVotes)
+          setAllVotes(loadedVotes);
         }
       } catch {
         if (isCurrent) {
-          setResultsError(i18n.t('results.errors.load'))
+          setResultsError(i18n.t("results.errors.load"));
         }
       } finally {
         if (isCurrent) {
-          setIsLoadingData(false)
+          setIsLoadingData(false);
         }
       }
-
     }
 
-    void loadData()
+    void loadData();
 
     return () => {
-      isCurrent = false
-    }
-  }, [festivalAccess.isUnlocked, selectedParticipant])
+      isCurrent = false;
+    };
+  }, [festivalAccess.isUnlocked, selectedParticipant]);
 
   const resultsByCategory = useMemo(
     () =>
@@ -1890,122 +1954,123 @@ function App() {
           }))
           .sort((firstResult, secondResult) => {
             if (secondResult.voteCount !== firstResult.voteCount) {
-              return secondResult.voteCount - firstResult.voteCount
+              return secondResult.voteCount - firstResult.voteCount;
             }
 
             return firstResult.participant.displayName.localeCompare(
               secondResult.participant.displayName,
-            )
-          })
+            );
+          });
 
-        const highestVoteCount = results[0]?.voteCount ?? 0
+        const highestVoteCount = results[0]?.voteCount ?? 0;
 
         return {
           category,
           results,
           highestVoteCount,
-        }
+        };
       }),
     [allVotes, categories, participants],
-  )
+  );
 
-  const hasVotes = allVotes.length > 0
-  const timetablePerformanceCount = timetable?.performances.length ?? 0
+  const hasVotes = allVotes.length > 0;
+  const timetablePerformanceCount = timetable?.performances.length ?? 0;
   const festivalInfoCount =
     festivalDocuments.length +
     (campLocationLink ? 1 : 0) +
-    (musicPlaylist ? 1 : 0)
+    (musicPlaylist ? 1 : 0);
   const unsortedDashboardTiles: DashboardTile[] = [
     {
-      id: 'awards',
-      section: 'awards',
-      title: t('dashboard.tiles.awards.title'),
-      description: t('dashboard.tiles.awards.description'),
+      id: "awards",
+      section: "awards",
+      title: t("dashboard.tiles.awards.title"),
+      description: t("dashboard.tiles.awards.description"),
       status:
         allTimeStandings.length > 0
-          ? t('dashboard.tiles.awards.status.standings', {
+          ? t("dashboard.tiles.awards.status.standings", {
               count: allTimeStandings.length,
             })
           : hasVotes
-            ? t('dashboard.tiles.awards.status.votes', {
+            ? t("dashboard.tiles.awards.status.votes", {
                 count: allVotes.length,
               })
-            : t('dashboard.tiles.awards.status.empty'),
-      detail: t('dashboard.tiles.awards.detail'),
+            : t("dashboard.tiles.awards.status.empty"),
+      detail: t("dashboard.tiles.awards.detail"),
     },
     {
-      id: 'timetable',
-      section: 'timetable',
-      title: t('dashboard.tiles.timetable.title'),
-      description: t('dashboard.tiles.timetable.description'),
+      id: "timetable",
+      section: "timetable",
+      title: t("dashboard.tiles.timetable.title"),
+      description: t("dashboard.tiles.timetable.description"),
       status:
         timetablePerformanceCount > 0
-          ? t('dashboard.tiles.timetable.status.available', {
+          ? t("dashboard.tiles.timetable.status.available", {
               count: timetablePerformanceCount,
             })
-          : t('dashboard.tiles.timetable.status.empty'),
-      detail: t('dashboard.tiles.timetable.detail'),
+          : t("dashboard.tiles.timetable.status.empty"),
+      detail: t("dashboard.tiles.timetable.detail"),
     },
     {
-      id: 'games',
-      section: 'games',
-      title: t('dashboard.tiles.games.title'),
-      description: t('dashboard.tiles.games.description'),
+      id: "games",
+      section: "games",
+      title: t("dashboard.tiles.games.title"),
+      description: t("dashboard.tiles.games.description"),
       status:
         randomPairingAssignments.length > 0
-          ? t('dashboard.tiles.games.status.randomPairings', {
+          ? t("dashboard.tiles.games.status.randomPairings", {
               count: randomPairingAssignments.length,
             })
           : tournaments.length > 0
-          ? t('dashboard.tiles.games.status.tournaments', {
-              count: tournaments.length,
-            })
-          : horseRacingState?.isEnabled && horseRacingState.bettingStatus === 'open'
-          ? t('dashboard.tiles.games.status.horseRacing')
-          : bingoCard
-            ? t('dashboard.tiles.games.status.bingo')
-            : t('dashboard.tiles.games.status.empty'),
-      detail: t('dashboard.tiles.games.detail'),
+            ? t("dashboard.tiles.games.status.tournaments", {
+                count: tournaments.length,
+              })
+            : horseRacingState?.isEnabled &&
+                horseRacingState.bettingStatus === "open"
+              ? t("dashboard.tiles.games.status.horseRacing")
+              : bingoCard
+                ? t("dashboard.tiles.games.status.bingo")
+                : t("dashboard.tiles.games.status.empty"),
+      detail: t("dashboard.tiles.games.detail"),
     },
     {
-      id: 'info',
-      section: 'info',
-      title: t('dashboard.tiles.info.title'),
-      description: t('dashboard.tiles.info.description'),
+      id: "info",
+      section: "info",
+      title: t("dashboard.tiles.info.title"),
+      description: t("dashboard.tiles.info.description"),
       status:
         festivalInfoCount > 0
-          ? t('dashboard.tiles.info.status.available', {
+          ? t("dashboard.tiles.info.status.available", {
               count: festivalInfoCount,
             })
-          : t('dashboard.tiles.info.status.empty'),
-      detail: t('dashboard.tiles.info.detail'),
+          : t("dashboard.tiles.info.status.empty"),
+      detail: t("dashboard.tiles.info.detail"),
     },
     {
-      id: 'voting',
-      section: 'awards',
-      title: t('dashboard.tiles.voting.title'),
-      description: t('dashboard.tiles.voting.description'),
+      id: "voting",
+      section: "awards",
+      title: t("dashboard.tiles.voting.title"),
+      description: t("dashboard.tiles.voting.description"),
       status:
         openCategories.length > 0
-          ? t('dashboard.tiles.voting.status.available', {
+          ? t("dashboard.tiles.voting.status.available", {
               count: openCategories.length,
             })
-          : t('dashboard.tiles.voting.status.empty'),
-      detail: t('dashboard.tiles.voting.detail'),
+          : t("dashboard.tiles.voting.status.empty"),
+      detail: t("dashboard.tiles.voting.detail"),
     },
     {
-      id: 'profile',
-      section: 'profile',
-      title: t('dashboard.tiles.profile.title'),
-      description: t('dashboard.tiles.profile.description'),
+      id: "profile",
+      section: "profile",
+      title: t("dashboard.tiles.profile.title"),
+      description: t("dashboard.tiles.profile.description"),
       status: selectedParticipant
-        ? t('dashboard.tiles.profile.status.authenticated', {
+        ? t("dashboard.tiles.profile.status.authenticated", {
             name: selectedParticipant.displayName,
           })
-        : t('dashboard.tiles.profile.status.guest'),
+        : t("dashboard.tiles.profile.status.guest"),
       detail: selectedParticipant
-        ? t('dashboard.tiles.profile.detailAuthenticated')
-        : t('dashboard.tiles.profile.detailGuest'),
+        ? t("dashboard.tiles.profile.detailAuthenticated")
+        : t("dashboard.tiles.profile.detailGuest"),
       avatar: selectedParticipant
         ? {
             avatarId: selectedParticipant.avatarId,
@@ -2013,198 +2078,200 @@ function App() {
           }
         : undefined,
     },
-  ]
+  ];
   const eventPhase = determineEventPhase(
-    eventDateRangeFromDays(timetable?.festivalDays.map(({ date }) => date) ?? []),
-  )
+    {
+      startDate: eventStartDate,
+      endDate: eventEndDate,
+    },
+    eventReferenceInstant,
+  );
   const dashboardTiles = selectDashboardModules(
     unsortedDashboardTiles,
     dashboardModuleConfig,
     eventPhase,
-  )
+  );
 
   async function submitAccessCode(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
-    const now = Date.now()
+    const now = Date.now();
 
     if (loginLockedUntil && loginLockedUntil > now) {
-      setCurrentTimeMs(now)
-      return
+      setCurrentTimeMs(now);
+      return;
     }
 
-    const normalizedAccessCode = accessCode.trim().toUpperCase()
+    const normalizedAccessCode = accessCode.trim().toUpperCase();
 
     if (!normalizedAccessCode) {
-      setAccessCodeError(t('identity.errors.invalidAccessCode'))
-      return
+      setAccessCodeError(t("identity.errors.invalidAccessCode"));
+      return;
     }
 
-    setIsSubmittingAccessCode(true)
-    setAccessCodeError('')
+    setIsSubmittingAccessCode(true);
+    setAccessCodeError("");
 
     try {
-      const loginResult = await loginParticipant(normalizedAccessCode)
+      const loginResult = await loginParticipant(normalizedAccessCode);
 
-      if (loginResult.status === 'blocked') {
-        setAccessCodeError(t('identity.errors.loginLocked'))
-        setLoginLockedUntil(Date.parse(loginResult.lockedUntil))
-        setCurrentTimeMs(Date.now())
-        return
+      if (loginResult.status === "blocked") {
+        setAccessCodeError(t("identity.errors.loginLocked"));
+        setLoginLockedUntil(Date.parse(loginResult.lockedUntil));
+        setCurrentTimeMs(Date.now());
+        return;
       }
 
-      if (loginResult.status === 'invalid') {
-        setAccessCodeError(
-          t('identity.errors.invalidAccessCode'),
-        )
-        return
+      if (loginResult.status === "invalid") {
+        setAccessCodeError(t("identity.errors.invalidAccessCode"));
+        return;
       }
 
-      setLoginLockedUntil(null)
-      setIsStandingsLoading(true)
-      setStandingsError('')
+      setLoginLockedUntil(null);
+      setIsStandingsLoading(true);
+      setStandingsError("");
 
       try {
         const loadedStandings = await loadAllTimeStandings({
           participantAccessCode: loginResult.participant.accessCode,
-        })
+        });
 
-        setAllTimeStandings(loadedStandings)
+        setAllTimeStandings(loadedStandings);
       } catch {
-        setStandingsError(
-          t('standings.errors.load'),
-        )
+        setStandingsError(t("standings.errors.load"));
       } finally {
-        setIsStandingsLoading(false)
+        setIsStandingsLoading(false);
       }
 
-      storeAuthenticatedParticipant(loginResult.participant)
-      setSelectedParticipant(loginResult.participant)
-      setProfileDisplayName(loginResult.participant.displayName)
-      setProfileAvatarId(loginResult.participant.avatarId ?? avatars[0]?.id ?? '')
-      setProfileError('')
-      setProfileSuccess('')
-      setIsAvatarPickerExpanded(false)
-      setActiveMainSection('dashboard')
-      setSelectedVotesByCategory({})
-      setAccessCode('')
-      setAccessCodeError('')
-      setVotesError('')
+      storeAuthenticatedParticipant(loginResult.participant);
+      setSelectedParticipant(loginResult.participant);
+      setProfileDisplayName(loginResult.participant.displayName);
+      setProfileAvatarId(
+        loginResult.participant.avatarId ?? avatars[0]?.id ?? "",
+      );
+      setProfileError("");
+      setProfileSuccess("");
+      setIsAvatarPickerExpanded(false);
+      setActiveMainSection("dashboard");
+      setSelectedVotesByCategory({});
+      setAccessCode("");
+      setAccessCodeError("");
+      setVotesError("");
     } catch {
-      setAccessCodeError(t('identity.errors.accessCodeLoad'))
+      setAccessCodeError(t("identity.errors.accessCodeLoad"));
     } finally {
-      setIsSubmittingAccessCode(false)
+      setIsSubmittingAccessCode(false);
     }
   }
 
   function logout() {
-    clearStoredParticipant()
-    setSelectedParticipant(null)
-    setAccessCode('')
-    setAccessCodeError('')
-    setVotes([])
-    setVotesError('')
-    setLoginLockedUntil(null)
-    setCurrentTimeMs(Date.now())
-    setFestivalCode('')
-    setFestivalCodeError('')
-    setParticipantsError('')
-    setCategoriesError('')
-    setResultsError('')
-    setStandingsError('')
-    setAdminError('')
-    setAdminCategories([])
-    setAdminCategoriesError('')
-    setAdminParticipants([])
-    setAdminParticipantsError('')
-    setFestivalDocuments([])
-    setCampLocationLink(null)
-    setCampLocationOpenError('')
-    setMusicPlaylist(null)
-    setFestivalDocumentsError('')
-    setIsLoadingFestivalDocuments(false)
-    setAdminFestivalDocuments([])
-    setAdminCampLocationLink(null)
-    setAdminCampLocationError('')
-    setIsSavingCampLocation(false)
-    setAdminMusicPlaylist(null)
-    setAdminMusicPlaylistError('')
-    setIsSavingMusicPlaylist(false)
-    setBingoCard(null)
-    setBingoError('')
-    setHorseRacingState(null)
-    setHorseRacingError('')
-    setSavingHorseRacingSuit(null)
-    setRandomPairingAssignments([])
-    setRandomPairingsError('')
-    setTournaments([])
-    setTournamentsError('')
-    setTimetable(null)
-    setTimetableError('')
-    setIsLoadingTimetable(false)
-    setTogglingFavoritePerformanceId(null)
-    setAdminFestivalDays([])
-    setAdminFestivalDaysError('')
-    setIsLoadingAdminFestivalDays(false)
-    setSavingFestivalDayId(null)
-    setDeletingFestivalDayId(null)
-    setAdminTimetableStages([])
-    setAdminTimetableStagesError('')
-    setIsLoadingAdminTimetableStages(false)
-    setSavingStageId(null)
-    setDeletingStageId(null)
-    setAdminTimetableActs([])
-    setAdminTimetableActsError('')
-    setIsLoadingAdminTimetableActs(false)
-    setDeletingActId(null)
-    setAdminTimetablePerformances([])
-    setAdminTimetablePerformancesError('')
-    setIsLoadingAdminTimetablePerformances(false)
-    setDeletingPerformanceId(null)
-    setTogglingBingoNumber(null)
-    setAdminBingoRound(null)
-    setAdminBingoError('')
-    setIsLoadingAdminBingo(false)
-    setIsSavingBingoRound(false)
-    setAdminHorseRacingState(null)
-    setAdminHorseRacingBets([])
-    setAdminHorseRacingError('')
-    setIsLoadingAdminHorseRacing(false)
-    setIsSavingHorseRacingState(false)
-    setAdminRandomPairingActions([])
-    setAdminRandomPairingsError('')
-    setIsLoadingAdminRandomPairings(false)
-    setIsCreatingRandomPairingAction(false)
-    setSavingRandomPairingActionId(null)
-    setAdminTournaments([])
-    setAdminTournamentsError('')
-    setIsLoadingAdminTournaments(false)
-    setSavingTournamentId(null)
-    setDeletingTournamentId(null)
-    setAdminFestivalDocumentsError('')
-    setIsLoadingAdminFestivalDocuments(false)
-    setUploadingDocumentType(null)
-    setRemovingDocumentType(null)
-    setParticipantForm(null)
-    setParticipantFormError('')
-    setProfileError('')
-    setProfileSuccess('')
-    setProfileDisplayName('')
-    setProfileAvatarId(avatars[0]?.id ?? '')
-    setIsSavingProfile(false)
-    isSavingProfileRef.current = false
-    setIsAvatarPickerExpanded(false)
-    setIsAdminVisible(false)
-    setActiveMainSection('dashboard')
-    setActiveAdminSection('festival')
-    setSelectedVotesByCategory({})
+    clearStoredParticipant();
+    setSelectedParticipant(null);
+    setAccessCode("");
+    setAccessCodeError("");
+    setVotes([]);
+    setVotesError("");
+    setLoginLockedUntil(null);
+    setCurrentTimeMs(Date.now());
+    setFestivalCode("");
+    setFestivalCodeError("");
+    setParticipantsError("");
+    setCategoriesError("");
+    setResultsError("");
+    setStandingsError("");
+    setAdminError("");
+    setAdminCategories([]);
+    setAdminCategoriesError("");
+    setAdminParticipants([]);
+    setAdminParticipantsError("");
+    setFestivalDocuments([]);
+    setCampLocationLink(null);
+    setCampLocationOpenError("");
+    setMusicPlaylist(null);
+    setFestivalDocumentsError("");
+    setIsLoadingFestivalDocuments(false);
+    setAdminFestivalDocuments([]);
+    setAdminCampLocationLink(null);
+    setAdminCampLocationError("");
+    setIsSavingCampLocation(false);
+    setAdminMusicPlaylist(null);
+    setAdminMusicPlaylistError("");
+    setIsSavingMusicPlaylist(false);
+    setBingoCard(null);
+    setBingoError("");
+    setHorseRacingState(null);
+    setHorseRacingError("");
+    setSavingHorseRacingSuit(null);
+    setRandomPairingAssignments([]);
+    setRandomPairingsError("");
+    setTournaments([]);
+    setTournamentsError("");
+    setTimetable(null);
+    setTimetableError("");
+    setIsLoadingTimetable(false);
+    setTogglingFavoritePerformanceId(null);
+    setAdminFestivalDays([]);
+    setAdminFestivalDaysError("");
+    setIsLoadingAdminFestivalDays(false);
+    setSavingFestivalDayId(null);
+    setDeletingFestivalDayId(null);
+    setAdminTimetableStages([]);
+    setAdminTimetableStagesError("");
+    setIsLoadingAdminTimetableStages(false);
+    setSavingStageId(null);
+    setDeletingStageId(null);
+    setAdminTimetableActs([]);
+    setAdminTimetableActsError("");
+    setIsLoadingAdminTimetableActs(false);
+    setDeletingActId(null);
+    setAdminTimetablePerformances([]);
+    setAdminTimetablePerformancesError("");
+    setIsLoadingAdminTimetablePerformances(false);
+    setDeletingPerformanceId(null);
+    setTogglingBingoNumber(null);
+    setAdminBingoRound(null);
+    setAdminBingoError("");
+    setIsLoadingAdminBingo(false);
+    setIsSavingBingoRound(false);
+    setAdminHorseRacingState(null);
+    setAdminHorseRacingBets([]);
+    setAdminHorseRacingError("");
+    setIsLoadingAdminHorseRacing(false);
+    setIsSavingHorseRacingState(false);
+    setAdminRandomPairingActions([]);
+    setAdminRandomPairingsError("");
+    setIsLoadingAdminRandomPairings(false);
+    setIsCreatingRandomPairingAction(false);
+    setSavingRandomPairingActionId(null);
+    setAdminTournaments([]);
+    setAdminTournamentsError("");
+    setIsLoadingAdminTournaments(false);
+    setSavingTournamentId(null);
+    setDeletingTournamentId(null);
+    setAdminFestivalDocumentsError("");
+    setIsLoadingAdminFestivalDocuments(false);
+    setUploadingDocumentType(null);
+    setRemovingDocumentType(null);
+    setParticipantForm(null);
+    setParticipantFormError("");
+    setProfileError("");
+    setProfileSuccess("");
+    setProfileDisplayName("");
+    setProfileAvatarId(avatars[0]?.id ?? "");
+    setIsSavingProfile(false);
+    isSavingProfileRef.current = false;
+    setIsAvatarPickerExpanded(false);
+    setIsAdminVisible(false);
+    setActiveMainSection("dashboard");
+    setActiveAdminSection("festival");
+    setSelectedVotesByCategory({});
 
     if (window.location.hash) {
       window.history.replaceState(
         null,
-        '',
+        "",
         `${window.location.pathname}${window.location.search}`,
-      )
+      );
     }
   }
 
@@ -2212,37 +2279,37 @@ function App() {
     setSelectedVotesByCategory((currentVotes) => ({
       ...currentVotes,
       [categoryId]: votedForId,
-    }))
+    }));
   }
 
   async function saveOwnProfile(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
     if (!selectedParticipant || isSavingProfileRef.current) {
-      return
+      return;
     }
 
-    const displayName = profileDisplayName.trim()
+    const displayName = profileDisplayName.trim();
 
-    setProfileError('')
-    setProfileSuccess('')
+    setProfileError("");
+    setProfileSuccess("");
 
     if (!displayName) {
-      setProfileError(t('identity.profile.errors.nameRequired'))
-      return
+      setProfileError(t("identity.profile.errors.nameRequired"));
+      return;
     }
 
     if (displayName.length > 50) {
-      setProfileError(t('identity.profile.errors.nameTooLong'))
-      return
+      setProfileError(t("identity.profile.errors.nameTooLong"));
+      return;
     }
 
     if (!hasProfileChanges) {
-      return
+      return;
     }
 
-    isSavingProfileRef.current = true
-    setIsSavingProfile(true)
+    isSavingProfileRef.current = true;
+    setIsSavingProfile(true);
 
     try {
       const updatedParticipant = await updateOwnProfile(
@@ -2253,33 +2320,33 @@ function App() {
         {
           participantAccessCode: selectedParticipant.accessCode,
         },
-      )
+      );
 
-      storeAuthenticatedParticipant(updatedParticipant)
-      setSelectedParticipant(updatedParticipant)
-      setProfileDisplayName(updatedParticipant.displayName)
-      setProfileAvatarId(updatedParticipant.avatarId ?? avatars[0]?.id ?? '')
+      storeAuthenticatedParticipant(updatedParticipant);
+      setSelectedParticipant(updatedParticipant);
+      setProfileDisplayName(updatedParticipant.displayName);
+      setProfileAvatarId(updatedParticipant.avatarId ?? avatars[0]?.id ?? "");
       setParticipants((currentParticipants) =>
         currentParticipants.map((participant) =>
           participant.id === updatedParticipant.id
             ? { ...participant, ...updatedParticipant }
             : participant,
         ),
-      )
+      );
       setAdminParticipants((currentParticipants) =>
         currentParticipants.map((participant) =>
           participant.id === updatedParticipant.id
             ? { ...participant, ...updatedParticipant }
             : participant,
         ),
-      )
+      );
       setAllTimeStandings((currentStandings) =>
         currentStandings.map((standing) =>
           standing.participantId === updatedParticipant.id
             ? { ...standing, participantName: updatedParticipant.displayName }
             : standing,
         ),
-      )
+      );
       setTimetable((currentTimetable) =>
         currentTimetable
           ? {
@@ -2300,7 +2367,7 @@ function App() {
               ),
             }
           : currentTimetable,
-      )
+      );
       setRandomPairingAssignments((currentAssignments) =>
         currentAssignments.map((assignment) =>
           assignment.assignedParticipantId === updatedParticipant.id
@@ -2310,7 +2377,7 @@ function App() {
               }
             : assignment,
         ),
-      )
+      );
       setAdminRandomPairingActions((currentActions) =>
         currentActions.map((action) => ({
           ...action,
@@ -2324,245 +2391,249 @@ function App() {
               : {}),
           })),
         })),
-      )
+      );
       setAdminHorseRacingBets((currentBets) =>
         currentBets.map((bet) =>
           bet.participantId === updatedParticipant.id
             ? { ...bet, participantName: updatedParticipant.displayName }
             : bet,
         ),
-      )
+      );
       setTournaments((currentTournaments) =>
         currentTournaments.map((tournament) =>
           updateTournamentParticipantName(tournament, updatedParticipant),
         ),
-      )
+      );
       setAdminTournaments((currentTournaments) =>
         currentTournaments.map((tournament) =>
           updateTournamentParticipantName(tournament, updatedParticipant),
         ),
-      )
-      setProfileSuccess(t('identity.profile.saved'))
+      );
+      setProfileSuccess(t("identity.profile.saved"));
     } catch {
-      setProfileError(t('identity.profile.errors.save'))
+      setProfileError(t("identity.profile.errors.save"));
     } finally {
-      isSavingProfileRef.current = false
-      setIsSavingProfile(false)
+      isSavingProfileRef.current = false;
+      setIsSavingProfile(false);
     }
   }
 
   function toggleAdminView() {
     if (!selectedParticipant?.isAdmin) {
-      return
+      return;
     }
 
     setIsAdminVisible((isVisible) => {
       if (!isVisible) {
-        void reloadFestivalCode()
-        void reloadAdminCategories()
-        void reloadAdminParticipants()
-        void reloadAdminFestivalDays()
-        void reloadAdminTimetableStages()
-        void reloadAdminTimetableActs()
-        void reloadAdminTimetablePerformances()
-        void reloadAdminFestivalDocuments()
-        void reloadAdminBingoRound()
-        void reloadAdminHorseRacing()
-        void reloadAdminRandomPairings()
-        void reloadAdminTournaments()
+        void reloadFestivalCode();
+        void reloadAdminCategories();
+        void reloadAdminParticipants();
+        void reloadAdminFestivalDays();
+        void reloadAdminTimetableStages();
+        void reloadAdminTimetableActs();
+        void reloadAdminTimetablePerformances();
+        void reloadAdminFestivalDocuments();
+        void reloadAdminBingoRound();
+        void reloadAdminHorseRacing();
+        void reloadAdminRandomPairings();
+        void reloadAdminTournaments();
 
         window.setTimeout(() => {
-          document.getElementById('admin')?.scrollIntoView({ behavior: 'smooth' })
-        })
+          document
+            .getElementById("admin")
+            ?.scrollIntoView({ behavior: "smooth" });
+        });
       }
 
-      return !isVisible
-    })
+      return !isVisible;
+    });
   }
 
   function getParticipantAdminContext() {
     if (!selectedParticipant?.isAdmin) {
-      return null
+      return null;
     }
 
     return {
       participantAccessCode: selectedParticipant.accessCode,
-    }
+    };
   }
 
   function participantMutationErrorMessage(error: unknown) {
-    const message = technicalErrorMessage(error)
+    const message = technicalErrorMessage(error);
 
-    if (message.includes('participant access code already exists')) {
-      return t('admin.participants.errors.duplicateCode')
+    if (message.includes("participant access code already exists")) {
+      return t("admin.participants.errors.duplicateCode");
     }
 
-    if (message.includes('display name is required')) {
-      return t('admin.participants.errors.displayNameRequired')
+    if (message.includes("display name is required")) {
+      return t("admin.participants.errors.displayNameRequired");
     }
 
-    if (message.includes('participant access code is required')) {
-      return t('admin.participants.errors.accessCodeRequired')
+    if (message.includes("participant access code is required")) {
+      return t("admin.participants.errors.accessCodeRequired");
     }
 
-    return t('admin.participants.errors.save')
+    return t("admin.participants.errors.save");
   }
 
   function categoryMutationErrorMessage(error: unknown) {
-    const message = technicalErrorMessage(error)
+    const message = technicalErrorMessage(error);
 
-    if (message.includes('category title is required')) {
-      return t('admin.categories.errors.titleRequired')
+    if (message.includes("category title is required")) {
+      return t("admin.categories.errors.titleRequired");
     }
 
-    if (message.includes('invalid status')) {
-      return t('admin.categories.errors.invalidStatus')
+    if (message.includes("invalid status")) {
+      return t("admin.categories.errors.invalidStatus");
     }
 
-    if (message.includes('category cannot be deleted while votes exist')) {
-      return t('admin.categories.errors.deleteHasVotes')
+    if (message.includes("category cannot be deleted while votes exist")) {
+      return t("admin.categories.errors.deleteHasVotes");
     }
 
-    return t('admin.categories.errors.save')
+    return t("admin.categories.errors.save");
   }
 
   function festivalDayMutationErrorMessage(error: unknown) {
-    const message = technicalErrorMessage(error)
+    const message = technicalErrorMessage(error);
 
-    if (message.includes('festival day date already exists')) {
-      return t('admin.timetable.days.errors.duplicateDate')
+    if (message.includes("festival day date already exists")) {
+      return t("admin.timetable.days.errors.duplicateDate");
     }
 
-    if (message.includes('festival day date is required')) {
-      return t('admin.timetable.days.errors.dateRequired')
+    if (message.includes("festival day date is required")) {
+      return t("admin.timetable.days.errors.dateRequired");
     }
 
-    if (message.includes('festival day label is required')) {
-      return t('admin.timetable.days.errors.labelRequired')
+    if (message.includes("festival day label is required")) {
+      return t("admin.timetable.days.errors.labelRequired");
     }
 
-    if (message.includes('festival day sort order is invalid')) {
-      return t('admin.timetable.days.errors.sortOrderInvalid')
+    if (message.includes("festival day sort order is invalid")) {
+      return t("admin.timetable.days.errors.sortOrderInvalid");
     }
 
-    return t('admin.timetable.days.errors.save')
+    return t("admin.timetable.days.errors.save");
   }
 
   function timetableStageMutationErrorMessage(error: unknown) {
-    const message = technicalErrorMessage(error)
+    const message = technicalErrorMessage(error);
 
-    if (message.includes('stage name already exists')) {
-      return t('admin.timetable.stages.errors.duplicateName')
+    if (message.includes("stage name already exists")) {
+      return t("admin.timetable.stages.errors.duplicateName");
     }
 
-    if (message.includes('stage name is required')) {
-      return t('admin.timetable.stages.errors.nameRequired')
+    if (message.includes("stage name is required")) {
+      return t("admin.timetable.stages.errors.nameRequired");
     }
 
-    if (message.includes('stage sort order is invalid')) {
-      return t('admin.timetable.stages.errors.sortOrderInvalid')
+    if (message.includes("stage sort order is invalid")) {
+      return t("admin.timetable.stages.errors.sortOrderInvalid");
     }
 
-    if (message.includes('stage color is invalid')) {
-      return t('admin.timetable.stages.errors.colorInvalid')
+    if (message.includes("stage color is invalid")) {
+      return t("admin.timetable.stages.errors.colorInvalid");
     }
 
-    return t('admin.timetable.stages.errors.save')
+    return t("admin.timetable.stages.errors.save");
   }
 
   function timetableActMutationErrorMessage(error: unknown) {
-    const message = technicalErrorMessage(error)
+    const message = technicalErrorMessage(error);
 
-    if (message.includes('act name is required')) {
-      return t('admin.timetable.acts.errors.nameRequired')
+    if (message.includes("act name is required")) {
+      return t("admin.timetable.acts.errors.nameRequired");
     }
 
-    if (message.includes('act cannot be deleted while performances exist')) {
-      return t('admin.timetable.acts.errors.deleteHasPerformances')
+    if (message.includes("act cannot be deleted while performances exist")) {
+      return t("admin.timetable.acts.errors.deleteHasPerformances");
     }
 
-    return t('admin.timetable.acts.errors.save')
+    return t("admin.timetable.acts.errors.save");
   }
 
   function timetablePerformanceMutationErrorMessage(error: unknown) {
-    const message = technicalErrorMessage(error)
+    const message = technicalErrorMessage(error);
 
-    if (message.includes('festival day is required')) {
-      return t('admin.timetable.performances.errors.dayRequired')
+    if (message.includes("festival day is required")) {
+      return t("admin.timetable.performances.errors.dayRequired");
     }
 
-    if (message.includes('stage is required')) {
-      return t('admin.timetable.performances.errors.stageRequired')
+    if (message.includes("stage is required")) {
+      return t("admin.timetable.performances.errors.stageRequired");
     }
 
-    if (message.includes('act is required')) {
-      return t('admin.timetable.performances.errors.actRequired')
+    if (message.includes("act is required")) {
+      return t("admin.timetable.performances.errors.actRequired");
     }
 
-    if (message.includes('performance start time is required')) {
-      return t('admin.timetable.performances.errors.startRequired')
+    if (message.includes("performance start time is required")) {
+      return t("admin.timetable.performances.errors.startRequired");
     }
 
-    if (message.includes('performance end time is required')) {
-      return t('admin.timetable.performances.errors.endRequired')
+    if (message.includes("performance end time is required")) {
+      return t("admin.timetable.performances.errors.endRequired");
     }
 
-    if (message.includes('performance end time must be after start time')) {
-      return t('admin.timetable.performances.errors.endAfterStart')
+    if (message.includes("performance end time must be after start time")) {
+      return t("admin.timetable.performances.errors.endAfterStart");
     }
 
-    if (message.includes('performance overlaps existing performance on stage')) {
-      return t('admin.timetable.performances.errors.overlap')
+    if (
+      message.includes("performance overlaps existing performance on stage")
+    ) {
+      return t("admin.timetable.performances.errors.overlap");
     }
 
-    if (message.includes('performance references are invalid')) {
-      return t('admin.timetable.performances.errors.invalidReference')
+    if (message.includes("performance references are invalid")) {
+      return t("admin.timetable.performances.errors.invalidReference");
     }
 
-    return t('admin.timetable.performances.errors.save')
+    return t("admin.timetable.performances.errors.save");
   }
 
   function festivalNameMutationErrorMessage(error: unknown) {
-    const message = technicalErrorMessage(error)
+    const message = technicalErrorMessage(error);
 
-    if (message.includes('festival name is required')) {
-      return t('admin.festival.errors.nameRequired')
+    if (message.includes("festival name is required")) {
+      return t("admin.festival.errors.nameRequired");
     }
 
-    return t('admin.festival.errors.save')
+    return t("admin.festival.errors.save");
   }
 
   function festivalCodeMutationErrorMessage(error: unknown) {
-    const message = technicalErrorMessage(error)
+    const message = technicalErrorMessage(error);
 
-    if (message.includes('festival access code is required')) {
-      return t('admin.festival.errors.codeRequired')
+    if (message.includes("festival access code is required")) {
+      return t("admin.festival.errors.codeRequired");
     }
 
-    return t('admin.festival.errors.codeSave')
+    return t("admin.festival.errors.codeSave");
   }
 
   async function reloadCategoriesForAdminChange() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
     const [loadedAdminCategories, loadedCategories] = await Promise.all([
       loadAdminCategories(adminContext),
       loadCategories(adminContext),
-    ])
+    ]);
 
-    setAdminCategories(loadedAdminCategories)
-    setCategories(loadedCategories)
+    setAdminCategories(loadedAdminCategories);
+    setCategories(loadedCategories);
   }
 
   async function reloadTimetableForAdminChange() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
     const [
@@ -2577,270 +2648,270 @@ function App() {
       loadAdminTimetableActs(adminContext),
       loadAdminTimetablePerformances(adminContext),
       loadTimetable(adminContext),
-    ])
+    ]);
 
-    setAdminFestivalDays(loadedAdminFestivalDays)
-    setAdminTimetableStages(loadedAdminTimetableStages)
-    setAdminTimetableActs(loadedAdminTimetableActs)
-    setAdminTimetablePerformances(loadedAdminTimetablePerformances)
-    setTimetable(loadedTimetable)
+    setAdminFestivalDays(loadedAdminFestivalDays);
+    setAdminTimetableStages(loadedAdminTimetableStages);
+    setAdminTimetableActs(loadedAdminTimetableActs);
+    setAdminTimetablePerformances(loadedAdminTimetablePerformances);
+    setTimetable(loadedTimetable);
   }
 
   async function reloadFestivalCode() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsLoadingFestivalCode(true)
-    setFestivalCodeError('')
+    setIsLoadingFestivalCode(true);
+    setFestivalCodeError("");
 
     try {
-      const loadedFestivalCode = await loadFestivalAccessCode(adminContext)
+      const loadedFestivalCode = await loadFestivalAccessCode(adminContext);
 
-      setFestivalCode(loadedFestivalCode.code)
-      festivalAccess.rememberAccessVersion(loadedFestivalCode.version)
+      setFestivalCode(loadedFestivalCode.code);
+      festivalAccess.rememberAccessVersion(loadedFestivalCode.version);
     } catch {
-      setFestivalCodeError(t('admin.festival.errors.codeLoad'))
+      setFestivalCodeError(t("admin.festival.errors.codeLoad"));
     } finally {
-      setIsLoadingFestivalCode(false)
+      setIsLoadingFestivalCode(false);
     }
   }
 
   async function reloadAdminCategories() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsLoadingAdminCategories(true)
-    setAdminCategoriesError('')
+    setIsLoadingAdminCategories(true);
+    setAdminCategoriesError("");
 
     try {
-      const loadedAdminCategories = await loadAdminCategories(adminContext)
+      const loadedAdminCategories = await loadAdminCategories(adminContext);
 
-      setAdminCategories(loadedAdminCategories)
+      setAdminCategories(loadedAdminCategories);
     } catch {
-      setAdminCategoriesError(t('admin.categories.errors.load'))
+      setAdminCategoriesError(t("admin.categories.errors.load"));
     } finally {
-      setIsLoadingAdminCategories(false)
+      setIsLoadingAdminCategories(false);
     }
   }
 
   async function reloadAdminFestivalDays() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsLoadingAdminFestivalDays(true)
-    setAdminFestivalDaysError('')
+    setIsLoadingAdminFestivalDays(true);
+    setAdminFestivalDaysError("");
 
     try {
-      const loadedFestivalDays = await loadAdminFestivalDays(adminContext)
+      const loadedFestivalDays = await loadAdminFestivalDays(adminContext);
 
-      setAdminFestivalDays(loadedFestivalDays)
+      setAdminFestivalDays(loadedFestivalDays);
     } catch {
-      setAdminFestivalDaysError(t('admin.timetable.days.errors.load'))
+      setAdminFestivalDaysError(t("admin.timetable.days.errors.load"));
     } finally {
-      setIsLoadingAdminFestivalDays(false)
+      setIsLoadingAdminFestivalDays(false);
     }
   }
 
   async function reloadAdminTimetableStages() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsLoadingAdminTimetableStages(true)
-    setAdminTimetableStagesError('')
+    setIsLoadingAdminTimetableStages(true);
+    setAdminTimetableStagesError("");
 
     try {
-      const loadedStages = await loadAdminTimetableStages(adminContext)
+      const loadedStages = await loadAdminTimetableStages(adminContext);
 
-      setAdminTimetableStages(loadedStages)
+      setAdminTimetableStages(loadedStages);
     } catch {
-      setAdminTimetableStagesError(t('admin.timetable.stages.errors.load'))
+      setAdminTimetableStagesError(t("admin.timetable.stages.errors.load"));
     } finally {
-      setIsLoadingAdminTimetableStages(false)
+      setIsLoadingAdminTimetableStages(false);
     }
   }
 
   async function reloadAdminTimetableActs() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsLoadingAdminTimetableActs(true)
-    setAdminTimetableActsError('')
+    setIsLoadingAdminTimetableActs(true);
+    setAdminTimetableActsError("");
 
     try {
-      const loadedActs = await loadAdminTimetableActs(adminContext)
+      const loadedActs = await loadAdminTimetableActs(adminContext);
 
-      setAdminTimetableActs(loadedActs)
+      setAdminTimetableActs(loadedActs);
     } catch {
-      setAdminTimetableActsError(t('admin.timetable.acts.errors.load'))
+      setAdminTimetableActsError(t("admin.timetable.acts.errors.load"));
     } finally {
-      setIsLoadingAdminTimetableActs(false)
+      setIsLoadingAdminTimetableActs(false);
     }
   }
 
   async function reloadAdminTimetablePerformances() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsLoadingAdminTimetablePerformances(true)
-    setAdminTimetablePerformancesError('')
+    setIsLoadingAdminTimetablePerformances(true);
+    setAdminTimetablePerformancesError("");
 
     try {
       const loadedPerformances =
-        await loadAdminTimetablePerformances(adminContext)
+        await loadAdminTimetablePerformances(adminContext);
 
-      setAdminTimetablePerformances(loadedPerformances)
+      setAdminTimetablePerformances(loadedPerformances);
     } catch {
       setAdminTimetablePerformancesError(
-        t('admin.timetable.performances.errors.load'),
-      )
+        t("admin.timetable.performances.errors.load"),
+      );
     } finally {
-      setIsLoadingAdminTimetablePerformances(false)
+      setIsLoadingAdminTimetablePerformances(false);
     }
   }
 
   async function reloadAdminParticipants() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsLoadingAdminParticipants(true)
-    setAdminParticipantsError('')
+    setIsLoadingAdminParticipants(true);
+    setAdminParticipantsError("");
 
     try {
-      const loadedAdminParticipants = await loadAdminParticipants(adminContext)
+      const loadedAdminParticipants = await loadAdminParticipants(adminContext);
 
-      setAdminParticipants(loadedAdminParticipants)
+      setAdminParticipants(loadedAdminParticipants);
     } catch {
-      setAdminParticipantsError(t('admin.participants.errors.load'))
+      setAdminParticipantsError(t("admin.participants.errors.load"));
     } finally {
-      setIsLoadingAdminParticipants(false)
+      setIsLoadingAdminParticipants(false);
     }
   }
 
   async function reloadAdminBingoRound() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsLoadingAdminBingo(true)
-    setAdminBingoError('')
+    setIsLoadingAdminBingo(true);
+    setAdminBingoError("");
 
     try {
-      const loadedBingoRound = await loadAdminBingoRound(adminContext)
+      const loadedBingoRound = await loadAdminBingoRound(adminContext);
 
-      setAdminBingoRound(loadedBingoRound)
+      setAdminBingoRound(loadedBingoRound);
     } catch {
-      setAdminBingoError(t('admin.bingo.errors.load'))
+      setAdminBingoError(t("admin.bingo.errors.load"));
     } finally {
-      setIsLoadingAdminBingo(false)
+      setIsLoadingAdminBingo(false);
     }
   }
 
   async function reloadAdminHorseRacing() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsLoadingAdminHorseRacing(true)
-    setAdminHorseRacingError('')
+    setIsLoadingAdminHorseRacing(true);
+    setAdminHorseRacingError("");
 
     try {
       const [loadedState, loadedBets] = await Promise.all([
         loadAdminHorseRacingState(activeFestival.id, adminContext),
         loadAdminHorseRacingBets(activeFestival.id, adminContext),
-      ])
+      ]);
 
-      setAdminHorseRacingState(loadedState)
-      setAdminHorseRacingBets(loadedBets)
+      setAdminHorseRacingState(loadedState);
+      setAdminHorseRacingBets(loadedBets);
     } catch {
-      setAdminHorseRacingError(t('admin.horseRacing.errors.load'))
+      setAdminHorseRacingError(t("admin.horseRacing.errors.load"));
     } finally {
-      setIsLoadingAdminHorseRacing(false)
+      setIsLoadingAdminHorseRacing(false);
     }
   }
 
   async function reloadAdminRandomPairings() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsLoadingAdminRandomPairings(true)
-    setAdminRandomPairingsError('')
+    setIsLoadingAdminRandomPairings(true);
+    setAdminRandomPairingsError("");
 
     try {
       const loadedActions = await loadAdminRandomPairingActions(
         activeFestival.id,
         adminContext,
-      )
+      );
 
-      setAdminRandomPairingActions(loadedActions)
+      setAdminRandomPairingActions(loadedActions);
     } catch {
-      setAdminRandomPairingsError(t('admin.randomPairings.errors.load'))
+      setAdminRandomPairingsError(t("admin.randomPairings.errors.load"));
     } finally {
-      setIsLoadingAdminRandomPairings(false)
+      setIsLoadingAdminRandomPairings(false);
     }
   }
 
   async function reloadAdminTournaments() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsLoadingAdminTournaments(true)
-    setAdminTournamentsError('')
+    setIsLoadingAdminTournaments(true);
+    setAdminTournamentsError("");
 
     try {
       const loadedTournaments = await loadAdminTournaments(
         activeFestival.id,
         adminContext,
-      )
+      );
 
-      setAdminTournaments(loadedTournaments)
+      setAdminTournaments(loadedTournaments);
     } catch {
-      setAdminTournamentsError(t('admin.tournaments.errors.load'))
+      setAdminTournamentsError(t("admin.tournaments.errors.load"));
     } finally {
-      setIsLoadingAdminTournaments(false)
+      setIsLoadingAdminTournaments(false);
     }
   }
 
   async function reloadAdminFestivalDocuments() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsLoadingAdminFestivalDocuments(true)
-    setAdminFestivalDocumentsError('')
-    setAdminCampLocationError('')
+    setIsLoadingAdminFestivalDocuments(true);
+    setAdminFestivalDocumentsError("");
+    setAdminCampLocationError("");
 
     try {
       const [
@@ -2851,172 +2922,188 @@ function App() {
         loadAdminFestivalDocuments(adminContext),
         loadAdminCampLocationLink(adminContext),
         loadAdminMusicPlaylist(adminContext),
-      ])
+      ]);
 
-      setAdminFestivalDocuments(loadedAdminFestivalDocuments)
-      setAdminCampLocationLink(loadedAdminCampLocationLink)
-      setAdminMusicPlaylist(loadedAdminMusicPlaylist)
+      setAdminFestivalDocuments(loadedAdminFestivalDocuments);
+      setAdminCampLocationLink(loadedAdminCampLocationLink);
+      setAdminMusicPlaylist(loadedAdminMusicPlaylist);
     } catch {
-      setAdminFestivalDocumentsError(t('admin.documents.errors.load'))
+      setAdminFestivalDocumentsError(t("admin.documents.errors.load"));
     } finally {
-      setIsLoadingAdminFestivalDocuments(false)
+      setIsLoadingAdminFestivalDocuments(false);
     }
   }
 
-  async function saveFestivalName(name: string) {
-    const adminContext = getParticipantAdminContext()
+  async function saveFestivalSettings(settings: EventSettings) {
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsSavingFestivalName(true)
-    setFestivalNameError('')
+    setIsSavingFestivalName(true);
+    setFestivalNameError("");
 
     try {
-      const savedFestivalName = await updateFestivalName(name, adminContext)
-
-      setFestivalName(savedFestivalName)
+      const savedSettings = await updateEventSettings(settings, adminContext);
+      setFestivalName(savedSettings.name);
+      setEventStartDate(savedSettings.startDate);
+      setEventEndDate(savedSettings.endDate);
     } catch (error) {
-      throw new Error(festivalNameMutationErrorMessage(error), { cause: error })
+      throw new Error(festivalNameMutationErrorMessage(error), {
+        cause: error,
+      });
     } finally {
-      setIsSavingFestivalName(false)
+      setIsSavingFestivalName(false);
     }
   }
 
   async function saveFestivalCode(code: string) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsSavingFestivalCode(true)
-    setFestivalCodeError('')
+    setIsSavingFestivalCode(true);
+    setFestivalCodeError("");
 
     try {
-      const savedFestivalCode = await updateFestivalAccessCode(code, adminContext)
+      const savedFestivalCode = await updateFestivalAccessCode(
+        code,
+        adminContext,
+      );
 
-      setFestivalCode(savedFestivalCode.code)
-      festivalAccess.rememberAccessVersion(savedFestivalCode.version)
+      setFestivalCode(savedFestivalCode.code);
+      festivalAccess.rememberAccessVersion(savedFestivalCode.version);
     } catch (error) {
-      throw new Error(festivalCodeMutationErrorMessage(error), { cause: error })
+      throw new Error(festivalCodeMutationErrorMessage(error), {
+        cause: error,
+      });
     } finally {
-      setIsSavingFestivalCode(false)
+      setIsSavingFestivalCode(false);
     }
   }
 
   async function archiveCurrentFestival() {
     if (!selectedParticipant?.isAdmin) {
-      return ''
+      return "";
     }
 
-    return archiveFestival(selectedParticipant.accessCode)
+    return archiveFestival(selectedParticipant.accessCode);
   }
 
   async function exportCurrentFestival(includeParticipantAccessCodes: boolean) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsExportingFestival(true)
+    setIsExportingFestival(true);
 
     try {
-      const exportedAt = new Date()
+      const exportedAt = new Date();
       const exportData = await loadFestivalExportData(
         adminContext,
         {
-          type: 'active',
+          type: "active",
           festivalId: activeFestival.id,
         },
         exportedAt,
         {
           includeParticipantAccessCodes,
         },
-      )
-      const fileName = festivalExportFileName(exportData.festival.name, exportedAt)
+      );
+      const fileName = festivalExportFileName(
+        exportData.festival.name,
+        exportedAt,
+      );
       const blob = new Blob([serializeFestivalExport(exportData)], {
-        type: 'application/json;charset=utf-8',
-      })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
+        type: "application/json;charset=utf-8",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
 
-      link.href = url
-      link.download = fileName
-      link.click()
-      URL.revokeObjectURL(url)
+      link.href = url;
+      link.download = fileName;
+      link.click();
+      URL.revokeObjectURL(url);
     } finally {
-      setIsExportingFestival(false)
+      setIsExportingFestival(false);
     }
   }
 
   async function startCreateParticipant() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setParticipantFormError('')
+    setParticipantFormError("");
     setParticipantForm({
       id: null,
-      displayName: '',
-      accessCode: '',
-    })
+      displayName: "",
+      accessCode: "",
+    });
 
     try {
-      const suggestedAccessCode = await suggestParticipantAccessCode(adminContext)
+      const suggestedAccessCode =
+        await suggestParticipantAccessCode(adminContext);
 
       setParticipantForm((currentForm) =>
         currentForm && currentForm.id === null
           ? { ...currentForm, accessCode: suggestedAccessCode }
           : currentForm,
-      )
+      );
     } catch {
-      setParticipantFormError(t('admin.participants.errors.codeSuggest'))
+      setParticipantFormError(t("admin.participants.errors.codeSuggest"));
     }
   }
 
   function startEditParticipant(participant: Participant) {
-    setParticipantFormError('')
+    setParticipantFormError("");
     setParticipantForm({
       id: participant.id,
       displayName: participant.displayName,
       accessCode: participant.accessCode,
-    })
+    });
   }
 
   function cancelParticipantForm() {
-    setParticipantForm(null)
-    setParticipantFormError('')
+    setParticipantForm(null);
+    setParticipantFormError("");
   }
 
   async function submitParticipantForm(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext || !participantForm) {
-      return
+      return;
     }
 
-    const displayName = participantForm.displayName.trim()
-    const accessCode = participantForm.accessCode.trim().toUpperCase()
+    const displayName = participantForm.displayName.trim();
+    const accessCode = participantForm.accessCode.trim().toUpperCase();
 
     if (!displayName) {
-      setParticipantFormError(t('admin.participants.errors.displayNameRequired'))
-      return
+      setParticipantFormError(
+        t("admin.participants.errors.displayNameRequired"),
+      );
+      return;
     }
 
     if (!accessCode) {
-      setParticipantFormError(t('admin.participants.errors.accessCodeRequired'))
-      return
+      setParticipantFormError(
+        t("admin.participants.errors.accessCodeRequired"),
+      );
+      return;
     }
 
-    setIsSavingParticipant(true)
-    setParticipantFormError('')
+    setIsSavingParticipant(true);
+    setParticipantFormError("");
 
     try {
       if (participantForm.id) {
@@ -3027,7 +3114,7 @@ function App() {
             accessCode,
           },
           adminContext,
-        )
+        );
       } else {
         await createParticipant(
           {
@@ -3035,99 +3122,99 @@ function App() {
             accessCode,
           },
           adminContext,
-        )
+        );
       }
 
-      setParticipantForm(null)
-      await reloadAdminParticipants()
+      setParticipantForm(null);
+      await reloadAdminParticipants();
     } catch (error) {
-      setParticipantFormError(participantMutationErrorMessage(error))
+      setParticipantFormError(participantMutationErrorMessage(error));
     } finally {
-      setIsSavingParticipant(false)
+      setIsSavingParticipant(false);
     }
   }
 
   async function deactivateAdminParticipant(participant: Participant) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext || !participant.isActive) {
-      return
+      return;
     }
 
     const shouldDeactivate = window.confirm(
-      t('admin.participants.confirmDeactivate', {
+      t("admin.participants.confirmDeactivate", {
         name: participant.displayName,
       }),
-    )
+    );
 
     if (!shouldDeactivate) {
-      return
+      return;
     }
 
-    setTogglingParticipantId(participant.id)
-    setAdminParticipantsError('')
+    setTogglingParticipantId(participant.id);
+    setAdminParticipantsError("");
 
     try {
-      await deactivateParticipant(participant.id, adminContext)
-      await reloadAdminParticipants()
+      await deactivateParticipant(participant.id, adminContext);
+      await reloadAdminParticipants();
     } catch {
-      setAdminParticipantsError(t('admin.participants.errors.deactivate'))
+      setAdminParticipantsError(t("admin.participants.errors.deactivate"));
     } finally {
-      setTogglingParticipantId(null)
+      setTogglingParticipantId(null);
     }
   }
 
   async function reactivateAdminParticipant(participant: Participant) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext || participant.isActive) {
-      return
+      return;
     }
 
-    setTogglingParticipantId(participant.id)
-    setAdminParticipantsError('')
+    setTogglingParticipantId(participant.id);
+    setAdminParticipantsError("");
 
     try {
-      await reactivateParticipant(participant.id, adminContext)
-      await reloadAdminParticipants()
+      await reactivateParticipant(participant.id, adminContext);
+      await reloadAdminParticipants();
     } catch {
-      setAdminParticipantsError(t('admin.participants.errors.reactivate'))
+      setAdminParticipantsError(t("admin.participants.errors.reactivate"));
     } finally {
-      setTogglingParticipantId(null)
+      setTogglingParticipantId(null);
     }
   }
 
   async function createAdminCategory(input: CreateCategoryInput) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setAdminCategoriesError('')
+    setAdminCategoriesError("");
 
     try {
-      await createCategory(input, adminContext)
-      await reloadCategoriesForAdminChange()
+      await createCategory(input, adminContext);
+      await reloadCategoriesForAdminChange();
     } catch (error) {
-      throw new Error(categoryMutationErrorMessage(error), { cause: error })
+      throw new Error(categoryMutationErrorMessage(error), { cause: error });
     }
   }
 
   async function updateAdminCategory(input: UpdateCategoryInput) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setAdminCategoriesError('')
+    setAdminCategoriesError("");
 
     try {
-      await updateCategory(input, adminContext)
-      await reloadCategoriesForAdminChange()
+      await updateCategory(input, adminContext);
+      await reloadCategoriesForAdminChange();
     } catch (error) {
-      throw new Error(categoryMutationErrorMessage(error), { cause: error })
+      throw new Error(categoryMutationErrorMessage(error), { cause: error });
     }
   }
 
@@ -3136,24 +3223,24 @@ function App() {
     status: CategoryStatus,
   ) {
     if (!selectedParticipant?.isAdmin) {
-      return
+      return;
     }
 
-    const previousCategories = categories
-    const previousAdminCategories = adminCategories
+    const previousCategories = categories;
+    const previousAdminCategories = adminCategories;
 
-    setAdminError('')
-    setUpdatingCategoryId(categoryId)
+    setAdminError("");
+    setUpdatingCategoryId(categoryId);
     setCategories((currentCategories) =>
       currentCategories.map((category) =>
         category.id === categoryId ? { ...category, status } : category,
       ),
-    )
+    );
     setAdminCategories((currentCategories) =>
       currentCategories.map((category) =>
         category.id === categoryId ? { ...category, status } : category,
       ),
-    )
+    );
 
     try {
       const updatedCategory = await updateCategory(
@@ -3164,118 +3251,119 @@ function App() {
         {
           participantAccessCode: selectedParticipant.accessCode,
         },
-      )
+      );
 
       setCategories((currentCategories) =>
         currentCategories.map((category) =>
           category.id === categoryId ? updatedCategory : category,
         ),
-      )
+      );
       setAdminCategories((currentCategories) =>
         currentCategories.map((category) =>
           category.id === categoryId ? updatedCategory : category,
         ),
-      )
+      );
     } catch {
-      setCategories(previousCategories)
-      setAdminCategories(previousAdminCategories)
-      setAdminError(t('admin.errors.statusSave'))
+      setCategories(previousCategories);
+      setAdminCategories(previousAdminCategories);
+      setAdminError(t("admin.errors.statusSave"));
     } finally {
-      setUpdatingCategoryId(null)
+      setUpdatingCategoryId(null);
     }
   }
 
   async function deleteAdminCategory(category: Category) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
     const shouldDelete = window.confirm(
-      t('admin.categories.confirmDelete', {
+      t("admin.categories.confirmDelete", {
         title: category.title,
       }),
-    )
+    );
 
     if (!shouldDelete) {
-      return
+      return;
     }
 
-    setDeletingCategoryId(category.id)
-    setAdminCategoriesError('')
+    setDeletingCategoryId(category.id);
+    setAdminCategoriesError("");
 
     try {
-      await deleteCategory(category.id, adminContext)
-      await reloadCategoriesForAdminChange()
+      await deleteCategory(category.id, adminContext);
+      await reloadCategoriesForAdminChange();
     } catch (error) {
-      setAdminCategoriesError(categoryMutationErrorMessage(error))
+      setAdminCategoriesError(categoryMutationErrorMessage(error));
     } finally {
-      setDeletingCategoryId(null)
+      setDeletingCategoryId(null);
     }
   }
 
   async function createAdminFestivalDay(input: CreateFestivalDayInput) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setAdminFestivalDaysError('')
+    setAdminFestivalDaysError("");
 
     try {
-      await createFestivalDay(input, adminContext)
-      await reloadTimetableForAdminChange()
+      await createFestivalDay(input, adminContext);
+      await reloadTimetableForAdminChange();
     } catch (error) {
-      throw new Error(festivalDayMutationErrorMessage(error), { cause: error })
+      throw new Error(festivalDayMutationErrorMessage(error), { cause: error });
     }
   }
 
   async function updateAdminFestivalDay(input: UpdateFestivalDayInput) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setAdminFestivalDaysError('')
+    setAdminFestivalDaysError("");
 
     try {
-      await updateFestivalDay(input, adminContext)
-      await reloadTimetableForAdminChange()
+      await updateFestivalDay(input, adminContext);
+      await reloadTimetableForAdminChange();
     } catch (error) {
-      throw new Error(festivalDayMutationErrorMessage(error), { cause: error })
+      throw new Error(festivalDayMutationErrorMessage(error), { cause: error });
     }
   }
 
   async function moveAdminFestivalDay(
     festivalDay: FestivalDay,
-    direction: 'up' | 'down',
+    direction: "up" | "down",
   ) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
     const orderedFestivalDays = [...adminFestivalDays].sort(
       (firstDay, secondDay) =>
         firstDay.sortOrder - secondDay.sortOrder ||
         firstDay.date.localeCompare(secondDay.date),
-    )
+    );
     const currentIndex = orderedFestivalDays.findIndex(
       (currentDay) => currentDay.id === festivalDay.id,
-    )
-    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
-    const targetDay = orderedFestivalDays[targetIndex]
+    );
+    const targetIndex =
+      direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    const targetDay = orderedFestivalDays[targetIndex];
 
     if (currentIndex < 0 || !targetDay) {
-      return
+      return;
     }
 
-    setSavingFestivalDayId(festivalDay.id)
-    setAdminFestivalDaysError('')
+    setSavingFestivalDayId(festivalDay.id);
+    setAdminFestivalDaysError("");
 
     try {
       await updateFestivalDay(
@@ -3284,117 +3372,118 @@ function App() {
           sortOrder: targetDay.sortOrder,
         },
         adminContext,
-      )
+      );
       await updateFestivalDay(
         {
           ...targetDay,
           sortOrder: festivalDay.sortOrder,
         },
         adminContext,
-      )
-      await reloadTimetableForAdminChange()
+      );
+      await reloadTimetableForAdminChange();
     } catch {
-      setAdminFestivalDaysError(t('admin.timetable.days.errors.reorder'))
+      setAdminFestivalDaysError(t("admin.timetable.days.errors.reorder"));
     } finally {
-      setSavingFestivalDayId(null)
+      setSavingFestivalDayId(null);
     }
   }
 
   async function deleteAdminFestivalDay(festivalDay: FestivalDay) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
     const shouldDelete = window.confirm(
-      t('admin.timetable.days.confirmDelete', {
+      t("admin.timetable.days.confirmDelete", {
         label: festivalDay.label,
       }),
-    )
+    );
 
     if (!shouldDelete) {
-      return
+      return;
     }
 
-    setDeletingFestivalDayId(festivalDay.id)
-    setAdminFestivalDaysError('')
+    setDeletingFestivalDayId(festivalDay.id);
+    setAdminFestivalDaysError("");
 
     try {
-      await deleteFestivalDay(festivalDay.id, adminContext)
-      await reloadTimetableForAdminChange()
+      await deleteFestivalDay(festivalDay.id, adminContext);
+      await reloadTimetableForAdminChange();
     } catch {
-      setAdminFestivalDaysError(t('admin.timetable.days.errors.delete'))
+      setAdminFestivalDaysError(t("admin.timetable.days.errors.delete"));
     } finally {
-      setDeletingFestivalDayId(null)
+      setDeletingFestivalDayId(null);
     }
   }
 
   async function createAdminTimetableStage(input: CreateTimetableStageInput) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setAdminTimetableStagesError('')
+    setAdminTimetableStagesError("");
 
     try {
-      await createTimetableStage(input, adminContext)
-      await reloadTimetableForAdminChange()
+      await createTimetableStage(input, adminContext);
+      await reloadTimetableForAdminChange();
     } catch (error) {
       throw new Error(timetableStageMutationErrorMessage(error), {
         cause: error,
-      })
+      });
     }
   }
 
   async function updateAdminTimetableStage(input: UpdateTimetableStageInput) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setAdminTimetableStagesError('')
+    setAdminTimetableStagesError("");
 
     try {
-      await updateTimetableStage(input, adminContext)
-      await reloadTimetableForAdminChange()
+      await updateTimetableStage(input, adminContext);
+      await reloadTimetableForAdminChange();
     } catch (error) {
       throw new Error(timetableStageMutationErrorMessage(error), {
         cause: error,
-      })
+      });
     }
   }
 
   async function moveAdminTimetableStage(
     stage: TimetableStage,
-    direction: 'up' | 'down',
+    direction: "up" | "down",
   ) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
     const orderedStages = [...adminTimetableStages].sort(
       (firstStage, secondStage) =>
         firstStage.sortOrder - secondStage.sortOrder ||
         firstStage.name.localeCompare(secondStage.name),
-    )
+    );
     const currentIndex = orderedStages.findIndex(
       (currentStage) => currentStage.id === stage.id,
-    )
-    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
-    const targetStage = orderedStages[targetIndex]
+    );
+    const targetIndex =
+      direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    const targetStage = orderedStages[targetIndex];
 
     if (currentIndex < 0 || !targetStage) {
-      return
+      return;
     }
 
-    setSavingStageId(stage.id)
-    setAdminTimetableStagesError('')
+    setSavingStageId(stage.id);
+    setAdminTimetableStagesError("");
 
     try {
       await updateTimetableStage(
@@ -3403,196 +3492,196 @@ function App() {
           sortOrder: targetStage.sortOrder,
         },
         adminContext,
-      )
+      );
       await updateTimetableStage(
         {
           ...targetStage,
           sortOrder: stage.sortOrder,
         },
         adminContext,
-      )
-      await reloadTimetableForAdminChange()
+      );
+      await reloadTimetableForAdminChange();
     } catch {
-      setAdminTimetableStagesError(t('admin.timetable.stages.errors.reorder'))
+      setAdminTimetableStagesError(t("admin.timetable.stages.errors.reorder"));
     } finally {
-      setSavingStageId(null)
+      setSavingStageId(null);
     }
   }
 
   async function deleteAdminTimetableStage(stage: TimetableStage) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
     const shouldDelete = window.confirm(
-      t('admin.timetable.stages.confirmDelete', {
+      t("admin.timetable.stages.confirmDelete", {
         name: stage.name,
       }),
-    )
+    );
 
     if (!shouldDelete) {
-      return
+      return;
     }
 
-    setDeletingStageId(stage.id)
-    setAdminTimetableStagesError('')
+    setDeletingStageId(stage.id);
+    setAdminTimetableStagesError("");
 
     try {
-      await deleteTimetableStage(stage.id, adminContext)
-      await reloadTimetableForAdminChange()
+      await deleteTimetableStage(stage.id, adminContext);
+      await reloadTimetableForAdminChange();
     } catch {
-      setAdminTimetableStagesError(t('admin.timetable.stages.errors.delete'))
+      setAdminTimetableStagesError(t("admin.timetable.stages.errors.delete"));
     } finally {
-      setDeletingStageId(null)
+      setDeletingStageId(null);
     }
   }
 
   async function createAdminTimetableAct(input: CreateTimetableActInput) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setAdminTimetableActsError('')
+    setAdminTimetableActsError("");
 
     try {
-      await createTimetableAct(input, adminContext)
-      await reloadTimetableForAdminChange()
+      await createTimetableAct(input, adminContext);
+      await reloadTimetableForAdminChange();
     } catch (error) {
       throw new Error(timetableActMutationErrorMessage(error), {
         cause: error,
-      })
+      });
     }
   }
 
   async function updateAdminTimetableAct(input: UpdateTimetableActInput) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setAdminTimetableActsError('')
+    setAdminTimetableActsError("");
 
     try {
-      await updateTimetableAct(input, adminContext)
-      await reloadTimetableForAdminChange()
+      await updateTimetableAct(input, adminContext);
+      await reloadTimetableForAdminChange();
     } catch (error) {
       throw new Error(timetableActMutationErrorMessage(error), {
         cause: error,
-      })
+      });
     }
   }
 
   async function deleteAdminTimetableAct(act: TimetableAct) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
     const shouldDelete = window.confirm(
-      t('admin.timetable.acts.confirmDelete', {
+      t("admin.timetable.acts.confirmDelete", {
         name: act.name,
       }),
-    )
+    );
 
     if (!shouldDelete) {
-      return
+      return;
     }
 
-    setDeletingActId(act.id)
-    setAdminTimetableActsError('')
+    setDeletingActId(act.id);
+    setAdminTimetableActsError("");
 
     try {
-      await deleteTimetableAct(act.id, adminContext)
-      await reloadTimetableForAdminChange()
+      await deleteTimetableAct(act.id, adminContext);
+      await reloadTimetableForAdminChange();
     } catch (error) {
-      setAdminTimetableActsError(timetableActMutationErrorMessage(error))
+      setAdminTimetableActsError(timetableActMutationErrorMessage(error));
     } finally {
-      setDeletingActId(null)
+      setDeletingActId(null);
     }
   }
 
   async function createAdminTimetablePerformance(
     input: CreateTimetablePerformanceInput,
   ) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setAdminTimetablePerformancesError('')
+    setAdminTimetablePerformancesError("");
 
     try {
-      await createTimetablePerformance(input, adminContext)
-      await reloadTimetableForAdminChange()
+      await createTimetablePerformance(input, adminContext);
+      await reloadTimetableForAdminChange();
     } catch (error) {
       throw new Error(timetablePerformanceMutationErrorMessage(error), {
         cause: error,
-      })
+      });
     }
   }
 
   async function updateAdminTimetablePerformance(
     input: UpdateTimetablePerformanceInput,
   ) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setAdminTimetablePerformancesError('')
+    setAdminTimetablePerformancesError("");
 
     try {
-      await updateTimetablePerformance(input, adminContext)
-      await reloadTimetableForAdminChange()
+      await updateTimetablePerformance(input, adminContext);
+      await reloadTimetableForAdminChange();
     } catch (error) {
       throw new Error(timetablePerformanceMutationErrorMessage(error), {
         cause: error,
-      })
+      });
     }
   }
 
   async function deleteAdminTimetablePerformance(
     performance: TimetablePerformance,
   ) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
     const act = adminTimetableActs.find(
       (currentAct) => currentAct.id === performance.actId,
-    )
+    );
     const shouldDelete = window.confirm(
-      t('admin.timetable.performances.confirmDelete', {
-        act: act?.name ?? t('admin.timetable.performances.unknownAct'),
+      t("admin.timetable.performances.confirmDelete", {
+        act: act?.name ?? t("admin.timetable.performances.unknownAct"),
       }),
-    )
+    );
 
     if (!shouldDelete) {
-      return
+      return;
     }
 
-    setDeletingPerformanceId(performance.id)
-    setAdminTimetablePerformancesError('')
+    setDeletingPerformanceId(performance.id);
+    setAdminTimetablePerformancesError("");
 
     try {
-      await deleteTimetablePerformance(performance.id, adminContext)
-      await reloadTimetableForAdminChange()
+      await deleteTimetablePerformance(performance.id, adminContext);
+      await reloadTimetableForAdminChange();
     } catch {
       setAdminTimetablePerformancesError(
-        t('admin.timetable.performances.errors.delete'),
-      )
+        t("admin.timetable.performances.errors.delete"),
+      );
     } finally {
-      setDeletingPerformanceId(null)
+      setDeletingPerformanceId(null);
     }
   }
 
@@ -3600,21 +3689,21 @@ function App() {
     documentType: FestivalDocumentType,
     file: File,
   ) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
     if (!isSupportedFestivalDocumentFile(file)) {
       setAdminFestivalDocumentsError(
-        t('admin.documents.errors.unsupportedFileType'),
-      )
-      return
+        t("admin.documents.errors.unsupportedFileType"),
+      );
+      return;
     }
 
-    setUploadingDocumentType(documentType)
-    setAdminFestivalDocumentsError('')
+    setUploadingDocumentType(documentType);
+    setAdminFestivalDocumentsError("");
 
     try {
       await uploadFestivalDocument(
@@ -3624,259 +3713,265 @@ function App() {
           file,
         },
         adminContext,
-      )
+      );
 
       const [loadedAdminDocuments, loadedDocuments] = await Promise.all([
         loadAdminFestivalDocuments(adminContext),
         loadFestivalDocuments(adminContext),
-      ])
+      ]);
 
-      setAdminFestivalDocuments(loadedAdminDocuments)
-      setFestivalDocuments(loadedDocuments)
-      setFestivalDocumentsError('')
+      setAdminFestivalDocuments(loadedAdminDocuments);
+      setFestivalDocuments(loadedDocuments);
+      setFestivalDocumentsError("");
     } catch {
-      setAdminFestivalDocumentsError(t('admin.documents.errors.upload'))
+      setAdminFestivalDocumentsError(t("admin.documents.errors.upload"));
     } finally {
-      setUploadingDocumentType(null)
+      setUploadingDocumentType(null);
     }
   }
 
   async function removeAdminFestivalDocument(
     documentType: FestivalDocumentType,
   ) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
     const shouldRemove = window.confirm(
-      t('admin.documents.confirmRemove', {
+      t("admin.documents.confirmRemove", {
         title: t(`info.documentTypes.${documentType}`),
       }),
-    )
+    );
 
     if (!shouldRemove) {
-      return
+      return;
     }
 
-    setRemovingDocumentType(documentType)
-    setAdminFestivalDocumentsError('')
+    setRemovingDocumentType(documentType);
+    setAdminFestivalDocumentsError("");
 
     try {
-      await deleteFestivalDocument(documentType, adminContext)
+      await deleteFestivalDocument(documentType, adminContext);
 
       const [loadedAdminDocuments, loadedDocuments] = await Promise.all([
         loadAdminFestivalDocuments(adminContext),
         loadFestivalDocuments(adminContext),
-      ])
+      ]);
 
-      setAdminFestivalDocuments(loadedAdminDocuments)
-      setFestivalDocuments(loadedDocuments)
-      setFestivalDocumentsError('')
+      setAdminFestivalDocuments(loadedAdminDocuments);
+      setFestivalDocuments(loadedDocuments);
+      setFestivalDocumentsError("");
     } catch {
-      setAdminFestivalDocumentsError(t('admin.documents.errors.remove'))
+      setAdminFestivalDocumentsError(t("admin.documents.errors.remove"));
     } finally {
-      setRemovingDocumentType(null)
+      setRemovingDocumentType(null);
     }
   }
 
   async function saveAdminCampLocationLink(link: string) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    const normalizedLink = link.trim()
+    const normalizedLink = link.trim();
 
     if (!isSupportedCampLocationLink(normalizedLink)) {
-      setAdminCampLocationError(t('admin.campLocation.errors.invalid'))
-      return
+      setAdminCampLocationError(t("admin.campLocation.errors.invalid"));
+      return;
     }
 
-    setIsSavingCampLocation(true)
-    setAdminCampLocationError('')
+    setIsSavingCampLocation(true);
+    setAdminCampLocationError("");
 
     try {
-      const savedLink = await updateCampLocationLink(normalizedLink, adminContext)
+      const savedLink = await updateCampLocationLink(
+        normalizedLink,
+        adminContext,
+      );
 
-      setAdminCampLocationLink(savedLink)
-      setCampLocationLink(savedLink)
-      setCampLocationOpenError('')
+      setAdminCampLocationLink(savedLink);
+      setCampLocationLink(savedLink);
+      setCampLocationOpenError("");
     } catch {
-      setAdminCampLocationError(t('admin.campLocation.errors.save'))
+      setAdminCampLocationError(t("admin.campLocation.errors.save"));
     } finally {
-      setIsSavingCampLocation(false)
+      setIsSavingCampLocation(false);
     }
   }
 
   async function removeAdminCampLocationLink() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    const shouldRemove = window.confirm(t('admin.campLocation.confirmRemove'))
+    const shouldRemove = window.confirm(t("admin.campLocation.confirmRemove"));
 
     if (!shouldRemove) {
-      return
+      return;
     }
 
-    setIsSavingCampLocation(true)
-    setAdminCampLocationError('')
+    setIsSavingCampLocation(true);
+    setAdminCampLocationError("");
 
     try {
-      await deleteCampLocationLink(adminContext)
-      setAdminCampLocationLink(null)
-      setCampLocationLink(null)
-      setCampLocationOpenError('')
+      await deleteCampLocationLink(adminContext);
+      setAdminCampLocationLink(null);
+      setCampLocationLink(null);
+      setCampLocationOpenError("");
     } catch {
-      setAdminCampLocationError(t('admin.campLocation.errors.remove'))
+      setAdminCampLocationError(t("admin.campLocation.errors.remove"));
     } finally {
-      setIsSavingCampLocation(false)
+      setIsSavingCampLocation(false);
     }
   }
 
   async function saveAdminMusicPlaylist(link: string) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return false
+      return false;
     }
 
-    const normalizedLink = link.trim()
+    const normalizedLink = link.trim();
 
     if (!isSupportedMusicPlaylistLink(normalizedLink)) {
-      setAdminMusicPlaylistError(t('admin.musicPlaylist.errors.invalid'))
-      return false
+      setAdminMusicPlaylistError(t("admin.musicPlaylist.errors.invalid"));
+      return false;
     }
 
-    setIsSavingMusicPlaylist(true)
-    setAdminMusicPlaylistError('')
+    setIsSavingMusicPlaylist(true);
+    setAdminMusicPlaylistError("");
 
     try {
-      const savedPlaylist = await updateMusicPlaylist(normalizedLink, adminContext)
+      const savedPlaylist = await updateMusicPlaylist(
+        normalizedLink,
+        adminContext,
+      );
 
-      setAdminMusicPlaylist(savedPlaylist)
-      setMusicPlaylist(savedPlaylist)
-      setFestivalDocumentsError('')
-      return true
+      setAdminMusicPlaylist(savedPlaylist);
+      setMusicPlaylist(savedPlaylist);
+      setFestivalDocumentsError("");
+      return true;
     } catch {
-      setAdminMusicPlaylistError(t('admin.musicPlaylist.errors.save'))
-      return false
+      setAdminMusicPlaylistError(t("admin.musicPlaylist.errors.save"));
+      return false;
     } finally {
-      setIsSavingMusicPlaylist(false)
+      setIsSavingMusicPlaylist(false);
     }
   }
 
   async function removeAdminMusicPlaylist() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return false
+      return false;
     }
 
-    const shouldRemove = window.confirm(t('admin.musicPlaylist.confirmRemove'))
+    const shouldRemove = window.confirm(t("admin.musicPlaylist.confirmRemove"));
 
     if (!shouldRemove) {
-      return false
+      return false;
     }
 
-    setIsSavingMusicPlaylist(true)
-    setAdminMusicPlaylistError('')
+    setIsSavingMusicPlaylist(true);
+    setAdminMusicPlaylistError("");
 
     try {
-      await deleteMusicPlaylist(adminContext)
-      setAdminMusicPlaylist(null)
-      setMusicPlaylist(null)
-      setFestivalDocumentsError('')
-      return true
+      await deleteMusicPlaylist(adminContext);
+      setAdminMusicPlaylist(null);
+      setMusicPlaylist(null);
+      setFestivalDocumentsError("");
+      return true;
     } catch {
-      setAdminMusicPlaylistError(t('admin.musicPlaylist.errors.remove'))
-      return false
+      setAdminMusicPlaylistError(t("admin.musicPlaylist.errors.remove"));
+      return false;
     } finally {
-      setIsSavingMusicPlaylist(false)
+      setIsSavingMusicPlaylist(false);
     }
   }
 
   async function startAdminBingoRound() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsSavingBingoRound(true)
-    setAdminBingoError('')
+    setIsSavingBingoRound(true);
+    setAdminBingoError("");
 
     try {
-      const startedRound = await startBingoRound(adminContext)
-      const loadedBingoCard = await loadOrCreateBingoCard(adminContext)
+      const startedRound = await startBingoRound(adminContext);
+      const loadedBingoCard = await loadOrCreateBingoCard(adminContext);
 
-      setAdminBingoRound(startedRound)
-      setBingoCard(loadedBingoCard)
-      setBingoError('')
+      setAdminBingoRound(startedRound);
+      setBingoCard(loadedBingoCard);
+      setBingoError("");
     } finally {
-      setIsSavingBingoRound(false)
+      setIsSavingBingoRound(false);
     }
   }
 
   async function closeAdminBingoRound() {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsSavingBingoRound(true)
-    setAdminBingoError('')
+    setIsSavingBingoRound(true);
+    setAdminBingoError("");
 
     try {
-      await closeBingoRound(adminContext)
-      setAdminBingoRound(null)
-      setBingoCard(null)
-      setBingoError('')
+      await closeBingoRound(adminContext);
+      setAdminBingoRound(null);
+      setBingoCard(null);
+      setBingoError("");
 
-      if (activeMainSection === 'games') {
-        setActiveMainSection('awards')
+      if (activeMainSection === "games") {
+        setActiveMainSection("awards");
       }
     } finally {
-      setIsSavingBingoRound(false)
+      setIsSavingBingoRound(false);
     }
   }
 
   async function updateHorseRacingAdminState(input: {
-    isEnabled: boolean
-    bettingStatus: HorseRacingBettingStatus
+    isEnabled: boolean;
+    bettingStatus: HorseRacingBettingStatus;
   }) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsSavingHorseRacingState(true)
-    setAdminHorseRacingError('')
+    setIsSavingHorseRacingState(true);
+    setAdminHorseRacingError("");
 
     try {
       const updatedState = await updateAdminHorseRacingState(
         activeFestival.id,
         input,
         adminContext,
-      )
+      );
       const [loadedParticipantState, loadedBets] = await Promise.all([
         loadHorseRacingState(activeFestival.id, adminContext),
         loadAdminHorseRacingBets(activeFestival.id, adminContext),
-      ])
+      ]);
 
-      setAdminHorseRacingState(updatedState)
-      setAdminHorseRacingBets(loadedBets)
-      setHorseRacingState(loadedParticipantState)
-      setHorseRacingError('')
+      setAdminHorseRacingState(updatedState);
+      setAdminHorseRacingBets(loadedBets);
+      setHorseRacingState(loadedParticipantState);
+      setHorseRacingError("");
     } finally {
-      setIsSavingHorseRacingState(false)
+      setIsSavingHorseRacingState(false);
     }
   }
 
@@ -3884,38 +3979,38 @@ function App() {
     setAdminRandomPairingActions((currentActions) => {
       const existingIndex = currentActions.findIndex(
         (currentAction) => currentAction.id === action.id,
-      )
+      );
 
       if (existingIndex === -1) {
-        return [action, ...currentActions]
+        return [action, ...currentActions];
       }
 
       return currentActions.map((currentAction) =>
         currentAction.id === action.id ? action : currentAction,
-      )
-    })
+      );
+    });
   }
 
   async function createAdminRandomPairingAction(name: string) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setIsCreatingRandomPairingAction(true)
-    setAdminRandomPairingsError('')
+    setIsCreatingRandomPairingAction(true);
+    setAdminRandomPairingsError("");
 
     try {
       const createdAction = await createRandomPairingAction(
         activeFestival.id,
         name,
         adminContext,
-      )
+      );
 
-      replaceAdminRandomPairingAction(createdAction)
+      replaceAdminRandomPairingAction(createdAction);
     } finally {
-      setIsCreatingRandomPairingAction(false)
+      setIsCreatingRandomPairingAction(false);
     }
   }
 
@@ -3923,25 +4018,25 @@ function App() {
     actionId: string,
     participantIds: string[],
   ) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setSavingRandomPairingActionId(actionId)
-    setAdminRandomPairingsError('')
+    setSavingRandomPairingActionId(actionId);
+    setAdminRandomPairingsError("");
 
     try {
       const updatedAction = await updateRandomPairingParticipants(
         actionId,
         participantIds,
         adminContext,
-      )
+      );
 
-      replaceAdminRandomPairingAction(updatedAction)
+      replaceAdminRandomPairingAction(updatedAction);
     } finally {
-      setSavingRandomPairingActionId(null)
+      setSavingRandomPairingActionId(null);
     }
   }
 
@@ -3949,31 +4044,31 @@ function App() {
     actionId: string,
     replaceExisting: boolean,
   ) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setSavingRandomPairingActionId(actionId)
-    setAdminRandomPairingsError('')
+    setSavingRandomPairingActionId(actionId);
+    setAdminRandomPairingsError("");
 
     try {
       const drawnAction = await drawRandomPairingAction(
         actionId,
         replaceExisting,
         adminContext,
-      )
+      );
       const loadedAssignments = await loadRandomPairingAssignments(
         activeFestival.id,
         adminContext,
-      )
+      );
 
-      replaceAdminRandomPairingAction(drawnAction)
-      setRandomPairingAssignments(loadedAssignments)
-      setRandomPairingsError('')
+      replaceAdminRandomPairingAction(drawnAction);
+      setRandomPairingAssignments(loadedAssignments);
+      setRandomPairingsError("");
     } finally {
-      setSavingRandomPairingActionId(null)
+      setSavingRandomPairingActionId(null);
     }
   }
 
@@ -3981,7 +4076,7 @@ function App() {
     setTournaments((currentTournaments) => {
       const exists = currentTournaments.some(
         (currentTournament) => currentTournament.id === tournament.id,
-      )
+      );
 
       return exists
         ? currentTournaments.map((currentTournament) =>
@@ -3989,12 +4084,12 @@ function App() {
               ? tournament
               : currentTournament,
           )
-        : [tournament, ...currentTournaments]
-    })
+        : [tournament, ...currentTournaments];
+    });
     setAdminTournaments((currentTournaments) => {
       const exists = currentTournaments.some(
         (currentTournament) => currentTournament.id === tournament.id,
-      )
+      );
 
       return exists
         ? currentTournaments.map((currentTournament) =>
@@ -4002,94 +4097,94 @@ function App() {
               ? tournament
               : currentTournament,
           )
-        : [tournament, ...currentTournaments]
-    })
+        : [tournament, ...currentTournaments];
+    });
   }
 
   async function createAdminTournament(input: {
-    name: string
-    mode: TournamentMode
-    participantIds: string[]
+    name: string;
+    mode: TournamentMode;
+    participantIds: string[];
   }) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setSavingTournamentId('new')
-    setAdminTournamentsError('')
+    setSavingTournamentId("new");
+    setAdminTournamentsError("");
 
     try {
       const createdTournament = await createTournament(
         activeFestival.id,
         input,
         adminContext,
-      )
+      );
 
-      replaceTournament(createdTournament)
-      setTournamentsError('')
+      replaceTournament(createdTournament);
+      setTournamentsError("");
     } finally {
-      setSavingTournamentId(null)
+      setSavingTournamentId(null);
     }
   }
 
   async function updateAdminTournament(
     tournamentId: string,
     input: {
-      name: string
-      mode: TournamentMode
-      participantIds: string[]
+      name: string;
+      mode: TournamentMode;
+      participantIds: string[];
     },
   ) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setSavingTournamentId(tournamentId)
-    setAdminTournamentsError('')
+    setSavingTournamentId(tournamentId);
+    setAdminTournamentsError("");
 
     try {
       const updatedTournament = await updateTournament(
         tournamentId,
         input,
         adminContext,
-      )
+      );
 
-      replaceTournament(updatedTournament)
-      setTournamentsError('')
+      replaceTournament(updatedTournament);
+      setTournamentsError("");
     } finally {
-      setSavingTournamentId(null)
+      setSavingTournamentId(null);
     }
   }
 
   async function deleteAdminTournament(tournamentId: string) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
-      return
+      return;
     }
 
-    setDeletingTournamentId(tournamentId)
-    setAdminTournamentsError('')
+    setDeletingTournamentId(tournamentId);
+    setAdminTournamentsError("");
 
     try {
-      await deleteTournament(tournamentId, adminContext)
+      await deleteTournament(tournamentId, adminContext);
       setAdminTournaments((currentTournaments) =>
         currentTournaments.filter(
           (currentTournament) => currentTournament.id !== tournamentId,
         ),
-      )
+      );
       setTournaments((currentTournaments) =>
         currentTournaments.filter(
           (currentTournament) => currentTournament.id !== tournamentId,
         ),
-      )
-      setTournamentsError('')
+      );
+      setTournamentsError("");
     } finally {
-      setDeletingTournamentId(null)
+      setDeletingTournamentId(null);
     }
   }
 
@@ -4098,12 +4193,12 @@ function App() {
     matchId: string,
     winnerParticipantId: string,
   ) {
-    const adminContext = getParticipantAdminContext()
+    const adminContext = getParticipantAdminContext();
 
-    if (!adminContext) return
+    if (!adminContext) return;
 
-    setSavingTournamentMatchId(matchId)
-    setAdminTournamentsError('')
+    setSavingTournamentMatchId(matchId);
+    setAdminTournamentsError("");
 
     try {
       const updatedTournament = await setTournamentMatchWinner(
@@ -4111,64 +4206,64 @@ function App() {
         matchId,
         winnerParticipantId,
         adminContext,
-      )
-      replaceTournament(updatedTournament)
-      setTournamentsError('')
+      );
+      replaceTournament(updatedTournament);
+      setTournamentsError("");
     } catch {
-      setAdminTournamentsError(t('admin.tournaments.errors.winnerSave'))
+      setAdminTournamentsError(t("admin.tournaments.errors.winnerSave"));
     } finally {
-      setSavingTournamentMatchId(null)
+      setSavingTournamentMatchId(null);
     }
   }
 
   async function toggleBingoNumber(number: number) {
     if (!selectedParticipant || !bingoCard) {
-      return
+      return;
     }
 
-    const isMarked = bingoCard.markedNumbers.includes(number)
+    const isMarked = bingoCard.markedNumbers.includes(number);
 
-    setTogglingBingoNumber(number)
-    setBingoError('')
+    setTogglingBingoNumber(number);
+    setBingoError("");
 
     try {
       const markedNumbers = await setBingoMark(number, !isMarked, {
         participantAccessCode: selectedParticipant.accessCode,
-      })
+      });
 
       setBingoCard({
         ...bingoCard,
         markedNumbers,
-      })
+      });
     } catch {
-      setBingoError(t('bingo.errors.mark'))
+      setBingoError(t("bingo.errors.mark"));
     } finally {
-      setTogglingBingoNumber(null)
+      setTogglingBingoNumber(null);
     }
   }
 
   async function selectHorseRacingSuit(suit: HorseRacingSuit) {
     if (!selectedParticipant) {
-      return
+      return;
     }
 
-    setSavingHorseRacingSuit(suit)
-    setHorseRacingError('')
+    setSavingHorseRacingSuit(suit);
+    setHorseRacingError("");
 
     try {
       const savedState = await saveHorseRacingBet(activeFestival.id, suit, {
         participantAccessCode: selectedParticipant.accessCode,
-      })
+      });
 
-      setHorseRacingState(savedState)
+      setHorseRacingState(savedState);
 
       if (selectedParticipant.isAdmin) {
-        void reloadAdminHorseRacing()
+        void reloadAdminHorseRacing();
       }
     } catch {
-      setHorseRacingError(t('horseRacing.errors.save'))
+      setHorseRacingError(t("horseRacing.errors.save"));
     } finally {
-      setSavingHorseRacingSuit(null)
+      setSavingHorseRacingSuit(null);
     }
   }
 
@@ -4177,17 +4272,17 @@ function App() {
     isFavorite: boolean,
   ) {
     if (!selectedParticipant || !timetable) {
-      return
+      return;
     }
 
-    const previousFavoritePerformanceIds = timetable.favoritePerformanceIds
-    const previousPerformanceFavorites = timetable.performanceFavorites
+    const previousFavoritePerformanceIds = timetable.favoritePerformanceIds;
+    const previousPerformanceFavorites = timetable.performanceFavorites;
     const nextFavoritePerformanceIds = isFavorite
       ? previousFavoritePerformanceIds.filter((id) => id !== performanceId)
-      : Array.from(new Set([...previousFavoritePerformanceIds, performanceId]))
+      : Array.from(new Set([...previousFavoritePerformanceIds, performanceId]));
     const hasPerformanceFavoritesEntry = previousPerformanceFavorites.some(
       (favorite) => favorite.performanceId === performanceId,
-    )
+    );
     const nextPerformanceFavoritesSource = hasPerformanceFavoritesEntry
       ? previousPerformanceFavorites
       : [
@@ -4196,10 +4291,10 @@ function App() {
             performanceId,
             participants: [],
           },
-        ]
+        ];
 
-    setTogglingFavoritePerformanceId(performanceId)
-    setTimetableError('')
+    setTogglingFavoritePerformanceId(performanceId);
+    setTimetableError("");
     setTimetable({
       ...timetable,
       favoritePerformanceIds: nextFavoritePerformanceIds,
@@ -4226,17 +4321,17 @@ function App() {
             }
           : favorite,
       ),
-    })
+    });
 
     try {
       if (isFavorite) {
         await removeTimetableFavorite(performanceId, {
           participantAccessCode: selectedParticipant.accessCode,
-        })
+        });
       } else {
         await addTimetableFavorite(performanceId, {
           participantAccessCode: selectedParticipant.accessCode,
-        })
+        });
       }
     } catch {
       setTimetable((currentTimetable) =>
@@ -4247,40 +4342,41 @@ function App() {
               performanceFavorites: previousPerformanceFavorites,
             }
           : currentTimetable,
-      )
-      setTimetableError(t('timetable.favorite.errors.save'))
+      );
+      setTimetableError(t("timetable.favorite.errors.save"));
     } finally {
-      setTogglingFavoritePerformanceId(null)
+      setTogglingFavoritePerformanceId(null);
     }
   }
 
   function openCampLocationLink() {
     if (!campLocationLink) {
-      return
+      return;
     }
 
-    setCampLocationOpenError('')
+    setCampLocationOpenError("");
 
-    window.open(
-      campLocationLink,
-      '_blank',
-      'noopener,noreferrer',
-    )
+    window.open(campLocationLink, "_blank", "noopener,noreferrer");
   }
 
   async function submitVote(categoryId: string) {
     if (!selectedParticipant) {
-      return
+      return;
     }
 
-    const votedForId = selectedVotesByCategory[categoryId]
+    const votedForId = selectedVotesByCategory[categoryId];
     const hasAlreadyVoted = votes.some(
       (vote) =>
-        vote.voterId === selectedParticipant.id && vote.categoryId === categoryId,
-    )
+        vote.voterId === selectedParticipant.id &&
+        vote.categoryId === categoryId,
+    );
 
-    if (!votedForId || votedForId === selectedParticipant.id || hasAlreadyVoted) {
-      return
+    if (
+      !votedForId ||
+      votedForId === selectedParticipant.id ||
+      hasAlreadyVoted
+    ) {
+      return;
     }
 
     const vote = {
@@ -4288,37 +4384,37 @@ function App() {
       votedForId,
       categoryId,
       timestamp: new Date().toISOString(),
-    }
+    };
 
-    setSubmittingCategoryId(categoryId)
-    setVotesError('')
+    setSubmittingCategoryId(categoryId);
+    setVotesError("");
 
     try {
       const savedVote = await saveVote(vote, {
         participantAccessCode: selectedParticipant.accessCode,
-      })
+      });
 
-      setVotes((currentVotes) => [...currentVotes, savedVote])
-      setAllVotes((currentVotes) => [...currentVotes, savedVote])
+      setVotes((currentVotes) => [...currentVotes, savedVote]);
+      setAllVotes((currentVotes) => [...currentVotes, savedVote]);
       setSelectedVotesByCategory((currentVotes) => {
-        const remainingVotes = { ...currentVotes }
-        delete remainingVotes[categoryId]
+        const remainingVotes = { ...currentVotes };
+        delete remainingVotes[categoryId];
 
-        return remainingVotes
-      })
+        return remainingVotes;
+      });
     } catch {
-      setVotesError(t('categories.errors.voteSave'))
+      setVotesError(t("categories.errors.voteSave"));
     } finally {
-      setSubmittingCategoryId(null)
+      setSubmittingCategoryId(null);
     }
   }
 
-  if (locationHash === '#impressum') {
-    return <LegalNotice festivalName={displayedFestivalName} />
+  if (locationHash === "#impressum") {
+    return <LegalNotice festivalName={displayedFestivalName} />;
   }
 
-  if (locationHash === '#datenschutz') {
-    return <PrivacyNotice festivalName={displayedFestivalName} />
+  if (locationHash === "#datenschutz") {
+    return <PrivacyNotice festivalName={displayedFestivalName} />;
   }
 
   if (!festivalAccess.isUnlocked) {
@@ -4327,13 +4423,13 @@ function App() {
         festivalName={festivalName}
         onUnlock={festivalAccess.unlock}
       />
-    )
+    );
   }
 
   return (
     <main
       className="home"
-      aria-label={t('app.ariaLabel', {
+      aria-label={t("app.ariaLabel", {
         count: participantCount,
         festivalName: displayedFestivalName,
       })}
@@ -4342,9 +4438,9 @@ function App() {
         <button
           className="app-header__brand"
           type="button"
-          onClick={() => setActiveMainSection('dashboard')}
+          onClick={() => setActiveMainSection("dashboard")}
         >
-          <p>{t('dashboard.festivalLabel')}</p>
+          <p>{t("dashboard.festivalLabel")}</p>
           <h1 id="app-title">{displayedFestivalName}</h1>
         </button>
 
@@ -4367,7 +4463,9 @@ function App() {
               >
                 <path d="M19.14 12.94a7.43 7.43 0 0 0 .05-.94 7.43 7.43 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.2 7.2 0 0 0-1.62-.94L14.39 2.8a.49.49 0 0 0-.49-.4h-3.8a.49.49 0 0 0-.49.4l-.36 2.52a7.2 7.2 0 0 0-1.62.94L5.24 5.3a.5.5 0 0 0-.61.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.43 7.43 0 0 0-.05.94c0 .32.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.5.39 1.04.7 1.62.94l.36 2.52c.04.24.24.4.49.4h3.8c.25 0 .45-.16.49-.4l.36-2.52a7.2 7.2 0 0 0 1.62-.94l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
               </svg>
-              <span>{isAdminVisible ? t('hero.adminClose') : t('hero.admin')}</span>
+              <span>
+                {isAdminVisible ? t("hero.adminClose") : t("hero.admin")}
+              </span>
             </button>
           ) : null}
         </div>
@@ -4377,11 +4475,11 @@ function App() {
         <section
           className="admin"
           id="admin"
-          aria-label={t('admin.navigation.label')}
+          aria-label={t("admin.navigation.label")}
         >
           <nav
             className="admin-navigation"
-            aria-label={t('admin.navigation.label')}
+            aria-label={t("admin.navigation.label")}
           >
             {adminNavigationItems.map((item) => (
               <button
@@ -4389,7 +4487,7 @@ function App() {
                 type="button"
                 key={item.section}
                 aria-current={
-                  activeAdminSection === item.section ? 'page' : undefined
+                  activeAdminSection === item.section ? "page" : undefined
                 }
                 onClick={() => setActiveAdminSection(item.section)}
               >
@@ -4398,11 +4496,13 @@ function App() {
             ))}
           </nav>
 
-          {activeAdminSection === 'festival' ? (
+          {activeAdminSection === "festival" ? (
             <AdminFestival
-              key={`festival-${festivalName}-${festivalCode}`}
+              key={`festival-${festivalName}-${eventStartDate}-${eventEndDate}-${festivalCode}`}
               mode="settings"
               festivalName={festivalName}
+              eventStartDate={eventStartDate}
+              eventEndDate={eventEndDate}
               error={festivalNameError}
               isSaving={isSavingFestivalName}
               festivalCode={festivalCode}
@@ -4410,14 +4510,14 @@ function App() {
               isLoadingFestivalCode={isLoadingFestivalCode}
               isSavingFestivalCode={isSavingFestivalCode}
               isExporting={isExportingFestival}
-              onSave={saveFestivalName}
+              onSave={saveFestivalSettings}
               onSaveFestivalCode={saveFestivalCode}
               onArchive={archiveCurrentFestival}
               onExport={exportCurrentFestival}
             />
           ) : null}
 
-          {activeAdminSection === 'participants' ? (
+          {activeAdminSection === "participants" ? (
             <AdminParticipants
               participants={adminParticipants}
               error={adminParticipantsError}
@@ -4431,15 +4531,17 @@ function App() {
               onCancelForm={cancelParticipantForm}
               onSubmitForm={submitParticipantForm}
               onChangeForm={setParticipantForm}
-              onClearFormError={() => setParticipantFormError('')}
+              onClearFormError={() => setParticipantFormError("")}
               onDeactivate={deactivateAdminParticipant}
               onReactivate={reactivateAdminParticipant}
             />
           ) : null}
 
-          {activeAdminSection === 'awards' ? (
+          {activeAdminSection === "awards" ? (
             <>
-              {adminError ? <p className="admin__notice">{adminError}</p> : null}
+              {adminError ? (
+                <p className="admin__notice">{adminError}</p>
+              ) : null}
               {categoriesError ? (
                 <p className="admin__notice">{categoriesError}</p>
               ) : null}
@@ -4458,7 +4560,7 @@ function App() {
             </>
           ) : null}
 
-          {activeAdminSection === 'timetable' ? (
+          {activeAdminSection === "timetable" ? (
             <>
               <AdminTimetableDays
                 festivalDays={adminFestivalDays}
@@ -4506,7 +4608,7 @@ function App() {
             </>
           ) : null}
 
-          {activeAdminSection === 'games' ? (
+          {activeAdminSection === "games" ? (
             <>
               <AdminBingo
                 round={adminBingoRound}
@@ -4551,9 +4653,9 @@ function App() {
             </>
           ) : null}
 
-          {activeAdminSection === 'info' ? (
+          {activeAdminSection === "info" ? (
             <AdminFestivalDocuments
-              key={`documents-${adminCampLocationLink ?? 'empty'}`}
+              key={`documents-${adminCampLocationLink ?? "empty"}`}
               documents={adminFestivalDocuments}
               campLocationLink={adminCampLocationLink}
               campLocationError={adminCampLocationError}
@@ -4567,20 +4669,22 @@ function App() {
               removingDocumentType={removingDocumentType}
               onSaveCampLocation={saveAdminCampLocationLink}
               onRemoveCampLocation={removeAdminCampLocationLink}
-              onClearCampLocationError={() => setAdminCampLocationError('')}
+              onClearCampLocationError={() => setAdminCampLocationError("")}
               onSaveMusicPlaylist={saveAdminMusicPlaylist}
               onRemoveMusicPlaylist={removeAdminMusicPlaylist}
-              onClearMusicPlaylistError={() => setAdminMusicPlaylistError('')}
+              onClearMusicPlaylistError={() => setAdminMusicPlaylistError("")}
               onUpload={uploadAdminFestivalDocument}
               onRemove={removeAdminFestivalDocument}
             />
           ) : null}
 
-          {activeAdminSection === 'archive' ? (
+          {activeAdminSection === "archive" ? (
             <AdminFestival
               key={`archive-${festivalName}-${festivalCode}`}
               mode="archive"
               festivalName={festivalName}
+              eventStartDate={eventStartDate}
+              eventEndDate={eventEndDate}
               error={festivalNameError}
               isSaving={isSavingFestivalName}
               festivalCode={festivalCode}
@@ -4588,7 +4692,7 @@ function App() {
               isLoadingFestivalCode={isLoadingFestivalCode}
               isSavingFestivalCode={isSavingFestivalCode}
               isExporting={isExportingFestival}
-              onSave={saveFestivalName}
+              onSave={saveFestivalSettings}
               onSaveFestivalCode={saveFestivalCode}
               onArchive={archiveCurrentFestival}
               onExport={exportCurrentFestival}
@@ -4597,41 +4701,50 @@ function App() {
         </section>
       ) : null}
 
-      {activeMainSection === 'dashboard' ? (
+      {activeMainSection === "dashboard" ? (
         <DashboardSection
           festivalName={displayedFestivalName}
           participantName={selectedParticipant?.displayName ?? null}
           tiles={dashboardTiles}
           isAuthenticated={Boolean(selectedParticipant)}
+          eventStartDate={eventStartDate}
+          eventEndDate={eventEndDate}
+          eventPhase={eventPhase}
+          referenceInstant={eventReferenceInstant}
           onNavigate={setActiveMainSection}
         />
       ) : null}
 
-      {activeMainSection === 'profile' ? (
+      {activeMainSection === "profile" ? (
         <section
           className="identity"
           id="main-profile"
           aria-labelledby="identity-title"
         >
           <div className="identity__content">
-            <DashboardBackButton onClick={() => setActiveMainSection('dashboard')} />
+            <DashboardBackButton
+              onClick={() => setActiveMainSection("dashboard")}
+            />
 
             {selectedParticipant ? (
               <>
                 <SectionHeader
-                  title={t('identity.profileTitle')}
+                  title={t("identity.profileTitle")}
                   titleId="identity-title"
-                  description={t('identity.profileDescription')}
+                  description={t("identity.profileDescription")}
                 />
 
                 <div className="identity__selected identity__profile-card">
                   <Avatar
                     avatarId={profileAvatarId}
-                    name={profileDisplayName.trim() || selectedParticipant.displayName}
+                    name={
+                      profileDisplayName.trim() ||
+                      selectedParticipant.displayName
+                    }
                     size="large"
                   />
                   <div className="identity__profile-copy">
-                    <p>{t('identity.loggedInAs')}</p>
+                    <p>{t("identity.loggedInAs")}</p>
                     <h3>{selectedParticipant.displayName}</h3>
                   </div>
                   <button
@@ -4639,15 +4752,15 @@ function App() {
                     type="button"
                     onClick={logout}
                   >
-                    {t('identity.logout')}
+                    {t("identity.logout")}
                   </button>
                 </div>
 
                 <form className="profile-editor" onSubmit={saveOwnProfile}>
-                  <h3>{t('identity.profile.editTitle')}</h3>
+                  <h3>{t("identity.profile.editTitle")}</h3>
 
                   <label htmlFor="profile-display-name">
-                    {t('identity.profile.displayName')}
+                    {t("identity.profile.displayName")}
                   </label>
                   <input
                     id="profile-display-name"
@@ -4656,9 +4769,9 @@ function App() {
                     maxLength={50}
                     disabled={isSavingProfile}
                     onChange={(event) => {
-                      setProfileDisplayName(event.target.value)
-                      setProfileError('')
-                      setProfileSuccess('')
+                      setProfileDisplayName(event.target.value);
+                      setProfileError("");
+                      setProfileSuccess("");
                     }}
                   />
 
@@ -4676,16 +4789,19 @@ function App() {
                       <span className="avatar-picker__toggle-current">
                         <Avatar
                           avatarId={profileAvatarId}
-                          name={profileDisplayName.trim() || selectedParticipant.displayName}
+                          name={
+                            profileDisplayName.trim() ||
+                            selectedParticipant.displayName
+                          }
                           size="medium"
                         />
                         <span>
-                          <strong>{t('identity.avatar.title')}</strong>
-                          <small>{t('identity.avatar.toggleHint')}</small>
+                          <strong>{t("identity.avatar.title")}</strong>
+                          <small>{t("identity.avatar.toggleHint")}</small>
                         </span>
                       </span>
                       <span aria-hidden="true">
-                        {isAvatarPickerExpanded ? '−' : '+'}
+                        {isAvatarPickerExpanded ? "−" : "+"}
                       </span>
                     </button>
 
@@ -4697,30 +4813,30 @@ function App() {
                       >
                         <div className="avatar-picker__header">
                           <h4 id="avatar-picker-title">
-                            {t('identity.avatar.title')}
+                            {t("identity.avatar.title")}
                           </h4>
-                          <p>{t('identity.avatar.description')}</p>
+                          <p>{t("identity.avatar.description")}</p>
                         </div>
                         <div className="avatar-picker__grid">
                           {avatars.map((avatar) => {
-                            const isSelected = avatar.id === profileAvatarId
+                            const isSelected = avatar.id === profileAvatarId;
 
                             return (
                               <button
                                 className={`avatar-picker__option${
-                                  isSelected ? ' is-selected' : ''
+                                  isSelected ? " is-selected" : ""
                                 }`}
                                 type="button"
                                 key={avatar.id}
                                 onClick={() => {
-                                  setProfileAvatarId(avatar.id)
-                                  setProfileError('')
-                                  setProfileSuccess('')
-                                  setIsAvatarPickerExpanded(false)
+                                  setProfileAvatarId(avatar.id);
+                                  setProfileError("");
+                                  setProfileSuccess("");
+                                  setIsAvatarPickerExpanded(false);
                                 }}
                                 disabled={isSavingProfile}
                                 aria-pressed={isSelected}
-                                aria-label={t('identity.avatar.selectLabel', {
+                                aria-label={t("identity.avatar.selectLabel", {
                                   avatar: avatar.label,
                                 })}
                               >
@@ -4732,11 +4848,11 @@ function App() {
                                 <span>{avatar.label}</span>
                                 {isSelected ? (
                                   <span className="avatar-picker__selected-badge">
-                                    {t('identity.avatar.selected')}
+                                    {t("identity.avatar.selected")}
                                   </span>
                                 ) : null}
                               </button>
-                            )
+                            );
                           })}
                         </div>
                       </div>
@@ -4760,8 +4876,8 @@ function App() {
                     disabled={isSavingProfile || !hasProfileChanges}
                   >
                     {isSavingProfile
-                      ? t('identity.profile.saving')
-                      : t('identity.profile.save')}
+                      ? t("identity.profile.saving")
+                      : t("identity.profile.save")}
                   </button>
                 </form>
 
@@ -4772,14 +4888,14 @@ function App() {
             ) : (
               <>
                 <SectionHeader
-                  title={t('identity.loginTitle')}
+                  title={t("identity.loginTitle")}
                   titleId="identity-title"
-                  description={t('identity.loginDescription')}
+                  description={t("identity.loginDescription")}
                 />
 
                 <form className="identity__form" onSubmit={submitAccessCode}>
                   <label htmlFor="participant-access-code">
-                    {t('identity.participantCodeLabel')}
+                    {t("identity.participantCodeLabel")}
                   </label>
                   <input
                     id="participant-access-code"
@@ -4787,19 +4903,19 @@ function App() {
                     value={accessCode}
                     disabled={isSubmittingAccessCode || isLoginLocked}
                     onChange={(event) => {
-                      setAccessCode(event.target.value)
-                      setAccessCodeError('')
+                      setAccessCode(event.target.value);
+                      setAccessCodeError("");
                     }}
                     autoComplete="off"
                     inputMode="text"
-                    placeholder={t('identity.participantCodePlaceholder')}
+                    placeholder={t("identity.participantCodePlaceholder")}
                   />
                   {accessCodeError ? (
                     <p className="identity__error">{accessCodeError}</p>
                   ) : null}
                   {isLoginLocked ? (
                     <p className="identity__error" role="status">
-                      {t('identity.locked', {
+                      {t("identity.locked", {
                         seconds: loginLockRemainingSeconds,
                       })}
                     </p>
@@ -4810,8 +4926,8 @@ function App() {
                     disabled={isSubmittingAccessCode || isLoginLocked}
                   >
                     {isSubmittingAccessCode
-                      ? t('common.loading')
-                      : t('identity.submit')}
+                      ? t("common.loading")
+                      : t("identity.submit")}
                   </button>
                 </form>
               </>
@@ -4820,77 +4936,78 @@ function App() {
         </section>
       ) : null}
 
-      {selectedParticipant && activeMainSection === 'games' ? (
+      {selectedParticipant && activeMainSection === "games" ? (
         <section
           className="games"
           id="main-games"
           aria-labelledby="games-title"
         >
           <DashboardBackButton
-            onClick={() => setActiveMainSection('dashboard')}
+            onClick={() => setActiveMainSection("dashboard")}
             width="narrow"
           />
 
           <SectionHeader
-            title={t('games.title')}
+            title={t("games.title")}
             titleId="games-title"
-            eyebrow={t('games.eyebrow')}
-            description={t('games.description')}
+            eyebrow={t("games.eyebrow")}
+            description={t("games.description")}
             width="narrow"
           />
 
-          <nav className="games__navigation" aria-label={t('games.navigationLabel')}>
+          <nav
+            className="games__navigation"
+            aria-label={t("games.navigationLabel")}
+          >
             <button
               className={`games__tab${
-                activeGameSection === 'bingo' ? ' is-active' : ''
+                activeGameSection === "bingo" ? " is-active" : ""
               }`}
               type="button"
-              aria-current={activeGameSection === 'bingo' ? 'page' : undefined}
-              onClick={() => setActiveGameSection('bingo')}
+              aria-current={activeGameSection === "bingo" ? "page" : undefined}
+              onClick={() => setActiveGameSection("bingo")}
             >
-              {t('games.bingo')}
+              {t("games.bingo")}
             </button>
             <button
               className={`games__tab${
-                activeGameSection === 'horseRacing' ? ' is-active' : ''
-              }${
-                horseRacingState?.isEnabled ? '' : ' games__tab--disabled'
-              }`}
+                activeGameSection === "horseRacing" ? " is-active" : ""
+              }${horseRacingState?.isEnabled ? "" : " games__tab--disabled"}`}
               type="button"
               aria-current={
-                activeGameSection === 'horseRacing' ? 'page' : undefined
+                activeGameSection === "horseRacing" ? "page" : undefined
               }
-              onClick={() => setActiveGameSection('horseRacing')}
+              onClick={() => setActiveGameSection("horseRacing")}
             >
-              {t('games.horseRacing')}
+              {t("games.horseRacing")}
             </button>
             <button
               className={`games__tab${
-                activeGameSection === 'randomPairings' ? ' is-active' : ''
+                activeGameSection === "randomPairings" ? " is-active" : ""
               }`}
               type="button"
               aria-current={
-                activeGameSection === 'randomPairings' ? 'page' : undefined
+                activeGameSection === "randomPairings" ? "page" : undefined
               }
-              onClick={() => setActiveGameSection('randomPairings')}
+              onClick={() => setActiveGameSection("randomPairings")}
             >
-              {t('games.randomPairings')}
+              {t("games.randomPairings")}
             </button>
             <button
               className={`games__tab${
-                activeGameSection === 'tournaments' ? ' is-active' : ''
+                activeGameSection === "tournaments" ? " is-active" : ""
               }`}
               type="button"
               aria-current={
-                activeGameSection === 'tournaments' ? 'page' : undefined
+                activeGameSection === "tournaments" ? "page" : undefined
               }
-              onClick={() => setActiveGameSection('tournaments')}
+              onClick={() => setActiveGameSection("tournaments")}
             >
-              {t('games.tournaments')}
+              {t("games.tournaments")}
             </button>
           </nav>
 
-          {activeGameSection === 'bingo' && bingoCard ? (
+          {activeGameSection === "bingo" && bingoCard ? (
             <Bingo
               card={bingoCard}
               error={bingoError}
@@ -4899,11 +5016,11 @@ function App() {
             />
           ) : null}
 
-          {activeGameSection === 'bingo' && !bingoCard ? (
-            <p className="games__notice">{t('games.empty')}</p>
+          {activeGameSection === "bingo" && !bingoCard ? (
+            <p className="games__notice">{t("games.empty")}</p>
           ) : null}
 
-          {activeGameSection === 'horseRacing' ? (
+          {activeGameSection === "horseRacing" ? (
             <HorseRacing
               state={horseRacingState}
               error={horseRacingError}
@@ -4912,7 +5029,7 @@ function App() {
             />
           ) : null}
 
-          {activeGameSection === 'randomPairings' ? (
+          {activeGameSection === "randomPairings" ? (
             <RandomPairings
               assignments={randomPairingAssignments}
               error={randomPairingsError}
@@ -4920,7 +5037,7 @@ function App() {
             />
           ) : null}
 
-          {activeGameSection === 'tournaments' ? (
+          {activeGameSection === "tournaments" ? (
             <Tournaments
               tournaments={tournaments}
               error={tournamentsError}
@@ -4930,19 +5047,19 @@ function App() {
         </section>
       ) : null}
 
-      {selectedParticipant && activeMainSection === 'timetable' ? (
+      {selectedParticipant && activeMainSection === "timetable" ? (
         <TimetableSection
           timetable={timetable}
           error={timetableError}
           isLoading={isLoadingTimetable}
           currentParticipantId={selectedParticipant?.id ?? null}
           togglingPerformanceId={togglingFavoritePerformanceId}
-          onBackToDashboard={() => setActiveMainSection('dashboard')}
+          onBackToDashboard={() => setActiveMainSection("dashboard")}
           onToggleFavorite={toggleTimetableFavorite}
         />
       ) : null}
 
-      {selectedParticipant && activeMainSection === 'info' ? (
+      {selectedParticipant && activeMainSection === "info" ? (
         <FestivalInfo
           documents={festivalDocuments}
           campLocationLink={campLocationLink}
@@ -4952,51 +5069,59 @@ function App() {
           isLoading={isLoadingFestivalDocuments}
           dashboardBackButton={
             <DashboardBackButton
-              onClick={() => setActiveMainSection('dashboard')}
+              onClick={() => setActiveMainSection("dashboard")}
             />
           }
           onOpenCampLocation={openCampLocationLink}
         />
       ) : null}
 
-      {selectedParticipant && activeMainSection === 'awards' ? (
+      {selectedParticipant && activeMainSection === "awards" ? (
         <div id="main-awards">
-          <section className="categories" id="abstimmung" aria-labelledby="categories-title">
-            <DashboardBackButton onClick={() => setActiveMainSection('dashboard')} />
-
-            <SectionHeader
-              title={t('categories.title')}
-              titleId="categories-title"
-              eyebrow={t('categories.eyebrow', { count: participantCount })}
+          <section
+            className="categories"
+            id="abstimmung"
+            aria-labelledby="categories-title"
+          >
+            <DashboardBackButton
+              onClick={() => setActiveMainSection("dashboard")}
             />
 
-            {votesError ? <p className="categories__notice">{votesError}</p> : null}
+            <SectionHeader
+              title={t("categories.title")}
+              titleId="categories-title"
+              eyebrow={t("categories.eyebrow", { count: participantCount })}
+            />
+
+            {votesError ? (
+              <p className="categories__notice">{votesError}</p>
+            ) : null}
             {isLoadingData ? (
               <p className="categories__notice" role="status">
-                {t('common.loading')}
+                {t("common.loading")}
               </p>
             ) : null}
             {categoriesError ? (
               <p className="categories__notice">{categoriesError}</p>
             ) : null}
             {!isLoadingData && openCategories.length === 0 ? (
-              <p className="categories__notice">{t('categories.empty')}</p>
+              <p className="categories__notice">{t("categories.empty")}</p>
             ) : null}
 
             <div className="categories__grid">
               {openCategories.map((category) => {
                 const eligibleParticipants = participants.filter(
                   (participant) => participant.id !== selectedParticipant.id,
-                )
-                const selectedVote = selectedVotesByCategory[category.id] ?? ''
+                );
+                const selectedVote = selectedVotesByCategory[category.id] ?? "";
                 const hasAlreadyVoted = votes.some(
                   (vote) =>
                     vote.voterId === selectedParticipant.id &&
                     vote.categoryId === category.id,
-                )
+                );
                 const selectedParticipantForVote = eligibleParticipants.find(
                   (participant) => participant.id === selectedVote,
-                )
+                );
 
                 return (
                   <article className="category-card" key={category.id}>
@@ -5012,12 +5137,12 @@ function App() {
 
                     {hasAlreadyVoted ? (
                       <p className="category-card__voted">
-                        {t('categories.alreadyVoted')}
+                        {t("categories.alreadyVoted")}
                       </p>
                     ) : (
                       <div className="category-card__vote">
                         <label htmlFor={`vote-${category.id}`}>
-                          {t('categories.voteTargetLabel')}
+                          {t("categories.voteTargetLabel")}
                         </label>
                         <select
                           id={`vote-${category.id}`}
@@ -5026,7 +5151,9 @@ function App() {
                             selectVote(category.id, event.target.value)
                           }
                         >
-                          <option value="">{t('categories.selectPerson')}</option>
+                          <option value="">
+                            {t("categories.selectPerson")}
+                          </option>
                           {eligibleParticipants.map((participant) => (
                             <option key={participant.id} value={participant.id}>
                               {participant.displayName}
@@ -5038,7 +5165,9 @@ function App() {
                           <p className="category-card__selected-vote">
                             <ParticipantName
                               avatarId={selectedParticipantForVote?.avatarId}
-                              name={selectedParticipantForVote?.displayName ?? ''}
+                              name={
+                                selectedParticipantForVote?.displayName ?? ""
+                              }
                             />
                           </p>
                         ) : null}
@@ -5051,39 +5180,47 @@ function App() {
                             onClick={() => submitVote(category.id)}
                           >
                             {submittingCategoryId === category.id
-                              ? t('common.saving')
-                              : t('categories.submitVote')}
+                              ? t("common.saving")
+                              : t("categories.submitVote")}
                           </button>
                         ) : null}
                       </div>
                     )}
                   </article>
-                )
+                );
               })}
             </div>
           </section>
 
-          <section className="results" id="ergebnisse" aria-labelledby="results-title">
+          <section
+            className="results"
+            id="ergebnisse"
+            aria-labelledby="results-title"
+          >
             <SectionHeader
-              title={t('results.title')}
+              title={t("results.title")}
               titleId="results-title"
-              eyebrow={t('results.eyebrow')}
+              eyebrow={t("results.eyebrow")}
             />
 
-            {resultsError ? <p className="results__notice">{resultsError}</p> : null}
+            {resultsError ? (
+              <p className="results__notice">{resultsError}</p>
+            ) : null}
 
             {!hasVotes ? (
-              <p className="results__notice">{t('results.empty')}</p>
+              <p className="results__notice">{t("results.empty")}</p>
             ) : (
               <div className="results__grid">
-                {resultsByCategory.map(({ category, results, highestVoteCount }) => (
-                  <ResultCard
-                    category={category}
-                    results={results}
-                    highestVoteCount={highestVoteCount}
-                    key={`${category.id}-${category.status}`}
-                  />
-                ))}
+                {resultsByCategory.map(
+                  ({ category, results, highestVoteCount }) => (
+                    <ResultCard
+                      category={category}
+                      results={results}
+                      highestVoteCount={highestVoteCount}
+                      key={`${category.id}-${category.status}`}
+                    />
+                  ),
+                )}
               </div>
             )}
           </section>
@@ -5094,31 +5231,36 @@ function App() {
             aria-labelledby="standings-title"
           >
             <SectionHeader
-              title={t('standings.title')}
+              title={t("standings.title")}
               titleId="standings-title"
-              eyebrow={t('standings.eyebrow')}
+              eyebrow={t("standings.eyebrow")}
             />
 
             {isStandingsLoading ? (
               <p className="standings__notice" role="status">
-                {t('standings.loading')}
+                {t("standings.loading")}
               </p>
             ) : standingsError ? (
-              <p className="standings__notice standings__notice--error" role="alert">
+              <p
+                className="standings__notice standings__notice--error"
+                role="alert"
+              >
                 {standingsError}
               </p>
             ) : allTimeStandings.length === 0 ? (
-              <p className="standings__notice">{t('standings.empty')}</p>
+              <p className="standings__notice">{t("standings.empty")}</p>
             ) : (
               <div
                 className="standings__table"
                 role="table"
-                aria-label={t('standings.title')}
+                aria-label={t("standings.title")}
               >
                 <div className="standings__columns" role="row">
-                  <span role="columnheader">{t('standings.columns.rank')}</span>
-                  <span role="columnheader">{t('standings.columns.name')}</span>
-                  <span role="columnheader">{t('standings.columns.points')}</span>
+                  <span role="columnheader">{t("standings.columns.rank")}</span>
+                  <span role="columnheader">{t("standings.columns.name")}</span>
+                  <span role="columnheader">
+                    {t("standings.columns.points")}
+                  </span>
                 </div>
                 <ol>
                   {allTimeStandings.map((standing, index) => (
@@ -5126,7 +5268,9 @@ function App() {
                       <span
                         className="standings__rank"
                         role="cell"
-                        aria-label={t('standings.rankLabel', { rank: index + 1 })}
+                        aria-label={t("standings.rankLabel", {
+                          rank: index + 1,
+                        })}
                       >
                         {index + 1}
                       </span>
@@ -5144,7 +5288,7 @@ function App() {
       ) : null}
       <AppFooter />
     </main>
-  )
+  );
 }
 
-export default App
+export default App;

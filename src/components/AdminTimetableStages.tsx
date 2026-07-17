@@ -1,31 +1,31 @@
-import { useState, type FormEvent } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import {
   type CreateTimetableStageInput,
   type TimetableStage,
   type UpdateTimetableStageInput,
-} from '../data/timetable'
-import { SectionHeader } from './SectionHeader'
+} from "../data/timetable";
+import { SectionHeader } from "./SectionHeader";
 
 type StageFormState = {
-  id: string | null
-  name: string
-  sortOrder: string
-  color: string
-  hasColor: boolean
-}
+  id: string | null;
+  name: string;
+  sortOrder: string;
+  color: string;
+  hasColor: boolean;
+};
 
 type AdminTimetableStagesProps = {
-  stages: TimetableStage[]
-  error: string
-  isLoading: boolean
-  savingStageId: string | null
-  deletingStageId: string | null
-  onCreate: (input: CreateTimetableStageInput) => Promise<void>
-  onUpdate: (input: UpdateTimetableStageInput) => Promise<void>
-  onDelete: (stage: TimetableStage) => void
-  onMove: (stage: TimetableStage, direction: 'up' | 'down') => void
-}
+  stages: TimetableStage[];
+  error: string;
+  isLoading: boolean;
+  savingStageId: string | null;
+  deletingStageId: string | null;
+  onCreate: (input: CreateTimetableStageInput) => Promise<void>;
+  onUpdate: (input: UpdateTimetableStageInput) => Promise<void>;
+  onDelete: (stage: TimetableStage) => void;
+  onMove: (stage: TimetableStage, direction: "up" | "down") => void;
+};
 
 export function AdminTimetableStages({
   stages,
@@ -38,61 +38,61 @@ export function AdminTimetableStages({
   onDelete,
   onMove,
 }: AdminTimetableStagesProps) {
-  const { t } = useTranslation()
-  const [form, setForm] = useState<StageFormState | null>(null)
-  const [formError, setFormError] = useState('')
-  const [isSaving, setIsSaving] = useState(false)
+  const { t } = useTranslation();
+  const [form, setForm] = useState<StageFormState | null>(null);
+  const [formError, setFormError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   function startCreate() {
-    setFormError('')
+    setFormError("");
     setForm({
       id: null,
-      name: '',
+      name: "",
       sortOrder: String(stages.length + 1),
-      color: '#ffbe0b',
+      color: "#ffbe0b",
       hasColor: false,
-    })
+    });
   }
 
   function startEdit(stage: TimetableStage) {
-    setFormError('')
+    setFormError("");
     setForm({
       id: stage.id,
       name: stage.name,
       sortOrder: String(stage.sortOrder),
-      color: stage.color ?? '#ffbe0b',
+      color: stage.color ?? "#ffbe0b",
       hasColor: Boolean(stage.color),
-    })
+    });
   }
 
   function cancelForm() {
-    setForm(null)
-    setFormError('')
+    setForm(null);
+    setFormError("");
   }
 
   async function submitForm(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
     if (!form) {
-      return
+      return;
     }
 
-    const name = form.name.trim()
-    const sortOrder = Number(form.sortOrder)
-    const color = form.hasColor ? form.color : null
+    const name = form.name.trim();
+    const sortOrder = Number(form.sortOrder);
+    const color = form.hasColor ? form.color : null;
 
     if (!name) {
-      setFormError(t('admin.timetable.stages.errors.nameRequired'))
-      return
+      setFormError(t("admin.timetable.stages.errors.nameRequired"));
+      return;
     }
 
     if (!Number.isInteger(sortOrder) || sortOrder < 0) {
-      setFormError(t('admin.timetable.stages.errors.sortOrderInvalid'))
-      return
+      setFormError(t("admin.timetable.stages.errors.sortOrderInvalid"));
+      return;
     }
 
-    setIsSaving(true)
-    setFormError('')
+    setIsSaving(true);
+    setFormError("");
 
     try {
       if (form.id) {
@@ -101,28 +101,28 @@ export function AdminTimetableStages({
           name,
           sortOrder,
           color,
-        })
+        });
       } else {
         await onCreate({
           name,
           sortOrder,
           color,
-        })
+        });
       }
 
-      setForm(null)
+      setForm(null);
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : String(error))
+      setFormError(error instanceof Error ? error.message : String(error));
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
   }
 
   return (
     <>
       <SectionHeader
-        title={t('admin.timetable.stages.title')}
-        eyebrow={t('admin.timetable.eyebrow')}
+        title={t("admin.timetable.stages.title")}
+        eyebrow={t("admin.timetable.eyebrow")}
       />
 
       {error ? <p className="admin__notice">{error}</p> : null}
@@ -134,7 +134,7 @@ export function AdminTimetableStages({
             type="button"
             onClick={startCreate}
           >
-            {t('admin.timetable.stages.createButton')}
+            {t("admin.timetable.stages.createButton")}
           </button>
         </div>
 
@@ -142,26 +142,26 @@ export function AdminTimetableStages({
           <form className="admin-category-form" onSubmit={submitForm}>
             <h3>
               {form.id
-                ? t('admin.timetable.stages.editTitle')
-                : t('admin.timetable.stages.createTitle')}
+                ? t("admin.timetable.stages.editTitle")
+                : t("admin.timetable.stages.createTitle")}
             </h3>
 
             <label htmlFor="admin-timetable-stage-name">
-              {t('admin.timetable.stages.nameLabel')}
+              {t("admin.timetable.stages.nameLabel")}
               <input
                 id="admin-timetable-stage-name"
                 type="text"
                 value={form.name}
                 disabled={isSaving}
                 onChange={(event) => {
-                  setForm({ ...form, name: event.target.value })
-                  setFormError('')
+                  setForm({ ...form, name: event.target.value });
+                  setFormError("");
                 }}
               />
             </label>
 
             <label htmlFor="admin-timetable-stage-sort-order">
-              {t('admin.timetable.stages.sortOrderLabel')}
+              {t("admin.timetable.stages.sortOrderLabel")}
               <input
                 id="admin-timetable-stage-sort-order"
                 type="number"
@@ -169,8 +169,8 @@ export function AdminTimetableStages({
                 disabled={isSaving}
                 inputMode="numeric"
                 onChange={(event) => {
-                  setForm({ ...form, sortOrder: event.target.value })
-                  setFormError('')
+                  setForm({ ...form, sortOrder: event.target.value });
+                  setFormError("");
                 }}
               />
             </label>
@@ -182,23 +182,23 @@ export function AdminTimetableStages({
                   checked={form.hasColor}
                   disabled={isSaving}
                   onChange={(event) => {
-                    setForm({ ...form, hasColor: event.target.checked })
-                    setFormError('')
+                    setForm({ ...form, hasColor: event.target.checked });
+                    setFormError("");
                   }}
                 />
-                {t('admin.timetable.stages.useColorLabel')}
+                {t("admin.timetable.stages.useColorLabel")}
               </label>
 
               <label htmlFor="admin-timetable-stage-color">
-                {t('admin.timetable.stages.colorLabel')}
+                {t("admin.timetable.stages.colorLabel")}
                 <input
                   id="admin-timetable-stage-color"
                   type="color"
                   value={form.color}
                   disabled={isSaving || !form.hasColor}
                   onChange={(event) => {
-                    setForm({ ...form, color: event.target.value })
-                    setFormError('')
+                    setForm({ ...form, color: event.target.value });
+                    setFormError("");
                   }}
                 />
               </label>
@@ -214,7 +214,9 @@ export function AdminTimetableStages({
                 type="submit"
                 disabled={isSaving}
               >
-                {isSaving ? t('common.saving') : t('admin.timetable.stages.save')}
+                {isSaving
+                  ? t("common.saving")
+                  : t("admin.timetable.stages.save")}
               </button>
               <button
                 className="admin-card__reset admin-card__reset--secondary"
@@ -222,7 +224,7 @@ export function AdminTimetableStages({
                 disabled={isSaving}
                 onClick={cancelForm}
               >
-                {t('admin.timetable.stages.cancel')}
+                {t("admin.timetable.stages.cancel")}
               </button>
             </div>
           </form>
@@ -230,15 +232,15 @@ export function AdminTimetableStages({
 
         {isLoading ? (
           <p className="admin__notice" role="status">
-            {t('admin.timetable.stages.loading')}
+            {t("admin.timetable.stages.loading")}
           </p>
         ) : stages.length === 0 ? (
-          <p className="admin__notice">{t('admin.timetable.stages.empty')}</p>
+          <p className="admin__notice">{t("admin.timetable.stages.empty")}</p>
         ) : (
           <div className="admin-categories__list">
             {stages.map((stage, index) => {
               const isBusy =
-                savingStageId === stage.id || deletingStageId === stage.id
+                savingStageId === stage.id || deletingStageId === stage.id;
 
               return (
                 <article className="admin-category-card" key={stage.id}>
@@ -246,11 +248,11 @@ export function AdminTimetableStages({
                     <h3>{stage.name}</h3>
                     <dl>
                       <div>
-                        <dt>{t('admin.timetable.stages.sortOrderLabel')}</dt>
+                        <dt>{t("admin.timetable.stages.sortOrderLabel")}</dt>
                         <dd>{stage.sortOrder}</dd>
                       </div>
                       <div>
-                        <dt>{t('admin.timetable.stages.colorLabel')}</dt>
+                        <dt>{t("admin.timetable.stages.colorLabel")}</dt>
                         <dd>
                           {stage.color ? (
                             <span className="admin-stage-color__preview">
@@ -261,7 +263,7 @@ export function AdminTimetableStages({
                               {stage.color}
                             </span>
                           ) : (
-                            t('admin.timetable.stages.defaultColor')
+                            t("admin.timetable.stages.defaultColor")
                           )}
                         </dd>
                       </div>
@@ -274,17 +276,17 @@ export function AdminTimetableStages({
                         className="admin-card__reset admin-card__reset--secondary"
                         type="button"
                         disabled={isBusy || index === 0}
-                        onClick={() => onMove(stage, 'up')}
+                        onClick={() => onMove(stage, "up")}
                       >
-                        {t('admin.timetable.stages.moveUp')}
+                        {t("admin.timetable.stages.moveUp")}
                       </button>
                       <button
                         className="admin-card__reset admin-card__reset--secondary"
                         type="button"
                         disabled={isBusy || index === stages.length - 1}
-                        onClick={() => onMove(stage, 'down')}
+                        onClick={() => onMove(stage, "down")}
                       >
-                        {t('admin.timetable.stages.moveDown')}
+                        {t("admin.timetable.stages.moveDown")}
                       </button>
                       <button
                         className="admin-card__reset admin-card__reset--secondary"
@@ -292,7 +294,7 @@ export function AdminTimetableStages({
                         disabled={isBusy}
                         onClick={() => startEdit(stage)}
                       >
-                        {t('admin.timetable.stages.edit')}
+                        {t("admin.timetable.stages.edit")}
                       </button>
                       <button
                         className="admin-card__reset"
@@ -301,17 +303,17 @@ export function AdminTimetableStages({
                         onClick={() => onDelete(stage)}
                       >
                         {deletingStageId === stage.id
-                          ? t('admin.timetable.stages.deleting')
-                          : t('admin.timetable.stages.delete')}
+                          ? t("admin.timetable.stages.deleting")
+                          : t("admin.timetable.stages.delete")}
                       </button>
                     </div>
                   </div>
                 </article>
-              )
+              );
             })}
           </div>
         )}
       </div>
     </>
-  )
+  );
 }
