@@ -1,29 +1,29 @@
-import type { ReactNode } from 'react'
+import type { ReactNode } from "react";
 
 type SectionHeaderProps = {
-  title: ReactNode
-  titleId?: string
-  eyebrow?: ReactNode
-  description?: ReactNode
-  width?: 'standard' | 'narrow'
-  className?: string
-}
+  title: ReactNode;
+  titleId?: string;
+  eyebrow?: ReactNode;
+  description?: ReactNode;
+  width?: "standard" | "narrow";
+  className?: string;
+};
 
 export function SectionHeader({
   title,
   titleId,
   eyebrow,
   description,
-  width = 'standard',
+  width = "standard",
   className,
 }: SectionHeaderProps) {
   const classNames = [
-    'section-header',
-    width === 'narrow' ? 'section-header--narrow' : '',
-    className ?? '',
+    "section-header",
+    width === "narrow" ? "section-header--narrow" : "",
+    className ?? "",
   ]
     .filter(Boolean)
-    .join(' ')
+    .join(" ");
 
   return (
     <div className={classNames}>
@@ -35,5 +35,5 @@ export function SectionHeader({
         <p className="section-header__description">{description}</p>
       ) : null}
     </div>
-  )
+  );
 }

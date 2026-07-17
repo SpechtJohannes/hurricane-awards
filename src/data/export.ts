@@ -1,51 +1,53 @@
-import { loadAdminCategories, type Category } from './categories'
-import { loadFestivalName } from './festival'
-import { loadAdminParticipants, type Participant } from './participants'
-import { loadVotes, type Vote } from './votes'
-import type { AdminAccessContext } from './accessContext'
+import { loadAdminCategories, type Category } from "./categories";
+import { loadFestivalName } from "./festival";
+import { loadAdminParticipants, type Participant } from "./participants";
+import { loadVotes, type Vote } from "./votes";
+import type { AdminAccessContext } from "./accessContext";
 
-export const festivalExportFormatVersion = 1
+export const festivalExportFormatVersion = 1;
 
 export type FestivalExportOptions = {
-  includeParticipantAccessCodes?: boolean
-}
+  includeParticipantAccessCodes?: boolean;
+};
 
 export type FestivalExportSource =
   | {
-      type: 'active'
-      festivalId: string
+      type: "active";
+      festivalId: string;
     }
   | {
-      type: 'archive'
-      festivalId: string
-      archiveId: string
-      archivedAt?: string
-    }
+      type: "archive";
+      festivalId: string;
+      archiveId: string;
+      archivedAt?: string;
+    };
 
 export type FestivalExportData = {
-  formatVersion: typeof festivalExportFormatVersion
-  exportedAt: string
+  formatVersion: typeof festivalExportFormatVersion;
+  exportedAt: string;
   festival: {
-    id: string
-    name: string
-    source: FestivalExportSource['type']
-    archiveId?: string
-    archivedAt?: string
-  }
-  participants: Array<Omit<Participant, 'accessCode'> & { accessCode?: string }>
-  categories: Category[]
-  votes: Vote[]
-}
+    id: string;
+    name: string;
+    source: FestivalExportSource["type"];
+    archiveId?: string;
+    archivedAt?: string;
+  };
+  participants: Array<
+    Omit<Participant, "accessCode"> & { accessCode?: string }
+  >;
+  categories: Category[];
+  votes: Vote[];
+};
 
 export type CreateFestivalExportInput = {
-  festivalName: string
-  festivalSource: FestivalExportSource
-  participants: Participant[]
-  categories: Category[]
-  votes: Vote[]
-  exportedAt?: Date
-  options?: FestivalExportOptions
-}
+  festivalName: string;
+  festivalSource: FestivalExportSource;
+  participants: Participant[];
+  categories: Category[];
+  votes: Vote[];
+  exportedAt?: Date;
+  options?: FestivalExportOptions;
+};
 
 export async function loadFestivalExportData(
   context: AdminAccessContext,
@@ -58,7 +60,7 @@ export async function loadFestivalExportData(
     loadAdminParticipants(context),
     loadAdminCategories(context),
     loadVotes(context),
-  ])
+  ]);
 
   return createFestivalExportData({
     festivalName,
@@ -68,15 +70,15 @@ export async function loadFestivalExportData(
     votes,
     exportedAt,
     options,
-  })
+  });
 }
 
 function participantForExport(
   participant: Participant,
   options: FestivalExportOptions,
-): FestivalExportData['participants'][number] {
+): FestivalExportData["participants"][number] {
   if (options.includeParticipantAccessCodes === true) {
-    return participant
+    return participant;
   }
 
   return {
@@ -85,7 +87,7 @@ function participantForExport(
     displayName: participant.displayName,
     isAdmin: participant.isAdmin,
     isActive: participant.isActive,
-  }
+  };
 }
 
 export function createFestivalExportData({
@@ -104,7 +106,7 @@ export function createFestivalExportData({
       id: festivalSource.festivalId,
       name: festivalName,
       source: festivalSource.type,
-      ...(festivalSource.type === 'archive'
+      ...(festivalSource.type === "archive"
         ? {
             archiveId: festivalSource.archiveId,
             archivedAt: festivalSource.archivedAt,
@@ -116,26 +118,26 @@ export function createFestivalExportData({
     ),
     categories,
     votes,
-  }
+  };
 }
 
 export function serializeFestivalExport(exportData: FestivalExportData) {
-  return `${JSON.stringify(exportData, null, 2)}\n`
+  return `${JSON.stringify(exportData, null, 2)}\n`;
 }
 
 export function festivalExportFileName(
   festivalName: string,
   exportedAt = new Date(),
 ) {
-  const date = exportedAt.toISOString().slice(0, 10)
+  const date = exportedAt.toISOString().slice(0, 10);
   const slug =
     festivalName
       .trim()
       .toLowerCase()
-      .normalize('NFKD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '') || 'festival'
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "festival";
 
-  return `festival-awards-${slug}-${date}.json`
+  return `festival-awards-${slug}-${date}.json`;
 }

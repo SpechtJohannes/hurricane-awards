@@ -139,6 +139,15 @@
     "description": "Alles Wichtige fuer dein Festival auf einen Blick.",
     "guestDescription": "Melde dich mit deinem Teilnehmercode an, um alle Bereiche persoenlich zu nutzen.",
     "quickAccess": "Schnellzugriff",
+    "eventStatus": {
+      "label": "Eventstatus",
+      "countdown_one": "Noch {{count}} Tag bis zum Event",
+      "countdown_other": "Noch {{count}} Tage bis zum Event",
+      "tomorrow": "Morgen beginnt das Event",
+      "singleDay": "Heute ist das Event",
+      "eventDay": "Tag {{current}} von {{total}}",
+      "finished": "Das Event ist beendet"
+    },
     "tiles": {
       "timetable": {
         "title": "Timetable",
@@ -570,7 +579,11 @@
       "eyebrow": "Admin",
       "title": "Festival",
       "nameLabel": "Festivalname",
-      "save": "Festivalname speichern",
+      "startDateLabel": "Startdatum",
+      "endDateLabel": "Enddatum",
+      "periodMissing": "Es ist noch kein Eventzeitraum hinterlegt.",
+      "save": "Eventeinstellungen speichern",
+      "saveSuccess": "Eventeinstellungen wurden gespeichert.",
       "codeLabel": "Festivalcode",
       "codeLoading": "Festivalcode wird geladen...",
       "codeSave": "Festivalcode speichern",
@@ -586,6 +599,8 @@
       "errors": {
         "save": "Der Festivalname konnte gerade nicht gespeichert werden.",
         "nameRequired": "Der Festivalname ist erforderlich.",
+        "periodIncomplete": "Startdatum und Enddatum müssen gemeinsam ausgefüllt werden.",
+        "periodOrder": "Das Enddatum darf nicht vor dem Startdatum liegen.",
         "codeLoad": "Der Festivalcode konnte gerade nicht geladen werden.",
         "codeSave": "Der Festivalcode konnte gerade nicht gespeichert werden.",
         "codeRequired": "Der Festivalcode ist erforderlich.",

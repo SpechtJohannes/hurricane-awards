@@ -165,18 +165,26 @@ Teilnehmende markieren und entfernen Favoriten direkt in der Timetable-Leseansic
 ### Kontextbezogenes Dashboard
 
 Die Eventphase wird zentral und ohne React-Abhaengigkeit in `src/domain/eventPhase.ts`
-als `before`, `during` oder `after` ermittelt. Als bestehende Datenquelle dienen der
-frueheste und spaeteste `festival_days.date` Wert aus dem Timetable. Reine
-Datumswerte gelten als vollstaendige Kalendertage in `Europe/Berlin`; der erste und
-letzte Tag gehoeren jeweils noch zur laufenden Phase.
+als `before`, `during` oder `after` ermittelt. Einzige Datenquelle sind
+`app_settings.event_start_date` und `app_settings.event_end_date` am Datensatz
+`festival_name`. Reine Datumswerte gelten als vollstaendige Kalendertage in
+`Europe/Berlin`; der erste und letzte Tag gehoeren jeweils noch zur laufenden Phase.
 
 `src/domain/dashboardModules.ts` ordnet vorhandenen Dashboard-Modulen ihre
 Prioritaet je Phase und optional sichtbare Phasen zu. Vor dem Festival stehen
 Timetable, Infos und Spiele vorn, waehrenddessen Timetable, Spiele und Abstimmungen,
 danach Awards, Abstimmungen und Timetable. Allgemeine Module bleiben sichtbar.
 
-Fehlt eine Datumsgrenze, ist das Intervall dort offen. Fehlen beide Grenzen, gilt
-`during` als neutrales Fallback. Eine Datenbankmigration ist nicht erforderlich.
+Das Dashboard bindet `EventStatusCard` als eigenstaendiges Modul ein. Die gemeinsame
+Kalenderlogik in `src/domain/eventStatus.ts` liefert vorab verbleibende Tage,
+waehrenddessen aktuellen und gesamten Eventtag und danach den Abschlussstatus. Ohne
+vollstaendigen Zeitraum wird das Modul ausgeblendet.
+
+Administratoren bearbeiten Name, Start- und Enddatum gemeinsam in den
+Eventeinstellungen. `ha_get_event_settings` liest die Werte; der serverseitig
+admin-geschuetzte RPC `ha_admin_update_event_settings` speichert sie atomar und
+erzwingt entweder zwei leere oder zwei gueltige, chronologisch geordnete Datumswerte.
+Diese Felder sind die zentrale Quelle fuer alle zeitabhaengigen Funktionen.
 
 ### Festivaleinstellungen
 

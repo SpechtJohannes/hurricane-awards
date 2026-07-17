@@ -1,34 +1,34 @@
-import { useEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   festivalDocumentTypes,
   type FestivalDocument,
   type FestivalDocumentType,
-} from '../data/festivalDocuments'
-import type { MusicPlaylist } from '../data/musicEmbeds'
-import { SectionHeader } from './SectionHeader'
+} from "../data/festivalDocuments";
+import type { MusicPlaylist } from "../data/musicEmbeds";
+import { SectionHeader } from "./SectionHeader";
 
 type FestivalInfoProps = {
-  documents: FestivalDocument[]
-  campLocationLink: string | null
-  campLocationError: string
-  musicPlaylist: MusicPlaylist | null
-  error: string
-  isLoading: boolean
-  dashboardBackButton?: ReactNode
-  onOpenCampLocation: () => void
-}
+  documents: FestivalDocument[];
+  campLocationLink: string | null;
+  campLocationError: string;
+  musicPlaylist: MusicPlaylist | null;
+  error: string;
+  isLoading: boolean;
+  dashboardBackButton?: ReactNode;
+  onOpenCampLocation: () => void;
+};
 
 function documentByType(
   documents: FestivalDocument[],
   documentType: FestivalDocumentType,
 ) {
-  return documents.find((document) => document.documentType === documentType)
+  return documents.find((document) => document.documentType === documentType);
 }
 
 function isImageDocument(document: FestivalDocument) {
-  return document.mimeType.startsWith('image/')
+  return document.mimeType.startsWith("image/");
 }
 
 export function FestivalInfo({
@@ -41,30 +41,30 @@ export function FestivalInfo({
   dashboardBackButton,
   onOpenCampLocation,
 }: FestivalInfoProps) {
-  const { t } = useTranslation()
-  const [musicPlaylistLoadError, setMusicPlaylistLoadError] = useState(false)
-  const musicPlayerRef = useRef<HTMLIFrameElement | null>(null)
-  const hasDocuments = documents.length > 0
-  const hasCampLocationLink = Boolean(campLocationLink)
-  const hasMusicPlaylist = Boolean(musicPlaylist)
+  const { t } = useTranslation();
+  const [musicPlaylistLoadError, setMusicPlaylistLoadError] = useState(false);
+  const musicPlayerRef = useRef<HTMLIFrameElement | null>(null);
+  const hasDocuments = documents.length > 0;
+  const hasCampLocationLink = Boolean(campLocationLink);
+  const hasMusicPlaylist = Boolean(musicPlaylist);
 
   useEffect(() => {
-    const musicPlayer = musicPlayerRef.current
+    const musicPlayer = musicPlayerRef.current;
 
     if (!musicPlayer) {
-      return
+      return;
     }
 
     function showMusicPlaylistLoadError() {
-      setMusicPlaylistLoadError(true)
+      setMusicPlaylistLoadError(true);
     }
 
-    musicPlayer.addEventListener('error', showMusicPlaylistLoadError)
+    musicPlayer.addEventListener("error", showMusicPlaylistLoadError);
 
     return () => {
-      musicPlayer.removeEventListener('error', showMusicPlaylistLoadError)
-    }
-  }, [musicPlaylist?.embedUrl])
+      musicPlayer.removeEventListener("error", showMusicPlaylistLoadError);
+    };
+  }, [musicPlaylist?.embedUrl]);
 
   return (
     <section
@@ -75,42 +75,52 @@ export function FestivalInfo({
       {dashboardBackButton}
 
       <SectionHeader
-        title={t('info.title')}
+        title={t("info.title")}
         titleId="festival-info-title"
-        eyebrow={t('info.eyebrow')}
+        eyebrow={t("info.eyebrow")}
       />
 
       {isLoading ? (
         <p className="festival-info__notice" role="status">
-          {t('info.loading')}
+          {t("info.loading")}
         </p>
       ) : null}
 
       {error ? (
-        <p className="festival-info__notice festival-info__notice--error" role="alert">
+        <p
+          className="festival-info__notice festival-info__notice--error"
+          role="alert"
+        >
           {error}
         </p>
       ) : null}
 
-      {!isLoading && !error && !hasDocuments && !hasCampLocationLink && !hasMusicPlaylist ? (
-        <p className="festival-info__notice">{t('info.empty')}</p>
+      {!isLoading &&
+      !error &&
+      !hasDocuments &&
+      !hasCampLocationLink &&
+      !hasMusicPlaylist ? (
+        <p className="festival-info__notice">{t("info.empty")}</p>
       ) : null}
 
       {hasCampLocationLink ? (
         <article className="festival-info__camp-location">
           <div>
-            <p>{t('info.campLocation.eyebrow')}</p>
-            <h3>{t('info.campLocation.title')}</h3>
+            <p>{t("info.campLocation.eyebrow")}</p>
+            <h3>{t("info.campLocation.title")}</h3>
           </div>
           <button
             className="festival-info__camp-location-link"
             type="button"
             onClick={onOpenCampLocation}
           >
-            {t('info.campLocation.open')}
+            {t("info.campLocation.open")}
           </button>
           {campLocationError ? (
-            <p className="festival-info__notice festival-info__notice--error" role="alert">
+            <p
+              className="festival-info__notice festival-info__notice--error"
+              role="alert"
+            >
               {campLocationError}
             </p>
           ) : null}
@@ -121,8 +131,8 @@ export function FestivalInfo({
         <article className="festival-info__music">
           <div className="festival-info__music-header">
             <div>
-              <p>{t('info.musicPlaylist.eyebrow')}</p>
-              <h3>{t('info.musicPlaylist.title')}</h3>
+              <p>{t("info.musicPlaylist.eyebrow")}</p>
+              <h3>{t("info.musicPlaylist.title")}</h3>
             </div>
             <a
               className="festival-info__camp-location-link"
@@ -130,20 +140,23 @@ export function FestivalInfo({
               target="_blank"
               rel="noreferrer"
             >
-              {t('info.musicPlaylist.open')}
+              {t("info.musicPlaylist.open")}
             </a>
           </div>
           <iframe
             ref={musicPlayerRef}
             className="festival-info__music-player"
             src={musicPlaylist.embedUrl}
-            title={t('info.musicPlaylist.playerTitle')}
+            title={t("info.musicPlaylist.playerTitle")}
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             loading="lazy"
           />
           {musicPlaylistLoadError ? (
-            <p className="festival-info__notice festival-info__notice--error" role="alert">
-              {t('info.musicPlaylist.errors.load')}
+            <p
+              className="festival-info__notice festival-info__notice--error"
+              role="alert"
+            >
+              {t("info.musicPlaylist.errors.load")}
             </p>
           ) : null}
         </article>
@@ -152,14 +165,17 @@ export function FestivalInfo({
       {hasDocuments ? (
         <div className="festival-info__documents">
           {festivalDocumentTypes.map((documentType) => {
-            const document = documentByType(documents, documentType)
+            const document = documentByType(documents, documentType);
 
             if (!document) {
-              return null
+              return null;
             }
 
             return (
-              <article className="festival-document" key={document.documentType}>
+              <article
+                className="festival-document"
+                key={document.documentType}
+              >
                 <div className="festival-document__header">
                   <p>{t(`info.documentTypes.${document.documentType}`)}</p>
                   <h3>{document.title}</h3>
@@ -179,10 +195,10 @@ export function FestivalInfo({
                   />
                 )}
               </article>
-            )
+            );
           })}
         </div>
       ) : null}
     </section>
-  )
+  );
 }

@@ -256,7 +256,7 @@ Empfohlener Ablauf:
 2. **Festival archivieren**
 
    Archiviere danach das Festival über den Adminbereich.
-   
+
 3. **Neues Festival vorbereiten**
 
    Bereite anschließend den nächsten Festivalstand vor: Festivalnamen anpassen, Teilnehmer prüfen oder neu anlegen und Kategorien vorbereiten.

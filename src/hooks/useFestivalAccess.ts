@@ -1,117 +1,123 @@
-import { useEffect, useState } from 'react'
-import { festivalStorageKey, type FestivalConfig } from '../config/festivals'
+import { useEffect, useState } from "react";
+import { festivalStorageKey, type FestivalConfig } from "../config/festivals";
 import {
   loadFestivalAccessVersion,
   verifyFestivalAccessCode,
-} from '../data/festival'
+} from "../data/festival";
 
 type FestivalAccessState = {
-  isUnlocked: boolean
-  unlock: (code: string) => Promise<boolean>
-  rememberAccessVersion: (version: string) => void
-}
+  isUnlocked: boolean;
+  unlock: (code: string) => Promise<boolean>;
+  rememberAccessVersion: (version: string) => void;
+};
 
 type StoredFestivalAccess = {
-  version: string
-}
+  version: string;
+};
 
 export function festivalAccessStorageKey(festivalId: string) {
-  return festivalStorageKey(festivalId, 'festival-access')
+  return festivalStorageKey(festivalId, "festival-access");
 }
 
 function parseStoredFestivalAccess(festival: FestivalConfig) {
-  const storedValue = localStorage.getItem(festivalAccessStorageKey(festival.id))
+  const storedValue = localStorage.getItem(
+    festivalAccessStorageKey(festival.id),
+  );
 
   if (!storedValue) {
-    return null
+    return null;
   }
 
   try {
-    const parsedValue = JSON.parse(storedValue) as Partial<StoredFestivalAccess>
+    const parsedValue = JSON.parse(
+      storedValue,
+    ) as Partial<StoredFestivalAccess>;
 
-    if (typeof parsedValue.version === 'string' && parsedValue.version) {
+    if (typeof parsedValue.version === "string" && parsedValue.version) {
       return {
         version: parsedValue.version,
-      }
+      };
     }
   } catch {
-    localStorage.removeItem(festivalAccessStorageKey(festival.id))
+    localStorage.removeItem(festivalAccessStorageKey(festival.id));
   }
 
-  return null
+  return null;
 }
 
 function storeFestivalAccess(festival: FestivalConfig, version: string) {
   localStorage.setItem(
     festivalAccessStorageKey(festival.id),
     JSON.stringify({ version }),
-  )
+  );
 }
 
-export function useFestivalAccess(festival: FestivalConfig): FestivalAccessState {
+export function useFestivalAccess(
+  festival: FestivalConfig,
+): FestivalAccessState {
   const [isUnlocked, setIsUnlocked] = useState(() =>
     Boolean(parseStoredFestivalAccess(festival)),
-  )
+  );
 
   useEffect(() => {
-    const storedAccess = parseStoredFestivalAccess(festival)
+    const storedAccess = parseStoredFestivalAccess(festival);
 
     if (!storedAccess) {
-      return
+      return;
     }
 
-    const storedVersion = storedAccess.version
-    let isCurrent = true
+    const storedVersion = storedAccess.version;
+    let isCurrent = true;
 
     async function validateStoredAccess() {
       try {
-        const currentVersion = await loadFestivalAccessVersion()
+        const currentVersion = await loadFestivalAccessVersion();
 
         if (!isCurrent) {
-          return
+          return;
         }
 
         if (currentVersion && currentVersion === storedVersion) {
-          setIsUnlocked(true)
-          return
+          setIsUnlocked(true);
+          return;
         }
 
-        localStorage.removeItem(festivalAccessStorageKey(festival.id))
-        setIsUnlocked(false)
+        localStorage.removeItem(festivalAccessStorageKey(festival.id));
+        setIsUnlocked(false);
       } catch {
         if (isCurrent) {
-          setIsUnlocked(false)
+          setIsUnlocked(false);
         }
       }
     }
 
-    void validateStoredAccess()
+    void validateStoredAccess();
 
     return () => {
-      isCurrent = false
-    }
-  }, [festival])
+      isCurrent = false;
+    };
+  }, [festival]);
 
   async function unlock(code: string) {
-    const verification = await verifyFestivalAccessCode(code)
+    const verification = await verifyFestivalAccessCode(code);
 
     if (!verification.isValid || !verification.version) {
-      return false
+      return false;
     }
 
-    storeFestivalAccess(festival, verification.version)
-    setIsUnlocked(true)
-    return true
+    storeFestivalAccess(festival, verification.version);
+    setIsUnlocked(true);
+    return true;
   }
 
   function rememberAccessVersion(version: string) {
-    storeFestivalAccess(festival, version)
-    setIsUnlocked(true)
+    storeFestivalAccess(festival, version);
+    setIsUnlocked(true);
   }
 
   return {
     isUnlocked,
     unlock,
     rememberAccessVersion,
-  }
+  };
 }

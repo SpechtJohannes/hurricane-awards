@@ -1,54 +1,54 @@
-import { useState, type FormEvent } from 'react'
-import { useTranslation } from 'react-i18next'
-import type { Participant } from '../data/participants'
+import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
+import type { Participant } from "../data/participants";
 import {
   largestPowerOfTwo,
   type Tournament,
   type TournamentMode,
-} from '../data/tournaments'
-import { ParticipantName } from './Avatar'
-import { SectionHeader } from './SectionHeader'
-import { TournamentBracket } from './TournamentBracket'
+} from "../data/tournaments";
+import { ParticipantName } from "./Avatar";
+import { SectionHeader } from "./SectionHeader";
+import { TournamentBracket } from "./TournamentBracket";
 
 type TournamentFormState = {
-  id: string | null
-  name: string
-  mode: TournamentMode
-  participantIds: string[]
-}
+  id: string | null;
+  name: string;
+  mode: TournamentMode;
+  participantIds: string[];
+};
 
 type AdminTournamentsProps = {
-  tournaments: Tournament[]
-  participants: Participant[]
-  error: string
-  isLoading: boolean
-  savingTournamentId: string | null
-  deletingTournamentId: string | null
-  savingMatchId: string | null
+  tournaments: Tournament[];
+  participants: Participant[];
+  error: string;
+  isLoading: boolean;
+  savingTournamentId: string | null;
+  deletingTournamentId: string | null;
+  savingMatchId: string | null;
   onCreate: (input: {
-    name: string
-    mode: TournamentMode
-    participantIds: string[]
-  }) => Promise<void>
+    name: string;
+    mode: TournamentMode;
+    participantIds: string[];
+  }) => Promise<void>;
   onUpdate: (
     tournamentId: string,
     input: { name: string; mode: TournamentMode; participantIds: string[] },
-  ) => Promise<void>
-  onDelete: (tournamentId: string) => Promise<void>
+  ) => Promise<void>;
+  onDelete: (tournamentId: string) => Promise<void>;
   onSetWinner: (
     tournamentId: string,
     matchId: string,
     winnerParticipantId: string,
-  ) => Promise<void>
-}
+  ) => Promise<void>;
+};
 
 function emptyForm(): TournamentFormState {
   return {
     id: null,
-    name: '',
-    mode: 'knockout',
+    name: "",
+    mode: "knockout",
     participantIds: [],
-  }
+  };
 }
 
 export function AdminTournaments({
@@ -64,108 +64,112 @@ export function AdminTournaments({
   onDelete,
   onSetWinner,
 }: AdminTournamentsProps) {
-  const { t } = useTranslation()
-  const [form, setForm] = useState<TournamentFormState | null>(null)
-  const [formError, setFormError] = useState('')
-  const [actionError, setActionError] = useState('')
+  const { t } = useTranslation();
+  const [form, setForm] = useState<TournamentFormState | null>(null);
+  const [formError, setFormError] = useState("");
+  const [actionError, setActionError] = useState("");
   const activeParticipants = participants.filter(
     (participant) => participant.isActive,
-  )
+  );
 
   function startEdit(tournament: Tournament) {
-    setFormError('')
-    setActionError('')
+    setFormError("");
+    setActionError("");
     setForm({
       id: tournament.id,
       name: tournament.name,
       mode: tournament.mode,
       participantIds: tournament.selectedParticipantIds,
-    })
+    });
   }
 
   function toggleParticipant(participantId: string) {
-    setFormError('')
+    setFormError("");
     setForm((currentForm) => {
       if (!currentForm) {
-        return currentForm
+        return currentForm;
       }
 
       const participantIds = currentForm.participantIds.includes(participantId)
         ? currentForm.participantIds.filter((id) => id !== participantId)
-        : [...currentForm.participantIds, participantId]
+        : [...currentForm.participantIds, participantId];
 
       return {
         ...currentForm,
         participantIds,
-      }
-    })
+      };
+    });
   }
 
   async function submitForm(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
     if (!form) {
-      return
+      return;
     }
 
-    const name = form.name.trim()
+    const name = form.name.trim();
 
     if (!name) {
-      setFormError(t('admin.tournaments.errors.nameRequired'))
-      return
+      setFormError(t("admin.tournaments.errors.nameRequired"));
+      return;
     }
 
     if (form.participantIds.length < 2) {
-      setFormError(t('admin.tournaments.errors.participantsRequired'))
-      return
+      setFormError(t("admin.tournaments.errors.participantsRequired"));
+      return;
     }
 
-    setFormError('')
-    setActionError('')
+    setFormError("");
+    setActionError("");
 
     try {
       if (form.id) {
         await onUpdate(form.id, {
           name,
-          mode: 'knockout',
+          mode: "knockout",
           participantIds: form.participantIds,
-        })
+        });
       } else {
         await onCreate({
           name,
-          mode: 'knockout',
+          mode: "knockout",
           participantIds: form.participantIds,
-        })
+        });
       }
 
-      setForm(null)
+      setForm(null);
     } catch {
-      setFormError(t('admin.tournaments.errors.save'))
+      setFormError(t("admin.tournaments.errors.save"));
     }
   }
 
   async function deleteCurrentTournament(tournament: Tournament) {
-    if (!window.confirm(t('admin.tournaments.confirmDelete', {
-      name: tournament.name,
-    }))) {
-      return
+    if (
+      !window.confirm(
+        t("admin.tournaments.confirmDelete", {
+          name: tournament.name,
+        }),
+      )
+    ) {
+      return;
     }
 
-    setActionError('')
+    setActionError("");
 
     try {
-      await onDelete(tournament.id)
+      await onDelete(tournament.id);
     } catch {
-      setActionError(t('admin.tournaments.errors.delete'))
+      setActionError(t("admin.tournaments.errors.delete"));
     }
   }
 
   return (
     <>
       <SectionHeader
-        title={t('admin.tournaments.title')}
+        title={t("admin.tournaments.title")}
         titleId="admin-tournaments-title"
-        eyebrow={t('admin.tournaments.eyebrow')}
+        eyebrow={t("admin.tournaments.eyebrow")}
       />
 
       <div className="admin-tournaments">
@@ -173,7 +177,7 @@ export function AdminTournaments({
           <form className="admin-tournaments__form" onSubmit={submitForm}>
             <div>
               <label htmlFor="tournament-name">
-                {t('admin.tournaments.nameLabel')}
+                {t("admin.tournaments.nameLabel")}
               </label>
               <input
                 id="tournament-name"
@@ -181,15 +185,15 @@ export function AdminTournaments({
                 value={form.name}
                 disabled={savingTournamentId !== null}
                 onChange={(event) => {
-                  setForm({ ...form, name: event.target.value })
-                  setFormError('')
+                  setForm({ ...form, name: event.target.value });
+                  setFormError("");
                 }}
               />
             </div>
 
             <div
               className="admin-tournaments__participants"
-              aria-label={t('admin.tournaments.participantsLabel')}
+              aria-label={t("admin.tournaments.participantsLabel")}
             >
               {activeParticipants.map((participant) => (
                 <label key={participant.id}>
@@ -209,7 +213,7 @@ export function AdminTournaments({
 
             {activeParticipants.length === 0 ? (
               <p className="admin-bingo__status">
-                {t('admin.tournaments.noActiveParticipants')}
+                {t("admin.tournaments.noActiveParticipants")}
               </p>
             ) : null}
 
@@ -217,7 +221,7 @@ export function AdminTournaments({
             largestPowerOfTwo(form.participantIds.length) !==
               form.participantIds.length ? (
               <p className="admin-bingo__status">
-                {t('admin.tournaments.byeNotice')}
+                {t("admin.tournaments.byeNotice")}
               </p>
             ) : null}
 
@@ -234,19 +238,19 @@ export function AdminTournaments({
                 disabled={savingTournamentId !== null}
               >
                 {savingTournamentId
-                  ? t('common.saving')
-                  : t('admin.tournaments.save')}
+                  ? t("common.saving")
+                  : t("admin.tournaments.save")}
               </button>
               <button
                 className="admin-card__reset admin-card__reset--secondary"
                 type="button"
                 disabled={savingTournamentId !== null}
                 onClick={() => {
-                  setForm(null)
-                  setFormError('')
+                  setForm(null);
+                  setFormError("");
                 }}
               >
-                {t('admin.tournaments.cancel')}
+                {t("admin.tournaments.cancel")}
               </button>
             </div>
           </form>
@@ -256,12 +260,14 @@ export function AdminTournaments({
             type="button"
             onClick={() => setForm(emptyForm())}
           >
-            {t('admin.tournaments.createButton')}
+            {t("admin.tournaments.createButton")}
           </button>
         )}
 
         {isLoading ? (
-          <p className="admin-bingo__status">{t('admin.tournaments.loading')}</p>
+          <p className="admin-bingo__status">
+            {t("admin.tournaments.loading")}
+          </p>
         ) : null}
 
         {error || actionError ? (
@@ -271,7 +277,7 @@ export function AdminTournaments({
         ) : null}
 
         {!isLoading && tournaments.length === 0 ? (
-          <p className="admin-bingo__status">{t('admin.tournaments.empty')}</p>
+          <p className="admin-bingo__status">{t("admin.tournaments.empty")}</p>
         ) : null}
 
         <div className="admin-tournaments__list">
@@ -281,11 +287,11 @@ export function AdminTournaments({
                 <div>
                   <h3>{tournament.name}</h3>
                   <p>
-                    {t('admin.tournaments.status', {
+                    {t("admin.tournaments.status", {
                       count: tournament.selectedParticipantIds.length,
                     })}
                   </p>
-                  <p>{t('admin.tournaments.modes.knockout')}</p>
+                  <p>{t("admin.tournaments.modes.knockout")}</p>
                 </div>
                 <div className="admin-tournament__actions">
                   <button
@@ -294,19 +300,19 @@ export function AdminTournaments({
                     disabled={savingTournamentId !== null}
                     onClick={() => startEdit(tournament)}
                   >
-                    {t('admin.tournaments.edit')}
+                    {t("admin.tournaments.edit")}
                   </button>
                   <button
                     className="admin-card__reset admin-card__reset--secondary"
                     type="button"
                     disabled={deletingTournamentId === tournament.id}
                     onClick={() => {
-                      void deleteCurrentTournament(tournament)
+                      void deleteCurrentTournament(tournament);
                     }}
                   >
                     {deletingTournamentId === tournament.id
-                      ? t('admin.tournaments.deleting')
-                      : t('admin.tournaments.delete')}
+                      ? t("admin.tournaments.deleting")
+                      : t("admin.tournaments.delete")}
                   </button>
                 </div>
               </div>
@@ -322,5 +328,5 @@ export function AdminTournaments({
         </div>
       </div>
     </>
-  )
+  );
 }

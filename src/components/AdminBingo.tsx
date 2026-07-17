@@ -1,16 +1,16 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import type { BingoRound } from '../data/bingo'
-import { SectionHeader } from './SectionHeader'
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { BingoRound } from "../data/bingo";
+import { SectionHeader } from "./SectionHeader";
 
 type AdminBingoProps = {
-  round: BingoRound | null
-  error: string
-  isLoading: boolean
-  isSaving: boolean
-  onStart: () => Promise<void>
-  onClose: () => Promise<void>
-}
+  round: BingoRound | null;
+  error: string;
+  isLoading: boolean;
+  isSaving: boolean;
+  onStart: () => Promise<void>;
+  onClose: () => Promise<void>;
+};
 
 export function AdminBingo({
   round,
@@ -20,53 +20,53 @@ export function AdminBingo({
   onStart,
   onClose,
 }: AdminBingoProps) {
-  const { t } = useTranslation()
-  const [actionError, setActionError] = useState('')
-  const isDisabled = isLoading || isSaving
+  const { t } = useTranslation();
+  const [actionError, setActionError] = useState("");
+  const isDisabled = isLoading || isSaving;
 
   async function startRound() {
-    setActionError('')
+    setActionError("");
 
     try {
-      await onStart()
+      await onStart();
     } catch {
-      setActionError(t('admin.bingo.errors.start'))
+      setActionError(t("admin.bingo.errors.start"));
     }
   }
 
   async function closeRound() {
-    if (!window.confirm(t('admin.bingo.confirmClose'))) {
-      return
+    if (!window.confirm(t("admin.bingo.confirmClose"))) {
+      return;
     }
 
-    setActionError('')
+    setActionError("");
 
     try {
-      await onClose()
+      await onClose();
     } catch {
-      setActionError(t('admin.bingo.errors.close'))
+      setActionError(t("admin.bingo.errors.close"));
     }
   }
 
   return (
     <>
       <SectionHeader
-        title={t('admin.bingo.title')}
+        title={t("admin.bingo.title")}
         titleId="admin-bingo-title"
-        eyebrow={t('admin.bingo.eyebrow')}
+        eyebrow={t("admin.bingo.eyebrow")}
       />
 
       <div className="admin-bingo">
         {isLoading ? (
-          <p className="admin-bingo__status">{t('admin.bingo.loading')}</p>
+          <p className="admin-bingo__status">{t("admin.bingo.loading")}</p>
         ) : round ? (
           <p className="admin-bingo__status">
-            {t('admin.bingo.active', {
+            {t("admin.bingo.active", {
               startedAt: new Date(round.startedAt).toLocaleString(),
             })}
           </p>
         ) : (
-          <p className="admin-bingo__status">{t('admin.bingo.inactive')}</p>
+          <p className="admin-bingo__status">{t("admin.bingo.inactive")}</p>
         )}
 
         {error ? (
@@ -88,7 +88,7 @@ export function AdminBingo({
             disabled={isDisabled}
             onClick={closeRound}
           >
-            {isSaving ? t('common.saving') : t('admin.bingo.close')}
+            {isSaving ? t("common.saving") : t("admin.bingo.close")}
           </button>
         ) : (
           <button
@@ -97,10 +97,10 @@ export function AdminBingo({
             disabled={isDisabled}
             onClick={startRound}
           >
-            {isSaving ? t('common.saving') : t('admin.bingo.start')}
+            {isSaving ? t("common.saving") : t("admin.bingo.start")}
           </button>
         )}
       </div>
     </>
-  )
+  );
 }

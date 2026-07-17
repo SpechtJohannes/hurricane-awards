@@ -28,17 +28,17 @@ Diese Version verbessert die Bedienbarkeit und das visuelle Gesamtbild der App d
 
 ### Änderungen
 
-* Die Startseite zeigt nun ein persönliches Dashboard mit Statusinformationen und direkten Einstiegen in die Hauptbereiche.
-* Aus allen Hauptbereichen ist eine Rückkehr zum Dashboard möglich.
-* Das Header Konzept wurde vereinheitlicht und kompakter gestaltet.
-* Der Profilbereich reagiert nun besser auf den aktuellen Loginstatus.
-* Der ausgewählte Avatar wird deutlicher hervorgehoben.
-* Der Bingo Bereich enthält nun eine kurze Erklärung zur Funktionsweise.
-* Der Bereich Spiele wurde als Einstieg für Bingo und künftige Spiele eingeführt.
-* Bei nicht aktiven Abstimmungen wird ein verständlicher Hinweis angezeigt.
-* Im Timetable werden Tage ohne Auftritte ausgeblendet.
-* Ein konsistentes Farbsystem verbessert die visuelle Orientierung in der App.
-* Fehlerhafte Tests wurden korrigiert.
+- Die Startseite zeigt nun ein persönliches Dashboard mit Statusinformationen und direkten Einstiegen in die Hauptbereiche.
+- Aus allen Hauptbereichen ist eine Rückkehr zum Dashboard möglich.
+- Das Header Konzept wurde vereinheitlicht und kompakter gestaltet.
+- Der Profilbereich reagiert nun besser auf den aktuellen Loginstatus.
+- Der ausgewählte Avatar wird deutlicher hervorgehoben.
+- Der Bingo Bereich enthält nun eine kurze Erklärung zur Funktionsweise.
+- Der Bereich Spiele wurde als Einstieg für Bingo und künftige Spiele eingeführt.
+- Bei nicht aktiven Abstimmungen wird ein verständlicher Hinweis angezeigt.
+- Im Timetable werden Tage ohne Auftritte ausgeblendet.
+- Ein konsistentes Farbsystem verbessert die visuelle Orientierung in der App.
+- Fehlerhafte Tests wurden korrigiert.
 
 ## v1.3.0
 
@@ -48,46 +48,45 @@ Der Festival Timetable wurde vollständig in die App integriert und ermöglicht 
 
 #### Neu
 
-* Mehrtägiger Timetable mit Bühnen und Auftritten
-* Verwaltung von Bühnen, Acts und Auftritten im Administrationsbereich
-* Hervorhebung der Bühnen durch individuelle Farben
-* Persönliche Favoriten können direkt im Timetable markiert werden
-* Gemeinsame Favoriten anderer Teilnehmender werden angezeigt und erleichtern die gemeinsame Festivalplanung
+- Mehrtägiger Timetable mit Bühnen und Auftritten
+- Verwaltung von Bühnen, Acts und Auftritten im Administrationsbereich
+- Hervorhebung der Bühnen durch individuelle Farben
+- Persönliche Favoriten können direkt im Timetable markiert werden
+- Gemeinsame Favoriten anderer Teilnehmender werden angezeigt und erleichtern die gemeinsame Festivalplanung
 
 #### Verbessert
 
-* Darstellung und Bedienung des Timetables optimiert
-* Performance verbessert
-* Usability überarbeitet
-* Tests und Dokumentation ergänzt
-* Vollständige Mehrsprachigkeit für das Timetable Feature
-
+- Darstellung und Bedienung des Timetables optimiert
+- Performance verbessert
+- Usability überarbeitet
+- Tests und Dokumentation ergänzt
+- Vollständige Mehrsprachigkeit für das Timetable Feature
 
 ## v1.2.0
 
 ### Features
 
-* Appnavigation für Hauptbereiche eingeführt
-* Bereich Festivalinfos ergänzt
-* Campstandort für Teilnehmende bereitgestellt
-* Festival Playlist über Spotify eingebunden
-* Festivalcode per QR Code scanbar gemacht
-* Avatarauswahl für Teilnehmende ergänzt
-* Bingo Bereich integriert
+- Appnavigation für Hauptbereiche eingeführt
+- Bereich Festivalinfos ergänzt
+- Campstandort für Teilnehmende bereitgestellt
+- Festival Playlist über Spotify eingebunden
+- Festivalcode per QR Code scanbar gemacht
+- Avatarauswahl für Teilnehmende ergänzt
+- Bingo Bereich integriert
 
 ### Administration
 
-* Admins können Festivalinfos verwalten
-* Admins können Campstandort und Spotify Playlist hinterlegen
-* Admins können eine Bingorunde starten und schließen
+- Admins können Festivalinfos verwalten
+- Admins können Campstandort und Spotify Playlist hinterlegen
+- Admins können eine Bingorunde starten und schließen
 
 ### Technik
 
-* Supabase CLI Workflow für Migrationen eingeführt
-* Neue Datenmodelle und Migrationen für Festivalinfos, Avatare und Bingo ergänzt
-* Architektur Dokumentation aktualisiert
-* Testabdeckung erweitert
-* Build Größe analysiert und optimiert
+- Supabase CLI Workflow für Migrationen eingeführt
+- Neue Datenmodelle und Migrationen für Festivalinfos, Avatare und Bingo ergänzt
+- Architektur Dokumentation aktualisiert
+- Testabdeckung erweitert
+- Build Größe analysiert und optimiert
 
 ## [1.1.0]
 

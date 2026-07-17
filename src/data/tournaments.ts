@@ -1,97 +1,97 @@
-import { getSupabase } from '../lib/supabase'
+import { getSupabase } from "../lib/supabase";
 import {
   participantRpcParams,
   type AdminAccessContext,
   type ParticipantAccessContext,
-} from './accessContext'
+} from "./accessContext";
 
-export type TournamentStatus = 'draft' | 'active'
-export type TournamentMode = 'ko' | 'knockout' | 'qualification_knockout'
+export type TournamentStatus = "draft" | "active";
+export type TournamentMode = "ko" | "knockout" | "qualification_knockout";
 
 export type TournamentBracketParticipant = {
-  type: 'participant'
-  participantId: string
-  participantName: string
-}
+  type: "participant";
+  participantId: string;
+  participantName: string;
+};
 
 export type TournamentBracketSlot = {
-  participant: TournamentBracketParticipant | null
-  sourceMatchId?: string | null
-}
+  participant: TournamentBracketParticipant | null;
+  sourceMatchId?: string | null;
+};
 
 export type TournamentBracketMatch = {
-  id: string
-  round: number
-  position: number
-  status: 'scheduled' | 'completed'
-  participantA: TournamentBracketSlot
-  participantB: TournamentBracketSlot
-  winnerParticipantId: string | null
-  winnerResolution?: 'manual' | 'automatic' | null
-}
+  id: string;
+  round: number;
+  position: number;
+  status: "scheduled" | "completed";
+  participantA: TournamentBracketSlot;
+  participantB: TournamentBracketSlot;
+  winnerParticipantId: string | null;
+  winnerResolution?: "manual" | "automatic" | null;
+};
 
 export type TournamentBracketRound = {
-  round: number
-  type?: 'main'
-  matches: TournamentBracketMatch[]
-  byes?: TournamentBracketParticipant[]
-}
+  round: number;
+  type?: "main";
+  matches: TournamentBracketMatch[];
+  byes?: TournamentBracketParticipant[];
+};
 
 export type TournamentBracket = {
-  type: 'single_elimination'
-  mainParticipantCount?: number
-  rounds: TournamentBracketRound[]
-}
+  type: "single_elimination";
+  mainParticipantCount?: number;
+  rounds: TournamentBracketRound[];
+};
 
 export type Tournament = {
-  id: string
-  festivalId: string
-  name: string
-  mode: TournamentMode
-  status: TournamentStatus
-  selectedParticipantIds: string[]
-  drawParticipantIds: string[]
-  qualificationRankingIds: string[]
-  bracket: TournamentBracket
-  createdAt: string
-  updatedAt: string
-}
+  id: string;
+  festivalId: string;
+  name: string;
+  mode: TournamentMode;
+  status: TournamentStatus;
+  selectedParticipantIds: string[];
+  drawParticipantIds: string[];
+  qualificationRankingIds: string[];
+  bracket: TournamentBracket;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export type TournamentInput = {
-  name: string
-  mode: TournamentMode
-  participantIds: string[]
-}
+  name: string;
+  mode: TournamentMode;
+  participantIds: string[];
+};
 
 type TournamentRow = {
-  id: string
-  festival_id: string
-  name: string
-  mode?: TournamentMode | null
-  status: TournamentStatus
-  selected_participant_ids?: string[] | null
-  draw_participant_ids?: string[] | null
-  qualification_ranking_ids?: string[] | null
-  bracket: TournamentBracket | string
-  created_at: string
-  updated_at: string
-}
+  id: string;
+  festival_id: string;
+  name: string;
+  mode?: TournamentMode | null;
+  status: TournamentStatus;
+  selected_participant_ids?: string[] | null;
+  draw_participant_ids?: string[] | null;
+  qualification_ranking_ids?: string[] | null;
+  bracket: TournamentBracket | string;
+  created_at: string;
+  updated_at: string;
+};
 
 export type BracketParticipantInput = {
-  participantId: string
-  participantName: string
-}
+  participantId: string;
+  participantName: string;
+};
 
 function firstRow<T>(data: unknown): T | null {
-  const row = Array.isArray(data) ? data[0] : data
+  const row = Array.isArray(data) ? data[0] : data;
 
-  return row ? (row as T) : null
+  return row ? (row as T) : null;
 }
 
-function parseBracket(bracket: TournamentRow['bracket']): TournamentBracket {
-  return typeof bracket === 'string'
+function parseBracket(bracket: TournamentRow["bracket"]): TournamentBracket {
+  return typeof bracket === "string"
     ? (JSON.parse(bracket) as TournamentBracket)
-    : bracket
+    : bracket;
 }
 
 function mapTournament(row: TournamentRow): Tournament {
@@ -99,79 +99,77 @@ function mapTournament(row: TournamentRow): Tournament {
     id: row.id,
     festivalId: row.festival_id,
     name: row.name,
-    mode: row.mode ?? 'knockout',
+    mode: row.mode ?? "knockout",
     status: row.status,
     selectedParticipantIds: row.selected_participant_ids ?? [],
-    drawParticipantIds: row.draw_participant_ids ?? row.selected_participant_ids ?? [],
+    drawParticipantIds:
+      row.draw_participant_ids ?? row.selected_participant_ids ?? [],
     qualificationRankingIds: row.qualification_ranking_ids ?? [],
     bracket: parseBracket(row.bracket),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-  }
+  };
 }
 
 export function largestPowerOfTwo(value: number) {
-  let size = 1
+  let size = 1;
 
   while (size * 2 <= value) {
-    size *= 2
+    size *= 2;
   }
 
-  return size
+  return size;
 }
 
 export function nextPowerOfTwo(value: number) {
-  let size = 1
+  let size = 1;
 
   while (size < value) {
-    size *= 2
+    size *= 2;
   }
 
-  return size
+  return size;
 }
 
 function toBracketParticipant(
   participant: BracketParticipantInput,
 ): TournamentBracketParticipant {
   return {
-    type: 'participant',
+    type: "participant",
     participantId: participant.participantId,
     participantName: participant.participantName,
-  }
+  };
 }
 
-export function shuffleParticipants<T>(
-  items: T[],
-  random = Math.random,
-): T[] {
-  const shuffledItems = [...items]
+export function shuffleParticipants<T>(items: T[], random = Math.random): T[] {
+  const shuffledItems = [...items];
 
   for (let index = shuffledItems.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(random() * (index + 1))
-    const currentItem = shuffledItems[index]
+    const swapIndex = Math.floor(random() * (index + 1));
+    const currentItem = shuffledItems[index];
 
-    shuffledItems[index] = shuffledItems[swapIndex]
-    shuffledItems[swapIndex] = currentItem
+    shuffledItems[index] = shuffledItems[swapIndex];
+    shuffledItems[swapIndex] = currentItem;
   }
 
-  return shuffledItems
+  return shuffledItems;
 }
 
 export function drawTournamentParticipants(
   participants: BracketParticipantInput[],
   random = Math.random,
 ) {
-  const shuffledParticipants = [...participants]
+  const shuffledParticipants = [...participants];
 
   for (let index = shuffledParticipants.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(random() * (index + 1))
-    const currentParticipant = shuffledParticipants[index]
+    const swapIndex = Math.floor(random() * (index + 1));
+    const currentParticipant = shuffledParticipants[index];
 
-    shuffledParticipants[index] = shuffledParticipants[swapIndex]
-    shuffledParticipants[swapIndex] = currentParticipant
+    shuffledParticipants[index] = shuffledParticipants[swapIndex];
+    shuffledParticipants[swapIndex] = currentParticipant;
   }
 
-  return shuffledParticipants
+  return shuffledParticipants;
 }
 
 export function generateTournamentBracket(
@@ -179,47 +177,50 @@ export function generateTournamentBracket(
 ): TournamentBracket {
   if (participants.length < 2) {
     return {
-      type: 'single_elimination',
+      type: "single_elimination",
       mainParticipantCount: 0,
       rounds: [],
-    }
+    };
   }
 
-  const mainParticipantCount = nextPowerOfTwo(participants.length)
-  const byeCount = mainParticipantCount - participants.length
-  const firstRoundParticipantCount = participants.length - byeCount
-  const firstRoundParticipants = participants.slice(0, firstRoundParticipantCount)
+  const mainParticipantCount = nextPowerOfTwo(participants.length);
+  const byeCount = mainParticipantCount - participants.length;
+  const firstRoundParticipantCount = participants.length - byeCount;
+  const firstRoundParticipants = participants.slice(
+    0,
+    firstRoundParticipantCount,
+  );
   const byeParticipants = participants
     .slice(firstRoundParticipantCount)
-    .map(toBracketParticipant)
-  const rounds: TournamentBracketRound[] = []
+    .map(toBracketParticipant);
+  const rounds: TournamentBracketRound[] = [];
   const firstRoundEntries: TournamentBracketSlot[] = firstRoundParticipants.map(
     (participant) => ({
       participant: toBracketParticipant(participant),
     }),
-  )
+  );
 
-  const firstMainRoundNumber = 1
-  const firstMainRoundMatches: TournamentBracketMatch[] = []
+  const firstMainRoundNumber = 1;
+  const firstMainRoundMatches: TournamentBracketMatch[] = [];
 
   for (let index = 0; index < firstRoundEntries.length; index += 2) {
     firstMainRoundMatches.push({
       id: `r${firstMainRoundNumber}-m${index / 2 + 1}`,
       round: firstMainRoundNumber,
       position: index / 2 + 1,
-      status: 'scheduled',
+      status: "scheduled",
       participantA: firstRoundEntries[index],
       participantB: firstRoundEntries[index + 1],
       winnerParticipantId: null,
-    })
+    });
   }
 
   rounds.push({
     round: firstMainRoundNumber,
-    type: 'main',
+    type: "main",
     matches: firstMainRoundMatches,
     byes: byeParticipants,
-  })
+  });
 
   let previousRoundEntries: TournamentBracketSlot[] = [
     ...firstMainRoundMatches.map((match) => ({
@@ -229,73 +230,73 @@ export function generateTournamentBracket(
     ...byeParticipants.map((participant) => ({
       participant,
     })),
-  ]
-  let round = firstMainRoundNumber + 1
+  ];
+  let round = firstMainRoundNumber + 1;
 
   while (previousRoundEntries.length > 1) {
-    const matches: TournamentBracketMatch[] = []
+    const matches: TournamentBracketMatch[] = [];
 
     for (let index = 0; index < previousRoundEntries.length; index += 2) {
       matches.push({
         id: `r${round}-m${index / 2 + 1}`,
         round,
         position: index / 2 + 1,
-        status: 'scheduled',
+        status: "scheduled",
         participantA: previousRoundEntries[index],
         participantB: previousRoundEntries[index + 1],
         winnerParticipantId: null,
-      })
+      });
     }
 
-    rounds.push({ round, type: 'main', matches })
+    rounds.push({ round, type: "main", matches });
     previousRoundEntries = matches.map((match) => ({
       participant: null,
       sourceMatchId: match.id,
-    }))
-    round += 1
+    }));
+    round += 1;
   }
 
   return {
-    type: 'single_elimination',
+    type: "single_elimination",
     mainParticipantCount,
     rounds,
-  }
+  };
 }
 
 export async function loadTournaments(
   festivalId: string,
   context: ParticipantAccessContext,
 ): Promise<Tournament[]> {
-  const supabase = getSupabase()
+  const supabase = getSupabase();
 
-  const { data, error } = await supabase.rpc('ha_list_tournaments', {
+  const { data, error } = await supabase.rpc("ha_list_tournaments", {
     ...participantRpcParams(context),
     p_festival_id: festivalId,
-  })
+  });
 
   if (error) {
-    throw error
+    throw error;
   }
 
-  return ((data ?? []) as TournamentRow[]).map(mapTournament)
+  return ((data ?? []) as TournamentRow[]).map(mapTournament);
 }
 
 export async function loadAdminTournaments(
   festivalId: string,
   context: AdminAccessContext,
 ): Promise<Tournament[]> {
-  const supabase = getSupabase()
+  const supabase = getSupabase();
 
-  const { data, error } = await supabase.rpc('ha_admin_list_tournaments', {
+  const { data, error } = await supabase.rpc("ha_admin_list_tournaments", {
     ...participantRpcParams(context),
     p_festival_id: festivalId,
-  })
+  });
 
   if (error) {
-    throw error
+    throw error;
   }
 
-  return ((data ?? []) as TournamentRow[]).map(mapTournament)
+  return ((data ?? []) as TournamentRow[]).map(mapTournament);
 }
 
 export async function createTournament(
@@ -303,27 +304,27 @@ export async function createTournament(
   input: TournamentInput,
   context: AdminAccessContext,
 ): Promise<Tournament> {
-  const supabase = getSupabase()
+  const supabase = getSupabase();
 
-  const { data, error } = await supabase.rpc('ha_admin_create_tournament', {
+  const { data, error } = await supabase.rpc("ha_admin_create_tournament", {
     ...participantRpcParams(context),
     p_festival_id: festivalId,
     p_name: input.name.trim(),
     p_mode: input.mode,
     p_participant_ids: input.participantIds,
-  })
+  });
 
   if (error) {
-    throw error
+    throw error;
   }
 
-  const row = firstRow<TournamentRow>(data)
+  const row = firstRow<TournamentRow>(data);
 
   if (!row) {
-    throw new Error('tournament was not returned')
+    throw new Error("tournament was not returned");
   }
 
-  return mapTournament(row)
+  return mapTournament(row);
 }
 
 export async function updateTournament(
@@ -331,27 +332,27 @@ export async function updateTournament(
   input: TournamentInput,
   context: AdminAccessContext,
 ): Promise<Tournament> {
-  const supabase = getSupabase()
+  const supabase = getSupabase();
 
-  const { data, error } = await supabase.rpc('ha_admin_update_tournament', {
+  const { data, error } = await supabase.rpc("ha_admin_update_tournament", {
     ...participantRpcParams(context),
     p_tournament_id: tournamentId,
     p_name: input.name.trim(),
     p_mode: input.mode,
     p_participant_ids: input.participantIds,
-  })
+  });
 
   if (error) {
-    throw error
+    throw error;
   }
 
-  const row = firstRow<TournamentRow>(data)
+  const row = firstRow<TournamentRow>(data);
 
   if (!row) {
-    throw new Error('tournament was not returned')
+    throw new Error("tournament was not returned");
   }
 
-  return mapTournament(row)
+  return mapTournament(row);
 }
 
 export async function updateTournamentQualificationRanking(
@@ -359,43 +360,43 @@ export async function updateTournamentQualificationRanking(
   participantIds: string[],
   context: AdminAccessContext,
 ): Promise<Tournament> {
-  const supabase = getSupabase()
+  const supabase = getSupabase();
 
   const { data, error } = await supabase.rpc(
-    'ha_admin_set_tournament_qualification_ranking',
+    "ha_admin_set_tournament_qualification_ranking",
     {
       ...participantRpcParams(context),
       p_tournament_id: tournamentId,
       p_participant_ids: participantIds,
     },
-  )
+  );
 
   if (error) {
-    throw error
+    throw error;
   }
 
-  const row = firstRow<TournamentRow>(data)
+  const row = firstRow<TournamentRow>(data);
 
   if (!row) {
-    throw new Error('tournament was not returned')
+    throw new Error("tournament was not returned");
   }
 
-  return mapTournament(row)
+  return mapTournament(row);
 }
 
 export async function deleteTournament(
   tournamentId: string,
   context: AdminAccessContext,
 ): Promise<void> {
-  const supabase = getSupabase()
+  const supabase = getSupabase();
 
-  const { error } = await supabase.rpc('ha_admin_delete_tournament', {
+  const { error } = await supabase.rpc("ha_admin_delete_tournament", {
     ...participantRpcParams(context),
     p_tournament_id: tournamentId,
-  })
+  });
 
   if (error) {
-    throw error
+    throw error;
   }
 }
 
@@ -404,57 +405,57 @@ export function recalculateTournamentBracket(
   changedMatchId: string,
   winnerParticipantId: string,
 ): TournamentBracket {
-  const recalculated = structuredClone(bracket)
-  const winners = new Map<string, string>()
-  let changedMatchFound = false
+  const recalculated = structuredClone(bracket);
+  const winners = new Map<string, string>();
+  let changedMatchFound = false;
 
   for (const round of recalculated.rounds) {
     for (const match of round.matches) {
       const participantIds = [match.participantA, match.participantB].map(
         (slot) =>
           slot.participant?.participantId ??
-          winners.get(slot.sourceMatchId ?? '') ??
+          winners.get(slot.sourceMatchId ?? "") ??
           null,
-      )
+      );
 
       if (match.id === changedMatchId) {
         if (!participantIds.includes(winnerParticipantId)) {
-          throw new Error('winner must participate in the match')
+          throw new Error("winner must participate in the match");
         }
-        changedMatchFound = true
-        match.winnerParticipantId = winnerParticipantId
-        match.winnerResolution = 'manual'
+        changedMatchFound = true;
+        match.winnerParticipantId = winnerParticipantId;
+        match.winnerResolution = "manual";
       } else {
         const realParticipants = participantIds.filter(
           (participantId): participantId is string => participantId !== null,
-        )
+        );
 
         if (realParticipants.length === 1) {
-          match.winnerParticipantId = realParticipants[0]
-          match.winnerResolution = 'automatic'
+          match.winnerParticipantId = realParticipants[0];
+          match.winnerResolution = "automatic";
         } else if (
           realParticipants.length === 0 ||
-          match.winnerResolution === 'automatic' ||
+          match.winnerResolution === "automatic" ||
           (match.winnerParticipantId !== null &&
             !realParticipants.includes(match.winnerParticipantId))
         ) {
-          match.winnerParticipantId = null
-          match.winnerResolution = null
+          match.winnerParticipantId = null;
+          match.winnerResolution = null;
         }
       }
 
-      match.status = match.winnerParticipantId ? 'completed' : 'scheduled'
+      match.status = match.winnerParticipantId ? "completed" : "scheduled";
       if (match.winnerParticipantId) {
-        winners.set(match.id, match.winnerParticipantId)
+        winners.set(match.id, match.winnerParticipantId);
       }
     }
   }
 
   if (!changedMatchFound) {
-    throw new Error('match not found')
+    throw new Error("match not found");
   }
 
-  return recalculated
+  return recalculated;
 }
 
 export async function setTournamentMatchWinner(
@@ -463,26 +464,26 @@ export async function setTournamentMatchWinner(
   winnerParticipantId: string,
   context: AdminAccessContext,
 ): Promise<Tournament> {
-  const supabase = getSupabase()
+  const supabase = getSupabase();
   const { data, error } = await supabase.rpc(
-    'ha_admin_set_tournament_match_winner',
+    "ha_admin_set_tournament_match_winner",
     {
       ...participantRpcParams(context),
       p_tournament_id: tournamentId,
       p_match_id: matchId,
       p_winner_participant_id: winnerParticipantId,
     },
-  )
+  );
 
   if (error) {
-    throw error
+    throw error;
   }
 
-  const row = firstRow<TournamentRow>(data)
+  const row = firstRow<TournamentRow>(data);
 
   if (!row) {
-    throw new Error('tournament was not returned')
+    throw new Error("tournament was not returned");
   }
 
-  return mapTournament(row)
+  return mapTournament(row);
 }

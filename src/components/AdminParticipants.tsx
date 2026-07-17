@@ -1,32 +1,32 @@
-import { type FormEvent } from 'react'
-import { useTranslation } from 'react-i18next'
-import { ParticipantName } from './Avatar'
-import { type Participant } from '../data/participants'
-import { SectionHeader } from './SectionHeader'
+import { type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
+import { ParticipantName } from "./Avatar";
+import { type Participant } from "../data/participants";
+import { SectionHeader } from "./SectionHeader";
 
 export type ParticipantFormState = {
-  id: string | null
-  displayName: string
-  accessCode: string
-}
+  id: string | null;
+  displayName: string;
+  accessCode: string;
+};
 
 type AdminParticipantsProps = {
-  participants: Participant[]
-  error: string
-  isLoading: boolean
-  form: ParticipantFormState | null
-  formError: string
-  isSaving: boolean
-  togglingParticipantId: string | null
-  onCreate: () => void
-  onEdit: (participant: Participant) => void
-  onCancelForm: () => void
-  onSubmitForm: (event: FormEvent<HTMLFormElement>) => void
-  onChangeForm: (form: ParticipantFormState) => void
-  onClearFormError: () => void
-  onDeactivate: (participant: Participant) => void
-  onReactivate: (participant: Participant) => void
-}
+  participants: Participant[];
+  error: string;
+  isLoading: boolean;
+  form: ParticipantFormState | null;
+  formError: string;
+  isSaving: boolean;
+  togglingParticipantId: string | null;
+  onCreate: () => void;
+  onEdit: (participant: Participant) => void;
+  onCancelForm: () => void;
+  onSubmitForm: (event: FormEvent<HTMLFormElement>) => void;
+  onChangeForm: (form: ParticipantFormState) => void;
+  onClearFormError: () => void;
+  onDeactivate: (participant: Participant) => void;
+  onReactivate: (participant: Participant) => void;
+};
 
 export function AdminParticipants({
   participants,
@@ -45,13 +45,13 @@ export function AdminParticipants({
   onDeactivate,
   onReactivate,
 }: AdminParticipantsProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   return (
     <>
       <SectionHeader
-        title={t('admin.participants.title')}
-        eyebrow={t('admin.participants.eyebrow')}
+        title={t("admin.participants.title")}
+        eyebrow={t("admin.participants.eyebrow")}
         className="section-header--participants"
       />
 
@@ -64,7 +64,7 @@ export function AdminParticipants({
             type="button"
             onClick={onCreate}
           >
-            {t('admin.participants.createButton')}
+            {t("admin.participants.createButton")}
           </button>
         </div>
 
@@ -72,12 +72,12 @@ export function AdminParticipants({
           <form className="admin-participant-form" onSubmit={onSubmitForm}>
             <h3>
               {form.id
-                ? t('admin.participants.editTitle')
-                : t('admin.participants.createTitle')}
+                ? t("admin.participants.editTitle")
+                : t("admin.participants.createTitle")}
             </h3>
 
             <label htmlFor="admin-participant-display-name">
-              {t('admin.participants.displayNameLabel')}
+              {t("admin.participants.displayNameLabel")}
               <input
                 id="admin-participant-display-name"
                 type="text"
@@ -87,14 +87,14 @@ export function AdminParticipants({
                   onChangeForm({
                     ...form,
                     displayName: event.target.value,
-                  })
-                  onClearFormError()
+                  });
+                  onClearFormError();
                 }}
               />
             </label>
 
             <label htmlFor="admin-participant-access-code">
-              {t('admin.participants.accessCodeLabel')}
+              {t("admin.participants.accessCodeLabel")}
               <input
                 id="admin-participant-access-code"
                 type="text"
@@ -104,8 +104,8 @@ export function AdminParticipants({
                   onChangeForm({
                     ...form,
                     accessCode: event.target.value.toUpperCase(),
-                  })
-                  onClearFormError()
+                  });
+                  onClearFormError();
                 }}
                 autoComplete="off"
                 inputMode="text"
@@ -122,7 +122,7 @@ export function AdminParticipants({
                 type="submit"
                 disabled={isSaving}
               >
-                {isSaving ? t('common.saving') : t('admin.participants.save')}
+                {isSaving ? t("common.saving") : t("admin.participants.save")}
               </button>
               <button
                 className="admin-card__reset admin-card__reset--secondary"
@@ -130,7 +130,7 @@ export function AdminParticipants({
                 disabled={isSaving}
                 onClick={onCancelForm}
               >
-                {t('admin.participants.cancel')}
+                {t("admin.participants.cancel")}
               </button>
             </div>
           </form>
@@ -138,7 +138,7 @@ export function AdminParticipants({
 
         {isLoading ? (
           <p className="admin__notice" role="status">
-            {t('admin.participants.loading')}
+            {t("admin.participants.loading")}
           </p>
         ) : (
           <div className="admin-participants__list">
@@ -146,8 +146,8 @@ export function AdminParticipants({
               <article
                 className={`admin-participant-card${
                   participant.isActive
-                    ? ''
-                    : ' admin-participant-card--inactive'
+                    ? ""
+                    : " admin-participant-card--inactive"
                 }`}
                 key={participant.id}
               >
@@ -161,15 +161,15 @@ export function AdminParticipants({
                   </h3>
                   <dl>
                     <div>
-                      <dt>{t('admin.participants.codeLabel')}</dt>
+                      <dt>{t("admin.participants.codeLabel")}</dt>
                       <dd>{participant.accessCode}</dd>
                     </div>
                     <div>
-                      <dt>{t('admin.participants.statusLabel')}</dt>
+                      <dt>{t("admin.participants.statusLabel")}</dt>
                       <dd>
                         {participant.isActive
-                          ? t('admin.participants.status.active')
-                          : t('admin.participants.status.inactive')}
+                          ? t("admin.participants.status.active")
+                          : t("admin.participants.status.inactive")}
                       </dd>
                     </div>
                   </dl>
@@ -181,7 +181,7 @@ export function AdminParticipants({
                     type="button"
                     onClick={() => onEdit(participant)}
                   >
-                    {t('admin.participants.edit')}
+                    {t("admin.participants.edit")}
                   </button>
 
                   {participant.isActive ? (
@@ -192,8 +192,8 @@ export function AdminParticipants({
                       onClick={() => onDeactivate(participant)}
                     >
                       {togglingParticipantId === participant.id
-                        ? t('admin.participants.deactivating')
-                        : t('admin.participants.deactivate')}
+                        ? t("admin.participants.deactivating")
+                        : t("admin.participants.deactivate")}
                     </button>
                   ) : (
                     <button
@@ -203,8 +203,8 @@ export function AdminParticipants({
                       onClick={() => onReactivate(participant)}
                     >
                       {togglingParticipantId === participant.id
-                        ? t('admin.participants.reactivating')
-                        : t('admin.participants.reactivate')}
+                        ? t("admin.participants.reactivating")
+                        : t("admin.participants.reactivate")}
                     </button>
                   )}
                 </div>
@@ -214,5 +214,5 @@ export function AdminParticipants({
         )}
       </div>
     </>
-  )
+  );
 }

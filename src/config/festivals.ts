@@ -1,17 +1,17 @@
 export type FestivalConfig = {
-  id: string
-}
+  id: string;
+};
 
-const storagePrefix = 'hurricane-awards'
+const storagePrefix = "hurricane-awards";
 
 export const activeFestival: FestivalConfig = {
-  id: 'hurricane-awards-2026',
-}
+  id: "hurricane-awards-2026",
+};
 
 export function festivalStorageKey(festivalId: string, key: string) {
-  return `${storagePrefix}:${festivalId}:${key}`
+  return `${storagePrefix}:${festivalId}:${key}`;
 }
 
 export function normalizeFestivalCode(code: string) {
-  return code.trim().toUpperCase()
+  return code.trim().toUpperCase();
 }

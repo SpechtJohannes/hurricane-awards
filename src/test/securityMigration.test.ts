@@ -1,737 +1,778 @@
 /// <reference types="node" />
 
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
 
 const baseMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260628123000_secure_data_access.sql',
+    "supabase/migrations/20260628123000_secure_data_access.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const adminMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260628133000_restrict_admin_functions.sql',
+    "supabase/migrations/20260628133000_restrict_admin_functions.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const activeParticipantMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260628143000_add_participant_active_flag.sql',
+    "supabase/migrations/20260628143000_add_participant_active_flag.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const participantManagementMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260628153000_create_participant_management_rpcs.sql',
+    "supabase/migrations/20260628153000_create_participant_management_rpcs.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const dataIntegrityMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260629100000_enforce_data_integrity.sql',
+    "supabase/migrations/20260629100000_enforce_data_integrity.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const categoryManagementMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260630100000_create_category_management_rpcs.sql',
+    "supabase/migrations/20260630100000_create_category_management_rpcs.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const festivalNameMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260630110000_create_festival_name_setting.sql',
+    "supabase/migrations/20260630110000_create_festival_name_setting.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
+const eventPeriodMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    "supabase/migrations/20260717100000_manage_event_period.sql",
+  ),
+  "utf8",
+);
 const festivalArchiveMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260630120000_create_festival_archives.sql',
+    "supabase/migrations/20260630120000_create_festival_archives.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const secureParticipantLoginMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260630130000_secure_participant_login.sql',
+    "supabase/migrations/20260630130000_secure_participant_login.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const festivalAccessCodeMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260701070000_manage_festival_access_code.sql',
+    "supabase/migrations/20260701070000_manage_festival_access_code.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const secureFestivalAccessCodeMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260702090000_secure_festival_access_code.sql',
+    "supabase/migrations/20260702090000_secure_festival_access_code.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const hardeningMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260703100000_harden_security_infrastructure.sql',
+    "supabase/migrations/20260703100000_harden_security_infrastructure.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const festivalDocumentsMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260703110000_create_festival_documents.sql',
+    "supabase/migrations/20260703110000_create_festival_documents.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const campLocationMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260703120000_create_camp_location_link.sql',
+    "supabase/migrations/20260703120000_create_camp_location_link.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const musicPlaylistMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260703130000_create_music_playlist_setting.sql',
+    "supabase/migrations/20260703130000_create_music_playlist_setting.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const bingoMigration = readFileSync(
-  resolve(
-    process.cwd(),
-    'supabase/migrations/20260704110000_create_bingo.sql',
-  ),
-  'utf8',
-)
+  resolve(process.cwd(), "supabase/migrations/20260704110000_create_bingo.sql"),
+  "utf8",
+);
 const bingoFixMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260704120000_fix_bingo_round_deactivation.sql',
+    "supabase/migrations/20260704120000_fix_bingo_round_deactivation.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const timetableMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260705100000_create_timetable.sql',
+    "supabase/migrations/20260705100000_create_timetable.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const festivalDaysManagementMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260705110000_manage_festival_days.sql',
+    "supabase/migrations/20260705110000_manage_festival_days.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const timetableStagesManagementMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260705120000_manage_timetable_stages.sql',
+    "supabase/migrations/20260705120000_manage_timetable_stages.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const timetableActsManagementMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260705130000_manage_timetable_acts.sql',
+    "supabase/migrations/20260705130000_manage_timetable_acts.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const timetablePerformancesManagementMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260705140000_manage_timetable_performances.sql',
+    "supabase/migrations/20260705140000_manage_timetable_performances.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const timetableFavoritesMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260705150000_create_timetable_favorites.sql',
+    "supabase/migrations/20260705150000_create_timetable_favorites.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const timetableSharedFavoritesMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260705160000_show_timetable_favorite_participants.sql',
+    "supabase/migrations/20260705160000_show_timetable_favorite_participants.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const timetableStageColorsMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260705170000_add_timetable_stage_colors.sql',
+    "supabase/migrations/20260705170000_add_timetable_stage_colors.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const horseRacingMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260708100000_create_horse_racing.sql',
+    "supabase/migrations/20260708100000_create_horse_racing.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const horseRacingRpcFixMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260708110000_fix_horse_racing_rpc_ambiguity.sql',
+    "supabase/migrations/20260708110000_fix_horse_racing_rpc_ambiguity.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const randomPairingsMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260708120000_create_random_pairings.sql',
+    "supabase/migrations/20260708120000_create_random_pairings.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const tournamentsMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260708130000_create_tournaments.sql',
+    "supabase/migrations/20260708130000_create_tournaments.sql",
   ),
-  'utf8',
-).replaceAll('\r\n', '\n')
+  "utf8",
+).replaceAll("\r\n", "\n");
 const tournamentCreateRpcSignatureFixMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260708140000_fix_tournament_create_rpc_signature.sql',
+    "supabase/migrations/20260708140000_fix_tournament_create_rpc_signature.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const tournamentModeColumnMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260708150000_add_tournament_mode_column.sql',
+    "supabase/migrations/20260708150000_add_tournament_mode_column.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const tournamentTableShapeSyncMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260708160000_sync_tournaments_table_shape.sql',
+    "supabase/migrations/20260708160000_sync_tournaments_table_shape.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const tournamentCreateReturnShapeFixMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260708170000_fix_tournament_create_return_shape.sql',
+    "supabase/migrations/20260708170000_fix_tournament_create_return_shape.sql",
   ),
-  'utf8',
-).replaceAll('\r\n', '\n')
+  "utf8",
+).replaceAll("\r\n", "\n");
 const tournamentUpdateReturnShapeFixMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260708180000_fix_tournament_update_return_shape.sql',
+    "supabase/migrations/20260708180000_fix_tournament_update_return_shape.sql",
   ),
-  'utf8',
-).replaceAll('\r\n', '\n')
+  "utf8",
+).replaceAll("\r\n", "\n");
 const tournamentResultsMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260709100000_manage_tournament_results.sql',
+    "supabase/migrations/20260709100000_manage_tournament_results.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const tournamentByePropagationMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260709110000_fix_tournament_bye_propagation.sql',
+    "supabase/migrations/20260709110000_fix_tournament_bye_propagation.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 const ownProfileMigration = readFileSync(
   resolve(
     process.cwd(),
-    'supabase/migrations/20260713100000_update_own_participant_profile.sql',
+    "supabase/migrations/20260713100000_update_own_participant_profile.sql",
   ),
-  'utf8',
-)
+  "utf8",
+);
 
-describe('Supabase Sicherheitsmigration', () => {
-  it('aktualisiert ausschliesslich das Profil des authentifizierten Teilnehmers', () => {
+describe("Supabase Sicherheitsmigration", () => {
+  it("aktualisiert ausschliesslich das Profil des authentifizierten Teilnehmers", () => {
     expect(ownProfileMigration).toContain(
-      'create or replace function public.ha_update_own_profile',
-    )
-    expect(ownProfileMigration).toContain('security definer')
-    expect(ownProfileMigration).toContain('set search_path = public')
+      "create or replace function public.ha_update_own_profile",
+    );
+    expect(ownProfileMigration).toContain("security definer");
+    expect(ownProfileMigration).toContain("set search_path = public");
     expect(ownProfileMigration).toContain(
-      'public.ha_participant_id_for_access(',
-    )
-    expect(ownProfileMigration).not.toContain('p_participant_id')
+      "public.ha_participant_id_for_access(",
+    );
+    expect(ownProfileMigration).not.toContain("p_participant_id");
     expect(ownProfileMigration).toContain(
-      'where p.id::text = v_participant_id',
-    )
+      "where p.id::text = v_participant_id",
+    );
     expect(ownProfileMigration).toContain(
       "raise exception 'display name is required'",
-    )
-    expect(ownProfileMigration).toContain('char_length(v_display_name) > 50')
-    expect(ownProfileMigration).toContain('v_avatar_id = any(v_allowed_avatar_ids)')
+    );
+    expect(ownProfileMigration).toContain("char_length(v_display_name) > 50");
     expect(ownProfileMigration).toContain(
-      'revoke all on function public.ha_update_own_profile(text, text, text) from public',
-    )
+      "v_avatar_id = any(v_allowed_avatar_ids)",
+    );
     expect(ownProfileMigration).toContain(
-      'grant execute on function public.ha_update_own_profile(text, text, text) to anon, authenticated',
-    )
-    expect(ownProfileMigration).toContain("notify pgrst, 'reload schema'")
-    expect(ownProfileMigration).not.toContain('grant update on table')
-  })
+      "revoke all on function public.ha_update_own_profile(text, text, text) from public",
+    );
+    expect(ownProfileMigration).toContain(
+      "grant execute on function public.ha_update_own_profile(text, text, text) to anon, authenticated",
+    );
+    expect(ownProfileMigration).toContain("notify pgrst, 'reload schema'");
+    expect(ownProfileMigration).not.toContain("grant update on table");
+  });
 
-  it('verwaltet Turnierergebnisse atomar ueber eine geschuetzte Admin RPC', () => {
+  it("verwaltet Turnierergebnisse atomar ueber eine geschuetzte Admin RPC", () => {
     expect(tournamentResultsMigration).toContain(
-      'public.ha_admin_set_tournament_match_winner',
-    )
+      "public.ha_admin_set_tournament_match_winner",
+    );
     expect(tournamentResultsMigration).toContain(
-      'public.ha_has_admin_access(p_participant_access_code)',
-    )
-    expect(tournamentResultsMigration).toContain('for update')
+      "public.ha_has_admin_access(p_participant_access_code)",
+    );
+    expect(tournamentResultsMigration).toContain("for update");
     expect(tournamentResultsMigration).toContain(
-      'winner must participate in the match',
-    )
+      "winner must participate in the match",
+    );
     expect(tournamentResultsMigration).toContain(
-      'v_winner_id is distinct from v_slot_a_id',
-    )
+      "v_winner_id is distinct from v_slot_a_id",
+    );
     expect(tournamentByePropagationMigration).toContain(
       "(v_slot_a_id is null) <> (v_slot_b_id is null)",
-    )
+    );
     expect(tournamentByePropagationMigration).toContain(
       "v_winner_resolution := 'automatic'",
-    )
+    );
+    expect(tournamentResultsMigration).toContain("'winnerParticipantId'");
     expect(tournamentResultsMigration).toContain(
-      "'winnerParticipantId'",
-    )
-    expect(tournamentResultsMigration).toContain(
-      'revoke all on function public.ha_admin_set_tournament_match_winner',
-    )
-  })
-  it('aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte', () => {
+      "revoke all on function public.ha_admin_set_tournament_match_winner",
+    );
+  });
+  it("aktiviert RLS fuer geschuetzte Tabellen und entzieht direkte Browserrechte", () => {
     for (const table of [
-      'participants',
-      'categories',
-      'votes',
-      'archived_votes',
+      "participants",
+      "categories",
+      "votes",
+      "archived_votes",
     ]) {
       expect(baseMigration).toContain(
         `alter table public.${table} enable row level security`,
-      )
+      );
       expect(baseMigration).toContain(
         `revoke all on table public.${table} from anon, authenticated`,
-      )
+      );
     }
 
     expect(baseMigration).toContain(
       "revoke all on table public.all_time_standings from anon, authenticated",
-    )
+    );
     expect(baseMigration).toContain(
-      'alter table public.all_time_standings enable row level security',
-    )
-  })
+      "alter table public.all_time_standings enable row level security",
+    );
+  });
 
-  it('stellt nur gezielte RPC Funktionen fuer anon und authenticated bereit', () => {
+  it("stellt nur gezielte RPC Funktionen fuer anon und authenticated bereit", () => {
     for (const functionName of [
-      'ha_find_participant',
-      'ha_list_participants',
-      'ha_list_categories',
-      'ha_list_participant_votes',
-      'ha_list_result_votes',
-      'ha_save_vote',
-      'ha_update_category_status',
-      'ha_delete_category_votes',
-      'ha_list_all_time_standings',
+      "ha_find_participant",
+      "ha_list_participants",
+      "ha_list_categories",
+      "ha_list_participant_votes",
+      "ha_list_result_votes",
+      "ha_save_vote",
+      "ha_update_category_status",
+      "ha_delete_category_votes",
+      "ha_list_all_time_standings",
     ]) {
-      expect(baseMigration).toContain(`function public.${functionName}`)
+      expect(baseMigration).toContain(`function public.${functionName}`);
       expect(baseMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
-  })
+  });
 
-  it('bildet in der Basismigration die bestehende Adminlogik ohne neues Adminfeld ab', () => {
-    expect(baseMigration).toContain('public.ha_has_admin_access')
+  it("bildet in der Basismigration die bestehende Adminlogik ohne neues Adminfeld ab", () => {
+    expect(baseMigration).toContain("public.ha_has_admin_access");
     expect(baseMigration).toContain(
-      'select public.ha_participant_id_for_access(p_participant_access_code) is not null',
-    )
-    expect(baseMigration).toContain('admin access required')
-    expect(baseMigration).not.toContain("column_name = 'is_admin'")
-    expect(baseMigration).not.toContain('add column if not exists is_admin')
-  })
+      "select public.ha_participant_id_for_access(p_participant_access_code) is not null",
+    );
+    expect(baseMigration).toContain("admin access required");
+    expect(baseMigration).not.toContain("column_name = 'is_admin'");
+    expect(baseMigration).not.toContain("add column if not exists is_admin");
+  });
 
-  it('schraenkt Adminfunktionen in einer Folgemigration auf Adminteilnehmer ein', () => {
+  it("schraenkt Adminfunktionen in einer Folgemigration auf Adminteilnehmer ein", () => {
     expect(adminMigration).toContain(
-      'add column if not exists is_admin boolean not null default false',
-    )
-    expect(adminMigration).toContain('p.is_admin = true')
-    expect(adminMigration).toContain('create or replace function public.ha_has_admin_access')
-    expect(adminMigration).toContain('drop function if exists public.ha_find_participant(text)')
-    expect(adminMigration).toContain('is_admin boolean')
-  })
+      "add column if not exists is_admin boolean not null default false",
+    );
+    expect(adminMigration).toContain("p.is_admin = true");
+    expect(adminMigration).toContain(
+      "create or replace function public.ha_has_admin_access",
+    );
+    expect(adminMigration).toContain(
+      "drop function if exists public.ha_find_participant(text)",
+    );
+    expect(adminMigration).toContain("is_admin boolean");
+  });
 
-  it('erkennt nur aktive Teilnehmer als gueltigen serverseitigen Zugriff', () => {
+  it("erkennt nur aktive Teilnehmer als gueltigen serverseitigen Zugriff", () => {
     expect(activeParticipantMigration).toContain(
-      'add column if not exists is_active boolean not null default true',
-    )
+      "add column if not exists is_active boolean not null default true",
+    );
     expect(activeParticipantMigration).toContain(
-      'create or replace function public.ha_participant_id_for_access',
-    )
+      "create or replace function public.ha_participant_id_for_access",
+    );
     expect(activeParticipantMigration).toContain(
-      'create or replace function public.ha_find_participant',
-    )
-    expect(activeParticipantMigration).toContain('is_active boolean')
+      "create or replace function public.ha_find_participant",
+    );
+    expect(activeParticipantMigration).toContain("is_active boolean");
     expect(activeParticipantMigration).toContain(
-      'p.name::text, p.display_name::text, p.is_admin, p.is_active',
-    )
+      "p.name::text, p.display_name::text, p.is_admin, p.is_active",
+    );
     expect(activeParticipantMigration).toContain(
-      'create or replace function public.ha_has_admin_access',
-    )
-    expect(activeParticipantMigration.match(/and p\.is_active = true/g)).toHaveLength(3)
-  })
+      "create or replace function public.ha_has_admin_access",
+    );
+    expect(
+      activeParticipantMigration.match(/and p\.is_active = true/g),
+    ).toHaveLength(3);
+  });
 
-  it('stellt Admin RPCs fuer die Teilnehmerverwaltung bereit', () => {
+  it("stellt Admin RPCs fuer die Teilnehmerverwaltung bereit", () => {
     for (const functionName of [
-      'ha_admin_list_participants',
-      'ha_suggest_participant_access_code',
-      'ha_create_participant',
-      'ha_update_participant',
-      'ha_deactivate_participant',
-      'ha_reactivate_participant',
+      "ha_admin_list_participants",
+      "ha_suggest_participant_access_code",
+      "ha_create_participant",
+      "ha_update_participant",
+      "ha_deactivate_participant",
+      "ha_reactivate_participant",
     ]) {
       expect(participantManagementMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(participantManagementMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
 
     expect(participantManagementMigration).toContain(
       "v_alphabet constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'",
-    )
+    );
     expect(participantManagementMigration).toContain(
-      'participant access code already exists',
-    )
-    expect(participantManagementMigration).toContain('display name is required')
+      "participant access code already exists",
+    );
+    expect(participantManagementMigration).toContain(
+      "display name is required",
+    );
     expect(
       participantManagementMigration.match(
         /if not public\.ha_has_admin_access\(p_participant_access_code\)/g,
       ),
-    ).toHaveLength(6)
-    expect(participantManagementMigration).toContain('set is_active = false')
-    expect(participantManagementMigration).toContain('set is_active = true')
-  })
+    ).toHaveLength(6);
+    expect(participantManagementMigration).toContain("set is_active = false");
+    expect(participantManagementMigration).toContain("set is_active = true");
+  });
 
-  it('erzwingt Teilnehmercodes case insensitive serverseitig eindeutig', () => {
+  it("erzwingt Teilnehmercodes case insensitive serverseitig eindeutig", () => {
     expect(dataIntegrityMigration).toContain(
-      'create unique index if not exists participants_access_code_upper_unique',
-    )
+      "create unique index if not exists participants_access_code_upper_unique",
+    );
     expect(dataIntegrityMigration).toContain(
-      'on public.participants (upper(access_code))',
-    )
-    expect(dataIntegrityMigration).toContain('where access_code is not null')
-    expect(dataIntegrityMigration.match(/when unique_violation then/g)).toHaveLength(3)
-    expect(dataIntegrityMigration.match(
-      /participant access code already exists/g,
-    )).toHaveLength(2)
-  })
+      "on public.participants (upper(access_code))",
+    );
+    expect(dataIntegrityMigration).toContain("where access_code is not null");
+    expect(
+      dataIntegrityMigration.match(/when unique_violation then/g),
+    ).toHaveLength(3);
+    expect(
+      dataIntegrityMigration.match(/participant access code already exists/g),
+    ).toHaveLength(2);
+  });
 
-  it('erzwingt eine Stimme pro Waehler und Kategorie serverseitig eindeutig', () => {
+  it("erzwingt eine Stimme pro Waehler und Kategorie serverseitig eindeutig", () => {
     expect(dataIntegrityMigration).toContain(
-      'create unique index if not exists votes_voter_category_unique',
-    )
+      "create unique index if not exists votes_voter_category_unique",
+    );
     expect(dataIntegrityMigration).toContain(
-      'on public.votes (voter_id, category_id)',
-    )
+      "on public.votes (voter_id, category_id)",
+    );
     expect(dataIntegrityMigration).toContain(
       "raise exception 'vote already exists for category' using errcode = '23505'",
-    )
-  })
+    );
+  });
 
-  it('definiert nur die fuer Integritaetsfehler relevanten RPCs neu', () => {
+  it("definiert nur die fuer Integritaetsfehler relevanten RPCs neu", () => {
     expect(
       dataIntegrityMigration.match(/create or replace function public\.(\w+)/g),
     ).toEqual([
-      'create or replace function public.ha_create_participant',
-      'create or replace function public.ha_update_participant',
-      'create or replace function public.ha_save_vote',
-    ])
+      "create or replace function public.ha_create_participant",
+      "create or replace function public.ha_update_participant",
+      "create or replace function public.ha_save_vote",
+    ]);
 
     for (const functionName of [
-      'ha_normalize_participant_access_code',
-      'ha_generate_participant_access_code',
-      'ha_admin_participant_row',
-      'ha_admin_list_participants',
-      'ha_suggest_participant_access_code',
-      'ha_create_participant',
-      'ha_update_participant',
-      'ha_deactivate_participant',
-      'ha_reactivate_participant',
+      "ha_normalize_participant_access_code",
+      "ha_generate_participant_access_code",
+      "ha_admin_participant_row",
+      "ha_admin_list_participants",
+      "ha_suggest_participant_access_code",
+      "ha_create_participant",
+      "ha_update_participant",
+      "ha_deactivate_participant",
+      "ha_reactivate_participant",
     ]) {
       const expectedCount =
-        functionName === 'ha_create_participant' ||
-        functionName === 'ha_update_participant'
+        functionName === "ha_create_participant" ||
+        functionName === "ha_update_participant"
           ? 1
-          : 0
+          : 0;
 
       expect(
         dataIntegrityMigration.match(
-          new RegExp(`create or replace function public\\.${functionName}\\(`, 'g'),
+          new RegExp(
+            `create or replace function public\\.${functionName}\\(`,
+            "g",
+          ),
         )?.length ?? 0,
-      ).toBe(expectedCount)
+      ).toBe(expectedCount);
     }
-  })
+  });
 
-  it('stellt Admin RPCs fuer die Kategorienverwaltung bereit', () => {
+  it("stellt Admin RPCs fuer die Kategorienverwaltung bereit", () => {
     for (const functionName of [
-      'ha_admin_list_categories',
-      'ha_create_category',
-      'ha_update_category',
-      'ha_delete_category',
+      "ha_admin_list_categories",
+      "ha_create_category",
+      "ha_update_category",
+      "ha_delete_category",
     ]) {
       expect(categoryManagementMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(categoryManagementMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
 
     expect(categoryManagementMigration).toContain(
-      'create or replace function public.ha_admin_category_row',
-    )
+      "create or replace function public.ha_admin_category_row",
+    );
     expect(categoryManagementMigration).toContain(
-      'revoke all on function public.ha_admin_category_row(text) from public',
-    )
+      "revoke all on function public.ha_admin_category_row(text) from public",
+    );
     expect(
       categoryManagementMigration.match(
         /if not public\.ha_has_admin_access\(p_participant_access_code\)/g,
       ),
-    ).toHaveLength(4)
-    expect(categoryManagementMigration).toContain('category title is required')
-    expect(categoryManagementMigration).toContain('invalid status')
-    expect(categoryManagementMigration).toContain('category not found')
+    ).toHaveLength(4);
+    expect(categoryManagementMigration).toContain("category title is required");
+    expect(categoryManagementMigration).toContain("invalid status");
+    expect(categoryManagementMigration).toContain("category not found");
     expect(categoryManagementMigration).toContain(
-      'category cannot be deleted while votes exist',
-    )
-    expect(categoryManagementMigration).toContain('from public.votes v')
-    expect(categoryManagementMigration).toContain('from public.archived_votes av')
-  })
+      "category cannot be deleted while votes exist",
+    );
+    expect(categoryManagementMigration).toContain("from public.votes v");
+    expect(categoryManagementMigration).toContain(
+      "from public.archived_votes av",
+    );
+  });
 
-  it('speichert den Festivalnamen zentral und schuetzt direkte Settings-Zugriffe', () => {
+  it("speichert den Festivalnamen zentral und schuetzt direkte Settings-Zugriffe", () => {
     expect(festivalNameMigration).toContain(
-      'create table if not exists public.app_settings',
-    )
+      "create table if not exists public.app_settings",
+    );
     expect(festivalNameMigration).toContain(
-      'alter table public.app_settings enable row level security',
-    )
+      "alter table public.app_settings enable row level security",
+    );
     expect(festivalNameMigration).toContain(
-      'revoke all on table public.app_settings from anon, authenticated',
-    )
+      "revoke all on table public.app_settings from anon, authenticated",
+    );
     expect(festivalNameMigration).toContain(
       'create policy "deny direct app settings access"',
-    )
+    );
     expect(festivalNameMigration).toContain(
       "values ('festival_name', 'Hurricane Awards 2026')",
-    )
+    );
 
     for (const functionName of [
-      'ha_get_festival_name',
-      'ha_update_festival_name',
+      "ha_get_festival_name",
+      "ha_update_festival_name",
     ]) {
       expect(festivalNameMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(festivalNameMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
 
     expect(festivalNameMigration).toContain(
-      'if not public.ha_has_admin_access(p_participant_access_code)',
-    )
-    expect(festivalNameMigration).toContain('festival name is required')
+      "if not public.ha_has_admin_access(p_participant_access_code)",
+    );
+    expect(festivalNameMigration).toContain("festival name is required");
     expect(festivalNameMigration).toContain(
-      'constraint app_settings_value_not_blank',
-    )
-  })
+      "constraint app_settings_value_not_blank",
+    );
+  });
 
-  it('verwaltet den Festivalcode ueber geschuetzte Settings RPCs', () => {
-    expect(festivalAccessCodeMigration).not.toContain('HURRICANE2026')
+  it("verwaltet den Festivalcode ueber geschuetzte Settings RPCs", () => {
+    expect(festivalAccessCodeMigration).not.toContain("HURRICANE2026");
 
     for (const functionName of [
-      'ha_get_festival_access_version',
-      'ha_verify_festival_access_code',
-      'ha_get_festival_access_code',
-      'ha_update_festival_access_code',
+      "ha_get_festival_access_version",
+      "ha_verify_festival_access_code",
+      "ha_get_festival_access_code",
+      "ha_update_festival_access_code",
     ]) {
       expect(festivalAccessCodeMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(festivalAccessCodeMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
 
     expect(festivalAccessCodeMigration).toContain(
-      'if not public.ha_has_admin_access(p_participant_access_code)',
-    )
+      "if not public.ha_has_admin_access(p_participant_access_code)",
+    );
     expect(festivalAccessCodeMigration).toContain(
-      'festival access code is required',
-    )
+      "festival access code is required",
+    );
     expect(festivalAccessCodeMigration).toContain(
       "where s.key = 'festival_access_code'",
-    )
+    );
     expect(festivalAccessCodeMigration).not.toContain(
-      'create table if not exists public.festivals',
-    )
-  })
+      "create table if not exists public.festivals",
+    );
+  });
 
-  it('schuetzt den Festivalcode serverseitig gegen Code Erraten', () => {
+  it("speichert und validiert den Eventzeitraum mit Adminschutz", () => {
+    expect(eventPeriodMigration).toContain("event_start_date date");
+    expect(eventPeriodMigration).toContain("event_end_date date");
+    expect(eventPeriodMigration).toContain("app_settings_event_period_valid");
+    expect(eventPeriodMigration).toContain("ha_get_event_settings");
+    expect(eventPeriodMigration).toContain("ha_admin_update_event_settings");
+    expect(eventPeriodMigration).toContain(
+      "ha_has_admin_access(p_participant_access_code)",
+    );
+    expect(eventPeriodMigration).toContain(
+      "event period requires start and end date",
+    );
+    expect(eventPeriodMigration).toContain(
+      "event end date must not be before start date",
+    );
+    expect(eventPeriodMigration).toContain("notify pgrst, 'reload schema'");
+  });
+
+  it("schuetzt den Festivalcode serverseitig gegen Code Erraten", () => {
     expect(secureFestivalAccessCodeMigration).toContain(
       "upper(s.value) = 'HURRICANE2026'",
-    )
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
-      'create table if not exists public.festival_access_attempts',
-    )
-    expect(secureFestivalAccessCodeMigration).toContain('festival_id text not null')
-    expect(secureFestivalAccessCodeMigration).toContain('technical_key text not null')
+      "create table if not exists public.festival_access_attempts",
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
-      'primary key (festival_id, technical_key)',
-    )
+      "festival_id text not null",
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
-      'alter table public.festival_access_attempts enable row level security',
-    )
+      "technical_key text not null",
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
-      'revoke all on table public.festival_access_attempts from anon, authenticated',
-    )
+      "primary key (festival_id, technical_key)",
+    );
+    expect(secureFestivalAccessCodeMigration).toContain(
+      "alter table public.festival_access_attempts enable row level security",
+    );
+    expect(secureFestivalAccessCodeMigration).toContain(
+      "revoke all on table public.festival_access_attempts from anon, authenticated",
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
       'create policy "deny direct festival access attempt access"',
-    )
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
-      'create or replace function public.ha_festival_access_rate_limit_key',
-    )
-    expect(secureFestivalAccessCodeMigration).toContain('request.headers')
-    expect(secureFestivalAccessCodeMigration).toContain('digest(')
+      "create or replace function public.ha_festival_access_rate_limit_key",
+    );
+    expect(secureFestivalAccessCodeMigration).toContain("request.headers");
+    expect(secureFestivalAccessCodeMigration).toContain("digest(");
     expect(
       secureFestivalAccessCodeMigration.match(
         /create table if not exists public\.festival_access_attempts \(([\s\S]*?)\n\);/,
-      )?.[1] ?? '',
-    ).not.toContain('access_code')
+      )?.[1] ?? "",
+    ).not.toContain("access_code");
     expect(secureFestivalAccessCodeMigration).toContain(
-      'drop function if exists public.ha_verify_festival_access_code(text)',
-    )
+      "drop function if exists public.ha_verify_festival_access_code(text)",
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
-      'create or replace function public.ha_verify_festival_access_code',
-    )
+      "create or replace function public.ha_verify_festival_access_code",
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
-      'v_max_failed_attempts constant integer := 3',
-    )
+      "v_max_failed_attempts constant integer := 3",
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
       "v_lock_duration constant interval := interval '30 seconds'",
-    )
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
       "select false, null::text, 'blocked'::text",
-    )
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
       "select true, v_access_version, 'success'::text",
-    )
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
       "select false, null::text, 'invalid'::text",
-    )
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
-      'v_failed_attempts := coalesce(v_attempt.failed_attempts, 0) + 1',
-    )
+      "v_failed_attempts := coalesce(v_attempt.failed_attempts, 0) + 1",
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
-      'failed_attempts = excluded.failed_attempts',
-    )
+      "failed_attempts = excluded.failed_attempts",
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
-      'delete from public.festival_access_attempts faa',
-    )
+      "delete from public.festival_access_attempts faa",
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
-      'grant execute on function public.ha_verify_festival_access_code(text, text) to anon, authenticated',
-    )
+      "grant execute on function public.ha_verify_festival_access_code(text, text) to anon, authenticated",
+    );
     expect(secureFestivalAccessCodeMigration).toContain(
-      'revoke all on function public.ha_festival_access_rate_limit_key(text) from public',
-    )
-  })
+      "revoke all on function public.ha_festival_access_rate_limit_key(text) from public",
+    );
+  });
 
-  it('erzwingt Adminberechtigungen in allen Admin RPC Migrationen', () => {
+  it("erzwingt Adminberechtigungen in allen Admin RPC Migrationen", () => {
     const adminRpcExpectations = [
-      [participantManagementMigration, 'ha_admin_list_participants'],
-      [participantManagementMigration, 'ha_suggest_participant_access_code'],
-      [participantManagementMigration, 'ha_create_participant'],
-      [participantManagementMigration, 'ha_update_participant'],
-      [participantManagementMigration, 'ha_deactivate_participant'],
-      [participantManagementMigration, 'ha_reactivate_participant'],
-      [categoryManagementMigration, 'ha_admin_list_categories'],
-      [categoryManagementMigration, 'ha_create_category'],
-      [categoryManagementMigration, 'ha_update_category'],
-      [categoryManagementMigration, 'ha_delete_category'],
-      [festivalNameMigration, 'ha_update_festival_name'],
-      [festivalArchiveMigration, 'ha_archive_festival'],
-      [festivalAccessCodeMigration, 'ha_get_festival_access_code'],
-      [festivalAccessCodeMigration, 'ha_update_festival_access_code'],
-      [festivalDocumentsMigration, 'ha_admin_list_festival_documents'],
-      [festivalDocumentsMigration, 'ha_create_festival_document_upload'],
-      [festivalDocumentsMigration, 'ha_upsert_festival_document'],
-      [festivalDocumentsMigration, 'ha_delete_festival_document'],
-      [campLocationMigration, 'ha_admin_get_camp_location_link'],
-      [campLocationMigration, 'ha_update_camp_location_link'],
-      [campLocationMigration, 'ha_delete_camp_location_link'],
-      [musicPlaylistMigration, 'ha_admin_get_music_playlist'],
-      [musicPlaylistMigration, 'ha_update_music_playlist'],
-      [musicPlaylistMigration, 'ha_delete_music_playlist'],
-      [bingoMigration, 'ha_admin_get_bingo_round'],
-      [bingoMigration, 'ha_start_bingo_round'],
-      [bingoMigration, 'ha_close_bingo_round'],
-      [festivalDaysManagementMigration, 'ha_admin_list_festival_days'],
-      [festivalDaysManagementMigration, 'ha_create_festival_day'],
-      [festivalDaysManagementMigration, 'ha_update_festival_day'],
-      [festivalDaysManagementMigration, 'ha_delete_festival_day'],
-      [timetableStagesManagementMigration, 'ha_admin_list_timetable_stages'],
-      [timetableStagesManagementMigration, 'ha_create_timetable_stage'],
-      [timetableStagesManagementMigration, 'ha_update_timetable_stage'],
-      [timetableStagesManagementMigration, 'ha_delete_timetable_stage'],
-      [timetableActsManagementMigration, 'ha_admin_list_timetable_acts'],
-      [timetableActsManagementMigration, 'ha_create_timetable_act'],
-      [timetableActsManagementMigration, 'ha_update_timetable_act'],
-      [timetableActsManagementMigration, 'ha_delete_timetable_act'],
+      [participantManagementMigration, "ha_admin_list_participants"],
+      [participantManagementMigration, "ha_suggest_participant_access_code"],
+      [participantManagementMigration, "ha_create_participant"],
+      [participantManagementMigration, "ha_update_participant"],
+      [participantManagementMigration, "ha_deactivate_participant"],
+      [participantManagementMigration, "ha_reactivate_participant"],
+      [categoryManagementMigration, "ha_admin_list_categories"],
+      [categoryManagementMigration, "ha_create_category"],
+      [categoryManagementMigration, "ha_update_category"],
+      [categoryManagementMigration, "ha_delete_category"],
+      [festivalNameMigration, "ha_update_festival_name"],
+      [festivalArchiveMigration, "ha_archive_festival"],
+      [festivalAccessCodeMigration, "ha_get_festival_access_code"],
+      [festivalAccessCodeMigration, "ha_update_festival_access_code"],
+      [festivalDocumentsMigration, "ha_admin_list_festival_documents"],
+      [festivalDocumentsMigration, "ha_create_festival_document_upload"],
+      [festivalDocumentsMigration, "ha_upsert_festival_document"],
+      [festivalDocumentsMigration, "ha_delete_festival_document"],
+      [campLocationMigration, "ha_admin_get_camp_location_link"],
+      [campLocationMigration, "ha_update_camp_location_link"],
+      [campLocationMigration, "ha_delete_camp_location_link"],
+      [musicPlaylistMigration, "ha_admin_get_music_playlist"],
+      [musicPlaylistMigration, "ha_update_music_playlist"],
+      [musicPlaylistMigration, "ha_delete_music_playlist"],
+      [bingoMigration, "ha_admin_get_bingo_round"],
+      [bingoMigration, "ha_start_bingo_round"],
+      [bingoMigration, "ha_close_bingo_round"],
+      [festivalDaysManagementMigration, "ha_admin_list_festival_days"],
+      [festivalDaysManagementMigration, "ha_create_festival_day"],
+      [festivalDaysManagementMigration, "ha_update_festival_day"],
+      [festivalDaysManagementMigration, "ha_delete_festival_day"],
+      [timetableStagesManagementMigration, "ha_admin_list_timetable_stages"],
+      [timetableStagesManagementMigration, "ha_create_timetable_stage"],
+      [timetableStagesManagementMigration, "ha_update_timetable_stage"],
+      [timetableStagesManagementMigration, "ha_delete_timetable_stage"],
+      [timetableActsManagementMigration, "ha_admin_list_timetable_acts"],
+      [timetableActsManagementMigration, "ha_create_timetable_act"],
+      [timetableActsManagementMigration, "ha_update_timetable_act"],
+      [timetableActsManagementMigration, "ha_delete_timetable_act"],
       [
         timetablePerformancesManagementMigration,
-        'ha_admin_list_timetable_performances',
+        "ha_admin_list_timetable_performances",
       ],
       [
         timetablePerformancesManagementMigration,
-        'ha_create_timetable_performance',
+        "ha_create_timetable_performance",
       ],
       [
         timetablePerformancesManagementMigration,
-        'ha_update_timetable_performance',
+        "ha_update_timetable_performance",
       ],
       [
         timetablePerformancesManagementMigration,
-        'ha_delete_timetable_performance',
+        "ha_delete_timetable_performance",
       ],
-      [tournamentsMigration, 'ha_admin_list_tournaments'],
-      [tournamentsMigration, 'ha_admin_create_tournament'],
-      [tournamentsMigration, 'ha_admin_update_tournament'],
-      [tournamentsMigration, 'ha_admin_delete_tournament'],
-      [tournamentsMigration, 'ha_admin_set_tournament_qualification_ranking'],
-    ] as const
+      [tournamentsMigration, "ha_admin_list_tournaments"],
+      [tournamentsMigration, "ha_admin_create_tournament"],
+      [tournamentsMigration, "ha_admin_update_tournament"],
+      [tournamentsMigration, "ha_admin_delete_tournament"],
+      [tournamentsMigration, "ha_admin_set_tournament_qualification_ranking"],
+    ] as const;
 
     for (const [migration, functionName] of adminRpcExpectations) {
       const functionBody =
@@ -739,1197 +780,1193 @@ describe('Supabase Sicherheitsmigration', () => {
           new RegExp(
             `create or replace function public\\.${functionName}[\\s\\S]*?\\n\\$\\$;`,
           ),
-        )?.[0] ?? ''
+        )?.[0] ?? "";
 
-      expect(functionBody, functionName).toContain('ha_has_admin_access')
-      expect(functionBody, functionName).toContain('admin access required')
+      expect(functionBody, functionName).toContain("ha_has_admin_access");
+      expect(functionBody, functionName).toContain("admin access required");
     }
-  })
+  });
 
-  it('archiviert Festivaldaten in getrennte geschuetzte Archivtabellen', () => {
+  it("archiviert Festivaldaten in getrennte geschuetzte Archivtabellen", () => {
     for (const table of [
-      'festival_archives',
-      'festival_archive_participants',
-      'festival_archive_categories',
-      'festival_archive_votes',
+      "festival_archives",
+      "festival_archive_participants",
+      "festival_archive_categories",
+      "festival_archive_votes",
     ]) {
       expect(festivalArchiveMigration).toContain(
         `create table if not exists public.${table}`,
-      )
+      );
       expect(festivalArchiveMigration).toContain(
         `alter table public.${table} enable row level security`,
-      )
+      );
       expect(festivalArchiveMigration).toContain(
         `revoke all on table public.${table} from anon, authenticated`,
-      )
+      );
     }
 
     expect(festivalArchiveMigration).toContain(
-      'create or replace function public.ha_archive_festival',
-    )
+      "create or replace function public.ha_archive_festival",
+    );
     expect(festivalArchiveMigration).toContain(
-      'if not public.ha_has_admin_access(p_admin_access_code)',
-    )
+      "if not public.ha_has_admin_access(p_admin_access_code)",
+    );
     expect(festivalArchiveMigration).toContain(
-      'grant execute on function public.ha_archive_festival(text) to anon, authenticated',
-    )
-    expect(festivalArchiveMigration).toContain('from public.app_settings s')
-    expect(festivalArchiveMigration).toContain('from public.participants p')
-    expect(festivalArchiveMigration).toContain('from public.categories c')
-    expect(festivalArchiveMigration).toContain('from public.votes v')
-    expect(festivalArchiveMigration).toContain('voter_display_name')
-    expect(festivalArchiveMigration).toContain('category_name')
-    expect(festivalArchiveMigration).toContain('nominee_display_name')
+      "grant execute on function public.ha_archive_festival(text) to anon, authenticated",
+    );
+    expect(festivalArchiveMigration).toContain("from public.app_settings s");
+    expect(festivalArchiveMigration).toContain("from public.participants p");
+    expect(festivalArchiveMigration).toContain("from public.categories c");
+    expect(festivalArchiveMigration).toContain("from public.votes v");
+    expect(festivalArchiveMigration).toContain("voter_display_name");
+    expect(festivalArchiveMigration).toContain("category_name");
+    expect(festivalArchiveMigration).toContain("nominee_display_name");
     expect(festivalArchiveMigration).not.toContain(
-      'references public.participants',
-    )
-    expect(festivalArchiveMigration).not.toContain('references public.categories')
-    expect(festivalArchiveMigration).not.toContain('references public.votes')
-  })
+      "references public.participants",
+    );
+    expect(festivalArchiveMigration).not.toContain(
+      "references public.categories",
+    );
+    expect(festivalArchiveMigration).not.toContain("references public.votes");
+  });
 
-  it('schuetzt Teilnehmerlogin serverseitig gegen Code Erraten', () => {
+  it("schuetzt Teilnehmerlogin serverseitig gegen Code Erraten", () => {
     expect(secureParticipantLoginMigration).toContain(
-      'create table if not exists public.participant_login_attempts',
-    )
-    expect(secureParticipantLoginMigration).toContain('festival_id text not null')
-    expect(secureParticipantLoginMigration).toContain('technical_key text not null')
+      "create table if not exists public.participant_login_attempts",
+    );
     expect(secureParticipantLoginMigration).toContain(
-      'primary key (festival_id, technical_key)',
-    )
+      "festival_id text not null",
+    );
     expect(secureParticipantLoginMigration).toContain(
-      'alter table public.participant_login_attempts enable row level security',
-    )
+      "technical_key text not null",
+    );
     expect(secureParticipantLoginMigration).toContain(
-      'revoke all on table public.participant_login_attempts from anon, authenticated',
-    )
+      "primary key (festival_id, technical_key)",
+    );
     expect(secureParticipantLoginMigration).toContain(
-      'create or replace function public.ha_login_rate_limit_key',
-    )
-    expect(secureParticipantLoginMigration).toContain('current_setting')
-    expect(secureParticipantLoginMigration).toContain('request.headers')
-    expect(secureParticipantLoginMigration).toContain('digest(')
-    expect(secureParticipantLoginMigration).not.toContain('p_access_code,')
+      "alter table public.participant_login_attempts enable row level security",
+    );
     expect(secureParticipantLoginMigration).toContain(
-      'v_max_failed_attempts constant integer := 3',
-    )
+      "revoke all on table public.participant_login_attempts from anon, authenticated",
+    );
+    expect(secureParticipantLoginMigration).toContain(
+      "create or replace function public.ha_login_rate_limit_key",
+    );
+    expect(secureParticipantLoginMigration).toContain("current_setting");
+    expect(secureParticipantLoginMigration).toContain("request.headers");
+    expect(secureParticipantLoginMigration).toContain("digest(");
+    expect(secureParticipantLoginMigration).not.toContain("p_access_code,");
+    expect(secureParticipantLoginMigration).toContain(
+      "v_max_failed_attempts constant integer := 3",
+    );
     expect(secureParticipantLoginMigration).toContain(
       "v_lock_duration constant interval := interval '30 seconds'",
-    )
+    );
     expect(secureParticipantLoginMigration).toContain(
-      'create or replace function public.ha_login_participant',
-    )
-    expect(secureParticipantLoginMigration).toContain("select 'invalid'::text")
-    expect(secureParticipantLoginMigration).toContain("select 'blocked'::text")
-    expect(secureParticipantLoginMigration).toMatch(/'success'::text/)
-    expect(secureParticipantLoginMigration).toContain('and p.is_active = true')
+      "create or replace function public.ha_login_participant",
+    );
+    expect(secureParticipantLoginMigration).toContain("select 'invalid'::text");
+    expect(secureParticipantLoginMigration).toContain("select 'blocked'::text");
+    expect(secureParticipantLoginMigration).toMatch(/'success'::text/);
+    expect(secureParticipantLoginMigration).toContain("and p.is_active = true");
     expect(secureParticipantLoginMigration).toContain(
-      'v_failed_attempts := coalesce(v_attempt.failed_attempts, 0) + 1',
-    )
+      "v_failed_attempts := coalesce(v_attempt.failed_attempts, 0) + 1",
+    );
     expect(secureParticipantLoginMigration).toContain(
-      'failed_attempts = excluded.failed_attempts',
-    )
-    expect(secureParticipantLoginMigration).toContain('v_locked_until := case')
+      "failed_attempts = excluded.failed_attempts",
+    );
+    expect(secureParticipantLoginMigration).toContain("v_locked_until := case");
     expect(secureParticipantLoginMigration).toContain(
-      'then now() + v_lock_duration',
-    )
+      "then now() + v_lock_duration",
+    );
     expect(secureParticipantLoginMigration).toContain(
-      'locked_until = excluded.locked_until',
-    )
+      "locked_until = excluded.locked_until",
+    );
     expect(secureParticipantLoginMigration).toContain(
-      'delete from public.participant_login_attempts pla',
-    )
+      "delete from public.participant_login_attempts pla",
+    );
     expect(
       secureParticipantLoginMigration.match(
         /create table if not exists public\.participant_login_attempts \(([\s\S]*?)\n\);/,
-      )?.[1] ?? '',
-    ).not.toContain('access_code')
+      )?.[1] ?? "",
+    ).not.toContain("access_code");
     expect(secureParticipantLoginMigration).toContain(
-      'grant execute on function public.ha_login_participant(text, text) to anon, authenticated',
-    )
+      "grant execute on function public.ha_login_participant(text, text) to anon, authenticated",
+    );
     expect(secureParticipantLoginMigration).toContain(
-      'revoke all on function public.ha_find_participant(text) from anon, authenticated',
-    )
-  })
+      "revoke all on function public.ha_find_participant(text) from anon, authenticated",
+    );
+  });
 
-  it('haertet Archivdaten und interne RPC Helper in einer Folgemigration', () => {
+  it("haertet Archivdaten und interne RPC Helper in einer Folgemigration", () => {
     expect(hardeningMigration).toContain(
-      'alter table public.festival_archive_participants',
-    )
-    expect(hardeningMigration).toContain('drop column if exists access_code')
+      "alter table public.festival_archive_participants",
+    );
+    expect(hardeningMigration).toContain("drop column if exists access_code");
     expect(hardeningMigration).toContain(
-      'create or replace function public.ha_archive_festival',
-    )
+      "create or replace function public.ha_archive_festival",
+    );
     expect(
       hardeningMigration.match(
         /insert into public\.festival_archive_participants \(([\s\S]*?)\n {2}\)\n {2}select/,
-      )?.[1] ?? '',
-    ).not.toContain('access_code')
+      )?.[1] ?? "",
+    ).not.toContain("access_code");
 
     for (const helperSignature of [
-      'public.ha_participant_id_for_access(text)',
-      'public.ha_has_admin_access(text)',
-      'public.ha_normalize_participant_access_code(text)',
-      'public.ha_generate_participant_access_code()',
-      'public.ha_admin_participant_row(text)',
-      'public.ha_admin_category_row(text)',
-      'public.ha_login_rate_limit_key(text)',
-      'public.ha_festival_access_rate_limit_key(text)',
+      "public.ha_participant_id_for_access(text)",
+      "public.ha_has_admin_access(text)",
+      "public.ha_normalize_participant_access_code(text)",
+      "public.ha_generate_participant_access_code()",
+      "public.ha_admin_participant_row(text)",
+      "public.ha_admin_category_row(text)",
+      "public.ha_login_rate_limit_key(text)",
+      "public.ha_festival_access_rate_limit_key(text)",
     ]) {
       expect(hardeningMigration).toContain(
         `revoke all on function ${helperSignature} from anon, authenticated`,
-      )
+      );
     }
 
     expect(hardeningMigration).toContain(
       "v_festival_id text := coalesce(nullif(left(trim(p_festival_id), 64), ''), 'current')",
-    )
+    );
     expect(hardeningMigration).toContain(
       "public.ha_normalize_participant_access_code(left(coalesce(p_access_code, ''), 128))",
-    )
+    );
     expect(hardeningMigration).toContain(
       "upper(nullif(trim(left(coalesce(p_access_code, ''), 128)), ''))",
-    )
+    );
     expect(hardeningMigration).toContain(
-      'grant execute on function public.ha_login_participant(text, text) to anon, authenticated',
-    )
+      "grant execute on function public.ha_login_participant(text, text) to anon, authenticated",
+    );
     expect(hardeningMigration).toContain(
-      'grant execute on function public.ha_verify_festival_access_code(text, text) to anon, authenticated',
-    )
-  })
+      "grant execute on function public.ha_verify_festival_access_code(text, text) to anon, authenticated",
+    );
+  });
 
-  it('legt Festivaldokumente mit geschuetzter Metadatentabelle und Storage Bucket an', () => {
+  it("legt Festivaldokumente mit geschuetzter Metadatentabelle und Storage Bucket an", () => {
     expect(festivalDocumentsMigration).toContain(
-      'create table if not exists public.festival_documents',
-    )
+      "create table if not exists public.festival_documents",
+    );
     expect(festivalDocumentsMigration).toContain(
-      'create table if not exists public.festival_document_uploads',
-    )
+      "create table if not exists public.festival_document_uploads",
+    );
     expect(festivalDocumentsMigration).toContain(
-      'document_type text primary key',
-    )
+      "document_type text primary key",
+    );
     expect(festivalDocumentsMigration).toContain(
       "document_type in ('timetable', 'site_map')",
-    )
+    );
     expect(festivalDocumentsMigration).toContain(
       "mime_type = 'application/pdf' or mime_type like 'image/%'",
-    )
+    );
     expect(festivalDocumentsMigration).toContain(
-      'alter table public.festival_documents enable row level security',
-    )
+      "alter table public.festival_documents enable row level security",
+    );
     expect(festivalDocumentsMigration).toContain(
-      'alter table public.festival_document_uploads enable row level security',
-    )
+      "alter table public.festival_document_uploads enable row level security",
+    );
     expect(festivalDocumentsMigration).toContain(
-      'revoke all on table public.festival_documents from anon, authenticated',
-    )
+      "revoke all on table public.festival_documents from anon, authenticated",
+    );
     expect(festivalDocumentsMigration).toContain(
-      'revoke all on table public.festival_document_uploads from anon, authenticated',
-    )
+      "revoke all on table public.festival_document_uploads from anon, authenticated",
+    );
     expect(festivalDocumentsMigration).toContain(
       'create policy "deny direct festival document access"',
-    )
-    expect(festivalDocumentsMigration).toContain("'festival-documents'")
-    expect(festivalDocumentsMigration).toContain(
-      "allowed_mime_types",
-    )
+    );
+    expect(festivalDocumentsMigration).toContain("'festival-documents'");
+    expect(festivalDocumentsMigration).toContain("allowed_mime_types");
     expect(festivalDocumentsMigration).toContain(
       'create policy "festival documents can be read"',
-    )
+    );
     expect(festivalDocumentsMigration).toContain(
       'create policy "festival documents can be uploaded"',
-    )
+    );
     expect(festivalDocumentsMigration).toContain(
-      'public.ha_is_allowed_festival_document_upload(name)',
-    )
+      "public.ha_is_allowed_festival_document_upload(name)",
+    );
 
     for (const functionName of [
-      'ha_is_allowed_festival_document_upload',
-      'ha_list_festival_documents',
-      'ha_admin_list_festival_documents',
-      'ha_create_festival_document_upload',
-      'ha_upsert_festival_document',
-      'ha_delete_festival_document',
+      "ha_is_allowed_festival_document_upload",
+      "ha_list_festival_documents",
+      "ha_admin_list_festival_documents",
+      "ha_create_festival_document_upload",
+      "ha_upsert_festival_document",
+      "ha_delete_festival_document",
     ]) {
       expect(festivalDocumentsMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(festivalDocumentsMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
 
     const upsertFunctionBody =
       festivalDocumentsMigration.match(
         /create or replace function public\.ha_upsert_festival_document[\s\S]*?\n\$\$;/,
-      )?.[0] ?? ''
+      )?.[0] ?? "";
 
+    expect(upsertFunctionBody).toContain("p_document_type text");
+    expect(upsertFunctionBody).toContain("p_title text");
+    expect(upsertFunctionBody).toContain("p_file_path text");
+    expect(upsertFunctionBody).toContain("p_mime_type text");
     expect(upsertFunctionBody).toContain(
-      'p_document_type text',
-    )
-    expect(upsertFunctionBody).toContain(
-      'p_title text',
-    )
-    expect(upsertFunctionBody).toContain(
-      'p_file_path text',
-    )
-    expect(upsertFunctionBody).toContain(
-      'p_mime_type text',
-    )
-    expect(upsertFunctionBody).toContain(
-      'on conflict on constraint festival_documents_pkey do update',
-    )
-    expect(upsertFunctionBody).toContain('d.document_type')
-    expect(upsertFunctionBody).not.toContain('on conflict (document_type)')
-  })
+      "on conflict on constraint festival_documents_pkey do update",
+    );
+    expect(upsertFunctionBody).toContain("d.document_type");
+    expect(upsertFunctionBody).not.toContain("on conflict (document_type)");
+  });
 
-  it('speichert genau einen Campstandort Link in den App Settings', () => {
+  it("speichert genau einen Campstandort Link in den App Settings", () => {
     expect(campLocationMigration).toContain(
       "where s.key = 'camp_location_link'",
-    )
-    expect(campLocationMigration).toContain("'camp_location_link'")
+    );
+    expect(campLocationMigration).toContain("'camp_location_link'");
     expect(campLocationMigration).toContain(
-      'delete from public.app_settings s',
-    )
-    expect(campLocationMigration).not.toContain('latitude')
-    expect(campLocationMigration).not.toContain('longitude')
-    expect(campLocationMigration).not.toContain('gps')
+      "delete from public.app_settings s",
+    );
+    expect(campLocationMigration).not.toContain("latitude");
+    expect(campLocationMigration).not.toContain("longitude");
+    expect(campLocationMigration).not.toContain("gps");
 
     for (const functionName of [
-      'ha_is_supported_camp_location_link',
-      'ha_get_camp_location_link',
-      'ha_admin_get_camp_location_link',
-      'ha_update_camp_location_link',
-      'ha_delete_camp_location_link',
+      "ha_is_supported_camp_location_link",
+      "ha_get_camp_location_link",
+      "ha_admin_get_camp_location_link",
+      "ha_update_camp_location_link",
+      "ha_delete_camp_location_link",
     ]) {
       expect(campLocationMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(campLocationMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
 
-    expect(campLocationMigration).toContain('maps\\.app\\.goo\\.gl')
-    expect(campLocationMigration).toContain('google\\.com/maps')
-    expect(campLocationMigration).toContain('wa\\.me')
-    expect(campLocationMigration).toContain('whatsapp\\.com')
-    expect(campLocationMigration).toContain(
-      'unsupported camp location link',
-    )
-  })
+    expect(campLocationMigration).toContain("maps\\.app\\.goo\\.gl");
+    expect(campLocationMigration).toContain("google\\.com/maps");
+    expect(campLocationMigration).toContain("wa\\.me");
+    expect(campLocationMigration).toContain("whatsapp\\.com");
+    expect(campLocationMigration).toContain("unsupported camp location link");
+  });
 
-  it('speichert genau eine Spotify Playlist ohne personenbezogene Spotify Daten', () => {
+  it("speichert genau eine Spotify Playlist ohne personenbezogene Spotify Daten", () => {
     expect(musicPlaylistMigration).toContain(
       "where s.key = 'music_spotify_playlist_id'",
-    )
-    expect(musicPlaylistMigration).toContain("'music_spotify_playlist_id'")
+    );
+    expect(musicPlaylistMigration).toContain("'music_spotify_playlist_id'");
     expect(musicPlaylistMigration).toContain(
-      'delete from public.app_settings s',
-    )
+      "delete from public.app_settings s",
+    );
     expect(musicPlaylistMigration).toContain(
       "'https://open.spotify.com/embed/playlist/'",
-    )
+    );
     expect(musicPlaylistMigration).toContain(
       "'https://open.spotify.com/playlist/'",
-    )
-    expect(musicPlaylistMigration).toContain('spotify:playlist:')
-    expect(musicPlaylistMigration).toContain('open\\.spotify\\.com')
-    expect(musicPlaylistMigration).toContain('unsupported music playlist link')
-    expect(musicPlaylistMigration).not.toContain('spotify_user')
-    expect(musicPlaylistMigration).not.toContain('access_token')
-    expect(musicPlaylistMigration).not.toContain('refresh_token')
+    );
+    expect(musicPlaylistMigration).toContain("spotify:playlist:");
+    expect(musicPlaylistMigration).toContain("open\\.spotify\\.com");
+    expect(musicPlaylistMigration).toContain("unsupported music playlist link");
+    expect(musicPlaylistMigration).not.toContain("spotify_user");
+    expect(musicPlaylistMigration).not.toContain("access_token");
+    expect(musicPlaylistMigration).not.toContain("refresh_token");
 
     for (const functionName of [
-      'ha_spotify_playlist_id',
-      'ha_is_supported_music_playlist_link',
-      'ha_music_playlist_row',
-      'ha_get_music_playlist',
-      'ha_admin_get_music_playlist',
-      'ha_update_music_playlist',
-      'ha_delete_music_playlist',
+      "ha_spotify_playlist_id",
+      "ha_is_supported_music_playlist_link",
+      "ha_music_playlist_row",
+      "ha_get_music_playlist",
+      "ha_admin_get_music_playlist",
+      "ha_update_music_playlist",
+      "ha_delete_music_playlist",
     ]) {
       expect(musicPlaylistMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(musicPlaylistMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
-  })
+  });
 
-  it('legt Bingo mit geschuetzten Tabellen und serverseitiger Kartengenerierung an', () => {
-    for (const table of ['bingo_rounds', 'bingo_cards', 'bingo_marks']) {
+  it("legt Bingo mit geschuetzten Tabellen und serverseitiger Kartengenerierung an", () => {
+    for (const table of ["bingo_rounds", "bingo_cards", "bingo_marks"]) {
       expect(bingoMigration).toContain(
         `create table if not exists public.${table}`,
-      )
+      );
       expect(bingoMigration).toContain(
         `alter table public.${table} enable row level security`,
-      )
+      );
       expect(bingoMigration).toContain(
         `revoke all on table public.${table} from anon, authenticated`,
-      )
+      );
     }
 
-    expect(bingoMigration).toContain('bingo_rounds_single_active')
-    expect(bingoMigration).toContain("status in ('active', 'closed')")
-    expect(bingoMigration).toContain("where status = 'active'")
+    expect(bingoMigration).toContain("bingo_rounds_single_active");
+    expect(bingoMigration).toContain("status in ('active', 'closed')");
+    expect(bingoMigration).toContain("where status = 'active'");
     expect(bingoMigration).toContain(
-      'constraint bingo_cards_round_participant_unique unique (round_id, participant_id)',
-    )
+      "constraint bingo_cards_round_participant_unique unique (round_id, participant_id)",
+    );
     expect(bingoMigration).toContain(
-      'constraint bingo_cards_numbers_valid check (public.ha_bingo_numbers_are_valid(numbers))',
-    )
-    expect(bingoMigration).toContain('cardinality(p_numbers) = 25')
-    expect(bingoMigration).toContain('number < 1 or number > 75')
-    expect(bingoMigration).toContain('count(distinct number)')
-    expect(bingoMigration).toContain('generate_series(1, 75)')
-    expect(bingoMigration).toContain('order by random()')
-    expect(bingoMigration).toContain('limit 25')
+      "constraint bingo_cards_numbers_valid check (public.ha_bingo_numbers_are_valid(numbers))",
+    );
+    expect(bingoMigration).toContain("cardinality(p_numbers) = 25");
+    expect(bingoMigration).toContain("number < 1 or number > 75");
+    expect(bingoMigration).toContain("count(distinct number)");
+    expect(bingoMigration).toContain("generate_series(1, 75)");
+    expect(bingoMigration).toContain("order by random()");
+    expect(bingoMigration).toContain("limit 25");
+    expect(bingoMigration).toContain("public.ha_generate_bingo_card_numbers()");
     expect(bingoMigration).toContain(
-      'public.ha_generate_bingo_card_numbers()',
-    )
+      "on conflict on constraint bingo_cards_round_participant_unique do nothing",
+    );
     expect(bingoMigration).toContain(
-      'on conflict on constraint bingo_cards_round_participant_unique do nothing',
-    )
-    expect(bingoMigration).toContain('p_number is null or not p_number = any(v_numbers)')
-    expect(bingoMigration).toContain('number is not on bingo card')
-    expect(bingoMigration).toContain('insert into public.bingo_marks')
-    expect(bingoMigration).toContain('delete from public.bingo_marks')
+      "p_number is null or not p_number = any(v_numbers)",
+    );
+    expect(bingoMigration).toContain("number is not on bingo card");
+    expect(bingoMigration).toContain("insert into public.bingo_marks");
+    expect(bingoMigration).toContain("delete from public.bingo_marks");
 
     for (const functionName of [
-      'ha_get_active_bingo_round',
-      'ha_admin_get_bingo_round',
-      'ha_start_bingo_round',
-      'ha_close_bingo_round',
-      'ha_get_or_create_bingo_card',
-      'ha_set_bingo_mark',
+      "ha_get_active_bingo_round",
+      "ha_admin_get_bingo_round",
+      "ha_start_bingo_round",
+      "ha_close_bingo_round",
+      "ha_get_or_create_bingo_card",
+      "ha_set_bingo_mark",
     ]) {
       expect(bingoMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(bingoMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
 
     expect(bingoMigration).toContain(
-      'revoke all on function public.ha_generate_bingo_card_numbers() from anon, authenticated',
-    )
-    expect(bingoMigration).toContain('update public.bingo_rounds br')
-    expect(bingoMigration).toContain("set status = 'closed'")
-    expect(bingoMigration).toContain("where br.status = 'active'")
-    expect(bingoMigration).not.toContain('delete from public.bingo_rounds;')
-    expect(bingoMigration).not.toContain('bingo_history')
-  })
+      "revoke all on function public.ha_generate_bingo_card_numbers() from anon, authenticated",
+    );
+    expect(bingoMigration).toContain("update public.bingo_rounds br");
+    expect(bingoMigration).toContain("set status = 'closed'");
+    expect(bingoMigration).toContain("where br.status = 'active'");
+    expect(bingoMigration).not.toContain("delete from public.bingo_rounds;");
+    expect(bingoMigration).not.toContain("bingo_history");
+  });
 
-  it('korrigiert angewendete Bingo RPCs ohne unsichere DELETE Statements', () => {
+  it("korrigiert angewendete Bingo RPCs ohne unsichere DELETE Statements", () => {
     expect(bingoFixMigration).toContain(
-      'drop constraint if exists bingo_rounds_status_check',
-    )
-    expect(bingoFixMigration).toContain("status in ('active', 'closed')")
+      "drop constraint if exists bingo_rounds_status_check",
+    );
+    expect(bingoFixMigration).toContain("status in ('active', 'closed')");
 
     for (const functionName of [
-      'ha_start_bingo_round',
-      'ha_close_bingo_round',
+      "ha_start_bingo_round",
+      "ha_close_bingo_round",
     ]) {
       expect(bingoFixMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(bingoFixMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
 
-    expect(bingoFixMigration).toContain('update public.bingo_rounds br')
-    expect(bingoFixMigration).toContain("set status = 'closed'")
-    expect(bingoFixMigration).toContain("where br.status = 'active'")
-    expect(bingoFixMigration).not.toContain('delete from public.bingo_rounds;')
-  })
+    expect(bingoFixMigration).toContain("update public.bingo_rounds br");
+    expect(bingoFixMigration).toContain("set status = 'closed'");
+    expect(bingoFixMigration).toContain("where br.status = 'active'");
+    expect(bingoFixMigration).not.toContain("delete from public.bingo_rounds;");
+  });
 
-  it('legt Pferderennen mit festivalbezogenem Status und geschuetzten Wetten an', () => {
-    for (const table of ['horse_racing_settings', 'horse_racing_bets']) {
+  it("legt Pferderennen mit festivalbezogenem Status und geschuetzten Wetten an", () => {
+    for (const table of ["horse_racing_settings", "horse_racing_bets"]) {
       expect(horseRacingMigration).toContain(
         `create table if not exists public.${table}`,
-      )
+      );
       expect(horseRacingMigration).toContain(
         `alter table public.${table} enable row level security`,
-      )
+      );
       expect(horseRacingMigration).toContain(
         `revoke all on table public.${table} from anon, authenticated`,
-      )
+      );
     }
 
-    expect(horseRacingMigration).toContain('festival_id text primary key')
+    expect(horseRacingMigration).toContain("festival_id text primary key");
     expect(horseRacingMigration).toContain(
-      'constraint horse_racing_bets_unique_participant_festival',
-    )
+      "constraint horse_racing_bets_unique_participant_festival",
+    );
     expect(horseRacingMigration).toContain(
-      'unique (festival_id, participant_id)',
-    )
+      "unique (festival_id, participant_id)",
+    );
     expect(horseRacingMigration).toContain(
       "check (suit in ('hearts', 'diamonds', 'spades', 'clubs'))",
-    )
+    );
     expect(horseRacingMigration).toContain(
       "check (betting_status in ('open', 'closed'))",
-    )
+    );
     expect(horseRacingMigration).toContain(
-      'if not public.ha_has_admin_access(p_participant_access_code) then',
-    )
+      "if not public.ha_has_admin_access(p_participant_access_code) then",
+    );
     expect(horseRacingMigration).toContain(
       "if v_betting_status <> 'open' then",
-    )
+    );
     expect(horseRacingMigration).toContain(
-      'on conflict on constraint horse_racing_bets_unique_participant_festival',
-    )
+      "on conflict on constraint horse_racing_bets_unique_participant_festival",
+    );
     expect(horseRacingMigration).toContain(
-      'when p_is_enabled then p_betting_status',
-    )
-    expect(horseRacingMigration).toContain("else 'closed'")
+      "when p_is_enabled then p_betting_status",
+    );
+    expect(horseRacingMigration).toContain("else 'closed'");
 
     for (const functionName of [
-      'ha_get_horse_racing_state',
-      'ha_place_horse_racing_bet',
-      'ha_admin_get_horse_racing_state',
-      'ha_admin_set_horse_racing_state',
-      'ha_admin_list_horse_racing_bets',
+      "ha_get_horse_racing_state",
+      "ha_place_horse_racing_bet",
+      "ha_admin_get_horse_racing_state",
+      "ha_admin_set_horse_racing_state",
+      "ha_admin_list_horse_racing_bets",
     ]) {
       expect(horseRacingMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(horseRacingMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
-  })
+  });
 
-  it('korrigiert Pferderennen RPCs ohne mehrdeutige Festival-ID Referenzen', () => {
+  it("korrigiert Pferderennen RPCs ohne mehrdeutige Festival-ID Referenzen", () => {
     for (const functionName of [
-      'ha_get_horse_racing_state',
-      'ha_place_horse_racing_bet',
-      'ha_admin_get_horse_racing_state',
-      'ha_admin_set_horse_racing_state',
-      'ha_admin_list_horse_racing_bets',
+      "ha_get_horse_racing_state",
+      "ha_place_horse_racing_bet",
+      "ha_admin_get_horse_racing_state",
+      "ha_admin_set_horse_racing_state",
+      "ha_admin_list_horse_racing_bets",
     ]) {
       expect(horseRacingRpcFixMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(horseRacingRpcFixMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
 
     expect(horseRacingRpcFixMigration).toContain(
-      'on conflict on constraint horse_racing_settings_pkey',
-    )
-    expect(horseRacingRpcFixMigration).not.toContain('on conflict (festival_id)')
-    expect(horseRacingRpcFixMigration).toContain('requested_festival_id')
-    expect(horseRacingRpcFixMigration).toContain('hrs.festival_id')
-    expect(horseRacingRpcFixMigration).toContain('hrb.festival_id')
+      "on conflict on constraint horse_racing_settings_pkey",
+    );
+    expect(horseRacingRpcFixMigration).not.toContain(
+      "on conflict (festival_id)",
+    );
+    expect(horseRacingRpcFixMigration).toContain("requested_festival_id");
+    expect(horseRacingRpcFixMigration).toContain("hrs.festival_id");
+    expect(horseRacingRpcFixMigration).toContain("hrb.festival_id");
     expect(horseRacingRpcFixMigration).toContain(
-      'v_is_enabled := coalesce(p_is_enabled, false)',
-    )
-  })
+      "v_is_enabled := coalesce(p_is_enabled, false)",
+    );
+  });
 
-  it('legt zufaellige Paarungen mit geschuetzten Tabellen und zyklischer Auslosung an', () => {
+  it("legt zufaellige Paarungen mit geschuetzten Tabellen und zyklischer Auslosung an", () => {
     for (const table of [
-      'random_pairing_actions',
-      'random_pairing_participants',
-      'random_pairing_assignments',
+      "random_pairing_actions",
+      "random_pairing_participants",
+      "random_pairing_assignments",
     ]) {
       expect(randomPairingsMigration).toContain(
         `create table if not exists public.${table}`,
-      )
+      );
       expect(randomPairingsMigration).toContain(
         `alter table public.${table} enable row level security`,
-      )
+      );
       expect(randomPairingsMigration).toContain(
         `revoke all on table public.${table} from anon, authenticated`,
-      )
+      );
     }
 
-    expect(randomPairingsMigration).toContain('festival_id text not null')
+    expect(randomPairingsMigration).toContain("festival_id text not null");
     expect(randomPairingsMigration).toContain(
-      'primary key (action_id, participant_id)',
-    )
+      "primary key (action_id, participant_id)",
+    );
     expect(randomPairingsMigration).toContain(
-      'constraint random_pairing_assignments_no_self',
-    )
+      "constraint random_pairing_assignments_no_self",
+    );
     expect(randomPairingsMigration).toContain(
-      'check (participant_id <> assigned_participant_id)',
-    )
+      "check (participant_id <> assigned_participant_id)",
+    );
     expect(randomPairingsMigration).toContain(
-      'if not public.ha_has_admin_access(p_participant_access_code) then',
-    )
-    expect(randomPairingsMigration).toContain('and p.is_active = true')
-    expect(randomPairingsMigration).toContain('order by random()')
+      "if not public.ha_has_admin_access(p_participant_access_code) then",
+    );
+    expect(randomPairingsMigration).toContain("and p.is_active = true");
+    expect(randomPairingsMigration).toContain("order by random()");
     expect(randomPairingsMigration).toContain(
-      'when current_participant.position = current_participant.total_count then 1',
-    )
+      "when current_participant.position = current_participant.total_count then 1",
+    );
     expect(randomPairingsMigration).toContain(
-      'random pairing action is already drawn',
-    )
+      "random pairing action is already drawn",
+    );
     expect(randomPairingsMigration).toContain(
-      'at least two participants are required',
-    )
+      "at least two participants are required",
+    );
     expect(randomPairingsMigration).toContain(
-      'and rpas.participant_id = v_participant_id',
-    )
+      "and rpas.participant_id = v_participant_id",
+    );
 
     for (const functionName of [
-      'ha_admin_list_random_pairing_actions',
-      'ha_admin_create_random_pairing_action',
-      'ha_admin_set_random_pairing_participants',
-      'ha_admin_draw_random_pairing_action',
-      'ha_list_random_pairing_assignments',
+      "ha_admin_list_random_pairing_actions",
+      "ha_admin_create_random_pairing_action",
+      "ha_admin_set_random_pairing_participants",
+      "ha_admin_draw_random_pairing_action",
+      "ha_list_random_pairing_assignments",
     ]) {
       expect(randomPairingsMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(randomPairingsMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
-  })
+  });
 
-  it('legt Turniere mit geschuetzter Tabelle und KO Baum Erzeugung an', () => {
+  it("legt Turniere mit geschuetzter Tabelle und KO Baum Erzeugung an", () => {
     expect(tournamentsMigration).toContain(
-      'create table if not exists public.tournaments',
-    )
+      "create table if not exists public.tournaments",
+    );
     expect(tournamentsMigration).toContain(
-      'alter table public.tournaments enable row level security',
-    )
+      "alter table public.tournaments enable row level security",
+    );
     expect(tournamentsMigration).toContain(
-      'revoke all on table public.tournaments from anon, authenticated',
-    )
+      "revoke all on table public.tournaments from anon, authenticated",
+    );
     expect(tournamentsMigration).toContain(
       'create policy "deny direct tournament access"',
-    )
-    expect(tournamentsMigration).toContain('festival_id text not null')
-    expect(tournamentsMigration).toContain('mode text not null default')
-    expect(tournamentsMigration).toContain('selected_participant_ids text[]')
-    expect(tournamentsMigration).toContain('draw_participant_ids text[]')
-    expect(tournamentsMigration).toContain('qualification_ranking_ids text[]')
-    expect(tournamentsMigration).toContain('bracket jsonb not null')
+    );
+    expect(tournamentsMigration).toContain("festival_id text not null");
+    expect(tournamentsMigration).toContain("mode text not null default");
+    expect(tournamentsMigration).toContain("selected_participant_ids text[]");
+    expect(tournamentsMigration).toContain("draw_participant_ids text[]");
+    expect(tournamentsMigration).toContain("qualification_ranking_ids text[]");
+    expect(tournamentsMigration).toContain("bracket jsonb not null");
     expect(tournamentsMigration).toContain(
       "check (status in ('draft', 'active'))",
-    )
+    );
     expect(tournamentsMigration).toContain(
       "check (mode in ('knockout', 'qualification_knockout'))",
-    )
+    );
     expect(tournamentsMigration).toContain(
-      'public.ha_generate_tournament_bracket',
-    )
-    expect(tournamentsMigration).toContain(
-      "'type', 'single_elimination'",
-    )
-    expect(tournamentsMigration).toContain("'type', 'main'")
-    expect(tournamentsMigration).toContain('v_main_participant_count')
-    expect(tournamentsMigration).toContain('v_bye_count')
-    expect(tournamentsMigration).toContain("'byes', v_byes")
-    expect(tournamentsMigration).toContain('order by random()')
-    expect(tournamentsMigration).toContain('ha_seed_tournament_participants')
-    expect(tournamentsMigration).toContain("'status', 'scheduled'")
+      "public.ha_generate_tournament_bracket",
+    );
+    expect(tournamentsMigration).toContain("'type', 'single_elimination'");
+    expect(tournamentsMigration).toContain("'type', 'main'");
+    expect(tournamentsMigration).toContain("v_main_participant_count");
+    expect(tournamentsMigration).toContain("v_bye_count");
+    expect(tournamentsMigration).toContain("'byes', v_byes");
+    expect(tournamentsMigration).toContain("order by random()");
+    expect(tournamentsMigration).toContain("ha_seed_tournament_participants");
+    expect(tournamentsMigration).toContain("'status', 'scheduled'");
     expect(tournamentsMigration).not.toContain(
-      'knockout tournament requires a power of two participant count',
-    )
+      "knockout tournament requires a power of two participant count",
+    );
     expect(tournamentsMigration).not.toContain(
-      'knockout bracket requires a power of two participant count',
-    )
-    expect(tournamentsMigration).toContain("'winnerParticipantId'")
-    expect(tournamentsMigration).toContain('at least two participants are required')
+      "knockout bracket requires a power of two participant count",
+    );
+    expect(tournamentsMigration).toContain("'winnerParticipantId'");
     expect(tournamentsMigration).toContain(
-      'selected participant is inactive or unknown',
-    )
+      "at least two participants are required",
+    );
     expect(tournamentsMigration).toContain(
-      'public.ha_participant_id_for_access(p_participant_access_code) is null',
-    )
+      "selected participant is inactive or unknown",
+    );
+    expect(tournamentsMigration).toContain(
+      "public.ha_participant_id_for_access(p_participant_access_code) is null",
+    );
 
     for (const functionName of [
-      'ha_admin_list_tournaments',
-      'ha_admin_create_tournament',
-      'ha_admin_update_tournament',
-      'ha_admin_delete_tournament',
-      'ha_admin_set_tournament_qualification_ranking',
-      'ha_list_tournaments',
+      "ha_admin_list_tournaments",
+      "ha_admin_create_tournament",
+      "ha_admin_update_tournament",
+      "ha_admin_delete_tournament",
+      "ha_admin_set_tournament_qualification_ranking",
+      "ha_list_tournaments",
     ]) {
       expect(tournamentsMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(tournamentsMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
-  })
+  });
 
-  it('korrigiert die Turnier-Anlegen-RPC Signatur fuer den Supabase Schema Cache', () => {
+  it("korrigiert die Turnier-Anlegen-RPC Signatur fuer den Supabase Schema Cache", () => {
     expect(tournamentCreateRpcSignatureFixMigration).toContain(
-      'drop function if exists public.ha_admin_create_tournament(text, text, text, text[])',
-    )
+      "drop function if exists public.ha_admin_create_tournament(text, text, text, text[])",
+    );
     expect(tournamentCreateRpcSignatureFixMigration).toContain(
-      'drop function if exists public.ha_admin_create_tournament(text, text, text, text, text[])',
-    )
+      "drop function if exists public.ha_admin_create_tournament(text, text, text, text, text[])",
+    );
     expect(tournamentCreateRpcSignatureFixMigration).toContain(
-      'create or replace function public.ha_admin_create_tournament',
-    )
+      "create or replace function public.ha_admin_create_tournament",
+    );
+    expect(tournamentCreateRpcSignatureFixMigration).toContain("p_mode text");
+    expect(tournamentCreateRpcSignatureFixMigration).toContain("p_name text");
     expect(tournamentCreateRpcSignatureFixMigration).toContain(
-      'p_mode text',
-    )
+      "if not public.ha_has_admin_access(p_participant_access_code)",
+    );
+    expect(tournamentCreateRpcSignatureFixMigration).toContain("mode,");
+    expect(tournamentCreateRpcSignatureFixMigration).toContain("p_mode,");
     expect(tournamentCreateRpcSignatureFixMigration).toContain(
-      'p_name text',
-    )
+      "grant execute on function public.ha_admin_create_tournament(text, text, text, text, text[])",
+    );
     expect(tournamentCreateRpcSignatureFixMigration).toContain(
-      'if not public.ha_has_admin_access(p_participant_access_code)',
-    )
-    expect(tournamentCreateRpcSignatureFixMigration).toContain(
-      'mode,',
-    )
-    expect(tournamentCreateRpcSignatureFixMigration).toContain(
-      'p_mode,',
-    )
-    expect(tournamentCreateRpcSignatureFixMigration).toContain(
-      'grant execute on function public.ha_admin_create_tournament(text, text, text, text, text[])',
-    )
-    expect(tournamentCreateRpcSignatureFixMigration).toContain(
-      'to anon, authenticated',
-    )
+      "to anon, authenticated",
+    );
     expect(tournamentCreateRpcSignatureFixMigration).toContain(
       "notify pgrst, 'reload schema'",
-    )
-  })
+    );
+  });
 
-  it('ruestet die Turniermodus-Spalte fuer bestehende Datenbanken nach', () => {
+  it("ruestet die Turniermodus-Spalte fuer bestehende Datenbanken nach", () => {
     expect(tournamentModeColumnMigration).toContain(
-      'alter table public.tournaments',
-    )
+      "alter table public.tournaments",
+    );
     expect(tournamentModeColumnMigration).toContain(
-      'add column if not exists mode text',
-    )
-    expect(tournamentModeColumnMigration).toContain("set mode = 'ko'")
+      "add column if not exists mode text",
+    );
+    expect(tournamentModeColumnMigration).toContain("set mode = 'ko'");
     expect(tournamentModeColumnMigration).toContain(
       "alter column mode set default 'ko'",
-    )
+    );
     expect(tournamentModeColumnMigration).toContain(
-      'alter column mode set not null',
-    )
+      "alter column mode set not null",
+    );
     expect(tournamentModeColumnMigration).toContain(
-      'drop constraint if exists tournaments_mode_check',
-    )
+      "drop constraint if exists tournaments_mode_check",
+    );
     expect(tournamentModeColumnMigration).toContain(
       "check (mode in ('ko', 'knockout', 'qualification_knockout'))",
-    )
+    );
     expect(tournamentModeColumnMigration).toContain(
       "if p_mode not in ('ko', 'knockout', 'qualification_knockout')",
-    )
+    );
     expect(tournamentModeColumnMigration).toContain(
       "when p_mode in ('ko', 'knockout')",
-    )
+    );
     expect(tournamentModeColumnMigration).toContain(
-      'grant execute on function public.ha_admin_create_tournament(text, text, text, text, text[])',
-    )
+      "grant execute on function public.ha_admin_create_tournament(text, text, text, text, text[])",
+    );
     expect(tournamentModeColumnMigration).toContain(
-      'grant execute on function public.ha_admin_update_tournament(text, uuid, text, text, text[])',
-    )
+      "grant execute on function public.ha_admin_update_tournament(text, uuid, text, text, text[])",
+    );
     expect(tournamentModeColumnMigration).toContain(
       "notify pgrst, 'reload schema'",
-    )
-  })
+    );
+  });
 
-  it('gleicht die Turnier-Tabelle fuer bestehende Datenbanken vollstaendig ab', () => {
+  it("gleicht die Turnier-Tabelle fuer bestehende Datenbanken vollstaendig ab", () => {
     for (const columnDefinition of [
-      'add column if not exists id uuid default gen_random_uuid()',
-      'add column if not exists festival_id text',
-      'add column if not exists name text',
+      "add column if not exists id uuid default gen_random_uuid()",
+      "add column if not exists festival_id text",
+      "add column if not exists name text",
       "add column if not exists mode text not null default 'ko'",
       "add column if not exists status text not null default 'active'",
-      'add column if not exists selected_participant_ids text[] not null default array[]::text[]',
-      'add column if not exists draw_participant_ids text[] not null default array[]::text[]',
-      'add column if not exists qualification_ranking_ids text[] not null default array[]::text[]',
+      "add column if not exists selected_participant_ids text[] not null default array[]::text[]",
+      "add column if not exists draw_participant_ids text[] not null default array[]::text[]",
+      "add column if not exists qualification_ranking_ids text[] not null default array[]::text[]",
       `add column if not exists bracket jsonb not null default '{"type":"single_elimination","rounds":[]}'::jsonb`,
-      'add column if not exists created_at timestamptz not null default now()',
-      'add column if not exists updated_at timestamptz not null default now()',
-      'add column if not exists created_by_participant_id text',
+      "add column if not exists created_at timestamptz not null default now()",
+      "add column if not exists updated_at timestamptz not null default now()",
+      "add column if not exists created_by_participant_id text",
     ]) {
-      expect(tournamentTableShapeSyncMigration).toContain(columnDefinition)
+      expect(tournamentTableShapeSyncMigration).toContain(columnDefinition);
     }
 
     expect(tournamentTableShapeSyncMigration).toContain(
       "alter column mode set default 'ko'",
-    )
+    );
     expect(tournamentTableShapeSyncMigration).toContain(
-      'alter column draw_participant_ids set default array[]::text[]',
-    )
+      "alter column draw_participant_ids set default array[]::text[]",
+    );
     expect(tournamentTableShapeSyncMigration).toContain(
-      'alter column id set not null',
-    )
+      "alter column id set not null",
+    );
     expect(tournamentTableShapeSyncMigration).toContain(
-      'alter column festival_id set not null',
-    )
+      "alter column festival_id set not null",
+    );
     expect(tournamentTableShapeSyncMigration).toContain(
-      'alter column name set not null',
-    )
+      "alter column name set not null",
+    );
     expect(tournamentTableShapeSyncMigration).toContain(
-      'alter column bracket set not null',
-    )
+      "alter column bracket set not null",
+    );
     expect(tournamentTableShapeSyncMigration).toContain(
-      'drop constraint if exists tournaments_status_check',
-    )
+      "drop constraint if exists tournaments_status_check",
+    );
     expect(tournamentTableShapeSyncMigration).toContain(
-      'drop constraint if exists tournaments_mode_check',
-    )
+      "drop constraint if exists tournaments_mode_check",
+    );
     expect(tournamentTableShapeSyncMigration).toContain(
-      'drop constraint if exists tournaments_name_required',
-    )
+      "drop constraint if exists tournaments_name_required",
+    );
     expect(tournamentTableShapeSyncMigration).toContain(
-      'drop constraint if exists tournaments_bracket_object',
-    )
+      "drop constraint if exists tournaments_bracket_object",
+    );
     expect(tournamentTableShapeSyncMigration).toContain(
       "check (status in ('draft', 'active'))",
-    )
+    );
     expect(tournamentTableShapeSyncMigration).toContain(
       "check (mode in ('ko', 'knockout', 'qualification_knockout'))",
-    )
+    );
     expect(tournamentTableShapeSyncMigration).toContain(
       "check (btrim(name) <> '')",
-    )
+    );
     expect(tournamentTableShapeSyncMigration).toContain(
       "check (jsonb_typeof(bracket) = 'object')",
-    )
-  })
+    );
+  });
 
-  it('gibt beim Turnier-Anlegen die deklarierte Tabellenstruktur explizit zurueck', () => {
+  it("gibt beim Turnier-Anlegen die deklarierte Tabellenstruktur explizit zurueck", () => {
     for (const returnColumn of [
-      'id uuid',
-      'festival_id text',
-      'name text',
-      'mode text',
-      'status text',
-      'selected_participant_ids text[]',
-      'draw_participant_ids text[]',
-      'qualification_ranking_ids text[]',
-      'bracket jsonb',
-      'created_at timestamptz',
-      'updated_at timestamptz',
+      "id uuid",
+      "festival_id text",
+      "name text",
+      "mode text",
+      "status text",
+      "selected_participant_ids text[]",
+      "draw_participant_ids text[]",
+      "qualification_ranking_ids text[]",
+      "bracket jsonb",
+      "created_at timestamptz",
+      "updated_at timestamptz",
     ]) {
-      expect(tournamentCreateReturnShapeFixMigration).toContain(returnColumn)
+      expect(tournamentCreateReturnShapeFixMigration).toContain(returnColumn);
     }
 
     const explicitReturnQuery = [
-      'select',
-      '    t.id,',
-      '    t.festival_id,',
-      '    t.name,',
-      '    t.mode,',
-      '    t.status,',
-      '    t.selected_participant_ids,',
-      '    t.draw_participant_ids,',
-      '    t.qualification_ranking_ids,',
-      '    t.bracket,',
-      '    t.created_at,',
-      '    t.updated_at',
-      '  from public.tournaments t',
-      '  where t.id = v_tournament_id',
-    ].join('\n')
+      "select",
+      "    t.id,",
+      "    t.festival_id,",
+      "    t.name,",
+      "    t.mode,",
+      "    t.status,",
+      "    t.selected_participant_ids,",
+      "    t.draw_participant_ids,",
+      "    t.qualification_ranking_ids,",
+      "    t.bracket,",
+      "    t.created_at,",
+      "    t.updated_at",
+      "  from public.tournaments t",
+      "  where t.id = v_tournament_id",
+    ].join("\n");
 
     expect(tournamentCreateReturnShapeFixMigration).toContain(
       explicitReturnQuery,
-    )
+    );
     expect(tournamentCreateReturnShapeFixMigration).not.toContain(
-      'from public.ha_admin_list_tournaments',
-    )
-    expect(tournamentCreateReturnShapeFixMigration).not.toContain('select *')
+      "from public.ha_admin_list_tournaments",
+    );
+    expect(tournamentCreateReturnShapeFixMigration).not.toContain("select *");
     expect(tournamentCreateReturnShapeFixMigration).toContain(
-      'grant execute on function public.ha_admin_create_tournament(text, text, text, text, text[])',
-    )
+      "grant execute on function public.ha_admin_create_tournament(text, text, text, text, text[])",
+    );
     expect(tournamentCreateReturnShapeFixMigration).toContain(
       "notify pgrst, 'reload schema'",
-    )
-  })
+    );
+  });
 
-  it('gibt beim Turnier-Bearbeiten die deklarierte Tabellenstruktur explizit zurueck', () => {
+  it("gibt beim Turnier-Bearbeiten die deklarierte Tabellenstruktur explizit zurueck", () => {
     for (const returnColumn of [
-      'id uuid',
-      'festival_id text',
-      'name text',
-      'mode text',
-      'status text',
-      'selected_participant_ids text[]',
-      'draw_participant_ids text[]',
-      'qualification_ranking_ids text[]',
-      'bracket jsonb',
-      'created_at timestamptz',
-      'updated_at timestamptz',
+      "id uuid",
+      "festival_id text",
+      "name text",
+      "mode text",
+      "status text",
+      "selected_participant_ids text[]",
+      "draw_participant_ids text[]",
+      "qualification_ranking_ids text[]",
+      "bracket jsonb",
+      "created_at timestamptz",
+      "updated_at timestamptz",
     ]) {
-      expect(tournamentUpdateReturnShapeFixMigration).toContain(returnColumn)
+      expect(tournamentUpdateReturnShapeFixMigration).toContain(returnColumn);
     }
 
     const explicitReturnQuery = [
-      'select',
-      '    t.id,',
-      '    t.festival_id,',
-      '    t.name,',
-      '    t.mode,',
-      '    t.status,',
-      '    t.selected_participant_ids,',
-      '    t.draw_participant_ids,',
-      '    t.qualification_ranking_ids,',
-      '    t.bracket,',
-      '    t.created_at,',
-      '    t.updated_at',
-      '  from public.tournaments t',
-      '  where t.id = p_tournament_id',
-    ].join('\n')
+      "select",
+      "    t.id,",
+      "    t.festival_id,",
+      "    t.name,",
+      "    t.mode,",
+      "    t.status,",
+      "    t.selected_participant_ids,",
+      "    t.draw_participant_ids,",
+      "    t.qualification_ranking_ids,",
+      "    t.bracket,",
+      "    t.created_at,",
+      "    t.updated_at",
+      "  from public.tournaments t",
+      "  where t.id = p_tournament_id",
+    ].join("\n");
 
     expect(tournamentUpdateReturnShapeFixMigration).toContain(
       explicitReturnQuery,
-    )
+    );
     expect(tournamentUpdateReturnShapeFixMigration).not.toContain(
-      'from public.ha_admin_list_tournaments',
-    )
-    expect(tournamentUpdateReturnShapeFixMigration).not.toContain('select *')
+      "from public.ha_admin_list_tournaments",
+    );
+    expect(tournamentUpdateReturnShapeFixMigration).not.toContain("select *");
     expect(tournamentUpdateReturnShapeFixMigration).toContain(
-      'grant execute on function public.ha_admin_update_tournament(text, uuid, text, text, text[])',
-    )
+      "grant execute on function public.ha_admin_update_tournament(text, uuid, text, text, text[])",
+    );
     expect(tournamentUpdateReturnShapeFixMigration).toContain(
       "notify pgrst, 'reload schema'",
-    )
-  })
+    );
+  });
 
-  it('listet Admin-Turniere mit expliziter Rueckgabeform', () => {
+  it("listet Admin-Turniere mit expliziter Rueckgabeform", () => {
     const explicitReturnQuery = [
-      'select',
-      '    t.id,',
-      '    t.festival_id,',
-      '    t.name,',
-      '    t.mode,',
-      '    t.status,',
-      '    t.selected_participant_ids,',
-      '    t.draw_participant_ids,',
-      '    t.qualification_ranking_ids,',
-      '    t.bracket,',
-      '    t.created_at,',
-      '    t.updated_at',
-      '  from public.tournaments t',
-      '  where t.festival_id = p_festival_id',
-    ].join('\n')
+      "select",
+      "    t.id,",
+      "    t.festival_id,",
+      "    t.name,",
+      "    t.mode,",
+      "    t.status,",
+      "    t.selected_participant_ids,",
+      "    t.draw_participant_ids,",
+      "    t.qualification_ranking_ids,",
+      "    t.bracket,",
+      "    t.created_at,",
+      "    t.updated_at",
+      "  from public.tournaments t",
+      "  where t.festival_id = p_festival_id",
+    ].join("\n");
 
     expect(tournamentsMigration).toContain(
-      'create or replace function public.ha_admin_list_tournaments',
-    )
-    expect(tournamentsMigration).toContain(explicitReturnQuery)
-    expect(tournamentsMigration).toContain('selected_participant_ids text[]')
-    expect(tournamentsMigration).toContain('draw_participant_ids text[]')
-    expect(tournamentsMigration).toContain('bracket jsonb')
-  })
+      "create or replace function public.ha_admin_list_tournaments",
+    );
+    expect(tournamentsMigration).toContain(explicitReturnQuery);
+    expect(tournamentsMigration).toContain("selected_participant_ids text[]");
+    expect(tournamentsMigration).toContain("draw_participant_ids text[]");
+    expect(tournamentsMigration).toContain("bracket jsonb");
+  });
 
-  it('legt die technische Timetable Basis mit getrennten Entitaeten an', () => {
+  it("legt die technische Timetable Basis mit getrennten Entitaeten an", () => {
     for (const table of [
-      'festival_days',
-      'timetable_stages',
-      'timetable_acts',
-      'timetable_performances',
+      "festival_days",
+      "timetable_stages",
+      "timetable_acts",
+      "timetable_performances",
     ]) {
       expect(timetableMigration).toContain(
         `create table if not exists public.${table}`,
-      )
+      );
       expect(timetableMigration).toContain(
         `alter table public.${table} enable row level security`,
-      )
+      );
       expect(timetableMigration).toContain(
         `revoke all on table public.${table} from anon, authenticated`,
-      )
+      );
     }
 
     expect(timetableMigration).toContain(
-      'festival_day_id uuid not null references public.festival_days(id)',
-    )
+      "festival_day_id uuid not null references public.festival_days(id)",
+    );
     expect(timetableMigration).toContain(
-      'stage_id uuid not null references public.timetable_stages(id)',
-    )
+      "stage_id uuid not null references public.timetable_stages(id)",
+    );
     expect(timetableMigration).toContain(
-      'act_id uuid not null references public.timetable_acts(id)',
-    )
+      "act_id uuid not null references public.timetable_acts(id)",
+    );
     expect(timetableMigration).toContain(
-      'constraint timetable_performances_time_order',
-    )
+      "constraint timetable_performances_time_order",
+    );
     expect(timetableMigration).toContain(
-      'create or replace function public.ha_get_timetable',
-    )
+      "create or replace function public.ha_get_timetable",
+    );
     expect(timetableMigration).toContain(
-      'grant execute on function public.ha_get_timetable(text) to anon, authenticated',
-    )
+      "grant execute on function public.ha_get_timetable(text) to anon, authenticated",
+    );
     expect(timetableMigration).toContain(
-      'public.ha_participant_id_for_access(p_participant_access_code) is null',
-    )
-    expect(timetableMigration).not.toContain('favorite')
-    expect(timetableMigration).not.toContain('admin_get_timetable')
-  })
+      "public.ha_participant_id_for_access(p_participant_access_code) is null",
+    );
+    expect(timetableMigration).not.toContain("favorite");
+    expect(timetableMigration).not.toContain("admin_get_timetable");
+  });
 
-  it('stellt Admin RPCs fuer die Festivaltag Verwaltung bereit', () => {
+  it("stellt Admin RPCs fuer die Festivaltag Verwaltung bereit", () => {
     for (const functionName of [
-      'ha_admin_list_festival_days',
-      'ha_create_festival_day',
-      'ha_update_festival_day',
-      'ha_delete_festival_day',
+      "ha_admin_list_festival_days",
+      "ha_create_festival_day",
+      "ha_update_festival_day",
+      "ha_delete_festival_day",
     ]) {
       expect(festivalDaysManagementMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(festivalDaysManagementMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
 
     expect(festivalDaysManagementMigration).toContain(
-      'if not public.ha_has_admin_access(p_participant_access_code)',
-    )
+      "if not public.ha_has_admin_access(p_participant_access_code)",
+    );
     expect(festivalDaysManagementMigration).toContain(
-      'festival day date already exists',
-    )
+      "festival day date already exists",
+    );
     expect(festivalDaysManagementMigration).toContain(
-      'festival day date is required',
-    )
+      "festival day date is required",
+    );
     expect(festivalDaysManagementMigration).toContain(
-      'festival day label is required',
-    )
+      "festival day label is required",
+    );
     expect(festivalDaysManagementMigration).toContain(
-      'festival day sort order is invalid',
-    )
+      "festival day sort order is invalid",
+    );
     expect(festivalDaysManagementMigration).toContain(
-      'order by fd.sort_order, fd.date',
-    )
+      "order by fd.sort_order, fd.date",
+    );
     expect(festivalDaysManagementMigration).not.toContain(
-      'ha_create_timetable_stage',
-    )
-    expect(festivalDaysManagementMigration).not.toContain('ha_create_timetable_act')
+      "ha_create_timetable_stage",
+    );
     expect(festivalDaysManagementMigration).not.toContain(
-      'ha_create_timetable_performance',
-    )
-  })
+      "ha_create_timetable_act",
+    );
+    expect(festivalDaysManagementMigration).not.toContain(
+      "ha_create_timetable_performance",
+    );
+  });
 
-  it('stellt Admin RPCs fuer die Buehnenverwaltung bereit', () => {
+  it("stellt Admin RPCs fuer die Buehnenverwaltung bereit", () => {
     for (const functionName of [
-      'ha_admin_list_timetable_stages',
-      'ha_create_timetable_stage',
-      'ha_update_timetable_stage',
-      'ha_delete_timetable_stage',
+      "ha_admin_list_timetable_stages",
+      "ha_create_timetable_stage",
+      "ha_update_timetable_stage",
+      "ha_delete_timetable_stage",
     ]) {
       expect(timetableStagesManagementMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(timetableStagesManagementMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
 
     expect(timetableStagesManagementMigration).toContain(
-      'create unique index if not exists timetable_stages_name_unique',
-    )
-    expect(timetableStagesManagementMigration).toContain('lower(trim(name))')
+      "create unique index if not exists timetable_stages_name_unique",
+    );
+    expect(timetableStagesManagementMigration).toContain("lower(trim(name))");
     expect(timetableStagesManagementMigration).toContain(
-      'if not public.ha_has_admin_access(p_participant_access_code)',
-    )
+      "if not public.ha_has_admin_access(p_participant_access_code)",
+    );
     expect(timetableStagesManagementMigration).toContain(
-      'stage name already exists',
-    )
-    expect(timetableStagesManagementMigration).toContain('stage name is required')
+      "stage name already exists",
+    );
     expect(timetableStagesManagementMigration).toContain(
-      'stage sort order is invalid',
-    )
+      "stage name is required",
+    );
     expect(timetableStagesManagementMigration).toContain(
-      'order by ts.sort_order, ts.name',
-    )
+      "stage sort order is invalid",
+    );
+    expect(timetableStagesManagementMigration).toContain(
+      "order by ts.sort_order, ts.name",
+    );
     expect(timetableStagesManagementMigration).not.toContain(
-      'ha_create_timetable_act',
-    )
+      "ha_create_timetable_act",
+    );
     expect(timetableStagesManagementMigration).not.toContain(
-      'ha_create_timetable_performance',
-    )
-  })
+      "ha_create_timetable_performance",
+    );
+  });
 
-  it('stellt Admin RPCs fuer die Act Verwaltung bereit', () => {
+  it("stellt Admin RPCs fuer die Act Verwaltung bereit", () => {
     for (const functionName of [
-      'ha_admin_list_timetable_acts',
-      'ha_create_timetable_act',
-      'ha_update_timetable_act',
-      'ha_delete_timetable_act',
+      "ha_admin_list_timetable_acts",
+      "ha_create_timetable_act",
+      "ha_update_timetable_act",
+      "ha_delete_timetable_act",
     ]) {
       expect(timetableActsManagementMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(timetableActsManagementMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
 
     expect(timetableActsManagementMigration).toContain(
-      'if not public.ha_has_admin_access(p_participant_access_code)',
-    )
-    expect(timetableActsManagementMigration).toContain('act name is required')
+      "if not public.ha_has_admin_access(p_participant_access_code)",
+    );
+    expect(timetableActsManagementMigration).toContain("act name is required");
     expect(timetableActsManagementMigration).toContain(
-      'act cannot be deleted while performances exist',
-    )
+      "act cannot be deleted while performances exist",
+    );
     expect(timetableActsManagementMigration).toContain(
-      'from public.timetable_performances tp',
-    )
-    expect(timetableActsManagementMigration).toContain('order by ta.name')
+      "from public.timetable_performances tp",
+    );
+    expect(timetableActsManagementMigration).toContain("order by ta.name");
     expect(timetableActsManagementMigration).not.toContain(
-      'ha_create_timetable_performance',
-    )
-  })
+      "ha_create_timetable_performance",
+    );
+  });
 
-  it('stellt Admin RPCs und DB Validierung fuer Auftritte bereit', () => {
+  it("stellt Admin RPCs und DB Validierung fuer Auftritte bereit", () => {
     for (const functionName of [
-      'ha_admin_list_timetable_performances',
-      'ha_create_timetable_performance',
-      'ha_update_timetable_performance',
-      'ha_delete_timetable_performance',
+      "ha_admin_list_timetable_performances",
+      "ha_create_timetable_performance",
+      "ha_update_timetable_performance",
+      "ha_delete_timetable_performance",
     ]) {
       expect(timetablePerformancesManagementMigration).toContain(
         `create or replace function public.${functionName}`,
-      )
+      );
       expect(timetablePerformancesManagementMigration).toContain(
         `grant execute on function public.${functionName}`,
-      )
+      );
     }
 
     expect(timetablePerformancesManagementMigration).toContain(
-      'alter column ends_at set not null',
-    )
+      "alter column ends_at set not null",
+    );
     expect(timetablePerformancesManagementMigration).toContain(
-      'timetable_performances_no_stage_overlap',
-    )
+      "timetable_performances_no_stage_overlap",
+    );
     expect(timetablePerformancesManagementMigration).toContain(
       "tstzrange(starts_at, ends_at, '[)') with &&",
-    )
+    );
     expect(timetablePerformancesManagementMigration).toContain(
-      'stage_id with =',
-    )
+      "stage_id with =",
+    );
     expect(timetablePerformancesManagementMigration).toContain(
-      'performance end time must be after start time',
-    )
+      "performance end time must be after start time",
+    );
     expect(timetablePerformancesManagementMigration).toContain(
-      'performance overlaps existing performance on stage',
-    )
+      "performance overlaps existing performance on stage",
+    );
     expect(timetablePerformancesManagementMigration).toContain(
-      'when exclusion_violation then',
-    )
+      "when exclusion_violation then",
+    );
     expect(timetablePerformancesManagementMigration).toContain(
-      'p_performance_id uuid',
-    )
-    expect(timetablePerformancesManagementMigration).not.toContain('favorite')
-  })
+      "p_performance_id uuid",
+    );
+    expect(timetablePerformancesManagementMigration).not.toContain("favorite");
+  });
 
-  it('speichert Timetable Favoriten pro Teilnehmer und Auftritt geschuetzt', () => {
+  it("speichert Timetable Favoriten pro Teilnehmer und Auftritt geschuetzt", () => {
     expect(timetableFavoritesMigration).toContain(
-      'create table if not exists public.participant_timetable_favorites',
-    )
+      "create table if not exists public.participant_timetable_favorites",
+    );
     expect(timetableFavoritesMigration).toContain(
-      'participant_id text not null references public.participants(id) on delete cascade',
-    )
+      "participant_id text not null references public.participants(id) on delete cascade",
+    );
     expect(timetableFavoritesMigration).toContain(
-      'performance_id uuid not null references public.timetable_performances(id) on delete cascade',
-    )
+      "performance_id uuid not null references public.timetable_performances(id) on delete cascade",
+    );
     expect(timetableFavoritesMigration).toContain(
-      'primary key (participant_id, performance_id)',
-    )
+      "primary key (participant_id, performance_id)",
+    );
     expect(timetableFavoritesMigration).toContain(
-      'alter table public.participant_timetable_favorites enable row level security',
-    )
+      "alter table public.participant_timetable_favorites enable row level security",
+    );
     expect(timetableFavoritesMigration).toContain(
-      'revoke all on table public.participant_timetable_favorites from anon, authenticated',
-    )
+      "revoke all on table public.participant_timetable_favorites from anon, authenticated",
+    );
     expect(timetableFavoritesMigration).toContain(
       'create policy "deny direct timetable favorite access"',
-    )
+    );
     expect(timetableFavoritesMigration).toContain(
-      'favorite_performance_ids jsonb',
-    )
+      "favorite_performance_ids jsonb",
+    );
     expect(timetableFavoritesMigration).toContain(
-      'drop function if exists public.ha_get_timetable(text)',
-    )
+      "drop function if exists public.ha_get_timetable(text)",
+    );
     expect(timetableFavoritesMigration).toContain(
-      'create or replace function public.ha_add_timetable_favorite',
-    )
+      "create or replace function public.ha_add_timetable_favorite",
+    );
     expect(timetableFavoritesMigration).toContain(
-      'create or replace function public.ha_remove_timetable_favorite',
-    )
+      "create or replace function public.ha_remove_timetable_favorite",
+    );
     expect(timetableFavoritesMigration).toContain(
-      'on conflict (participant_id, performance_id) do nothing',
-    )
+      "on conflict (participant_id, performance_id) do nothing",
+    );
     expect(timetableFavoritesMigration).toContain(
-      'grant execute on function public.ha_add_timetable_favorite(text, uuid) to anon, authenticated',
-    )
+      "grant execute on function public.ha_add_timetable_favorite(text, uuid) to anon, authenticated",
+    );
     expect(timetableFavoritesMigration).toContain(
-      'grant execute on function public.ha_remove_timetable_favorite(text, uuid) to anon, authenticated',
-    )
-    expect(timetableFavoritesMigration).not.toContain('ha_admin')
-  })
+      "grant execute on function public.ha_remove_timetable_favorite(text, uuid) to anon, authenticated",
+    );
+    expect(timetableFavoritesMigration).not.toContain("ha_admin");
+  });
 
-  it('stellt gemeinsame Timetable Favoriten als reine Lesedaten bereit', () => {
+  it("stellt gemeinsame Timetable Favoriten als reine Lesedaten bereit", () => {
     expect(timetableSharedFavoritesMigration).toContain(
-      'drop function if exists public.ha_get_timetable(text)',
-    )
+      "drop function if exists public.ha_get_timetable(text)",
+    );
     expect(timetableSharedFavoritesMigration).toContain(
-      'create or replace function public.ha_get_timetable',
-    )
+      "create or replace function public.ha_get_timetable",
+    );
     expect(timetableSharedFavoritesMigration).toContain(
-      'performance_favorites jsonb',
-    )
+      "performance_favorites jsonb",
+    );
     expect(timetableSharedFavoritesMigration).toContain(
-      'from public.participant_timetable_favorites ptf',
-    )
+      "from public.participant_timetable_favorites ptf",
+    );
     expect(timetableSharedFavoritesMigration).toContain(
-      'join public.participants p on p.id = ptf.participant_id',
-    )
+      "join public.participants p on p.id = ptf.participant_id",
+    );
     expect(timetableSharedFavoritesMigration).toContain(
       "'display_name', p.display_name",
-    )
+    );
     expect(timetableSharedFavoritesMigration).toContain(
       "'avatar_id', p.avatar_id",
-    )
-    expect(timetableSharedFavoritesMigration).toContain('where p.is_active = true')
+    );
+    expect(timetableSharedFavoritesMigration).toContain(
+      "where p.is_active = true",
+    );
     expect(timetableSharedFavoritesMigration).not.toContain(
-      'create table if not exists',
-    )
+      "create table if not exists",
+    );
     expect(timetableSharedFavoritesMigration).not.toContain(
-      'ha_add_timetable_favorite',
-    )
+      "ha_add_timetable_favorite",
+    );
     expect(timetableSharedFavoritesMigration).not.toContain(
-      'ha_remove_timetable_favorite',
-    )
-    expect(timetableSharedFavoritesMigration).not.toContain('ha_admin')
-  })
+      "ha_remove_timetable_favorite",
+    );
+    expect(timetableSharedFavoritesMigration).not.toContain("ha_admin");
+  });
 
-  it('erweitert Timetable Buehnen um optionale Farben', () => {
+  it("erweitert Timetable Buehnen um optionale Farben", () => {
     expect(timetableStageColorsMigration).toContain(
-      'alter table public.timetable_stages',
-    )
+      "alter table public.timetable_stages",
+    );
     expect(timetableStageColorsMigration).toContain(
-      'add column if not exists color text',
-    )
+      "add column if not exists color text",
+    );
     expect(timetableStageColorsMigration).toContain(
-      'constraint timetable_stages_color_hex',
-    )
+      "constraint timetable_stages_color_hex",
+    );
     expect(timetableStageColorsMigration).toContain(
       "color is null or color ~ '^#[0-9A-Fa-f]{6}$'",
-    )
+    );
     expect(timetableStageColorsMigration).toContain(
-      'drop function if exists public.ha_admin_list_timetable_stages(text)',
-    )
+      "drop function if exists public.ha_admin_list_timetable_stages(text)",
+    );
     expect(timetableStageColorsMigration).toContain(
-      'p_color text default null',
-    )
-    expect(timetableStageColorsMigration).toContain("'color', ts.color")
+      "p_color text default null",
+    );
+    expect(timetableStageColorsMigration).toContain("'color', ts.color");
     expect(timetableStageColorsMigration).toContain(
-      'grant execute on function public.ha_create_timetable_stage(text, text, integer, text) to anon, authenticated',
-    )
+      "grant execute on function public.ha_create_timetable_stage(text, text, integer, text) to anon, authenticated",
+    );
     expect(timetableStageColorsMigration).toContain(
-      'grant execute on function public.ha_update_timetable_stage(text, uuid, text, integer, text) to anon, authenticated',
-    )
-    expect(timetableStageColorsMigration).not.toContain('create table if not exists')
-  })
+      "grant execute on function public.ha_update_timetable_stage(text, uuid, text, integer, text) to anon, authenticated",
+    );
+    expect(timetableStageColorsMigration).not.toContain(
+      "create table if not exists",
+    );
+  });
 
-  it('fuehrt keine Mehrfestival Datenmodell Migration durch', () => {
+  it("fuehrt keine Mehrfestival Datenmodell Migration durch", () => {
     const migrations = [
       baseMigration,
       adminMigration,
@@ -1960,11 +1997,13 @@ describe('Supabase Sicherheitsmigration', () => {
       horseRacingRpcFixMigration,
       randomPairingsMigration,
       tournamentsMigration,
-    ].join('\n')
+    ].join("\n");
 
-    expect(migrations).not.toContain('create table if not exists public.festivals')
-    expect(migrations).not.toContain('add column if not exists festival_id')
-    expect(migrations).not.toContain('set festival_id')
-    expect(migrations).not.toContain('p_festival_code')
-  })
-})
+    expect(migrations).not.toContain(
+      "create table if not exists public.festivals",
+    );
+    expect(migrations).not.toContain("add column if not exists festival_id");
+    expect(migrations).not.toContain("set festival_id");
+    expect(migrations).not.toContain("p_festival_code");
+  });
+});
