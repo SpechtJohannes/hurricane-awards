@@ -125,7 +125,8 @@
   line-height: 1;
   letter-spacing: 0;
   text-transform: uppercase;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .app-header__actions {
@@ -3682,6 +3683,42 @@ h1 {
 }
 
 @media (max-width: 719px) {
+  .app-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    align-items: stretch;
+    gap: 16px;
+    padding: 18px 16px;
+  }
+
+  .app-header__brand {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .app-header__brand h1 {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: clamp(1.55rem, 8vw, 2.25rem);
+    line-height: 1.08;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .app-header__actions {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .app-header__actions > * {
+    max-width: 100%;
+  }
+
   .admin-participant-card {
     grid-template-columns: minmax(0, 1fr);
     align-items: stretch;

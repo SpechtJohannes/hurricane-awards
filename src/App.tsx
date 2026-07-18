@@ -4506,6 +4506,7 @@ function App() {
         <button
           className="app-header__brand"
           type="button"
+          title={displayedFestivalName}
           onClick={() => navigateMainSection("dashboard")}
         >
           <p>{t("dashboard.festivalLabel")}</p>
