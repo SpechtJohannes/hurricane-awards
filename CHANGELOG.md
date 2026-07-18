@@ -4,6 +4,29 @@ All notable changes between releases of this project are documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## v1.6.0 - Even Management
+
+### ✨ Neue Funktionen
+
+- Dashboard reagiert nun auf den aktuellen Eventstatus und kann Inhalte abhängig von der Phase des Events priorisieren.
+- Administratoren können den Eventzeitraum verwalten.
+- Das Dashboard zeigt vor dem Event einen Countdown, während des Events den aktuellen Eventtag und nach dem Event einen Abschlussstatus.
+- Abstimmungen und Awards wurden in zwei eigenständige Bereiche getrennt.
+- Zufällige Paarungsaktionen können vollständig zurückgesetzt und anschließend erneut ausgelost werden.
+
+### 🎨 Verbesserungen
+
+- Allgemeine Benutzeroberfläche verwendet nun den neutralen Begriff Event, sofern kein expliziter Festivalbezug besteht.
+- Deutsche Umlaute und Sonderzeichen werden in der gesamten Anwendung korrekt dargestellt.
+- Navigation und Benutzerführung rund um Abstimmungen und Awards wurden vereinfacht.
+
+### 🛠️ Technische Änderungen
+
+- Zentrale Logik zur Ermittlung des Eventstatus geschaffen.
+- Eventzeitraum dient als gemeinsame Datengrundlage für zeitabhängige Funktionen.
+- Internationalisierung erweitert und vereinheitlicht.
+- Tests und Dokumentation aktualisiert.
+
 ## v1.5.0 – Festivalspiele
 
 ### ✨ Neue Features
