@@ -1319,6 +1319,48 @@ describe("PWA Installation", () => {
       screen.queryByRole("button", { name: /app installieren/i }),
     ).not.toBeInTheDocument();
   });
+
+  it("ordnet einen langen Eventnamen und alle Headeraktionen getrennt an", async () => {
+    const longFestivalName =
+      "Hurricane Freundeskreis Sommerfestival Auszeichnungen";
+    const installEvent = new Event("beforeinstallprompt") as Event & {
+      prompt: () => Promise<void>;
+      userChoice: Promise<{ outcome: "dismissed"; platform: string }>;
+    };
+    Object.defineProperty(installEvent, "prompt", {
+      value: vi.fn().mockResolvedValue(undefined),
+    });
+    Object.defineProperty(installEvent, "userChoice", {
+      value: Promise.resolve({ outcome: "dismissed", platform: "web" }),
+    });
+    mockLoadedData({ loadedFestivalName: longFestivalName });
+    await renderLoadedApp();
+    await loginWith("ALICE42");
+
+    act(() => {
+      window.dispatchEvent(installEvent);
+    });
+
+    const header = screen.getByRole("banner");
+    const brand = within(header).getByRole("button", {
+      name: new RegExp(longFestivalName, "i"),
+    });
+    const actions = header.querySelector(".app-header__actions");
+
+    expect(brand).toHaveAttribute("title", longFestivalName);
+    expect(actions).not.toBeNull();
+    expect(
+      within(actions as HTMLElement).getByRole("button", {
+        name: /app installieren/i,
+      }),
+    ).toBeVisible();
+    expect(
+      within(actions as HTMLElement).getByRole("button", { name: /deutsch/i }),
+    ).toBeVisible();
+    expect(
+      within(actions as HTMLElement).getByRole("button", { name: /^admin$/i }),
+    ).toBeVisible();
+  });
 });
 
 describe("Impressum", () => {
