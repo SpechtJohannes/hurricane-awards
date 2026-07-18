@@ -157,6 +157,7 @@ export function AdminParticipants({
                       avatarId={participant.avatarId}
                       name={participant.displayName}
                       size="medium"
+                      className="admin-participant-card__name"
                     />
                   </h3>
                   <dl>
