@@ -26,7 +26,7 @@ flowchart LR
 
 - Frontend: React, TypeScript und Vite. `src/App.tsx` steuert die Hauptansicht, Login, Abstimmung, Ergebnisse und Adminbereiche.
 - Supabase: Stellt den PostgREST RPC-Zugriff mit anon Key bereit. Direkte Tabellenrechte fuer Browserrollen sind fuer geschuetzte Tabellen entzogen.
-- Supabase Storage: Speichert Festivaldokumente fuer den Infos-Bereich. Metadaten und Berechtigungen laufen ueber RPCs; Dateien werden aus dem Frontend in einen dedizierten Bucket geladen.
+- Supabase Storage: Speichert Festivaldokumente fuer den Infos-Bereich und optionale Eventlogos. Metadaten und Berechtigungen laufen ueber RPCs; Dateien werden aus dem Frontend in dedizierte Buckets geladen.
 - Datenbank: PostgreSQL Tabellen, RLS Policies und `security definer` RPC-Funktionen in `supabase/migrations`.
 - Hosting: Das Vite-Build-Ergebnis in `dist` kann als statische Website gehostet werden. Supabase hostet Datenbank und RPC-Schicht getrennt vom Frontend.
 - Zusammenspiel: UI-Aktionen rufen Funktionen aus `src/data/*` auf. Diese Adapter rufen Supabase RPCs auf. Die RPCs pruefen Berechtigungen, lesen oder schreiben Tabellen und geben nur die fuer die UI benoetigten Daten zurueck.
@@ -102,7 +102,7 @@ Admin-RPCs umfassen unter anderem:
 
 - Teilnehmer: `ha_admin_list_participants`, `ha_suggest_participant_access_code`, `ha_create_participant`, `ha_update_participant`, `ha_deactivate_participant`, `ha_reactivate_participant`
 - Kategorien: `ha_admin_list_categories`, `ha_create_category`, `ha_update_category`, `ha_update_category_status`, `ha_delete_category`, `ha_delete_category_votes`
-- Festival: `ha_update_festival_name`, `ha_get_festival_access_code`, `ha_update_festival_access_code`, `ha_archive_festival`
+- Festival: `ha_update_festival_name`, `ha_get_festival_access_code`, `ha_update_festival_access_code`, `ha_create_event_logo_upload`, `ha_admin_finalize_event_logo`, `ha_admin_remove_event_logo`, `ha_archive_festival`
 - Infos: `ha_admin_list_festival_documents`, `ha_upsert_festival_document`, `ha_delete_festival_document`, `ha_admin_get_music_playlist`, `ha_update_music_playlist`, `ha_delete_music_playlist`
 - Timetable: `ha_get_timetable`, `ha_add_timetable_favorite`, `ha_remove_timetable_favorite`, `ha_admin_list_festival_days`, `ha_create_festival_day`, `ha_update_festival_day`, `ha_delete_festival_day`, `ha_admin_list_timetable_stages`, `ha_create_timetable_stage`, `ha_update_timetable_stage`, `ha_delete_timetable_stage`, `ha_admin_list_timetable_acts`, `ha_create_timetable_act`, `ha_update_timetable_act`, `ha_delete_timetable_act`, `ha_admin_list_timetable_performances`, `ha_create_timetable_performance`, `ha_update_timetable_performance`, `ha_delete_timetable_performance`
 - Bingo: `ha_admin_get_bingo_round`, `ha_start_bingo_round`, `ha_close_bingo_round`
@@ -207,6 +207,8 @@ Hash-Navigation ermoeglicht direkte Aufrufe sowie Browser Vor- und Zuruecknaviga
 
 Der in der Oberflaeche als Eventname bezeichnete Wert liegt zentral in `app_settings` unter dem technischen Key `festival_name`. Das Frontend liest ihn ueber `ha_get_festival_name`. Admins aendern ihn ueber `ha_update_festival_name`; die RPC validiert einen nicht-leeren Namen.
 
+Das optionale Eventlogo wird festivalbezogen im oeffentlichen Storage-Bucket `event-logos` gespeichert. `app_settings` enthaelt nur den stabilen Objektpfad und MIME-Typ. Vor dem Upload erzeugt ein admin-geschuetzter RPC eine kurzlebige Berechtigung fuer genau einen Festivalpfad. Beim Aktivieren prueft die Datenbank Festivalzuordnung, Dateityp und die maximale Groesse von 2 MB. Ersetzte und entfernte Dateien werden serverseitig aus Storage geloescht. Der Frontend-Adapter bildet den Pfad auf die oeffentliche URL ab; wenn kein Logo vorhanden ist oder das Bild nicht geladen werden kann, zeigt der Header den Eventnamen. Eine automatische Komprimierung oder Konvertierung findet nicht statt.
+
 Der in der Oberflaeche als Eventcode bezeichnete gemeinsame Zugangscode liegt ebenfalls in `app_settings` unter dem technischen Key `festival_access_code`. Die App prueft eingegebene Codes ueber `ha_verify_festival_access_code`, ohne den Codewert oeffentlich auszulesen. Admins lesen und aendern den Code ueber `ha_get_festival_access_code` und `ha_update_festival_access_code`; die Update-RPC validiert einen nicht-leeren Code. Frische Deployments installieren keinen bekannten Default-Code; der initiale Code wird projektspezifisch im Deployment gesetzt.
 
 Es gibt aktuell keine separate Tabelle `festival_settings`.
@@ -240,7 +242,8 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `categories`: Abstimmungskategorien mit Titel, Beschreibung, Status und Sortierung.
 - `votes`: Aktive Stimmen mit Waehler, nominierter Person, Kategorie und Zeitstempel.
 - `archived_votes`: Aeltere Archivstruktur fuer Stimmen, die in der Sicherheitsdokumentation noch beruecksichtigt wird.
-- `app_settings`: Zentrale App-Einstellungen, aktuell insbesondere `festival_name` und `festival_access_code`.
+- `app_settings`: Zentrale App-Einstellungen, insbesondere `festival_name`, `festival_access_code` und der optionale Eventlogo-Pfad.
+- `event_logo_uploads`: Kurzlebige, festivalspezifische Uploadberechtigungen fuer Eventlogos.
 - `app_settings` Key `camp_location_link`: Optionaler Link zum Campstandort ohne GPS-, Live- oder Bewegungsdaten.
 - `app_settings` Key `music_spotify_playlist_id`: Optionale Spotify Playlist ID fuer den offiziellen Embed Player ohne Spotify-Nutzerdaten oder Tokens.
 - `all_time_standings`: Quelle fuer das Gesamtclassement, falls als Tabelle, View oder Materialized View vorhanden.
@@ -273,7 +276,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - TypeScript: Typisierung fuer Komponenten, Datenadapter und Tests.
 - Vite: Entwicklungsserver, Build-System und Testintegration.
 - Supabase: Browserseitiger RPC-Zugriff mit anon Key und gehostete PostgreSQL-Datenbank.
-- Supabase Storage: Dateiablage fuer Festivaldokumente wie Timetable und Gelaendeplan.
+- Supabase Storage: Dateiablage fuer Festivaldokumente wie Timetable und Gelaendeplan sowie fuer optionale Eventlogos.
 - PostgreSQL: Tabellen, Constraints, RLS und `security definer` Funktionen.
 - RPC-Funktionen: Zentrale Schnittstelle zwischen Frontend und Datenbank fuer geschuetzte Operationen.
 - Internationalisierung: i18next und react-i18next mit `de.json` und `nl.json`.

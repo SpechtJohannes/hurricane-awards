@@ -60,6 +60,13 @@ const eventPeriodMigration = readFileSync(
   ),
   "utf8",
 );
+const eventLogoMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    "supabase/migrations/20260718110000_manage_event_logo.sql",
+  ),
+  "utf8",
+);
 const festivalArchiveMigration = readFileSync(
   resolve(
     process.cwd(),
@@ -642,6 +649,40 @@ describe("Supabase Sicherheitsmigration", () => {
       "event end date must not be before start date",
     );
     expect(eventPeriodMigration).toContain("notify pgrst, 'reload schema'");
+  });
+
+  it("verwaltet Eventlogos ueber einen abgesicherten Storage Bucket", () => {
+    expect(eventLogoMigration).toContain("event_logo_path text");
+    expect(eventLogoMigration).toContain("event_logo_mime_type text");
+    expect(eventLogoMigration).toContain(
+      "create table if not exists public.event_logo_uploads",
+    );
+    expect(eventLogoMigration).toContain("'event-logos'");
+    expect(eventLogoMigration).toContain("true,\n  2097152");
+    expect(eventLogoMigration).toContain(
+      "array['image/png', 'image/jpeg', 'image/webp']",
+    );
+    expect(eventLogoMigration).toContain(
+      "if not public.ha_has_admin_access(p_participant_access_code) then",
+    );
+    expect(eventLogoMigration).toContain("and u.festival_id = p_festival_id");
+    expect(eventLogoMigration).toContain(
+      "v_old_path not like p_festival_id || '/%'",
+    );
+    expect(eventLogoMigration).toContain("delete from storage.objects");
+    for (const functionName of [
+      "ha_create_event_logo_upload",
+      "ha_admin_finalize_event_logo",
+      "ha_admin_remove_event_logo",
+    ]) {
+      expect(eventLogoMigration).toContain(
+        `create or replace function public.${functionName}`,
+      );
+      expect(eventLogoMigration).toContain(
+        `grant execute on function public.${functionName}`,
+      );
+    }
+    expect(eventLogoMigration).toContain("notify pgrst, 'reload schema'");
   });
 
   it("schuetzt den Festivalcode serverseitig gegen Code Erraten", () => {

@@ -51,6 +51,11 @@ import {
   type EventSettings,
 } from "./data/festival";
 import {
+  eventLogoPublicUrl,
+  removeEventLogo,
+  uploadEventLogo,
+} from "./data/festivalLogo";
+import {
   festivalExportFileName,
   loadFestivalExportData,
   serializeFestivalExport,
@@ -179,6 +184,7 @@ import { FestivalInfo } from "./components/FestivalInfo";
 import { Avatar, ParticipantName } from "./components/Avatar";
 import { SectionHeader } from "./components/SectionHeader";
 import { DashboardHero } from "./components/DashboardHero";
+import { EventBrand } from "./components/EventBrand";
 import { useFestivalAccess } from "./hooks/useFestivalAccess";
 import { avatars } from "./config/avatars";
 import i18n from "./i18n";
@@ -1510,6 +1516,9 @@ function App() {
   const [festivalName, setFestivalName] = useState(fallbackFestivalName);
   const [eventStartDate, setEventStartDate] = useState<string | null>(null);
   const [eventEndDate, setEventEndDate] = useState<string | null>(null);
+  const [eventLogoUrl, setEventLogoUrl] = useState<string | null>(null);
+  const [isUploadingEventLogo, setIsUploadingEventLogo] = useState(false);
+  const [isRemovingEventLogo, setIsRemovingEventLogo] = useState(false);
   const [eventReferenceInstant, setEventReferenceInstant] = useState(
     () => new Date(),
   );
@@ -1809,6 +1818,7 @@ function App() {
           setFestivalName(settings.name);
           setEventStartDate(settings.startDate);
           setEventEndDate(settings.endDate);
+          setEventLogoUrl(settings.logoUrl ?? null);
         }
       } catch {
         if (isCurrent) {
@@ -2990,6 +3000,32 @@ function App() {
       });
     } finally {
       setIsSavingFestivalName(false);
+    }
+  }
+
+  async function uploadFestivalLogo(file: File) {
+    const adminContext = getParticipantAdminContext();
+    if (!adminContext) return;
+
+    setIsUploadingEventLogo(true);
+    try {
+      const logoPath = await uploadEventLogo(file, adminContext);
+      setEventLogoUrl(eventLogoPublicUrl(logoPath));
+    } finally {
+      setIsUploadingEventLogo(false);
+    }
+  }
+
+  async function removeFestivalLogo() {
+    const adminContext = getParticipantAdminContext();
+    if (!adminContext) return;
+
+    setIsRemovingEventLogo(true);
+    try {
+      await removeEventLogo(adminContext);
+      setEventLogoUrl(null);
+    } finally {
+      setIsRemovingEventLogo(false);
     }
   }
 
@@ -4498,16 +4534,12 @@ function App() {
         festivalName: displayedFestivalName,
       })}
     >
-      <header className="app-header" aria-labelledby="app-title">
-        <button
-          className="app-header__brand"
-          type="button"
-          title={displayedFestivalName}
+      <header className="app-header" aria-label={displayedFestivalName}>
+        <EventBrand
+          festivalName={displayedFestivalName}
+          logoUrl={eventLogoUrl}
           onClick={() => navigateMainSection("dashboard")}
-        >
-          <p>{t("dashboard.festivalLabel")}</p>
-          <h1 id="app-title">{displayedFestivalName}</h1>
-        </button>
+        />
 
         <div className="app-header__actions">
           <PwaInstallPrompt />
@@ -4575,10 +4607,15 @@ function App() {
               isLoadingFestivalCode={isLoadingFestivalCode}
               isSavingFestivalCode={isSavingFestivalCode}
               isExporting={isExportingFestival}
+              logoUrl={eventLogoUrl}
+              isUploadingLogo={isUploadingEventLogo}
+              isRemovingLogo={isRemovingEventLogo}
               onSave={saveFestivalSettings}
               onSaveFestivalCode={saveFestivalCode}
               onArchive={archiveCurrentFestival}
               onExport={exportCurrentFestival}
+              onUploadLogo={uploadFestivalLogo}
+              onRemoveLogo={removeFestivalLogo}
             />
           ) : null}
 
@@ -4758,10 +4795,15 @@ function App() {
               isLoadingFestivalCode={isLoadingFestivalCode}
               isSavingFestivalCode={isSavingFestivalCode}
               isExporting={isExportingFestival}
+              logoUrl={eventLogoUrl}
+              isUploadingLogo={isUploadingEventLogo}
+              isRemovingLogo={isRemovingEventLogo}
               onSave={saveFestivalSettings}
               onSaveFestivalCode={saveFestivalCode}
               onArchive={archiveCurrentFestival}
               onExport={exportCurrentFestival}
+              onUploadLogo={uploadFestivalLogo}
+              onRemoveLogo={removeFestivalLogo}
             />
           ) : null}
         </section>

@@ -140,7 +140,9 @@ describe("DashboardHero", () => {
       />,
     );
 
-    expect(screen.queryByText("Beste Festival-Energie")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Beste Festival-Energie"),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText("Aktive Abstimmung")).not.toBeInTheDocument();
   });
 });

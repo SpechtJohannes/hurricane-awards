@@ -17,6 +17,9 @@
     "loading": "Lade...",
     "saving": "Speichere..."
   },
+  "header": {
+    "eventLogoAlt": "Logo von {{festivalName}}"
+  },
   "installPrompt": {
     "button": "App installieren",
     "iosHelp": "Teilen-Symbol antippen und Zum Home-Bildschirm wählen."
@@ -612,6 +615,30 @@
       "archiving": "Archiviere...",
       "archiveConfirm": "Aktuelles Event wirklich archivieren? Die aktiven Daten bleiben unverändert.",
       "archiveSuccess": "Event wurde archiviert. Archiv ID: {{archiveId}}",
+      "logo": {
+        "title": "Eventlogo",
+        "description": "Optionales Logo im App-Header. Unterstützt werden PNG, JPEG und WebP bis maximal 2 MB.",
+        "empty": "Aktuell ist kein Eventlogo hinterlegt.",
+        "select": "Logo auswählen",
+        "replace": "Logo ersetzen",
+        "save": "Logo speichern",
+        "uploading": "Logo wird hochgeladen...",
+        "discard": "Auswahl verwerfen",
+        "remove": "Logo entfernen",
+        "removing": "Logo wird entfernt...",
+        "removeConfirm": "Eventlogo wirklich entfernen? Im Header wird anschließend wieder der Eventname angezeigt.",
+        "previewAlt": "Vorschau des Eventlogos",
+        "localPreview": "Lokale Vorschau – noch nicht gespeichert",
+        "savedPreview": "Aktuell gespeichertes Logo",
+        "uploadSuccess": "Das Eventlogo wurde gespeichert.",
+        "removeSuccess": "Das Eventlogo wurde entfernt.",
+        "errors": {
+          "type": "Bitte wähle eine PNG-, JPEG- oder WebP-Datei aus.",
+          "size": "Das Eventlogo darf maximal 2 MB groß sein.",
+          "upload": "Das Eventlogo konnte gerade nicht gespeichert werden.",
+          "remove": "Das Eventlogo konnte gerade nicht entfernt werden."
+        }
+      },
       "errors": {
         "save": "Der Eventname konnte gerade nicht gespeichert werden.",
         "nameRequired": "Der Eventname ist erforderlich.",

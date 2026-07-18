@@ -1,5 +1,6 @@
 import { getSupabase } from "../lib/supabase";
 import { participantRpcParams, type AdminAccessContext } from "./accessContext";
+import { eventLogoPublicUrl } from "./festivalLogo";
 
 type FestivalAccessCodeRow = {
   access_code: string;
@@ -25,12 +26,15 @@ export type EventSettings = {
   name: string;
   startDate: string | null;
   endDate: string | null;
+  logoPath?: string | null;
+  logoUrl?: string | null;
 };
 
 type EventSettingsRow = {
   event_name: string;
   event_start_date: string | null;
   event_end_date: string | null;
+  event_logo_path?: string | null;
 };
 
 function mapEventSettings(data: unknown): EventSettings {
@@ -39,6 +43,8 @@ function mapEventSettings(data: unknown): EventSettings {
     name: row?.event_name ?? "",
     startDate: row?.event_start_date ?? null,
     endDate: row?.event_end_date ?? null,
+    logoPath: row?.event_logo_path ?? null,
+    logoUrl: eventLogoPublicUrl(row?.event_logo_path ?? null),
   };
 }
 

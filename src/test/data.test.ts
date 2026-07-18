@@ -5,6 +5,7 @@ const rpcMock = vi.hoisted(() => vi.fn());
 const storageFromMock = vi.hoisted(() => vi.fn());
 const uploadMock = vi.hoisted(() => vi.fn());
 const createSignedUrlMock = vi.hoisted(() => vi.fn());
+const getPublicUrlMock = vi.hoisted(() => vi.fn());
 
 vi.mock("../lib/supabase", () => ({
   supabase: {
@@ -33,6 +34,14 @@ import {
   updateEventSettings,
   verifyFestivalAccessCode,
 } from "../data/festival";
+import {
+  eventLogoMaxFileSize,
+  eventLogoPublicUrl,
+  isEventLogoFileSizeAllowed,
+  isSupportedEventLogoFile,
+  removeEventLogo,
+  uploadEventLogo,
+} from "../data/festivalLogo";
 import {
   createFestivalExportData,
   festivalExportFileName,
@@ -172,10 +181,12 @@ beforeEach(() => {
   rpcMock.mockReset();
   uploadMock.mockReset();
   createSignedUrlMock.mockReset();
+  getPublicUrlMock.mockReset();
   storageFromMock.mockReset();
   storageFromMock.mockReturnValue({
     upload: uploadMock,
     createSignedUrl: createSignedUrlMock,
+    getPublicUrl: getPublicUrlMock,
   });
   uploadMock.mockResolvedValue({
     data: { path: "current/timetable/file.pdf" },
@@ -185,9 +196,94 @@ beforeEach(() => {
     data: { signedUrl: "https://example.test/document.pdf" },
     error: null,
   });
+  getPublicUrlMock.mockReturnValue({
+    data: { publicUrl: "https://example.test/event-logo.png" },
+  });
 });
 
 describe("Supabase Datenzugriffe", () => {
+  it("laedt bestehende Event Einstellungen ohne Logo kompatibel", async () => {
+    rpcMock.mockResolvedValue({
+      data: [
+        { event_name: "Awards", event_start_date: null, event_end_date: null },
+      ],
+      error: null,
+    });
+
+    await expect(loadEventSettings()).resolves.toEqual({
+      name: "Awards",
+      startDate: null,
+      endDate: null,
+      logoPath: null,
+      logoUrl: null,
+    });
+  });
+
+  it("validiert und verwaltet Eventlogos ueber Storage und Admin RPCs", async () => {
+    const validFile = new File(["logo"], "Mein Logo.png", {
+      type: "image/png",
+    });
+    const invalidFile = new File(["text"], "logo.txt", { type: "text/plain" });
+    const largeFile = new File(
+      [new Uint8Array(eventLogoMaxFileSize + 1)],
+      "logo.webp",
+      {
+        type: "image/webp",
+      },
+    );
+
+    expect(isSupportedEventLogoFile(validFile)).toBe(true);
+    expect(isSupportedEventLogoFile(invalidFile)).toBe(false);
+    expect(isEventLogoFileSizeAllowed(validFile)).toBe(true);
+    expect(isEventLogoFileSizeAllowed(largeFile)).toBe(false);
+    expect(eventLogoPublicUrl("festival/logo.png")).toBe(
+      "https://example.test/event-logo.png",
+    );
+
+    rpcMock
+      .mockResolvedValueOnce({
+        data: [
+          {
+            file_path: "hurricane-awards-2026/generated-logo.png",
+            mime_type: "image/png",
+            expires_at: "2026-07-18T12:10:00.000Z",
+          },
+        ],
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: "hurricane-awards-2026/generated-logo.png",
+        error: null,
+      })
+      .mockResolvedValueOnce({ data: null, error: null });
+
+    await expect(uploadEventLogo(validFile, participantContext)).resolves.toBe(
+      "hurricane-awards-2026/generated-logo.png",
+    );
+    expect(rpcMock).toHaveBeenNthCalledWith(1, "ha_create_event_logo_upload", {
+      ...expectedParticipantRpcContext,
+      p_festival_id: "hurricane-awards-2026",
+      p_file_name: "mein-logo.png",
+      p_mime_type: "image/png",
+      p_file_size: validFile.size,
+    });
+    expect(uploadMock).toHaveBeenCalledWith(
+      "hurricane-awards-2026/generated-logo.png",
+      validFile,
+      { contentType: "image/png", upsert: false },
+    );
+    expect(rpcMock).toHaveBeenNthCalledWith(2, "ha_admin_finalize_event_logo", {
+      ...expectedParticipantRpcContext,
+      p_festival_id: "hurricane-awards-2026",
+      p_file_path: "hurricane-awards-2026/generated-logo.png",
+    });
+
+    await removeEventLogo(participantContext);
+    expect(rpcMock).toHaveBeenNthCalledWith(3, "ha_admin_remove_event_logo", {
+      ...expectedParticipantRpcContext,
+      p_festival_id: "hurricane-awards-2026",
+    });
+  });
   it("laedt den Festivalnamen ueber eine RPC Funktion", async () => {
     rpcMock.mockResolvedValue({
       data: "Hurricane Awards 2026",
@@ -228,6 +324,8 @@ describe("Supabase Datenzugriffe", () => {
       name: "Festival",
       startDate: "2026-06-19",
       endDate: "2026-06-21",
+      logoPath: null,
+      logoUrl: null,
     });
     expect(rpcMock).toHaveBeenCalledWith("ha_get_event_settings");
 
@@ -246,7 +344,13 @@ describe("Supabase Datenzugriffe", () => {
         { name: "Festival", startDate: null, endDate: null },
         participantContext,
       ),
-    ).resolves.toEqual({ name: "Festival", startDate: null, endDate: null });
+    ).resolves.toEqual({
+      name: "Festival",
+      startDate: null,
+      endDate: null,
+      logoPath: null,
+      logoUrl: null,
+    });
     expect(rpcMock).toHaveBeenCalledWith("ha_admin_update_event_settings", {
       ...expectedParticipantRpcContext,
       p_event_name: "Festival",

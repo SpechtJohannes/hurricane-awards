@@ -179,6 +179,12 @@ Eine Kategorie kann nur gelöscht werden, wenn noch keine Stimmen für sie vorha
 
 Der neue Name wird direkt in der App verwendet.
 
+### Eventlogo verwalten
+
+Im Abschnitt **Eventlogo** kannst du optional ein PNG-, JPEG- oder WebP-Bild mit maximal 2 MB auswählen. Die App zeigt die Datei zunächst als lokale Vorschau; du kannst sie speichern oder vor dem Upload wieder verwerfen.
+
+Ein gespeichertes Logo ersetzt den Eventnamen im öffentlichen Header. Beim Ersetzen oder Entfernen löscht die App die bisherige Datei nach erfolgreicher Bestätigung. Ist kein Logo hinterlegt oder kann die Bilddatei nicht geladen werden, bleibt der vollständige Eventname sichtbar. Bilder werden nicht automatisch komprimiert oder umgewandelt.
+
 ### Eventcode ändern
 
 1. Öffne den Adminbereich.
