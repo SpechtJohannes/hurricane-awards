@@ -18,6 +18,7 @@ type AdminRandomPairingsProps = {
     participantIds: string[],
   ) => Promise<void>;
   onDraw: (actionId: string, replaceExisting: boolean) => Promise<void>;
+  onReset: (actionId: string) => Promise<void>;
 };
 
 export function AdminRandomPairings({
@@ -30,11 +31,15 @@ export function AdminRandomPairings({
   onCreate,
   onUpdateParticipants,
   onDraw,
+  onReset,
 }: AdminRandomPairingsProps) {
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [formError, setFormError] = useState("");
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
+  const [resetCandidate, setResetCandidate] =
+    useState<AdminRandomPairingAction | null>(null);
+  const [resetSuccess, setResetSuccess] = useState("");
   const activeParticipants = participants.filter(
     (participant) => participant.isActive,
   );
@@ -114,6 +119,33 @@ export function AdminRandomPairings({
     }
   }
 
+  async function resetAction() {
+    if (!resetCandidate) {
+      return;
+    }
+
+    const action = resetCandidate;
+    setActionErrors((currentErrors) => ({
+      ...currentErrors,
+      [action.id]: "",
+    }));
+    setResetSuccess("");
+
+    try {
+      await onReset(action.id);
+      setResetCandidate(null);
+      setResetSuccess(
+        t("admin.randomPairings.reset.success", { name: action.name }),
+      );
+    } catch {
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        [action.id]: t("admin.randomPairings.errors.reset"),
+      }));
+      setResetCandidate(null);
+    }
+  }
+
   return (
     <>
       <SectionHeader
@@ -164,6 +196,12 @@ export function AdminRandomPairings({
         {error ? (
           <p className="admin-participant-form__error" role="alert">
             {error}
+          </p>
+        ) : null}
+
+        {resetSuccess ? (
+          <p className="admin-random-pairings__notice" role="status">
+            {resetSuccess}
           </p>
         ) : null}
 
@@ -253,35 +291,91 @@ export function AdminRandomPairings({
                 </div>
 
                 {isDrawn ? (
-                  <div className="admin-random-pairing__assignments">
-                    <h4>{t("admin.randomPairings.resultsTitle")}</h4>
-                    <ul>
-                      {action.assignments.map((assignment) => (
-                        <li key={assignment.participantId}>
-                          <span>
-                            {assignment.participantName ||
-                              participantNamesById.get(
-                                assignment.participantId,
-                              ) ||
-                              assignment.participantId}
-                          </span>
-                          <strong>
-                            {assignment.assignedParticipantName ||
-                              participantNamesById.get(
-                                assignment.assignedParticipantId,
-                              ) ||
-                              assignment.assignedParticipantId}
-                          </strong>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <>
+                    <div className="admin-random-pairing__assignments">
+                      <h4>{t("admin.randomPairings.resultsTitle")}</h4>
+                      <ul>
+                        {action.assignments.map((assignment) => (
+                          <li key={assignment.participantId}>
+                            <span>
+                              {assignment.participantName ||
+                                participantNamesById.get(
+                                  assignment.participantId,
+                                ) ||
+                                assignment.participantId}
+                            </span>
+                            <strong>
+                              {assignment.assignedParticipantName ||
+                                participantNamesById.get(
+                                  assignment.assignedParticipantId,
+                                ) ||
+                                assignment.assignedParticipantId}
+                            </strong>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    {action.assignments.length > 0 ? (
+                      <button
+                        className="admin-card__reset"
+                        type="button"
+                        disabled={isSaving}
+                        onClick={() => {
+                          setResetSuccess("");
+                          setResetCandidate(action);
+                        }}
+                      >
+                        {t("admin.randomPairings.reset.open")}
+                      </button>
+                    ) : null}
+                  </>
                 ) : null}
               </article>
             );
           })}
         </div>
       </div>
+
+      {resetCandidate ? (
+        <div className="admin-dialog-backdrop">
+          <div
+            className="admin-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reset-random-pairing-title"
+            aria-describedby="reset-random-pairing-description"
+          >
+            <h3 id="reset-random-pairing-title">
+              {t("admin.randomPairings.reset.title")}
+            </h3>
+            <p id="reset-random-pairing-description">
+              {t("admin.randomPairings.reset.description", {
+                name: resetCandidate.name,
+              })}
+            </p>
+            <div className="admin-dialog__actions">
+              <button
+                className="admin-card__reset"
+                type="button"
+                disabled={savingActionId === resetCandidate.id}
+                onClick={() => setResetCandidate(null)}
+              >
+                {t("admin.randomPairings.reset.cancel")}
+              </button>
+              <button
+                className="admin-card__reset admin-card__reset--primary"
+                type="button"
+                disabled={savingActionId === resetCandidate.id}
+                onClick={() => void resetAction()}
+              >
+                {savingActionId === resetCandidate.id
+                  ? t("common.saving")
+                  : t("admin.randomPairings.reset.confirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

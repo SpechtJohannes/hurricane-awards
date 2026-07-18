@@ -524,6 +524,14 @@
       "confirmRedraw": "Deze actie is al geloot. Echt opnieuw loten en bestaande koppelingen vervangen?",
       "participantsLabel": "Deelnemerselectie voor {{name}}",
       "resultsTitle": "Resultaat",
+      "reset": {
+        "open": "Koppelingen resetten",
+        "title": "Koppelingen resetten?",
+        "description": "Alle koppelingen voor ‘{{name}}’ worden verwijderd. Deelnemers zien daarna geen koppeling meer. De actie kan vervolgens opnieuw worden geloot of verwijderd. Dit kan niet direct ongedaan worden gemaakt.",
+        "confirm": "Koppelingen resetten",
+        "cancel": "Annuleren",
+        "success": "De koppelingen voor ‘{{name}}’ zijn gereset."
+      },
       "status": {
         "draft": "{{count}} personen geselecteerd.",
         "drawn": "{{count}} koppelingen geloot."
@@ -533,7 +541,8 @@
         "create": "De actie kon net niet worden aangemaakt.",
         "nameRequired": "De actienaam is verplicht.",
         "participants": "De deelnemerselectie kon net niet worden opgeslagen.",
-        "draw": "De loting kon net niet worden gestart. Er moeten minstens twee actieve personen geselecteerd zijn."
+        "draw": "De loting kon net niet worden gestart. Er moeten minstens twee actieve personen geselecteerd zijn.",
+        "reset": "De koppelingen konden net niet worden gereset."
       }
     },
     "tournaments": {
