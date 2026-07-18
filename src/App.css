@@ -1636,6 +1636,42 @@ h1 {
   gap: 14px;
 }
 
+.admin-random-pairings__notice {
+  margin: 0;
+  color: var(--color-success, #166534);
+  font-weight: 700;
+}
+
+.admin-dialog-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(15 23 42 / 65%);
+}
+
+.admin-dialog {
+  width: min(100%, 34rem);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: var(--surface, #fff);
+  box-shadow: 0 1.5rem 4rem rgb(15 23 42 / 35%);
+}
+
+.admin-dialog h3,
+.admin-dialog p {
+  margin-top: 0;
+}
+
+.admin-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
 .admin-random-pairing__header {
   display: grid;
   gap: 12px;

@@ -102,6 +102,7 @@ import {
   drawRandomPairingAction,
   loadAdminRandomPairingActions,
   loadRandomPairingAssignments,
+  resetRandomPairingAction,
   updateRandomPairingParticipants,
   type AdminRandomPairingAction,
   type RandomPairingParticipantAssignment,
@@ -4110,6 +4111,35 @@ function App() {
     }
   }
 
+  async function resetAdminRandomPairingAction(actionId: string) {
+    const adminContext = getParticipantAdminContext();
+
+    if (!adminContext) {
+      return;
+    }
+
+    setSavingRandomPairingActionId(actionId);
+    setAdminRandomPairingsError("");
+
+    try {
+      const resetAction = await resetRandomPairingAction(
+        activeFestival.id,
+        actionId,
+        adminContext,
+      );
+      const loadedAssignments = await loadRandomPairingAssignments(
+        activeFestival.id,
+        adminContext,
+      );
+
+      replaceAdminRandomPairingAction(resetAction);
+      setRandomPairingAssignments(loadedAssignments);
+      setRandomPairingsError("");
+    } finally {
+      setSavingRandomPairingActionId(null);
+    }
+  }
+
   function replaceTournament(tournament: Tournament) {
     setTournaments((currentTournaments) => {
       const exists = currentTournaments.some(
@@ -4674,6 +4704,7 @@ function App() {
                 onCreate={createAdminRandomPairingAction}
                 onUpdateParticipants={updateAdminRandomPairingParticipants}
                 onDraw={drawAdminRandomPairingAction}
+                onReset={resetAdminRandomPairingAction}
               />
               <AdminTournaments
                 tournaments={adminTournaments}

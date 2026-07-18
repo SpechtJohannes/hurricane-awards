@@ -249,3 +249,32 @@ export async function drawRandomPairingAction(
 
   return mapAdminAction(row);
 }
+
+export async function resetRandomPairingAction(
+  festivalId: string,
+  actionId: string,
+  context: AdminAccessContext,
+): Promise<AdminRandomPairingAction> {
+  const supabase = getSupabase();
+
+  const { data, error } = await supabase.rpc(
+    "ha_admin_reset_random_pairing_action",
+    {
+      ...participantRpcParams(context),
+      p_festival_id: festivalId,
+      p_action_id: actionId,
+    },
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  const row = firstRow<AdminRandomPairingActionRow>(data);
+
+  if (!row) {
+    throw new Error("reset random pairing action was not returned");
+  }
+
+  return mapAdminAction(row);
+}

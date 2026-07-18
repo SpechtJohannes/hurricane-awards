@@ -204,6 +204,13 @@ const randomPairingsMigration = readFileSync(
   ),
   "utf8",
 );
+const resetRandomPairingsMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    "supabase/migrations/20260718100000_reset_random_pairing_actions.sql",
+  ),
+  "utf8",
+);
 const tournamentsMigration = readFileSync(
   resolve(
     process.cwd(),
@@ -1326,6 +1333,39 @@ describe("Supabase Sicherheitsmigration", () => {
         `grant execute on function public.${functionName}`,
       );
     }
+  });
+
+  it("setzt zufaellige Paarungen festivalgebunden und atomar zurueck", () => {
+    expect(resetRandomPairingsMigration).toContain(
+      "create or replace function public.ha_admin_reset_random_pairing_action",
+    );
+    expect(resetRandomPairingsMigration).toContain(
+      "if not public.ha_has_admin_access(p_participant_access_code) then",
+    );
+    expect(resetRandomPairingsMigration).toContain(
+      "and rpa.festival_id = p_festival_id",
+    );
+    expect(resetRandomPairingsMigration).toContain("for update");
+    expect(resetRandomPairingsMigration).toContain(
+      "delete from public.random_pairing_assignments",
+    );
+    expect(resetRandomPairingsMigration).toContain("set status = 'draft'");
+    expect(resetRandomPairingsMigration).toContain("drawn_at = null");
+    expect(resetRandomPairingsMigration).not.toContain(
+      "delete from public.random_pairing_participants",
+    );
+    expect(resetRandomPairingsMigration).not.toContain(
+      "delete from public.random_pairing_actions",
+    );
+    expect(resetRandomPairingsMigration).toContain(
+      "revoke all on function public.ha_admin_reset_random_pairing_action(text, text, uuid)",
+    );
+    expect(resetRandomPairingsMigration).toContain(
+      "grant execute on function public.ha_admin_reset_random_pairing_action(text, text, uuid)",
+    );
+    expect(resetRandomPairingsMigration).toContain(
+      "notify pgrst, 'reload schema'",
+    );
   });
 
   it("legt Turniere mit geschuetzter Tabelle und KO Baum Erzeugung an", () => {

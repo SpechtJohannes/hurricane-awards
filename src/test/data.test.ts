@@ -102,6 +102,7 @@ import {
   drawRandomPairingAction,
   loadAdminRandomPairingActions,
   loadRandomPairingAssignments,
+  resetRandomPairingAction,
   updateRandomPairingParticipants,
 } from "../data/randomPairings";
 import {
@@ -1130,6 +1131,34 @@ describe("Supabase Datenzugriffe", () => {
         ...expectedParticipantRpcContext,
         p_action_id: "action-1",
         p_replace_existing: false,
+      },
+    );
+
+    rpcMock.mockResolvedValueOnce({
+      data: [actionRow],
+      error: null,
+    });
+
+    await expect(
+      resetRandomPairingAction(
+        "hurricane-awards-2026",
+        "action-1",
+        participantContext,
+      ),
+    ).resolves.toMatchObject({
+      id: "action-1",
+      status: "draft",
+      selectedParticipantIds: ["alice", "bob"],
+      assignments: [],
+      drawnAt: null,
+    });
+    expect(rpcMock).toHaveBeenNthCalledWith(
+      5,
+      "ha_admin_reset_random_pairing_action",
+      {
+        ...expectedParticipantRpcContext,
+        p_festival_id: "hurricane-awards-2026",
+        p_action_id: "action-1",
       },
     );
   });

@@ -123,6 +123,30 @@ describe("i18n test infrastructure", () => {
     );
   });
 
+  it("enthaelt Texte zum Zuruecksetzen zufaelliger Paarungen auf Deutsch und Niederlaendisch", async () => {
+    await i18n.changeLanguage("de");
+
+    expect(i18n.t("admin.randomPairings.reset.open")).toBe(
+      "Zuordnungen zurücksetzen",
+    );
+    expect(
+      i18n.t("admin.randomPairings.reset.description", {
+        name: "Secret Buddy",
+      }),
+    ).toContain("nicht direkt rückgängig");
+
+    await i18n.changeLanguage("nl");
+
+    expect(i18n.t("admin.randomPairings.reset.open")).toBe(
+      "Koppelingen resetten",
+    );
+    expect(
+      i18n.t("admin.randomPairings.reset.description", {
+        name: "Secret Buddy",
+      }),
+    ).toContain("niet direct ongedaan");
+  });
+
   it("enthaelt Abstimmungs-Empty-State-Texte auf Deutsch und Niederlaendisch", async () => {
     await i18n.changeLanguage("de");
 

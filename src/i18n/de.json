@@ -524,6 +524,14 @@
       "confirmRedraw": "Diese Aktion wurde bereits ausgelost. Wirklich neu auslosen und bestehende Paarungen ersetzen?",
       "participantsLabel": "Teilnehmerauswahl für {{name}}",
       "resultsTitle": "Ergebnis",
+      "reset": {
+        "open": "Zuordnungen zurücksetzen",
+        "title": "Zuordnungen zurücksetzen?",
+        "description": "Alle Zuordnungen für „{{name}}“ werden entfernt. Teilnehmende sehen danach keine Zuordnung mehr. Die Aktion kann anschließend erneut ausgelost oder gelöscht werden. Dieser Vorgang kann nicht direkt rückgängig gemacht werden.",
+        "confirm": "Zuordnungen zurücksetzen",
+        "cancel": "Abbrechen",
+        "success": "Die Zuordnungen für „{{name}}“ wurden zurückgesetzt."
+      },
       "status": {
         "draft": "{{count}} Personen ausgewählt.",
         "drawn": "{{count}} Paarungen ausgelost."
@@ -533,7 +541,8 @@
         "create": "Die Aktion konnte gerade nicht angelegt werden.",
         "nameRequired": "Der Aktionsname ist erforderlich.",
         "participants": "Die Teilnehmerauswahl konnte gerade nicht gespeichert werden.",
-        "draw": "Die Auslosung konnte gerade nicht gestartet werden. Es müssen mindestens zwei aktive Personen ausgewählt sein."
+        "draw": "Die Auslosung konnte gerade nicht gestartet werden. Es müssen mindestens zwei aktive Personen ausgewählt sein.",
+        "reset": "Die Zuordnungen konnten gerade nicht zurückgesetzt werden."
       }
     },
     "tournaments": {

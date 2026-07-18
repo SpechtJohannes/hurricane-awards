@@ -140,6 +140,8 @@ Zufaellige Paarungen sind im Spielebereich verortet. Admins legen festivalbezoge
 
 Die Auslosung in `ha_admin_draw_random_pairing_action` verlangt mindestens zwei aktive ausgewaehlte Personen. Sie sortiert die Auswahl zufaellig und ordnet jede Person der jeweils naechsten Person zu; die letzte Person wird der ersten zugeordnet. Dadurch entstehen bei mindestens zwei Personen keine Selbstzuordnungen. Bereits ausgeloste Aktionen koennen nicht versehentlich ueberschrieben werden: Ein erneutes Auslosen ist nur ueber den expliziten Parameter `p_replace_existing = true` erlaubt und ersetzt bestehende Paarungen.
 
+Admins koennen eine Auslosung mit `ha_admin_reset_random_pairing_action` atomar zuruecksetzen. Die Security-Definer-RPC prueft Adminberechtigung und Festivalzugehoerigkeit, sperrt die Aktion fuer konkurrierende Aenderungen, entfernt alle Eintraege aus `random_pairing_assignments` und setzt `status` auf `draft` sowie `drawn_at` auf `null`. Aktion und ausgewaehlte Teilnehmende bleiben erhalten, sodass dieselbe Auswahl erneut ausgelost werden kann. Weil Teilnehmende ihre Zuordnung direkt aus der Assignment-Tabelle laden, erhalten sie nach dem Zuruecksetzen den bestehenden Leerzustand.
+
 Teilnehmende laden ausschliesslich ihre eigenen Zuordnungen ueber `ha_list_random_pairing_assignments`. Die RPC ermittelt die Person serverseitig aus dem Teilnehmercode und filtert auf `random_pairing_assignments.participant_id`. Andere Paarungen derselben Aktion werden fuer Teilnehmende nicht ausgeliefert. Admins koennen ueber die Admin-RPCs Aktionen, Auswahl und alle Paarungen einsehen.
 
 ### Turniere

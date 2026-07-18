@@ -96,6 +96,7 @@ import {
   drawRandomPairingAction,
   loadAdminRandomPairingActions,
   loadRandomPairingAssignments,
+  resetRandomPairingAction,
   updateRandomPairingParticipants,
   type AdminRandomPairingAction,
   type RandomPairingParticipantAssignment,
@@ -231,6 +232,7 @@ vi.mock("../data/randomPairings", () => ({
   drawRandomPairingAction: vi.fn(),
   loadAdminRandomPairingActions: vi.fn(),
   loadRandomPairingAssignments: vi.fn(),
+  resetRandomPairingAction: vi.fn(),
   updateRandomPairingParticipants: vi.fn(),
 }));
 
@@ -779,6 +781,17 @@ function mockLoadedData({
     assignments: drawnRandomPairingAction.assignments,
     drawnAt: drawnRandomPairingAction.drawnAt,
   }));
+  vi.mocked(resetRandomPairingAction).mockImplementation(
+    async (_festivalId, actionId) => ({
+      ...(loadedAdminRandomPairingActions.find(
+        (action) => action.id === actionId,
+      ) ?? drawnRandomPairingAction),
+      id: actionId,
+      status: "draft",
+      assignments: [],
+      drawnAt: null,
+    }),
+  );
   vi.mocked(loadTimetable).mockResolvedValue(loadedTimetable);
   vi.mocked(loadAdminFestivalDays).mockResolvedValue(loadedAdminFestivalDays);
   vi.mocked(loadAdminTimetableStages).mockResolvedValue(
@@ -4587,6 +4600,12 @@ describe("Admin", () => {
     const existingActionView = within(existingAction as HTMLElement);
     const carlaCheckbox = existingActionView.getByLabelText(/carla/i);
 
+    expect(
+      existingActionView.queryByRole("button", {
+        name: /zuordnungen zurücksetzen/i,
+      }),
+    ).toBeNull();
+
     await user.click(carlaCheckbox);
 
     expect(updateRandomPairingParticipants).toHaveBeenCalledWith(
@@ -4613,6 +4632,113 @@ describe("Admin", () => {
     expect(within(pairingsSection).getAllByText("Bob").length).toBeGreaterThan(
       0,
     );
+  });
+
+  it("setzt ausgeloste zufaellige Paarungen nach Bestaetigung zurueck", async () => {
+    mockLoadedData({
+      loadedAdminRandomPairingActions: [drawnRandomPairingAction],
+      loadedRandomPairingAssignments: [randomPairingAssignment],
+    });
+    vi.mocked(loadRandomPairingAssignments)
+      .mockResolvedValueOnce([randomPairingAssignment])
+      .mockResolvedValueOnce([]);
+    await renderLoadedApp();
+    const user = await loginWith("ALICE42");
+
+    await user.click(screen.getByRole("button", { name: /^admin$/i }));
+    await switchAdminSection(/^spiele$/i);
+    const pairingsSection = sectionForHeading(/zufällige paarungen/i);
+
+    await user.click(
+      within(pairingsSection).getByRole("button", {
+        name: /zuordnungen zurücksetzen/i,
+      }),
+    );
+
+    const dialog = screen.getByRole("dialog", {
+      name: /zuordnungen zurücksetzen/i,
+    });
+    expect(within(dialog).getByText(/nicht direkt rückgängig/i)).toBeVisible();
+
+    await user.click(
+      within(dialog).getByRole("button", {
+        name: /zuordnungen zurücksetzen/i,
+      }),
+    );
+
+    expect(resetRandomPairingAction).toHaveBeenCalledWith(
+      "hurricane-awards-2026",
+      "random-action-1",
+      { participantAccessCode: "ALICE42" },
+    );
+    expect(loadRandomPairingAssignments).toHaveBeenLastCalledWith(
+      "hurricane-awards-2026",
+      { participantAccessCode: "ALICE42" },
+    );
+    expect(
+      await within(pairingsSection).findByText(/wurden zurückgesetzt/i),
+    ).toBeVisible();
+    expect(
+      within(pairingsSection).getByRole("button", {
+        name: /auslosung starten/i,
+      }),
+    ).toBeEnabled();
+    expect(within(pairingsSection).queryByText(/^ergebnis$/i)).toBeNull();
+  });
+
+  it("bricht das Zuruecksetzen zufaelliger Paarungen ohne Aenderung ab", async () => {
+    mockLoadedData({
+      loadedAdminRandomPairingActions: [drawnRandomPairingAction],
+    });
+    await renderLoadedApp();
+    const user = await loginWith("ALICE42");
+
+    await user.click(screen.getByRole("button", { name: /^admin$/i }));
+    await switchAdminSection(/^spiele$/i);
+    const pairingsSection = sectionForHeading(/zufällige paarungen/i);
+    await user.click(
+      within(pairingsSection).getByRole("button", {
+        name: /zuordnungen zurücksetzen/i,
+      }),
+    );
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: /abbrechen/i,
+      }),
+    );
+
+    expect(resetRandomPairingAction).not.toHaveBeenCalled();
+    expect(within(pairingsSection).getByText(/^ergebnis$/i)).toBeVisible();
+  });
+
+  it("zeigt Fehler beim Zuruecksetzen zufaelliger Paarungen an", async () => {
+    mockLoadedData({
+      loadedAdminRandomPairingActions: [drawnRandomPairingAction],
+    });
+    vi.mocked(resetRandomPairingAction).mockRejectedValueOnce(
+      new Error("reset failed"),
+    );
+    await renderLoadedApp();
+    const user = await loginWith("ALICE42");
+
+    await user.click(screen.getByRole("button", { name: /^admin$/i }));
+    await switchAdminSection(/^spiele$/i);
+    const pairingsSection = sectionForHeading(/zufällige paarungen/i);
+    await user.click(
+      within(pairingsSection).getByRole("button", {
+        name: /zuordnungen zurücksetzen/i,
+      }),
+    );
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: /zuordnungen zurücksetzen/i,
+      }),
+    );
+
+    expect(
+      await within(pairingsSection).findByRole("alert"),
+    ).toHaveTextContent(/konnten gerade nicht zurückgesetzt werden/i);
+    expect(within(pairingsSection).getByText(/^ergebnis$/i)).toBeVisible();
   });
 
   it("verwaltet Turniere im Adminbereich Spiele", async () => {
