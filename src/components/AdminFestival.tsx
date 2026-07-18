@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { SectionHeader } from "./SectionHeader";
 import type { EventSettings } from "../data/festival";
+import { AdminEventLogo } from "./AdminEventLogo";
 
 type AdminFestivalProps = {
   mode?: "settings" | "archive";
@@ -15,10 +16,15 @@ type AdminFestivalProps = {
   isLoadingFestivalCode: boolean;
   isSavingFestivalCode: boolean;
   isExporting: boolean;
+  logoUrl?: string | null;
+  isUploadingLogo?: boolean;
+  isRemovingLogo?: boolean;
   onSave: (settings: EventSettings) => Promise<void>;
   onSaveFestivalCode: (code: string) => Promise<void>;
   onArchive: () => Promise<string>;
   onExport: (includeParticipantAccessCodes: boolean) => Promise<void>;
+  onUploadLogo?: (file: File) => Promise<void>;
+  onRemoveLogo?: () => Promise<void>;
 };
 
 export function AdminFestival({
@@ -33,10 +39,15 @@ export function AdminFestival({
   isLoadingFestivalCode,
   isSavingFestivalCode,
   isExporting,
+  logoUrl = null,
+  isUploadingLogo = false,
+  isRemovingLogo = false,
   onSave,
   onSaveFestivalCode,
   onArchive,
   onExport,
+  onUploadLogo = async () => undefined,
+  onRemoveLogo = async () => undefined,
 }: AdminFestivalProps) {
   const { t } = useTranslation();
   const [name, setName] = useState(festivalName);
@@ -334,6 +345,14 @@ export function AdminFestival({
           {isSaving ? t("common.saving") : t("admin.festival.save")}
         </button>
       </form>
+
+      <AdminEventLogo
+        logoUrl={logoUrl}
+        isUploading={isUploadingLogo}
+        isRemoving={isRemovingLogo}
+        onUpload={onUploadLogo}
+        onRemove={onRemoveLogo}
+      />
 
       <form className="admin-festival" onSubmit={submitCodeForm}>
         <div>

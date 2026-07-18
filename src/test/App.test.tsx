@@ -51,6 +51,11 @@ import {
   verifyFestivalAccessCode,
 } from "../data/festival";
 import {
+  eventLogoPublicUrl,
+  removeEventLogo,
+  uploadEventLogo,
+} from "../data/festivalLogo";
+import {
   festivalExportFileName,
   loadFestivalExportData,
   serializeFestivalExport,
@@ -180,6 +185,16 @@ vi.mock("../data/festival", () => ({
   updateEventSettings: vi.fn(),
   verifyFestivalAccessCode: vi.fn(),
 }));
+
+vi.mock("../data/festivalLogo", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../data/festivalLogo")>();
+  return {
+    ...actual,
+    eventLogoPublicUrl: vi.fn(),
+    removeEventLogo: vi.fn(),
+    uploadEventLogo: vi.fn(),
+  };
+});
 
 vi.mock("../data/export", () => ({
   festivalExportFileName: vi.fn(),
@@ -543,6 +558,8 @@ function mockLoadedData({
   loadedFestivalName = "Hurricane Awards 2026",
   loadedFestivalAccessCode = "HURRICANE2026",
   loadedFestivalAccessVersion = festivalAccessVersion,
+  loadedEventLogoPath = null,
+  loadedEventLogoUrl = null,
   loadedParticipants = participants,
   loadedAdminParticipants = loadedParticipants,
   loadedCategories = categories,
@@ -573,6 +590,8 @@ function mockLoadedData({
   loadedFestivalName?: string;
   loadedFestivalAccessCode?: string;
   loadedFestivalAccessVersion?: string;
+  loadedEventLogoPath?: string | null;
+  loadedEventLogoUrl?: string | null;
   loadedParticipants?: Participant[];
   loadedAdminParticipants?: Participant[];
   loadedCategories?: Category[];
@@ -606,7 +625,16 @@ function mockLoadedData({
     name: loadedFestivalName,
     startDate: null,
     endDate: null,
+    logoPath: loadedEventLogoPath,
+    logoUrl: loadedEventLogoUrl,
   });
+  vi.mocked(eventLogoPublicUrl).mockImplementation((path) =>
+    path ? `https://example.test/${path}` : null,
+  );
+  vi.mocked(uploadEventLogo).mockResolvedValue(
+    "hurricane-awards-2026/logo.png",
+  );
+  vi.mocked(removeEventLogo).mockResolvedValue();
   vi.mocked(loadFestivalAccessVersion).mockResolvedValue(
     loadedFestivalAccessVersion,
   );
@@ -1878,7 +1906,8 @@ describe("Login", () => {
     await user.click(screen.getByRole("button", { name: /code/i }));
 
     const dashboardSection = sectionForHeading(/hallo alice/i);
-    const dashboardHero = within(dashboardSection).getByTestId("dashboard-hero");
+    const dashboardHero =
+      within(dashboardSection).getByTestId("dashboard-hero");
 
     expect(
       screen.queryByRole("navigation", { name: /hauptbereiche/i }),
@@ -3508,6 +3537,9 @@ describe("Admin", () => {
     expect(
       screen.queryByRole("button", { name: /json exportieren/i }),
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: /eventlogo/i }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/status/i)).not.toBeInTheDocument();
     expect(loadAdminCategories).not.toHaveBeenCalled();
     expect(loadFestivalAccessCode).not.toHaveBeenCalled();
@@ -3525,6 +3557,8 @@ describe("Admin", () => {
     expect(screen.queryByLabelText(/status/i)).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: /^admin$/i }));
+
+    expect(screen.getByRole("heading", { name: /eventlogo/i })).toBeVisible();
     await switchAdminSection(/^awards$/i);
 
     expect(await screen.findAllByLabelText(/status/i)).toHaveLength(3);
@@ -4815,9 +4849,9 @@ describe("Admin", () => {
       }),
     );
 
-    expect(
-      await within(pairingsSection).findByRole("alert"),
-    ).toHaveTextContent(/konnten gerade nicht zurückgesetzt werden/i);
+    expect(await within(pairingsSection).findByRole("alert")).toHaveTextContent(
+      /konnten gerade nicht zurückgesetzt werden/i,
+    );
     expect(within(pairingsSection).getByText(/^ergebnis$/i)).toBeVisible();
   });
 

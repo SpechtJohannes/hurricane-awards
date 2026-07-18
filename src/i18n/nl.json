@@ -17,6 +17,9 @@
     "loading": "Laden...",
     "saving": "Opslaan..."
   },
+  "header": {
+    "eventLogoAlt": "Logo van {{festivalName}}"
+  },
   "installPrompt": {
     "button": "App installeren",
     "iosHelp": "Tik op het deel-symbool en kies Zet op beginscherm."
@@ -612,6 +615,30 @@
       "archiving": "Archiveren...",
       "archiveConfirm": "Huidig evenement echt archiveren? De actieve gegevens blijven ongewijzigd.",
       "archiveSuccess": "Evenement is gearchiveerd. Archief-ID: {{archiveId}}",
+      "logo": {
+        "title": "Evenementlogo",
+        "description": "Optioneel logo in de app-header. PNG, JPEG en WebP tot maximaal 2 MB worden ondersteund.",
+        "empty": "Er is momenteel geen evenementlogo ingesteld.",
+        "select": "Logo kiezen",
+        "replace": "Logo vervangen",
+        "save": "Logo opslaan",
+        "uploading": "Logo wordt geüpload...",
+        "discard": "Selectie annuleren",
+        "remove": "Logo verwijderen",
+        "removing": "Logo wordt verwijderd...",
+        "removeConfirm": "Evenementlogo echt verwijderen? Daarna wordt de evenementnaam weer in de header getoond.",
+        "previewAlt": "Voorbeeld van het evenementlogo",
+        "localPreview": "Lokaal voorbeeld – nog niet opgeslagen",
+        "savedPreview": "Momenteel opgeslagen logo",
+        "uploadSuccess": "Het evenementlogo is opgeslagen.",
+        "removeSuccess": "Het evenementlogo is verwijderd.",
+        "errors": {
+          "type": "Kies een PNG-, JPEG- of WebP-bestand.",
+          "size": "Het evenementlogo mag maximaal 2 MB groot zijn.",
+          "upload": "Het evenementlogo kon net niet worden opgeslagen.",
+          "remove": "Het evenementlogo kon net niet worden verwijderd."
+        }
+      },
       "errors": {
         "save": "De evenementnaam kon net niet worden opgeslagen.",
         "nameRequired": "De evenementnaam is verplicht.",
