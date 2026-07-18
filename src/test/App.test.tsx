@@ -1878,6 +1878,7 @@ describe("Login", () => {
     await user.click(screen.getByRole("button", { name: /code/i }));
 
     const dashboardSection = sectionForHeading(/hallo alice/i);
+    const dashboardHero = within(dashboardSection).getByTestId("dashboard-hero");
 
     expect(
       screen.queryByRole("navigation", { name: /hauptbereiche/i }),
@@ -1899,6 +1900,10 @@ describe("Login", () => {
     const awardsTile = within(dashboardSection).getByRole("button", {
       name: /^awards/i,
     });
+    expect(
+      dashboardHero.compareDocumentPosition(awardsTile) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     const timetableTile = within(dashboardSection).getByRole("button", {
       name: /timetable/i,
     });

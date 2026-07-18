@@ -293,6 +293,7 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - JSON-Exporte enthalten Teilnehmercodes nur nach expliziter Admin-Auswahl.
 - Bingo speichert keine gezogenen Zahlen, prueft kein Bingo automatisch und fuehrt keine Historie vergangener Runden.
 - Sichtbare UI-Texte werden ueber Uebersetzungsdateien gepflegt und nicht direkt in Komponenten hardcodiert.
+- `DashboardHero` fasst oberhalb der Dashboard-Karten den Eventstatus, den naechsten zukuenftigen Timetable-Favoriten und eine reale offene Abstimmung zusammen. Die Komponente erhaelt bereits geladene Anwendungsdaten und fuehrt keine eigenen Datenzugriffe aus; fehlende optionale Inhalte werden neutral dargestellt oder weggelassen.
 - Datenadapter in `src/data` kapseln Supabase RPC-Aufrufe, damit UI-Komponenten nicht direkt mit RPC-Details arbeiten muessen.
 - Festivaldokumente trennen Dateiinhalt und Metadaten: Storage enthaelt die Dateien, PostgreSQL/RPCs steuern die sichtbaren Dokumenteintraege.
 - Der strukturierte Timetable nutzt getrennte Kernentitaeten, einen Lese-RPC, eine Adminverwaltung fuer Festivaltage, Buehnen, Acts und Auftritte sowie eine nach Tagen, Buehnen und Zeiten gruppierte Teilnehmeransicht mit persoenlichen Auftrittsfavoriten.

@@ -146,7 +146,14 @@
       "tomorrow": "Morgen beginnt das Event",
       "singleDay": "Heute ist das Event",
       "eventDay": "Tag {{current}} von {{total}}",
-      "finished": "Das Event ist beendet"
+      "finished": "Das Event ist beendet",
+      "missing": "Der Eventzeitraum ist noch nicht hinterlegt"
+    },
+    "hero": {
+      "nextFavorite": "Dein nächster Favorit",
+      "favoriteDetails": "{{time}} · Bühne: {{stage}}",
+      "activeVoting": "Aktive Abstimmung",
+      "openVoting": "Jetzt abstimmen"
     },
     "tiles": {
       "timetable": {
