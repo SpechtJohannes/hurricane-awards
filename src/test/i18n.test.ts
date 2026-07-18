@@ -40,7 +40,7 @@ describe("i18n test infrastructure", () => {
 
     expect(i18n.t("navigation.timetable")).toBe("Timetable");
     expect(i18n.t("timetable.empty")).toContain("noch keine Auftritte");
-    expect(i18n.t("timetable.emptyStages")).toContain("noch keine Buehnen");
+    expect(i18n.t("timetable.emptyStages")).toContain("noch keine Bühnen");
     expect(i18n.t("timetable.emptyDay")).toContain("An diesem Tag");
     expect(i18n.t("timetable.scrollHint")).toContain("Seitlich scrollen");
     expect(i18n.t("timetable.unknownAct")).toBe("Unbekannter Act");
@@ -74,7 +74,7 @@ describe("i18n test infrastructure", () => {
     expect(i18n.t("bingo.description")).toContain(
       "automatisch eine eigene Bingokarte",
     );
-    expect(i18n.t("bingo.description")).toContain("ausserhalb der App");
+    expect(i18n.t("bingo.description")).toContain("außerhalb der App");
 
     await i18n.changeLanguage("nl");
 
@@ -138,7 +138,7 @@ describe("i18n test infrastructure", () => {
 
     expect(i18n.t("navigation.dashboard")).toBe("Start");
     expect(i18n.t("navigation.backToDashboard")).toBe(
-      "Zur Dashboard Uebersicht",
+      "Zur Dashboard-Übersicht",
     );
     expect(i18n.t("dashboard.greeting", { name: "Alice" })).toBe("Hallo Alice");
     expect(i18n.t("dashboard.tiles.awards.title")).toBe("Awards");
@@ -197,5 +197,26 @@ describe("i18n test infrastructure", () => {
     expect(i18n.t("admin.timetable.performances.createButton")).toBe(
       "Optreden aanmaken",
     );
+  });
+
+  it("stellt deutsche Sonderzeichen auch in dynamischen Übersetzungen korrekt dar", async () => {
+    await i18n.changeLanguage("de");
+
+    const translations = [
+      i18n.t("info.documentTypes.site_map"),
+      i18n.t("admin.horseRacing.openBetting"),
+      i18n.t("navigation.backToDashboard"),
+      i18n.t("horseRacing.description"),
+      i18n.t("tournaments.bracket.label", { name: "Müller & Söhne" }),
+    ];
+
+    expect(translations).toEqual([
+      "Geländeplan",
+      "Wettphase öffnen",
+      "Zur Dashboard-Übersicht",
+      expect.stringContaining("außerhalb"),
+      "Turnierbaum für Müller & Söhne",
+    ]);
+    expect(translations.join(" ")).not.toMatch(/Ã|Â|�/);
   });
 });

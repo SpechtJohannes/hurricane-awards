@@ -344,7 +344,7 @@ const festivalDocuments: FestivalDocument[] = [
   },
   {
     documentType: "site_map",
-    title: "Gelaendeplan",
+    title: "Geländeplan",
     filePath: "current/site_map/site-map.png",
     mimeType: "image/png",
     updatedAt: "2026-07-03T11:00:00.000Z",
@@ -1027,13 +1027,8 @@ async function renderLoadedApp() {
 async function unlockFestivalWith(code = "HURRICANE2026") {
   const user = userEvent.setup();
 
-  await user.type(
-    screen.getByRole("textbox", { name: /^eventcode$/i }),
-    code,
-  );
-  await user.click(
-    screen.getByRole("button", { name: /event freischalten/i }),
-  );
+  await user.type(screen.getByRole("textbox", { name: /^eventcode$/i }), code);
+  await user.click(screen.getByRole("button", { name: /event freischalten/i }));
 
   await waitFor(() => {
     expect(
@@ -1413,9 +1408,7 @@ describe("Login", () => {
     expect(
       await screen.findByRole("heading", { name: "Hurricane Awards 2026" }),
     ).toBeVisible();
-    expect(
-      screen.getByRole("textbox", { name: /^eventcode$/i }),
-    ).toBeVisible();
+    expect(screen.getByRole("textbox", { name: /^eventcode$/i })).toBeVisible();
     expect(
       screen.getByRole("button", { name: /event freischalten/i }),
     ).toBeVisible();
@@ -1466,9 +1459,7 @@ describe("Login", () => {
     setQrScannerSupport();
     await renderLoadedApp();
 
-    expect(
-      screen.getByRole("textbox", { name: /^eventcode$/i }),
-    ).toBeVisible();
+    expect(screen.getByRole("textbox", { name: /^eventcode$/i })).toBeVisible();
     expect(
       await screen.findByRole("button", { name: /qr-code scannen/i }),
     ).toBeEnabled();
@@ -1489,9 +1480,7 @@ describe("Login", () => {
     expect(
       screen.getByText(/qr-code scannen ist auf diesem ger/i),
     ).toBeVisible();
-    expect(
-      screen.getByRole("textbox", { name: /^eventcode$/i }),
-    ).toBeVisible();
+    expect(screen.getByRole("textbox", { name: /^eventcode$/i })).toBeVisible();
   });
 
   it("uebernimmt einen gueltigen QR-Scan als Eventcode", async () => {
@@ -1525,9 +1514,9 @@ describe("Login", () => {
     expect(
       screen.queryByRole("textbox", { name: /^teilnehmercode$/i }),
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("textbox", { name: /^eventcode$/i }),
-    ).toHaveValue("FALSCH");
+    expect(screen.getByRole("textbox", { name: /^eventcode$/i })).toHaveValue(
+      "FALSCH",
+    );
     expect(
       screen.getByRole("button", { name: /qr-code scannen/i }),
     ).toBeEnabled();
@@ -1980,7 +1969,7 @@ describe("Login", () => {
       ).toBeVisible();
 
       await user.click(
-        screen.getByRole("button", { name: /zur dashboard uebersicht/i }),
+        screen.getByRole("button", { name: /zur dashboard-übersicht/i }),
       );
       expect(
         await screen.findByRole("heading", { name: /hallo alice/i }),
@@ -2293,9 +2282,9 @@ describe("Login", () => {
       ).getByRole("button", { name: /^bingo$/i }),
     ).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("heading", { name: /^bingo$/i })).toBeVisible();
-    expect(screen.getByText(/jede person erhaelt automatisch/i)).toBeVisible();
+    expect(screen.getByText(/jede person erhält automatisch/i)).toBeVisible();
     expect(
-      screen.getByText(/ziehung findet ausserhalb der app statt/i),
+      screen.getByText(/ziehung findet außerhalb der app statt/i),
     ).toBeVisible();
     expect(
       screen.queryByRole("heading", { name: /abstimmung/i }),
@@ -2355,7 +2344,7 @@ describe("Login", () => {
     );
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: /herz.*ausgewaehlt/i }),
+        screen.getByRole("button", { name: /herz.*ausgewählt/i }),
       ).toHaveAttribute("aria-pressed", "true");
     });
   });
@@ -2381,7 +2370,7 @@ describe("Login", () => {
 
     expect(screen.getByText(/deine auswahl ist gespeichert/i)).toBeVisible();
     expect(
-      screen.getByRole("button", { name: /pik.*ausgewaehlt/i }),
+      screen.getByRole("button", { name: /pik.*ausgewählt/i }),
     ).toBeDisabled();
     expect(screen.getByRole("button", { name: /herz/i })).toBeDisabled();
     expect(saveHorseRacingBet).not.toHaveBeenCalled();
@@ -2424,7 +2413,7 @@ describe("Login", () => {
       ).getByRole("button", { name: /^zuordnungen$/i }),
     );
 
-    expect(screen.getByText(/keine zuordnung fuer dich/i)).toBeVisible();
+    expect(screen.getByText(/keine zuordnung für dich/i)).toBeVisible();
   });
 
   it("zeigt Turniere und den KO Baum fuer Teilnehmende", async () => {
@@ -2662,7 +2651,7 @@ describe("Login", () => {
   it("stellt viele Buehnen und lange Act Namen in einem horizontalen Raster dar", async () => {
     const manyStages = Array.from({ length: 7 }, (_, index) => ({
       id: `stage-${index + 1}`,
-      name: `Sehr lange Buehne ${index + 1}`,
+      name: `Sehr lange Bühne ${index + 1}`,
       sortOrder: index + 1,
       color: index === 0 ? "#3a86ff" : null,
     }));
@@ -2677,7 +2666,7 @@ describe("Login", () => {
           {
             id: "act-long",
             name: longActName,
-            description: "Beschreibung mit laengerem Text fuer mobile Karten.",
+            description: "Beschreibung mit längerem Text für mobile Karten.",
           },
         ],
         performances: [
@@ -2701,7 +2690,7 @@ describe("Login", () => {
     expect(grid).toHaveStyle("min-width: calc(76px + 7 * 180px)");
     expect(
       within(timetableSection).getByRole("columnheader", {
-        name: "Sehr lange Buehne 7",
+        name: "Sehr lange Bühne 7",
       }),
     ).toBeVisible();
     expect(
@@ -2914,7 +2903,7 @@ describe("Login", () => {
       "src",
       "https://example.test/timetable.pdf",
     );
-    expect(screen.getByRole("img", { name: /gelaendeplan/i })).toHaveAttribute(
+    expect(screen.getByRole("img", { name: /geländeplan/i })).toHaveAttribute(
       "src",
       "https://example.test/site-map.png",
     );
@@ -3567,9 +3556,7 @@ describe("Admin", () => {
 
     expect(updateEventSettings).not.toHaveBeenCalled();
     expect(
-      await within(festivalSection).findByText(
-        /eventname ist erforderlich/i,
-      ),
+      await within(festivalSection).findByText(/eventname ist erforderlich/i),
     ).toBeVisible();
   });
 
@@ -3652,9 +3639,7 @@ describe("Admin", () => {
 
     expect(updateFestivalAccessCode).not.toHaveBeenCalled();
     expect(
-      await within(festivalSection).findByText(
-        /eventcode ist erforderlich/i,
-      ),
+      await within(festivalSection).findByText(/eventcode ist erforderlich/i),
     ).toBeVisible();
   });
 
@@ -4563,9 +4548,7 @@ describe("Admin", () => {
       participantAccessCode: "ALICE42",
     });
     await waitFor(() => {
-      expect(
-        screen.getByRole("heading", { name: /^awards$/i }),
-      ).toBeVisible();
+      expect(screen.getByRole("heading", { name: /^awards$/i })).toBeVisible();
     });
   });
 
@@ -4719,7 +4702,7 @@ describe("Admin", () => {
 
     await user.click(
       within(updatedTournamentCard as HTMLElement).getByRole("button", {
-        name: /^lÃ¶schen$/i,
+        name: /^löschen$/i,
       }),
     );
 

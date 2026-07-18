@@ -387,7 +387,7 @@ describe("Supabase Datenzugriffe", () => {
       data: [
         {
           document_type: "site_map",
-          title: "Gelaendeplan",
+          title: "Geländeplan",
           file_path: "current/site_map/map.png",
           mime_type: "image/png",
           updated_at: "2026-07-03T10:00:00.000Z",
@@ -401,7 +401,7 @@ describe("Supabase Datenzugriffe", () => {
     ).resolves.toMatchObject([
       {
         documentType: "site_map",
-        title: "Gelaendeplan",
+        title: "Geländeplan",
         filePath: "current/site_map/map.png",
         mimeType: "image/png",
       },
