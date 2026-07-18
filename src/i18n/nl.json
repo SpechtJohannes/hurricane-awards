@@ -146,7 +146,14 @@
       "tomorrow": "Morgen begint het evenement",
       "singleDay": "Vandaag is het evenement",
       "eventDay": "Dag {{current}} van {{total}}",
-      "finished": "Het evenement is afgelopen"
+      "finished": "Het evenement is afgelopen",
+      "missing": "De evenementperiode is nog niet vastgelegd"
+    },
+    "hero": {
+      "nextFavorite": "Je volgende favoriet",
+      "favoriteDetails": "{{time}} · Podium: {{stage}}",
+      "activeVoting": "Actieve stemming",
+      "openVoting": "Nu stemmen"
     },
     "tiles": {
       "timetable": {

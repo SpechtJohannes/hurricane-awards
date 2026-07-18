@@ -178,7 +178,7 @@ import { Tournaments } from "./components/Tournaments";
 import { FestivalInfo } from "./components/FestivalInfo";
 import { Avatar, ParticipantName } from "./components/Avatar";
 import { SectionHeader } from "./components/SectionHeader";
-import { EventStatusCard } from "./components/EventStatusCard";
+import { DashboardHero } from "./components/DashboardHero";
 import { useFestivalAccess } from "./hooks/useFestivalAccess";
 import { avatars } from "./config/avatars";
 import i18n from "./i18n";
@@ -755,6 +755,8 @@ type DashboardSectionProps = {
   eventEndDate: string | null;
   eventPhase: EventPhase;
   referenceInstant: Date;
+  timetable: Timetable | null;
+  activeCategory: Category | null;
   onNavigate: (section: MainSection) => void;
 };
 
@@ -810,10 +812,11 @@ function DashboardSection({
   eventEndDate,
   eventPhase,
   referenceInstant,
+  timetable,
+  activeCategory,
   onNavigate,
 }: DashboardSectionProps) {
   const { t } = useTranslation();
-  const greetingName = participantName ?? t("dashboard.guestName");
   const showEventStatus =
     selectDashboardModules(
       [{ id: "eventStatus" }],
@@ -827,26 +830,19 @@ function DashboardSection({
       id="main-dashboard"
       aria-labelledby="dashboard-title"
     >
-      <div className="dashboard__intro">
-        <p className="dashboard__eyebrow">{t("dashboard.eyebrow")}</p>
-        <h2 id="dashboard-title">
-          {t("dashboard.greeting", { name: greetingName })}
-        </h2>
-        <p className="dashboard__festival">{festivalName}</p>
-        <p className="dashboard__description">
-          {isAuthenticated
-            ? t("dashboard.description")
-            : t("dashboard.guestDescription")}
-        </p>
-      </div>
-
-      {showEventStatus ? (
-        <EventStatusCard
-          startDate={eventStartDate}
-          endDate={eventEndDate}
-          referenceInstant={referenceInstant}
-        />
-      ) : null}
+      <DashboardHero
+        festivalName={festivalName}
+        participantName={participantName}
+        isAuthenticated={isAuthenticated}
+        eventStartDate={eventStartDate}
+        eventEndDate={eventEndDate}
+        referenceInstant={referenceInstant}
+        timetable={timetable}
+        activeCategory={activeCategory}
+        showEventStatus={showEventStatus}
+        onOpenTimetable={() => onNavigate("timetable")}
+        onOpenVoting={() => onNavigate(isAuthenticated ? "voting" : "profile")}
+      />
 
       <div className="dashboard__grid" aria-label={t("dashboard.quickAccess")}>
         {tiles.map((tile) => (
@@ -4781,6 +4777,8 @@ function App() {
           eventEndDate={eventEndDate}
           eventPhase={eventPhase}
           referenceInstant={eventReferenceInstant}
+          timetable={timetable}
+          activeCategory={openCategories[0] ?? null}
           onNavigate={navigateMainSection}
         />
       ) : null}
