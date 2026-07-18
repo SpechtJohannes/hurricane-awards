@@ -123,7 +123,7 @@
     "bingo": "Bingo",
     "info": "Infos",
     "profile": "Profil",
-    "backToDashboard": "Zur Dashboard Uebersicht"
+    "backToDashboard": "Zur Dashboard-Übersicht"
   },
   "placeholders": {
     "gamesTitle": "Spiele",
@@ -136,8 +136,8 @@
     "festivalLabel": "Event",
     "guestName": "Eventcrew",
     "greeting": "Hallo {{name}}",
-    "description": "Alles Wichtige fuer dein Event auf einen Blick.",
-    "guestDescription": "Melde dich mit deinem Teilnehmercode an, um alle Bereiche persoenlich zu nutzen.",
+    "description": "Alles Wichtige für dein Event auf einen Blick.",
+    "guestDescription": "Melde dich mit deinem Teilnehmercode an, um alle Bereiche persönlich zu nutzen.",
     "quickAccess": "Schnellzugriff",
     "eventStatus": {
       "label": "Eventstatus",
@@ -162,7 +162,7 @@
         "title": "Spiele",
         "description": "Bingo und weitere Eventspiele.",
         "status": {
-          "bingo": "Bingo ist verfuegbar.",
+          "bingo": "Bingo ist verfügbar.",
           "horseRacing": "Pferderennen ist offen.",
           "randomPairings": "{{count}} Zuordnung vorhanden.",
           "tournaments": "{{count}} Turnier vorhanden.",
@@ -174,7 +174,7 @@
         "title": "Festivalinfos",
         "description": "Dokumente, Campstandort und Playlist.",
         "status": {
-          "available": "{{count}} Infos verfuegbar.",
+          "available": "{{count}} Infos verfügbar.",
           "empty": "Noch keine Festivalinfos hinterlegt."
         },
         "detail": "Zu den Infos"
@@ -183,7 +183,7 @@
         "title": "Awards",
         "description": "Ergebnisse und Gesamtclassement.",
         "status": {
-          "standings": "{{count}} Eintraege im Gesamtclassement.",
+          "standings": "{{count}} Einträge im Gesamtclassement.",
           "votes": "{{count}} Stimmen eingegangen.",
           "empty": "Award Bereich bereit."
         },
@@ -191,7 +191,7 @@
       },
       "voting": {
         "title": "Abstimmungen",
-        "description": "Aktive Abstimmungen fuer die Eventcrew.",
+        "description": "Aktive Abstimmungen für die Eventcrew.",
         "status": {
           "available": "{{count}} aktive Abstimmungen.",
           "empty": "Keine Abstimmung aktiv."
@@ -217,7 +217,7 @@
     "empty": "Aktuell sind noch keine Festivalinfos hinterlegt.",
     "documentTypes": {
       "timetable": "Timetable",
-      "site_map": "Gelaendeplan"
+      "site_map": "Geländeplan"
     },
     "campLocation": {
       "eyebrow": "Campstandort",
@@ -312,7 +312,7 @@
       "title": "Infos",
       "loading": "Festivaldokumente werden geladen...",
       "emptyDocument": "Noch keine Datei",
-      "missingDocument": "Fuer diesen Dokumenttyp ist noch keine Datei hinterlegt.",
+      "missingDocument": "Für diesen Dokumenttyp ist noch keine Datei hinterlegt.",
       "fileType": "Dateityp",
       "updatedAt": "Aktualisiert",
       "upload": "Hochladen",
@@ -325,7 +325,7 @@
         "load": "Die Festivaldokumente konnten gerade nicht geladen werden.",
         "upload": "Das Dokument konnte gerade nicht hochgeladen werden.",
         "remove": "Das Dokument konnte gerade nicht entfernt werden.",
-        "unsupportedFileType": "Bitte waehle eine PDF- oder Bilddatei aus."
+        "unsupportedFileType": "Bitte wähle eine PDF- oder Bilddatei aus."
       }
     },
     "campLocation": {
@@ -487,7 +487,7 @@
       "active": "Aktive Bingorunde seit {{startedAt}}.",
       "start": "Bingorunde starten",
       "close": "Bingorunde beenden",
-      "confirmClose": "Aktive Bingorunde wirklich beenden? Die Bingo Navigation wird danach fuer Teilnehmende ausgeblendet.",
+      "confirmClose": "Aktive Bingorunde wirklich beenden? Die Bingo-Navigation wird danach für Teilnehmende ausgeblendet.",
       "errors": {
         "load": "Die Bingorunde konnte gerade nicht geladen werden.",
         "start": "Die Bingorunde konnte gerade nicht gestartet werden.",
@@ -503,8 +503,8 @@
       "closed": "Die Wettphase ist geschlossen. {{count}} Wetten wurden abgegeben.",
       "enable": "Pferderennen aktivieren",
       "disable": "Pferderennen deaktivieren",
-      "openBetting": "Wettphase oeffnen",
-      "closeBetting": "Wettphase schliessen",
+      "openBetting": "Wettphase öffnen",
+      "closeBetting": "Wettphase schließen",
       "betsTitle": "Abgegebene Wetten",
       "noBets": "Es wurden noch keine Wetten abgegeben.",
       "errors": {
@@ -522,10 +522,10 @@
       "draw": "Auslosung starten",
       "redraw": "Neu auslosen",
       "confirmRedraw": "Diese Aktion wurde bereits ausgelost. Wirklich neu auslosen und bestehende Paarungen ersetzen?",
-      "participantsLabel": "Teilnehmerauswahl fuer {{name}}",
+      "participantsLabel": "Teilnehmerauswahl für {{name}}",
       "resultsTitle": "Ergebnis",
       "status": {
-        "draft": "{{count}} Personen ausgewaehlt.",
+        "draft": "{{count}} Personen ausgewählt.",
         "drawn": "{{count}} Paarungen ausgelost."
       },
       "errors": {
@@ -533,7 +533,7 @@
         "create": "Die Aktion konnte gerade nicht angelegt werden.",
         "nameRequired": "Der Aktionsname ist erforderlich.",
         "participants": "Die Teilnehmerauswahl konnte gerade nicht gespeichert werden.",
-        "draw": "Die Auslosung konnte gerade nicht gestartet werden. Es muessen mindestens zwei aktive Personen ausgewaehlt sein."
+        "draw": "Die Auslosung konnte gerade nicht gestartet werden. Es müssen mindestens zwei aktive Personen ausgewählt sein."
       }
     },
     "tournaments": {
@@ -548,28 +548,28 @@
         "knockout": "KO Turnier",
         "qualificationKnockout": "Qualifikation plus KO Runde"
       },
-      "participantsLabel": "Teilnehmerauswahl fuer das Turnier",
+      "participantsLabel": "Teilnehmerauswahl für das Turnier",
       "noActiveParticipants": "Es gibt aktuell keine aktiven Teilnehmer.",
-      "byeNotice": "Fuer ein reines KO Turnier brauchst du 2, 4, 8, 16 oder 32 Teilnehmende. Bei dieser Teilnehmerzahl bekommt jemand ein Freilos. Wenn du fortfaehrst, bestimmt darueber das Los.",
+      "byeNotice": "Für ein reines KO-Turnier brauchst du 2, 4, 8, 16 oder 32 Teilnehmende. Bei dieser Teilnehmerzahl bekommt jemand ein Freilos. Wenn du fortfährst, bestimmt darüber das Los.",
       "rankingLabel": "Qualifikationsreihenfolge",
       "rankingHelp": "Trage pro Zeile eine Person ein. Die erste Zeile ist Platz 1.",
       "saveRanking": "Platzierung speichern",
       "save": "Speichern",
       "cancel": "Abbrechen",
       "edit": "Bearbeiten",
-      "delete": "LÃ¶schen",
-      "deleting": "LÃ¶sche...",
-      "confirmDelete": "Turnier \"{{name}}\" wirklich lÃ¶schen?",
-      "status": "{{count}} Teilnehmende ausgewaehlt.",
+      "delete": "Löschen",
+      "deleting": "Lösche...",
+      "confirmDelete": "Turnier \"{{name}}\" wirklich löschen?",
+      "status": "{{count}} Teilnehmende ausgewählt.",
       "winnerLabel": "Gewinner",
       "winnerForMatch": "Gewinner für {{round}}, Begegnung {{match}}",
       "selectWinner": "Gewinner auswählen",
       "errors": {
         "load": "Die Turnierverwaltung konnte gerade nicht geladen werden.",
         "save": "Das Turnier konnte gerade nicht gespeichert werden.",
-        "delete": "Das Turnier konnte gerade nicht gelÃ¶scht werden.",
+        "delete": "Das Turnier konnte gerade nicht gelöscht werden.",
         "nameRequired": "Der Turniername ist erforderlich.",
-        "participantsRequired": "Bitte waehle mindestens zwei aktive Teilnehmende aus.",
+        "participantsRequired": "Bitte wähle mindestens zwei aktive Teilnehmende aus.",
         "rankingInvalid": "Die Platzierung muss jede ausgewählte Person genau einmal enthalten.",
         "rankingSave": "Die Platzierung konnte gerade nicht gespeichert werden.",
         "winnerSave": "Das Ergebnis konnte gerade nicht gespeichert werden."
@@ -679,7 +679,7 @@
   "bingo": {
     "eyebrow": "Bingorunde",
     "title": "Bingo",
-    "description": "Jede Person erhaelt automatisch eine eigene Bingokarte. Gezogene Felder kannst du hier auf deiner Karte markieren; die Ziehung findet ausserhalb der App statt.",
+    "description": "Jede Person erhält automatisch eine eigene Bingokarte. Gezogene Felder kannst du hier auf deiner Karte markieren; die Ziehung findet außerhalb der App statt.",
     "cardLabel": "Deine Bingokarte",
     "errors": {
       "load": "Deine Bingokarte konnte gerade nicht geladen werden.",
@@ -689,14 +689,14 @@
   "horseRacing": {
     "eyebrow": "Partyspiel",
     "title": "Pferderennen",
-    "description": "Gib hier deine Wette auf eine Kartenfarbe ab. Die eigentliche Runde mit Kartenziehen findet ausserhalb der App statt.",
+    "description": "Gib hier deine Wette auf eine Kartenfarbe ab. Die eigentliche Runde mit Kartenziehen findet außerhalb der App statt.",
     "disabled": "Pferderennen ist aktuell deaktiviert.",
-    "open": "Die Wettphase ist offen. Waehle eine Kartenfarbe.",
-    "openWithSelection": "Die Wettphase ist offen. Du kannst deine Auswahl noch aendern.",
-    "closedWithSelection": "Die Wettphase ist geschlossen. Deine Auswahl ist gespeichert und kann nicht mehr geaendert werden.",
+    "open": "Die Wettphase ist offen. Wähle eine Kartenfarbe.",
+    "openWithSelection": "Die Wettphase ist offen. Du kannst deine Auswahl noch ändern.",
+    "closedWithSelection": "Die Wettphase ist geschlossen. Deine Auswahl ist gespeichert und kann nicht mehr geändert werden.",
     "closedWithoutSelection": "Die Wettphase ist geschlossen. Du hast keine Wette abgegeben.",
     "suitsLabel": "Kartenfarben",
-    "selected": "Ausgewaehlt",
+    "selected": "Ausgewählt",
     "suits": {
       "hearts": "Herz",
       "diamonds": "Karo",
@@ -711,9 +711,9 @@
   "randomPairings": {
     "eyebrow": "Aktionen",
     "title": "Dein Secret Buddy",
-    "description": "Hier siehst du ausschliesslich deine eigene Zuordnung je ausgeloster Aktion.",
+    "description": "Hier siehst du ausschließlich deine eigene Zuordnung je ausgeloster Aktion.",
     "loading": "Zuordnungen werden geladen...",
-    "empty": "Aktuell gibt es keine Zuordnung fuer dich.",
+    "empty": "Aktuell gibt es keine Zuordnung für dich.",
     "assignedTo": "Du bist zugeordnet zu",
     "errors": {
       "load": "Deine Zuordnungen konnten gerade nicht geladen werden."
@@ -728,7 +728,7 @@
     "qualificationOpen": "Qualifikation offen. Der KO Baum wird angezeigt, sobald die Platzierung erfasst wurde.",
     "participantCount": "{{count}} Teilnehmende",
     "bracket": {
-      "label": "Turnierbaum fuer {{name}}",
+      "label": "Turnierbaum für {{name}}",
       "preliminary": "Vorrunde",
       "roundOf16": "Achtelfinale",
       "quarterFinal": "Viertelfinale",
@@ -737,8 +737,8 @@
       "round": "Runde {{round}}",
       "match": "Begegnung {{position}}",
       "openSlot": "Offen",
-      "byeNotice": "Freilos: {{name}} ist direkt in der naechsten Runde.",
-      "empty": "Fuer dieses Turnier ist noch kein Turnierbaum vorhanden.",
+      "byeNotice": "Freilos: {{name}} ist direkt in der nächsten Runde.",
+      "empty": "Für dieses Turnier ist noch kein Turnierbaum vorhanden.",
       "champion": "Turniersieger: {{name}}"
     },
     "errors": {
@@ -748,7 +748,7 @@
   "games": {
     "eyebrow": "Spiele",
     "title": "Spiele",
-    "description": "Waehle ein Spiel aus und mach direkt weiter.",
+    "description": "Wähle ein Spiel aus und mach direkt weiter.",
     "navigationLabel": "Spielauswahl",
     "bingo": "Bingo",
     "horseRacing": "Pferderennen",
@@ -761,9 +761,9 @@
     "title": "Timetable",
     "loading": "Timetable wird geladen...",
     "empty": "Es sind noch keine Auftritte hinterlegt.",
-    "emptyStages": "Es sind noch keine Buehnen fuer den Timetable hinterlegt.",
+    "emptyStages": "Es sind noch keine Bühnen für den Timetable hinterlegt.",
     "emptyDay": "An diesem Tag sind noch keine Auftritte hinterlegt.",
-    "scrollHint": "Seitlich scrollen fuer weitere Buehnen",
+    "scrollHint": "Seitlich scrollen für weitere Bühnen",
     "unknownAct": "Unbekannter Act",
     "favorite": {
       "add": "Als Favorit markieren",

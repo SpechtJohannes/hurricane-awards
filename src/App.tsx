@@ -1697,8 +1697,9 @@ function App() {
     null,
   );
   const [isAdminVisible, setIsAdminVisible] = useState(false);
-  const [activeMainSection, setActiveMainSection] =
-    useState<MainSection>(() => mainSectionFromHash(window.location.hash) ?? "dashboard");
+  const [activeMainSection, setActiveMainSection] = useState<MainSection>(
+    () => mainSectionFromHash(window.location.hash) ?? "dashboard",
+  );
   const [activeAdminSection, setActiveAdminSection] =
     useState<AdminSection>("festival");
   const [activeGameSection, setActiveGameSection] =
