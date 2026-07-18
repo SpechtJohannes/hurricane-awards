@@ -2945,6 +2945,21 @@ h1 {
   background: rgba(255, 255, 255, 0.045);
 }
 
+.admin-participant-card__main {
+  min-width: 0;
+}
+
+.admin-participant-card__name {
+  width: 100%;
+}
+
+.admin-participant-card__name > span:last-child {
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: normal;
+  white-space: normal;
+}
+
 .admin-category-card h3,
 .admin-participant-card h3 {
   margin: 0 0 12px;
@@ -3662,6 +3677,25 @@ h1 {
   }
 
   .admin-horse-racing__actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 719px) {
+  .admin-participant-card {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .admin-participant-card__actions {
+    display: grid;
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(140px, 100%), 1fr)
+    );
+  }
+
+  .admin-participant-card__actions .admin-card__reset {
     width: 100%;
   }
 }

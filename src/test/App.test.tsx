@@ -3518,6 +3518,39 @@ describe("Admin", () => {
     });
   });
 
+  it("stellt lange und zusammengesetzte Namen in Teilnehmerkarten vollstaendig dar", async () => {
+    const longName =
+      "Alexandra-Maria von Beispielhausen Festivalorganisationsteam";
+    mockLoadedData({
+      loadedAdminParticipants: [
+        {
+          ...participants[0],
+          displayName: longName,
+        },
+      ],
+    });
+    await renderLoadedApp();
+    const user = await loginWith("ALICE42");
+
+    await user.click(screen.getByRole("button", { name: /^admin$/i }));
+    await switchAdminSection(/^teilnehmer$/i);
+
+    const participantsSection = sectionForHeading(/^teilnehmer$/i);
+    const name = await within(participantsSection).findByText(longName);
+    const card = name.closest("article");
+
+    expect(name.parentElement).toHaveClass("admin-participant-card__name");
+    expect(card).not.toBeNull();
+    expect(
+      within(card as HTMLElement).getByRole("button", { name: /bearbeiten/i }),
+    ).toBeVisible();
+    expect(
+      within(card as HTMLElement).getByRole("button", {
+        name: /deaktivieren/i,
+      }),
+    ).toBeVisible();
+  });
+
   it("bearbeitet den Eventnamen und zeigt ihn sofort in der App", async () => {
     await renderLoadedApp();
     const user = await loginWith("ALICE42");
