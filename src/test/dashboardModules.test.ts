@@ -14,6 +14,7 @@ describe("selectDashboardModules", () => {
       [
         "eventStatus",
         "timetable",
+        "artists",
         "info",
         "games",
         "voting",
@@ -26,6 +27,7 @@ describe("selectDashboardModules", () => {
       [
         "eventStatus",
         "timetable",
+        "artists",
         "games",
         "voting",
         "info",
@@ -40,6 +42,7 @@ describe("selectDashboardModules", () => {
         "awards",
         "voting",
         "timetable",
+        "artists",
         "games",
         "info",
         "profile",

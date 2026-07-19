@@ -126,6 +126,7 @@
     "dashboard": "Start",
     "awards": "Awards",
     "timetable": "Timetable",
+    "artists": "Artiesten",
     "games": "Spellen",
     "bingo": "Bingo",
     "info": "Info",
@@ -177,6 +178,13 @@
           "empty": "Nog geen timetable beschikbaar."
         },
         "detail": "Naar timetable"
+      },
+      "artists": {
+        "title": "Artiesten",
+        "description": "Alle acts in alfabetische volgorde.",
+        "status_one": "{{count}} artiest beschikbaar.",
+        "status_other": "{{count}} artiesten beschikbaar.",
+        "detail": "Naar de artiesten"
       },
       "games": {
         "title": "Spellen",
@@ -811,6 +819,21 @@
     "randomPairings": "Koppelingen",
     "tournaments": "Toernooien",
     "empty": "Er is momenteel geen spel actief."
+  },
+  "artists": {
+    "eyebrow": "Line-up",
+    "title": "Artiesten",
+    "description": "Doorzoek alle acts uit de timetable.",
+    "loading": "Artiesten worden geladen...",
+    "empty": "Er zijn nog geen artiesten toegevoegd.",
+    "noResults": "Geen artiesten gevonden voor je zoekopdracht.",
+    "search": {
+      "label": "Artiesten zoeken",
+      "placeholder": "Naam invoeren"
+    },
+    "errors": {
+      "load": "De artiesten konden niet worden geladen."
+    }
   },
   "timetable": {
     "eyebrow": "Festival",

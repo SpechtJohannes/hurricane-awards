@@ -187,6 +187,7 @@ import { Avatar, ParticipantName } from "./components/Avatar";
 import { SectionHeader } from "./components/SectionHeader";
 import { DashboardHero } from "./components/DashboardHero";
 import { EventBrand } from "./components/EventBrand";
+import { Artists } from "./components/Artists";
 import { useFestivalAccess } from "./hooks/useFestivalAccess";
 import { avatars } from "./config/avatars";
 import i18n from "./i18n";
@@ -347,6 +348,7 @@ type MainSection =
   | "voting"
   | "awards"
   | "timetable"
+  | "artists"
   | "games"
   | "info"
   | "profile";
@@ -364,12 +366,16 @@ const mainSectionHashes: Record<Exclude<MainSection, "dashboard">, string> = {
   voting: "#voting",
   awards: "#awards",
   timetable: "#timetable",
+  artists: "#artists",
   games: "#games",
   info: "#info",
   profile: "#profile",
 };
 
 function mainSectionFromHash(hash: string): MainSection | null {
+  if (hash === "#artists" || hash.startsWith("#artists/")) {
+    return "artists";
+  }
   const entry = Object.entries(mainSectionHashes).find(
     ([, sectionHash]) => sectionHash === hash,
   );
@@ -1715,6 +1721,9 @@ function App() {
   const [activeMainSection, setActiveMainSection] = useState<MainSection>(
     () => mainSectionFromHash(window.location.hash) ?? "dashboard",
   );
+  const selectedArtistId = window.location.hash.startsWith("#artists/")
+    ? window.location.hash.slice("#artists/".length)
+    : null;
   const [activeAdminSection, setActiveAdminSection] =
     useState<AdminSection>("festival");
   const [activeGameSection, setActiveGameSection] =
@@ -2063,6 +2072,16 @@ function App() {
             })
           : t("dashboard.tiles.timetable.status.empty"),
       detail: t("dashboard.tiles.timetable.detail"),
+    },
+    {
+      id: "artists",
+      section: "artists",
+      title: t("dashboard.tiles.artists.title"),
+      description: t("dashboard.tiles.artists.description"),
+      status: t("dashboard.tiles.artists.status", {
+        count: new Set(timetable?.acts.map((act) => act.id) ?? []).size,
+      }),
+      detail: t("dashboard.tiles.artists.detail"),
     },
     {
       id: "games",
@@ -5177,6 +5196,23 @@ function App() {
           togglingPerformanceId={togglingFavoritePerformanceId}
           onBackToDashboard={() => navigateMainSection("dashboard")}
           onToggleFavorite={toggleTimetableFavorite}
+        />
+      ) : null}
+
+      {selectedParticipant && activeMainSection === "artists" ? (
+        <Artists
+          acts={timetable?.acts ?? null}
+          error={timetableError ? t("artists.errors.load") : ""}
+          isLoading={isLoadingTimetable}
+          selectedActId={selectedArtistId}
+          dashboardBackButton={
+            <DashboardBackButton
+              onClick={() => navigateMainSection("dashboard")}
+            />
+          }
+          onSelectAct={(actId) => {
+            window.location.hash = `#artists/${encodeURIComponent(actId)}`;
+          }}
         />
       ) : null}
 
