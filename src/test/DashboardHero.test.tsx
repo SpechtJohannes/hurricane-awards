@@ -48,6 +48,7 @@ const timetable: Timetable = {
 };
 
 type RenderHeroOptions = {
+  eventLogoUrl?: string | null;
   startDate?: string | null;
   endDate?: string | null;
   loadedTimetable?: Timetable | null;
@@ -60,6 +61,7 @@ type RenderHeroOptions = {
 };
 
 function renderHero({
+  eventLogoUrl = null,
   startDate = "2026-08-01",
   endDate = "2026-08-03",
   loadedTimetable = timetable,
@@ -73,6 +75,7 @@ function renderHero({
   return render(
     <DashboardHero
       festivalName="Hurricane Awards 2026"
+      eventLogoUrl={eventLogoUrl}
       participantName="Alice Beispielname"
       isAuthenticated
       eventStartDate={startDate}
@@ -97,6 +100,30 @@ describe("DashboardHero", () => {
       screen.getByRole("heading", { name: "Hallo Alice Beispielname" }),
     ).toBeVisible();
     expect(screen.getByText("Noch 2 Tage bis zum Event")).toBeVisible();
+  });
+
+  it("bindet ein vorhandenes Eventlogo unverzerrt in die Visualisierung ein", async () => {
+    await i18n.changeLanguage("de");
+    renderHero({ eventLogoUrl: "https://example.test/event-logo.png" });
+
+    const logo = screen.getByRole("img", {
+      name: "Logo von Hurricane Awards 2026",
+    });
+    expect(logo).toBeVisible();
+    expect(logo).toHaveAttribute("src", "https://example.test/event-logo.png");
+  });
+
+  it("bleibt ohne Eventlogo vollstaendig und kennzeichnet die Szene als dekorativ", async () => {
+    await i18n.changeLanguage("de");
+    const { container } = renderHero({ eventLogoUrl: null });
+
+    expect(screen.getByTestId("dashboard-hero")).toBeVisible();
+    expect(screen.getByText("Hurricane Awards 2026")).toBeVisible();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(
+      container.querySelector(".dashboard-hero__festival-scene"),
+    ).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByRole("button", { name: /Beste Festival-Energie/i })).toBeEnabled();
   });
 
   it("zeigt ohne Eventdatum einen neutralen Status", async () => {

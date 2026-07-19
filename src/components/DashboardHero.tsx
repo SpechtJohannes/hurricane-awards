@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Category } from "../data/categories";
 import type { Timetable } from "../data/timetable";
@@ -7,6 +7,7 @@ import { WeatherCard } from "./WeatherCard";
 
 type DashboardHeroProps = {
   festivalName: string;
+  eventLogoUrl?: string | null;
   participantName: string | null;
   isAuthenticated: boolean;
   eventStartDate: string | null;
@@ -43,6 +44,7 @@ function nextFavoritePerformance(
 
 export function DashboardHero({
   festivalName,
+  eventLogoUrl = null,
   participantName,
   isAuthenticated,
   eventStartDate,
@@ -56,6 +58,8 @@ export function DashboardHero({
   onOpenVoting,
 }: DashboardHeroProps) {
   const { t, i18n } = useTranslation();
+  const [failedLogoUrl, setFailedLogoUrl] = useState<string | null>(null);
+  const showEventLogo = Boolean(eventLogoUrl && eventLogoUrl !== failedLogoUrl);
   const greetingName = participantName ?? t("dashboard.guestName");
   const nextFavorite = useMemo(
     () => nextFavoritePerformance(timetable, referenceInstant),
@@ -81,20 +85,40 @@ export function DashboardHero({
 
   return (
     <div className="dashboard-hero" data-testid="dashboard-hero">
-      <div className="dashboard-hero__intro">
-        <p className="dashboard__eyebrow">{t("dashboard.eyebrow")}</p>
-        <p className="dashboard-hero__festival-label">
-          {t("dashboard.festivalLabel")}
-        </p>
-        <p className="dashboard-hero__festival">{festivalName}</p>
-        <h2 id="dashboard-title">
-          {t("dashboard.greeting", { name: greetingName })}
-        </h2>
-        <p className="dashboard-hero__description">
-          {isAuthenticated
-            ? t("dashboard.description")
-            : t("dashboard.guestDescription")}
-        </p>
+      <div className="dashboard-hero__feature">
+        <div className="dashboard-hero__intro">
+          <p className="dashboard__eyebrow">{t("dashboard.eyebrow")}</p>
+          <p className="dashboard-hero__festival-label">
+            {t("dashboard.festivalLabel")}
+          </p>
+          <p className="dashboard-hero__festival">{festivalName}</p>
+          <h2 id="dashboard-title">
+            {t("dashboard.greeting", { name: greetingName })}
+          </h2>
+          <p className="dashboard-hero__description">
+            {isAuthenticated
+              ? t("dashboard.description")
+              : t("dashboard.guestDescription")}
+          </p>
+        </div>
+
+        <div className="dashboard-hero__visual">
+          <div className="dashboard-hero__festival-scene" aria-hidden="true">
+            <span className="dashboard-hero__moon" />
+            <span className="dashboard-hero__beam dashboard-hero__beam--left" />
+            <span className="dashboard-hero__beam dashboard-hero__beam--right" />
+            <span className="dashboard-hero__stage" />
+            <span className="dashboard-hero__crowd" />
+          </div>
+          {showEventLogo ? (
+            <img
+              className="dashboard-hero__event-logo"
+              src={eventLogoUrl ?? undefined}
+              alt={t("header.eventLogoAlt", { festivalName })}
+              onError={() => setFailedLogoUrl(eventLogoUrl)}
+            />
+          ) : null}
+        </div>
       </div>
 
       <div className="dashboard-hero__modules">

@@ -174,6 +174,8 @@ Teilnehmende markieren und entfernen Favoriten direkt in der Timetable-Leseansic
 
 ### Kontextbezogenes Dashboard
 
+Der bestehende `DashboardHero` enthaelt zusaetzlich eine rein mit CSS erzeugte Festivalbuehne mit Himmel, Lichtkegeln und abstrakter Crowd. Die Ebene ist dekorativ und fuer assistive Technologien ausgeblendet; Inhalte und Aktionen liegen weiterhin in ihrer bisherigen semantischen Reihenfolge. Ein vorhandenes Eventlogo wird aus den bestehenden Eventeinstellungen unverzerrt per `object-fit: contain` eingebunden und bei einem Ladefehler ausgeblendet. Ohne Logo bleibt die CSS-Szene als vollwertiger Fallback bestehen. Auf kleinen Viewports ist die Szene bewusst flach, ab Desktopbreite steht sie neben dem Intro und erhaelt mehr Flaeche. Es werden keine externen Motive oder JavaScript-Animationen geladen.
+
 Die Eventphase wird zentral und ohne React-Abhaengigkeit in `src/domain/eventPhase.ts`
 als `before`, `during` oder `after` ermittelt. Einzige Datenquelle sind
 `app_settings.event_start_date` und `app_settings.event_end_date` am Datensatz
