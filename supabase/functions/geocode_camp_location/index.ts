@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, fetchJson, json } from "../_shared/http.ts";
+import { resolveGeocoding } from "../_shared/geocoding.ts";
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -14,21 +15,15 @@ Deno.serve(async (request) => {
       p_participant_access_code: participantAccessCode,
     });
     if (error || !isAdmin) return json({ error: "forbidden" }, 403);
-    const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
-    url.searchParams.set("name", query.trim());
-    url.searchParams.set("count", "1");
-    url.searchParams.set("language", "de");
-    url.searchParams.set("format", "json");
-    const external = await fetchJson(url.toString()) as { results?: Array<Record<string, unknown>> };
-    const result = external.results?.[0];
-    if (!result || typeof result.name !== "string" || !Number.isFinite(result.latitude) || !Number.isFinite(result.longitude)) {
-      return json({ status: "not_found" });
-    }
-    const parts = [result.name, result.admin1, result.country].filter((part) => typeof part === "string");
-    return json({ status: "available", result: {
-      label: [...new Set(parts)].join(", "), latitude: result.latitude,
-      longitude: result.longitude, timezone: typeof result.timezone === "string" ? result.timezone : null,
-    }});
+    const result = await resolveGeocoding(query, async (searchQuery) => {
+      const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
+      url.searchParams.set("name", searchQuery);
+      url.searchParams.set("count", "1");
+      url.searchParams.set("language", "de");
+      url.searchParams.set("format", "json");
+      return fetchJson(url.toString());
+    });
+    return json(result);
   } catch {
     return json({ error: "geocoding_unavailable" }, 503);
   }

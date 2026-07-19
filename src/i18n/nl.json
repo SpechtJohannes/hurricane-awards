@@ -360,6 +360,7 @@
       "confirmRemove": "Campingplek echt verwijderen?",
       "errors": {
         "invalid": "Voer een geldige Google Maps- of WhatsApp-locatielink in.",
+        "notFound": "Voor deze locatie-invoer kon geen plaats worden gevonden.",
         "save": "De campingplek kon net niet worden opgeslagen.",
         "remove": "De campingplek kon net niet worden verwijderd."
       }
