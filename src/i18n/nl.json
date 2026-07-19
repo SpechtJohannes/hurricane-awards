@@ -72,6 +72,10 @@
         "title": "Gebruik van Supabase",
         "body": "De app gebruikt Supabase als backend voor opslag en verwerking van gegevens. Directe tabeltoegang vanuit de browser is geblokkeerd; de app gebruikt beveiligde serverfuncties."
       },
+      "weather": {
+        "title": "Campingplek en weer",
+        "body": "De campingplek wordt vrijwillig door de evenementadministratie vastgelegd en beschrijft geen individuele persoon. Alleen de coördinaten worden centraal via een Supabase Edge Function naar Open Meteo gestuurd; weerresultaten worden ongeveer 30 minuten bewaard. De app gebruikt de apparaatlocatie niet en verzamelt geen individuele locatiegegevens van deelnemers."
+      },
       "rights": {
         "title": "Rechten van betrokkenen",
         "body": "Betrokken personen kunnen inzage, correctie of verwijdering van hun persoonsgegevens vragen, voor zover er geen organisatorische redenen zijn voor verdere opslag."
@@ -157,6 +161,12 @@
       "favoriteDetails": "{{time}} · Podium: {{stage}}",
       "activeVoting": "Actieve stemming",
       "openVoting": "Nu stemmen"
+    },
+    "weather": {
+      "title": "Weer op de campingplek", "loading": "Weerinformatie wordt geladen...",
+      "missingLocation": "Voor dit evenement is nog geen campingplek vastgelegd.", "unavailable": "De weerinformatie is momenteel niet beschikbaar.",
+      "stale": "Laatst beschikbare weergegevens", "atCampLocation": "Campingplek: {{location}}", "updatedAt": "Laatst bijgewerkt: {{time}}", "source": "Gegevensbron:",
+      "conditions": { "clear": "Helder", "partly_cloudy": "Gedeeltelijk bewolkt", "cloudy": "Bewolkt", "fog": "Mist", "drizzle": "Motregen", "rain": "Regen", "snow": "Sneeuw", "showers": "Buien", "thunderstorm": "Onweer", "unknown": "Onbekend weer" }
     },
     "tiles": {
       "timetable": {
@@ -341,6 +351,8 @@
     "campLocation": {
       "eyebrow": "Campingplek",
       "title": "Campingplek",
+      "queryLabel": "Plaats of adres",
+      "queryPlaceholder": "bijv. Eichenring, Scheeßel",
       "linkLabel": "Locatielink",
       "linkPlaceholder": "Google Maps- of WhatsApp-locatielink",
       "save": "Locatie opslaan",

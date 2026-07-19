@@ -72,6 +72,10 @@
         "title": "Nutzung von Supabase",
         "body": "Die App nutzt Supabase als Backend für Speicherung und Verarbeitung der Daten. Direkte Tabellenzugriffe aus dem Browser sind gesperrt; die App verwendet geschützte Serverfunktionen."
       },
+      "weather": {
+        "title": "Campstandort und Wetter",
+        "body": "Der Campstandort wird freiwillig durch die Eventadministration hinterlegt und beschreibt keine einzelne Person. Ausschließlich seine Koordinaten werden zentral über eine Supabase Edge Function an Open Meteo übertragen und Wetterergebnisse ungefähr 30 Minuten zwischengespeichert. Die App greift nicht auf den Gerätestandort zu und erhebt keine individuellen Standortdaten von Teilnehmenden."
+      },
       "rights": {
         "title": "Rechte betroffener Personen",
         "body": "Betroffene Personen können Auskunft, Berichtigung oder Löschung ihrer personenbezogenen Daten verlangen, soweit keine organisatorischen Gründe für eine weitere Speicherung bestehen."
@@ -157,6 +161,12 @@
       "favoriteDetails": "{{time}} · Bühne: {{stage}}",
       "activeVoting": "Aktive Abstimmung",
       "openVoting": "Jetzt abstimmen"
+    },
+    "weather": {
+      "title": "Wetter am Campstandort", "loading": "Wetterinformationen werden geladen...",
+      "missingLocation": "Für dieses Event wurde noch kein Campstandort hinterlegt.", "unavailable": "Die Wetterinformationen sind derzeit nicht verfügbar.",
+      "stale": "Zuletzt verfügbare Wetterdaten", "atCampLocation": "Campstandort: {{location}}", "updatedAt": "Letzte Aktualisierung: {{time}}", "source": "Datenquelle:",
+      "conditions": { "clear": "Klar", "partly_cloudy": "Teilweise bewölkt", "cloudy": "Bewölkt", "fog": "Nebel", "drizzle": "Nieselregen", "rain": "Regen", "snow": "Schnee", "showers": "Regenschauer", "thunderstorm": "Gewitter", "unknown": "Unbekannte Wetterlage" }
     },
     "tiles": {
       "timetable": {
@@ -341,6 +351,8 @@
     "campLocation": {
       "eyebrow": "Campstandort",
       "title": "Campstandort",
+      "queryLabel": "Ort oder Adresse",
+      "queryPlaceholder": "z. B. Eichenring, Scheeßel",
       "linkLabel": "Standortlink",
       "linkPlaceholder": "Google Maps oder WhatsApp Standortlink",
       "save": "Standort speichern",

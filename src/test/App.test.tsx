@@ -64,6 +64,7 @@ import {
 import {
   deleteCampLocationLink,
   deleteFestivalDocument,
+  geocodeCampLocation,
   loadAdminCampLocationLink,
   loadAdminFestivalDocuments,
   loadCampLocationLink,
@@ -210,6 +211,7 @@ vi.mock("../data/festivalDocuments", async (importOriginal) => {
     ...actual,
     deleteCampLocationLink: vi.fn(),
     deleteFestivalDocument: vi.fn(),
+    geocodeCampLocation: vi.fn(),
     loadAdminCampLocationLink: vi.fn(),
     loadAdminFestivalDocuments: vi.fn(),
     loadCampLocationLink: vi.fn(),
@@ -5039,6 +5041,12 @@ describe("Admin", () => {
   });
 
   it("verwaltet den Campstandort im Adminbereich Infos", async () => {
+    vi.mocked(geocodeCampLocation).mockResolvedValue({
+      label: "Scheeßel, Niedersachsen, Deutschland",
+      latitude: 53.1667,
+      longitude: 9.4833,
+      timezone: "Europe/Berlin",
+    });
     mockLoadedData({
       loadedCampLocationLink: "https://maps.app.goo.gl/alter-standort",
       loadedAdminCampLocationLink: "https://maps.app.goo.gl/alter-standort",
@@ -5065,6 +5073,12 @@ describe("Admin", () => {
 
     expect(updateCampLocationLink).toHaveBeenCalledWith(
       "https://wa.me/491701234567",
+      {
+        label: "Scheeßel, Niedersachsen, Deutschland",
+        latitude: 53.1667,
+        longitude: 9.4833,
+        timezone: "Europe/Berlin",
+      },
       { participantAccessCode: "ALICE42" },
     );
 

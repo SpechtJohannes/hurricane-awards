@@ -65,6 +65,7 @@ import {
   deleteCampLocationLink,
   isSupportedFestivalDocumentFile,
   isSupportedCampLocationLink,
+  geocodeCampLocation,
   loadAdminCampLocationLink,
   loadAdminFestivalDocuments,
   loadCampLocationLink,
@@ -681,6 +682,7 @@ function PrivacyNotice({ festivalName }: LegalNoticeProps) {
     "legalBasis",
     "retention",
     "supabase",
+    "weather",
     "rights",
     "contact",
   ];
@@ -757,6 +759,7 @@ type DashboardSectionProps = {
   participantName: string | null;
   tiles: DashboardTile[];
   isAuthenticated: boolean;
+  participantAccessCode: string | null;
   eventStartDate: string | null;
   eventEndDate: string | null;
   eventPhase: EventPhase;
@@ -814,6 +817,7 @@ function DashboardSection({
   participantName,
   tiles,
   isAuthenticated,
+  participantAccessCode,
   eventStartDate,
   eventEndDate,
   eventPhase,
@@ -840,6 +844,7 @@ function DashboardSection({
         festivalName={festivalName}
         participantName={participantName}
         isAuthenticated={isAuthenticated}
+        participantAccessCode={participantAccessCode}
         eventStartDate={eventStartDate}
         eventEndDate={eventEndDate}
         referenceInstant={referenceInstant}
@@ -3841,7 +3846,7 @@ function App() {
     }
   }
 
-  async function saveAdminCampLocationLink(link: string) {
+  async function saveAdminCampLocationLink(link: string, locationQuery: string) {
     const adminContext = getParticipantAdminContext();
 
     if (!adminContext) {
@@ -3859,10 +3864,8 @@ function App() {
     setAdminCampLocationError("");
 
     try {
-      const savedLink = await updateCampLocationLink(
-        normalizedLink,
-        adminContext,
-      );
+      const location = await geocodeCampLocation(locationQuery || normalizedLink, adminContext);
+      const savedLink = await updateCampLocationLink(normalizedLink, location, adminContext);
 
       setAdminCampLocationLink(savedLink);
       setCampLocationLink(savedLink);
@@ -4815,6 +4818,7 @@ function App() {
           participantName={selectedParticipant?.displayName ?? null}
           tiles={dashboardTiles}
           isAuthenticated={Boolean(selectedParticipant)}
+          participantAccessCode={selectedParticipant?.accessCode ?? null}
           eventStartDate={eventStartDate}
           eventEndDate={eventEndDate}
           eventPhase={eventPhase}

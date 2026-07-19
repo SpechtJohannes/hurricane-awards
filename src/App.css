@@ -612,6 +612,26 @@ h1 {
   box-shadow: none;
 }
 
+.dashboard-weather {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  padding: 16px;
+  background: rgba(8, 10, 15, 0.58);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid #6ec8ff;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-weather p { margin: 0; color: var(--color-text-secondary); }
+.dashboard-weather small { color: var(--color-text-secondary); }
+.dashboard-weather a { color: inherit; }
+.dashboard-weather__title, .dashboard-weather__stale { color: #6ec8ff; font-weight: 900; }
+.dashboard-weather__reading { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; }
+.dashboard-weather__reading strong { font-size: 1.5rem; }
+.dashboard-weather__location { font-weight: 800; }
+
 .dashboard-hero__module {
   display: grid;
   min-width: 0;

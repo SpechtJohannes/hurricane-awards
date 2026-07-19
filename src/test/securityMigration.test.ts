@@ -658,7 +658,7 @@ describe("Supabase Sicherheitsmigration", () => {
       "create table if not exists public.event_logo_uploads",
     );
     expect(eventLogoMigration).toContain("'event-logos'");
-    expect(eventLogoMigration).toContain("true,\n  2097152");
+    expect(eventLogoMigration).toMatch(/true,\r?\n {2}2097152/);
     expect(eventLogoMigration).toContain(
       "array['image/png', 'image/jpeg', 'image/webp']",
     );
