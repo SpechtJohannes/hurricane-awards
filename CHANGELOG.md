@@ -4,6 +4,35 @@ All notable changes between releases of this project are documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 1.7.0
+
+### Neu
+
+1. Das Dashboard besitzt jetzt einen hervorgehobenen Hero Bereich mit wichtigen Informationen zum aktuellen Event.
+2. Der Hero zeigt abhängig vom Eventzeitraum einen Countdown oder den aktuellen Eventtag.
+3. Aktuelle Wetterinformationen können direkt im Dashboard angezeigt werden.
+4. Administratoren können ein individuelles Eventlogo hochladen, ersetzen und entfernen.
+5. Das Dashboard wurde um eine großformatige Festivalvisualisierung ergänzt.
+6. Eventlogo, Eventinformationen und Festivalvisualisierung bilden gemeinsam einen emotionaleren Einstieg in die App.
+
+### Verbessert
+
+1. Der mobile Header wurde übersichtlicher gestaltet.
+2. Lange Eventnamen werden auf kleinen Bildschirmen besser dargestellt.
+3. Teilnehmernamen bleiben auch in der mobilen Administration lesbar.
+4. Der Dashboard Einstieg wurde visuell aufgewertet und stärker auf das aktuelle Event ausgerichtet.
+5. Die Darstellung des Hero Bereichs wurde für mobile Geräte und größere Bildschirme optimiert.
+6. Bilder, Logos und dekorative Elemente beeinträchtigen die Lesbarkeit der Inhalte nicht.
+
+### Technik
+
+1. Wetterdaten werden über Supabase Edge Functions bereitgestellt.
+2. Eventlogos werden über den vorhandenen Supabase Storage verwaltet.
+3. Die Festivalvisualisierung wurde performanceorientiert und responsiv umgesetzt.
+4. Bestehende Datenbankfunktionen für Eventeinstellungen wurden um Logo Informationen erweitert.
+5. Tests und Dokumentation wurden an die neuen Dashboard Funktionen angepasst.
+
+
 ## v1.6.0 - Even Management
 
 ### ✨ Neue Funktionen
