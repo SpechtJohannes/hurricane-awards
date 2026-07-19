@@ -348,11 +348,21 @@ export async function updateCampLocationLink(
   return saved.mapUrl;
 }
 
+export class GeocodingNotFoundError extends Error {
+  constructor() {
+    super("geocoding location not found");
+    this.name = "GeocodingNotFoundError";
+  }
+}
+
 export async function geocodeCampLocation(query: string, context: AdminAccessContext) {
   const { data, error } = await getSupabase().functions.invoke("geocode_camp_location", {
     body: { participantAccessCode: context.participantAccessCode, query: query.trim() },
   });
-  if (error || data?.status !== "available" || !data.result) throw new Error("geocoding failed");
+  if (!error && data?.status === "not_found") throw new GeocodingNotFoundError();
+  if (error || data?.status !== "available" || !data.result ||
+      typeof data.result.label !== "string" || !Number.isFinite(data.result.latitude) ||
+      !Number.isFinite(data.result.longitude)) throw new Error("geocoding failed");
   return data.result as Omit<CampLocation, "mapUrl">;
 }
 

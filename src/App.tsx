@@ -66,6 +66,7 @@ import {
   isSupportedFestivalDocumentFile,
   isSupportedCampLocationLink,
   geocodeCampLocation,
+  GeocodingNotFoundError,
   loadAdminCampLocationLink,
   loadAdminFestivalDocuments,
   loadCampLocationLink,
@@ -3870,8 +3871,10 @@ function App() {
       setAdminCampLocationLink(savedLink);
       setCampLocationLink(savedLink);
       setCampLocationOpenError("");
-    } catch {
-      setAdminCampLocationError(t("admin.campLocation.errors.save"));
+    } catch (error) {
+      setAdminCampLocationError(t(error instanceof GeocodingNotFoundError
+        ? "admin.campLocation.errors.notFound"
+        : "admin.campLocation.errors.save"));
     } finally {
       setIsSavingCampLocation(false);
     }

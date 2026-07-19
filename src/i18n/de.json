@@ -360,6 +360,7 @@
       "confirmRemove": "Campstandort wirklich entfernen?",
       "errors": {
         "invalid": "Bitte gib einen gültigen Google Maps oder WhatsApp Standortlink ein.",
+        "notFound": "Für diese Standortangabe konnte kein Ort gefunden werden.",
         "save": "Der Campstandort konnte gerade nicht gespeichert werden.",
         "remove": "Der Campstandort konnte gerade nicht entfernt werden."
       }

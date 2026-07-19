@@ -65,6 +65,7 @@ import {
   deleteCampLocationLink,
   deleteFestivalDocument,
   geocodeCampLocation,
+  GeocodingNotFoundError,
   loadAdminCampLocationLink,
   loadAdminFestivalDocuments,
   loadCampLocationLink,
@@ -5094,6 +5095,20 @@ describe("Admin", () => {
     expect(deleteCampLocationLink).toHaveBeenCalledWith({
       participantAccessCode: "ALICE42",
     });
+  });
+
+  it("zeigt bei nicht gefundener Standortangabe einen fachlichen Fehler", async () => {
+    vi.mocked(geocodeCampLocation).mockRejectedValue(new GeocodingNotFoundError());
+    await renderLoadedApp();
+    const user = await loginWith("ALICE42");
+    await user.click(screen.getByRole("button", { name: /^admin$/i }));
+    await switchAdminSection(/^infos$/i);
+    const adminInfoSection = sectionForHeading(/^infos$/i);
+    await user.type(within(adminInfoSection).getByLabelText(/ort oder adresse/i), "Eichenring Scheeßel");
+    await user.type(within(adminInfoSection).getByLabelText(/^standortlink$/i), "https://maps.app.goo.gl/camp");
+    await user.click(within(adminInfoSection).getByRole("button", { name: /standort speichern/i }));
+    expect(await within(adminInfoSection).findByText(/konnte kein Ort gefunden werden/i)).toBeVisible();
+    expect(updateCampLocationLink).not.toHaveBeenCalled();
   });
 
   it("speichert, aendert und entfernt die Festival Playlist im Adminbereich Infos", async () => {
