@@ -835,6 +835,28 @@
       "load": "Die Künstler konnten gerade nicht geladen werden."
     }
   },
+  "artistDetail": {
+    "eyebrow": "Künstler",
+    "loading": "Künstlerdaten und Favoritenstatus werden geladen...",
+    "notFound": "Dieser Künstler wurde nicht gefunden oder wurde entfernt.",
+    "errors": {
+      "load": "Die Künstler- und Auftrittsdaten konnten gerade nicht geladen werden."
+    },
+    "favorite": {
+      "add": "Als Favorit markieren",
+      "remove": "Aus Favoriten entfernen",
+      "saving": "Favorit wird gespeichert...",
+      "error": "Der Favoritenstatus konnte nicht gespeichert werden. Der vorherige Zustand wurde beibehalten."
+    },
+    "performances": {
+      "title": "Geplante Auftritte",
+      "empty": "Für diesen Künstler sind noch keine Auftritte geplant.",
+      "timeRange": "{{start}}–{{end}} Uhr",
+      "startTime": "Ab {{start}} Uhr",
+      "stage": "Bühne: {{stage}}",
+      "unknownStage": "Unbekannte Bühne"
+    }
+  },
   "timetable": {
     "eyebrow": "Festival",
     "title": "Timetable",

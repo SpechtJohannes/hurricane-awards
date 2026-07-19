@@ -1900,7 +1900,7 @@ describe("Login", () => {
         performanceFavorites: [],
       },
     });
-    await renderLoadedApp();
+    const initialView = await renderLoadedApp();
     const user = await unlockFestivalWith();
 
     await user.click(screen.getByRole("button", { name: /^profil/i }));
@@ -1998,7 +1998,45 @@ describe("Login", () => {
     expect(window.location.hash).toBe("#artists");
     await user.click(screen.getByRole("button", { name: "The Headliners" }));
     expect(window.location.hash).toBe("#artists/act-1");
-    expect(screen.getByRole("heading", { name: /^künstler$/i })).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "The Headliners" }),
+    ).toBeVisible();
+    await user.click(
+      screen.getByRole("button", { name: /als favorit markieren/i }),
+    );
+    await waitFor(() => {
+      expect(addTimetableFavorite).toHaveBeenCalledWith("performance-1", {
+        participantAccessCode: "ALICE42",
+      });
+    });
+    await user.click(
+      screen.getByRole("button", { name: /aus favoriten entfernen/i }),
+    );
+    await waitFor(() => {
+      expect(removeTimetableFavorite).toHaveBeenCalledWith("performance-1", {
+        participantAccessCode: "ALICE42",
+      });
+    });
+
+    vi.mocked(addTimetableFavorite).mockRejectedValueOnce(
+      new Error("save failed"),
+    );
+    await user.click(
+      screen.getByRole("button", { name: /als favorit markieren/i }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /konnte nicht gespeichert werden/i,
+    );
+    expect(
+      screen.getByRole("button", { name: /als favorit markieren/i }),
+    ).toHaveAttribute("aria-pressed", "false");
+
+    initialView.unmount();
+    await renderLoadedApp();
+    expect(window.location.hash).toBe("#artists/act-1");
+    expect(
+      await screen.findByRole("heading", { name: "The Headliners" }),
+    ).toBeVisible();
 
     await switchMainSection(/^start$/i);
     await user.click(
