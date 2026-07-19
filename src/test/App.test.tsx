@@ -1142,6 +1142,8 @@ async function switchMainSection(name: RegExp) {
 
   const tileName = source.includes("timetable")
     ? /timetable/i
+    : source.includes("künstler")
+      ? /^künstler/i
     : source.includes("spiele")
       ? /spiele/i
       : source.includes("infos")
@@ -1939,6 +1941,9 @@ describe("Login", () => {
     const timetableTile = within(dashboardSection).getByRole("button", {
       name: /timetable/i,
     });
+    const artistsTile = within(dashboardSection).getByRole("button", {
+      name: /^künstler/i,
+    });
     const gamesTile = within(dashboardSection).getByRole("button", {
       name: /spiele/i,
     });
@@ -1956,6 +1961,7 @@ describe("Login", () => {
       expect(awardsTile).toHaveTextContent(/2/);
       expect(awardsTile).toHaveTextContent(/gesamtclassement/i);
       expect(timetableTile).toHaveTextContent(/1/);
+      expect(artistsTile).toHaveTextContent(/2/);
       expect(gamesTile).toHaveTextContent(/bingo/i);
       expect(infoTile).toHaveTextContent(/4/);
       expect(votingTile).toHaveTextContent(/1/);
@@ -1981,6 +1987,18 @@ describe("Login", () => {
       }),
     );
     expect(screen.getByRole("heading", { name: /^timetable$/i })).toBeVisible();
+
+    await switchMainSection(/^start$/i);
+    await user.click(
+      within(sectionForHeading(/hallo alice/i)).getByRole("button", {
+        name: /^künstler/i,
+      }),
+    );
+    expect(screen.getByRole("heading", { name: /^künstler$/i })).toBeVisible();
+    expect(window.location.hash).toBe("#artists");
+    await user.click(screen.getByRole("button", { name: "The Headliners" }));
+    expect(window.location.hash).toBe("#artists/act-1");
+    expect(screen.getByRole("heading", { name: /^künstler$/i })).toBeVisible();
 
     await switchMainSection(/^start$/i);
     await user.click(

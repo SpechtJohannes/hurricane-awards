@@ -126,6 +126,7 @@
     "dashboard": "Start",
     "awards": "Awards",
     "timetable": "Timetable",
+    "artists": "Künstler",
     "games": "Spiele",
     "bingo": "Bingo",
     "info": "Infos",
@@ -177,6 +178,13 @@
           "empty": "Noch kein Timetable vorhanden."
         },
         "detail": "Zum Timetable"
+      },
+      "artists": {
+        "title": "Künstler",
+        "description": "Alle Acts alphabetisch im Überblick.",
+        "status_one": "{{count}} Künstler vorhanden.",
+        "status_other": "{{count}} Künstler vorhanden.",
+        "detail": "Zu den Künstlern"
       },
       "games": {
         "title": "Spiele",
@@ -811,6 +819,21 @@
     "randomPairings": "Zuordnungen",
     "tournaments": "Turniere",
     "empty": "Aktuell ist kein Spiel aktiv."
+  },
+  "artists": {
+    "eyebrow": "Line-up",
+    "title": "Künstler",
+    "description": "Durchsuche alle Acts des Timetables.",
+    "loading": "Künstler werden geladen...",
+    "empty": "Es sind noch keine Künstler angelegt.",
+    "noResults": "Keine Künstler passen zu deiner Suche.",
+    "search": {
+      "label": "Künstler suchen",
+      "placeholder": "Name eingeben"
+    },
+    "errors": {
+      "load": "Die Künstler konnten gerade nicht geladen werden."
+    }
   },
   "timetable": {
     "eyebrow": "Festival",

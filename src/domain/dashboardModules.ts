@@ -14,6 +14,7 @@ export const dashboardModuleConfig = [
   },
   { id: "awards", priority: { before: 50, during: 50, after: 10 } },
   { id: "timetable", priority: { before: 10, during: 10, after: 30 } },
+  { id: "artists", priority: { before: 15, during: 15, after: 35 } },
   { id: "games", priority: { before: 30, during: 20, after: 40 } },
   { id: "info", priority: { before: 20, during: 40, after: 50 } },
   { id: "voting", priority: { before: 40, during: 30, after: 20 } },
