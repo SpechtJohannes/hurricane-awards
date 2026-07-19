@@ -757,6 +757,7 @@ type DashboardTile = {
 
 type DashboardSectionProps = {
   festivalName: string;
+  eventLogoUrl: string | null;
   participantName: string | null;
   tiles: DashboardTile[];
   isAuthenticated: boolean;
@@ -815,6 +816,7 @@ function DashboardBackButton({
 
 function DashboardSection({
   festivalName,
+  eventLogoUrl,
   participantName,
   tiles,
   isAuthenticated,
@@ -843,6 +845,7 @@ function DashboardSection({
     >
       <DashboardHero
         festivalName={festivalName}
+        eventLogoUrl={eventLogoUrl}
         participantName={participantName}
         isAuthenticated={isAuthenticated}
         participantAccessCode={participantAccessCode}
@@ -4818,6 +4821,7 @@ function App() {
       {activeMainSection === "dashboard" ? (
         <DashboardSection
           festivalName={displayedFestivalName}
+          eventLogoUrl={eventLogoUrl}
           participantName={selectedParticipant?.displayName ?? null}
           tiles={dashboardTiles}
           isAuthenticated={Boolean(selectedParticipant)}
