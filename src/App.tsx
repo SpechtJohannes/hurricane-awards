@@ -188,6 +188,7 @@ import { SectionHeader } from "./components/SectionHeader";
 import { DashboardHero } from "./components/DashboardHero";
 import { EventBrand } from "./components/EventBrand";
 import { Artists } from "./components/Artists";
+import { ArtistDetail } from "./components/ArtistDetail";
 import { useFestivalAccess } from "./hooks/useFestivalAccess";
 import { avatars } from "./config/avatars";
 import i18n from "./i18n";
@@ -1603,6 +1604,7 @@ function App() {
   const [tournamentsError, setTournamentsError] = useState("");
   const [timetable, setTimetable] = useState<Timetable | null>(null);
   const [timetableError, setTimetableError] = useState("");
+  const [artistFavoriteError, setArtistFavoriteError] = useState("");
   const [isLoadingTimetable, setIsLoadingTimetable] = useState(
     Boolean(selectedParticipant),
   );
@@ -4477,6 +4479,113 @@ function App() {
     }
   }
 
+  async function toggleArtistFavorite(
+    performanceIds: string[],
+    isFavorite: boolean,
+  ) {
+    if (!selectedParticipant || !timetable || performanceIds.length === 0) {
+      return;
+    }
+
+    const currentFavoriteIds = new Set(timetable.favoritePerformanceIds);
+    const targetPerformanceIds = performanceIds.filter((performanceId) =>
+      isFavorite
+        ? currentFavoriteIds.has(performanceId)
+        : !currentFavoriteIds.has(performanceId),
+    );
+
+    if (targetPerformanceIds.length === 0) {
+      return;
+    }
+
+    const completedIds: string[] = [];
+    setTogglingFavoritePerformanceId(targetPerformanceIds[0]);
+    setArtistFavoriteError("");
+
+    try {
+      for (const performanceId of targetPerformanceIds) {
+        if (isFavorite) {
+          await removeTimetableFavorite(performanceId, {
+            participantAccessCode: selectedParticipant.accessCode,
+          });
+        } else {
+          await addTimetableFavorite(performanceId, {
+            participantAccessCode: selectedParticipant.accessCode,
+          });
+        }
+        completedIds.push(performanceId);
+      }
+
+      const changedIds = new Set(targetPerformanceIds);
+      setTimetable((currentTimetable) =>
+        currentTimetable
+          ? {
+              ...currentTimetable,
+              favoritePerformanceIds: isFavorite
+                ? currentTimetable.favoritePerformanceIds.filter(
+                    (id) => !changedIds.has(id),
+                  )
+                : Array.from(
+                    new Set([
+                      ...currentTimetable.favoritePerformanceIds,
+                      ...targetPerformanceIds,
+                    ]),
+                  ),
+              performanceFavorites: targetPerformanceIds.reduce(
+                (favorites, performanceId) => {
+                  const existing = favorites.find(
+                    (favorite) => favorite.performanceId === performanceId,
+                  );
+                  const otherParticipants =
+                    existing?.participants.filter(
+                      (participant) =>
+                        participant.participantId !== selectedParticipant.id,
+                    ) ?? [];
+                  const updatedFavorite = {
+                    performanceId,
+                    participants: isFavorite
+                      ? otherParticipants
+                      : [
+                          ...otherParticipants,
+                          {
+                            participantId: selectedParticipant.id,
+                            displayName: selectedParticipant.displayName,
+                            avatarId: selectedParticipant.avatarId ?? null,
+                          },
+                        ],
+                  };
+
+                  return existing
+                    ? favorites.map((favorite) =>
+                        favorite.performanceId === performanceId
+                          ? updatedFavorite
+                          : favorite,
+                      )
+                    : [...favorites, updatedFavorite];
+                },
+                currentTimetable.performanceFavorites,
+              ),
+            }
+          : currentTimetable,
+      );
+    } catch {
+      await Promise.allSettled(
+        completedIds.map((performanceId) =>
+          isFavorite
+            ? addTimetableFavorite(performanceId, {
+                participantAccessCode: selectedParticipant.accessCode,
+              })
+            : removeTimetableFavorite(performanceId, {
+                participantAccessCode: selectedParticipant.accessCode,
+              }),
+        ),
+      );
+      setArtistFavoriteError(t("artistDetail.favorite.error"));
+    } finally {
+      setTogglingFavoritePerformanceId(null);
+    }
+  }
+
   function openCampLocationLink() {
     if (!campLocationLink) {
       return;
@@ -5200,20 +5309,40 @@ function App() {
       ) : null}
 
       {selectedParticipant && activeMainSection === "artists" ? (
-        <Artists
-          acts={timetable?.acts ?? null}
-          error={timetableError ? t("artists.errors.load") : ""}
-          isLoading={isLoadingTimetable}
-          selectedActId={selectedArtistId}
-          dashboardBackButton={
-            <DashboardBackButton
-              onClick={() => navigateMainSection("dashboard")}
-            />
-          }
-          onSelectAct={(actId) => {
-            window.location.hash = `#artists/${encodeURIComponent(actId)}`;
-          }}
-        />
+        selectedArtistId ? (
+          <ArtistDetail
+            timetable={timetable}
+            actId={selectedArtistId}
+            loadError={timetableError ? t("artistDetail.errors.load") : ""}
+            favoriteError={artistFavoriteError}
+            isLoading={isLoadingTimetable}
+            isSavingFavorite={togglingFavoritePerformanceId !== null}
+            backButton={
+              <DashboardBackButton
+                onClick={() => {
+                  window.location.hash = "#artists";
+                }}
+              />
+            }
+            onToggleFavorite={toggleArtistFavorite}
+          />
+        ) : (
+          <Artists
+            acts={timetable?.acts ?? null}
+            error={timetableError ? t("artists.errors.load") : ""}
+            isLoading={isLoadingTimetable}
+            selectedActId={null}
+            dashboardBackButton={
+              <DashboardBackButton
+                onClick={() => navigateMainSection("dashboard")}
+              />
+            }
+            onSelectAct={(actId) => {
+              setArtistFavoriteError("");
+              window.location.hash = `#artists/${encodeURIComponent(actId)}`;
+            }}
+          />
+        )
       ) : null}
 
       {selectedParticipant && activeMainSection === "info" ? (

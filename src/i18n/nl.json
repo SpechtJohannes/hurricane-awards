@@ -835,6 +835,28 @@
       "load": "De artiesten konden niet worden geladen."
     }
   },
+  "artistDetail": {
+    "eyebrow": "Artiest",
+    "loading": "Artiestgegevens en favorietenstatus worden geladen...",
+    "notFound": "Deze artiest is niet gevonden of is verwijderd.",
+    "errors": {
+      "load": "De artiest- en optredengegevens konden niet worden geladen."
+    },
+    "favorite": {
+      "add": "Als favoriet markeren",
+      "remove": "Uit favorieten verwijderen",
+      "saving": "Favoriet wordt opgeslagen...",
+      "error": "De favorietenstatus kon niet worden opgeslagen. De vorige status is behouden."
+    },
+    "performances": {
+      "title": "Geplande optredens",
+      "empty": "Voor deze artiest zijn nog geen optredens gepland.",
+      "timeRange": "{{start}}–{{end}} uur",
+      "startTime": "Vanaf {{start}} uur",
+      "stage": "Podium: {{stage}}",
+      "unknownStage": "Onbekend podium"
+    }
+  },
   "timetable": {
     "eyebrow": "Festival",
     "title": "Timetable",

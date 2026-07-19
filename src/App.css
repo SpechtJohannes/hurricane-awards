@@ -2385,6 +2385,134 @@ h1 {
   border-color: color-mix(in srgb, var(--color-error) 46%, transparent);
 }
 
+.artist-detail {
+  --section-color: var(--color-timetable);
+  min-height: 60svh;
+  padding: 34px 20px 56px;
+  background: rgba(9, 11, 16, 0.34);
+}
+
+.artist-detail__content {
+  display: grid;
+  width: min(100%, 760px);
+  margin: 0 auto;
+  gap: 28px;
+}
+
+.artist-detail__header {
+  display: grid;
+  gap: 10px;
+}
+
+.artist-detail__header p,
+.artist-detail__header h2 {
+  margin: 0;
+}
+
+.artist-detail__header p {
+  color: var(--section-color);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.artist-detail__header h2 {
+  color: var(--color-text-primary);
+  font-size: clamp(2rem, 9vw, 4rem);
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+
+.artist-detail__favorite {
+  width: fit-content;
+  min-height: 48px;
+  padding: 0 18px;
+  color: var(--color-accent-contrast);
+  font: inherit;
+  font-weight: 850;
+  background: var(--section-color);
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.artist-detail__favorite[aria-pressed="true"] {
+  color: var(--color-text-primary);
+  background: var(--surface-card);
+  border: 1px solid var(--section-color);
+}
+
+.artist-detail__favorite:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.artist-detail__favorite:focus-visible {
+  outline: 3px solid var(--color-text-primary);
+  outline-offset: 3px;
+}
+
+.artist-detail__performances {
+  display: grid;
+  gap: 12px;
+}
+
+.artist-detail__performances h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 1.25rem;
+}
+
+.artist-detail__performances ul {
+  display: grid;
+  padding: 0;
+  margin: 0;
+  gap: 10px;
+  list-style: none;
+}
+
+.artist-detail__performances li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(0, 1fr));
+  gap: 6px 16px;
+  padding: 16px;
+  color: var(--color-text-secondary);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}
+
+.artist-detail__performances li strong {
+  color: var(--color-text-primary);
+}
+
+.artist-detail__notice {
+  width: min(100%, 760px);
+  padding: 18px 20px;
+  margin: 0 auto;
+  color: var(--color-text-secondary);
+  font-weight: 750;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}
+
+.artist-detail__notice--error {
+  color: var(--color-error);
+  border-color: color-mix(in srgb, var(--color-error) 46%, transparent);
+}
+
+@media (max-width: 640px) {
+  .artist-detail__performances li {
+    grid-template-columns: 1fr;
+  }
+
+  .artist-detail__favorite {
+    width: 100%;
+  }
+}
+
 .timetable__notice {
   width: min(100%, 760px);
   margin: 0 auto;
