@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { Category } from "../data/categories";
 import type { Timetable } from "../data/timetable";
 import { EventStatusCard } from "./EventStatusCard";
+import { WeatherCard } from "./WeatherCard";
 
 type DashboardHeroProps = {
   festivalName: string;
@@ -14,6 +15,7 @@ type DashboardHeroProps = {
   timetable: Timetable | null;
   activeCategory: Category | null;
   showEventStatus: boolean;
+  participantAccessCode?: string | null;
   onOpenTimetable: () => void;
   onOpenVoting: () => void;
 };
@@ -49,6 +51,7 @@ export function DashboardHero({
   timetable,
   activeCategory,
   showEventStatus,
+  participantAccessCode = null,
   onOpenTimetable,
   onOpenVoting,
 }: DashboardHeroProps) {
@@ -95,6 +98,7 @@ export function DashboardHero({
       </div>
 
       <div className="dashboard-hero__modules">
+        <WeatherCard participantAccessCode={participantAccessCode} />
         {showEventStatus ? (
           eventStartDate && eventEndDate ? (
             <EventStatusCard

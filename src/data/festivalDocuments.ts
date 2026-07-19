@@ -23,7 +23,32 @@ export type UploadFestivalDocumentInput = {
   file: File;
 };
 
+export type CampLocation = {
+  label: string;
+  mapUrl: string;
+  latitude: number;
+  longitude: number;
+  timezone: string | null;
+};
 export type CampLocationLink = string | null;
+
+type CampLocationRow = {
+  camp_location_label: string | null;
+  camp_location_map_url: string | null;
+  camp_location_latitude: number | null;
+  camp_location_longitude: number | null;
+  camp_location_timezone: string | null;
+};
+
+function mapCampLocation(data: unknown): CampLocation | null {
+  if (typeof data === "string" && data.trim()) return null;
+  const row = (Array.isArray(data) ? data[0] : data) as CampLocationRow | null;
+  if (!row?.camp_location_label || !row.camp_location_map_url ||
+      !Number.isFinite(row.camp_location_latitude) || !Number.isFinite(row.camp_location_longitude)) return null;
+  return { label: row.camp_location_label, mapUrl: row.camp_location_map_url,
+    latitude: row.camp_location_latitude as number, longitude: row.camp_location_longitude as number,
+    timezone: row.camp_location_timezone ?? null };
+}
 
 type FestivalDocumentRow = {
   document_type: FestivalDocumentType;
@@ -244,9 +269,9 @@ export async function deleteFestivalDocument(
   }
 }
 
-export async function loadCampLocationLink(
+export async function loadCampLocation(
   context: ParticipantAccessContext,
-): Promise<CampLocationLink> {
+): Promise<CampLocation | null> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc(
     "ha_get_camp_location_link",
@@ -257,12 +282,12 @@ export async function loadCampLocationLink(
     throw error;
   }
 
-  return typeof data === "string" && data.trim() ? data : null;
+  return mapCampLocation(data);
 }
 
-export async function loadAdminCampLocationLink(
+export async function loadAdminCampLocation(
   context: AdminAccessContext,
-): Promise<CampLocationLink> {
+): Promise<CampLocation | null> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc(
     "ha_admin_get_camp_location_link",
@@ -273,12 +298,29 @@ export async function loadAdminCampLocationLink(
     throw error;
   }
 
-  return typeof data === "string" && data.trim() ? data : null;
+  return mapCampLocation(data);
+}
+
+export async function loadCampLocationLink(context: ParticipantAccessContext): Promise<CampLocationLink> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase.rpc("ha_get_camp_location_link", participantRpcParams(context));
+  if (error) throw error;
+  if (typeof data === "string") return data.trim() || null;
+  return mapCampLocation(data)?.mapUrl ?? null;
+}
+
+export async function loadAdminCampLocationLink(context: AdminAccessContext): Promise<CampLocationLink> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase.rpc("ha_admin_get_camp_location_link", participantRpcParams(context));
+  if (error) throw error;
+  if (typeof data === "string") return data.trim() || null;
+  return mapCampLocation(data)?.mapUrl ?? null;
 }
 
 export async function updateCampLocationLink(
   link: string,
-  context: AdminAccessContext,
+  locationOrContext: Omit<CampLocation, "mapUrl"> | AdminAccessContext,
+  possibleContext?: AdminAccessContext,
 ): Promise<string> {
   const normalizedLink = link.trim();
 
@@ -286,17 +328,32 @@ export async function updateCampLocationLink(
     throw new Error("unsupported camp location link");
   }
 
+  const context = possibleContext ?? (locationOrContext as AdminAccessContext);
+  const location = possibleContext ? locationOrContext as Omit<CampLocation, "mapUrl"> : null;
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc("ha_update_camp_location_link", {
     ...participantRpcParams(context),
     p_link: normalizedLink,
+    ...(location ? { p_label: location.label, p_latitude: location.latitude,
+      p_longitude: location.longitude, p_timezone: location.timezone } : {}),
   });
 
   if (error) {
     throw error;
   }
 
-  return String(data ?? "");
+  if (typeof data === "string") return data;
+  const saved = mapCampLocation(data);
+  if (!saved) throw new Error("invalid saved camp location");
+  return saved.mapUrl;
+}
+
+export async function geocodeCampLocation(query: string, context: AdminAccessContext) {
+  const { data, error } = await getSupabase().functions.invoke("geocode_camp_location", {
+    body: { participantAccessCode: context.participantAccessCode, query: query.trim() },
+  });
+  if (error || data?.status !== "available" || !data.result) throw new Error("geocoding failed");
+  return data.result as Omit<CampLocation, "mapUrl">;
 }
 
 export async function deleteCampLocationLink(

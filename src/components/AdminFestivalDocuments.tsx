@@ -20,7 +20,7 @@ type AdminFestivalDocumentsProps = {
   isSavingMusicPlaylist: boolean;
   uploadingDocumentType: FestivalDocumentType | null;
   removingDocumentType: FestivalDocumentType | null;
-  onSaveCampLocation: (link: string) => void;
+  onSaveCampLocation: (link: string, locationQuery: string) => void;
   onRemoveCampLocation: () => void;
   onClearCampLocationError: () => void;
   onSaveMusicPlaylist: (link: string) => Promise<boolean>;
@@ -62,6 +62,7 @@ export function AdminFestivalDocuments({
   const [campLocationInput, setCampLocationInput] = useState(
     campLocationLink ?? "",
   );
+  const [campLocationQuery, setCampLocationQuery] = useState("");
   const [musicPlaylistInput, setMusicPlaylistInput] = useState(
     musicPlaylist?.externalUrl ?? "",
   );
@@ -69,7 +70,7 @@ export function AdminFestivalDocuments({
 
   function submitCampLocation(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    onSaveCampLocation(campLocationInput);
+    onSaveCampLocation(campLocationInput, campLocationQuery);
   }
 
   async function submitMusicPlaylist(event: FormEvent<HTMLFormElement>) {
@@ -133,6 +134,20 @@ export function AdminFestivalDocuments({
           <div className="admin-document-card__main">
             <p>{t("admin.campLocation.eyebrow")}</p>
             <h3>{t("admin.campLocation.title")}</h3>
+            <label htmlFor="admin-camp-location-query">
+              {t("admin.campLocation.queryLabel")}
+              <input
+                id="admin-camp-location-query"
+                type="text"
+                value={campLocationQuery}
+                disabled={isSavingCampLocation}
+                placeholder={t("admin.campLocation.queryPlaceholder")}
+                onChange={(event) => {
+                  setCampLocationQuery(event.target.value);
+                  onClearCampLocationError();
+                }}
+              />
+            </label>
             <label htmlFor="admin-camp-location-link">
               {t("admin.campLocation.linkLabel")}
               <input

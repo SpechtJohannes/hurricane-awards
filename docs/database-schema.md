@@ -129,7 +129,7 @@ Fremdschluessel: Keine.
 
 Besonderheiten:
 
-- Aktuell werden `festival_name` als zentraler Festivalname, `festival_access_code` als gemeinsamer Festivalcode, `camp_location_link` als optionaler Standortlink und `music_spotify_playlist_id` als optionale Spotify Playlist ID gespeichert.
+- Aktuell werden `festival_name` als zentraler Festivalname, `festival_access_code` als gemeinsamer Festivalcode, `camp_location_link` als optionaler Standortlink und `music_spotify_playlist_id` als optionale Spotify Playlist ID gespeichert. Der Campstandort-Datensatz kann zusaetzlich die optionale normalisierte Bezeichnung, Latitude, Longitude und Zeitzone fuer die serverseitige Wetterabfrage enthalten.
 - `app_settings_value_not_blank` verhindert leere Werte.
 - Der Festivalname wird ueber `ha_get_festival_name` gelesen und ueber `ha_update_festival_name` mit Adminschutz geschrieben.
 - Der Festivalcode wird fuer den Zugang ueber `ha_verify_festival_access_code` geprueft. Admins lesen ihn ueber `ha_get_festival_access_code` und schreiben ihn ueber `ha_update_festival_access_code`.
