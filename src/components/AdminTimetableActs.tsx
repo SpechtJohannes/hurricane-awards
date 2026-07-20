@@ -5,6 +5,7 @@ import {
   type TimetableAct,
   type UpdateTimetableActInput,
 } from "../data/timetable";
+import type { ActArtistTag, ArtistTag } from "../data/artistTags";
 import { SectionHeader } from "./SectionHeader";
 
 type ActFormState = {
@@ -18,9 +19,14 @@ type AdminTimetableActsProps = {
   error: string;
   isLoading: boolean;
   deletingActId: string | null;
+  tags: ArtistTag[];
+  actTags: ActArtistTag[];
   onCreate: (input: CreateTimetableActInput) => Promise<void>;
   onUpdate: (input: UpdateTimetableActInput) => Promise<void>;
   onDelete: (act: TimetableAct) => void;
+  onAddTag: (actId: string, name: string) => Promise<void>;
+  onAssignTag: (actId: string, tagId: string) => Promise<void>;
+  onRemoveTag: (actId: string, tagId: string) => Promise<void>;
 };
 
 export function AdminTimetableActs({
@@ -28,14 +34,39 @@ export function AdminTimetableActs({
   error,
   isLoading,
   deletingActId,
+  tags,
+  actTags,
   onCreate,
   onUpdate,
   onDelete,
+  onAddTag,
+  onAssignTag,
+  onRemoveTag,
 }: AdminTimetableActsProps) {
   const { t } = useTranslation();
   const [form, setForm] = useState<ActFormState | null>(null);
   const [formError, setFormError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [tagInputByAct, setTagInputByAct] = useState<Record<string, string>>({});
+  const [savingTagForAct, setSavingTagForAct] = useState<string | null>(null);
+
+  async function addTag(actId: string) {
+    const value = (tagInputByAct[actId] ?? "").trim();
+    if (!value) {
+      setFormError(t("admin.timetable.acts.tags.errors.required"));
+      return;
+    }
+    setSavingTagForAct(actId);
+    setFormError("");
+    try {
+      await onAddTag(actId, value);
+      setTagInputByAct((current) => ({ ...current, [actId]: "" }));
+    } catch {
+      setFormError(t("admin.timetable.acts.tags.errors.save"));
+    } finally {
+      setSavingTagForAct(null);
+    }
+  }
 
   function startCreate() {
     setFormError("");
@@ -192,6 +223,51 @@ export function AdminTimetableActs({
                 <div className="admin-category-card__main">
                   <h3>{act.name}</h3>
                   {act.description ? <p>{act.description}</p> : null}
+                  <div className="artist-tags" aria-label={t("admin.timetable.acts.tags.assigned")}>
+                    {actTags.filter((tag) => tag.actId === act.id).map((tag) => (
+                      <span className="artist-tag" key={tag.id}>
+                        {tag.name}
+                        <button
+                          type="button"
+                          disabled={savingTagForAct === act.id}
+                          aria-label={t("admin.timetable.acts.tags.remove", { name: tag.name })}
+                          onClick={async () => {
+                            setSavingTagForAct(act.id);
+                            try { await onRemoveTag(act.id, tag.id); } finally { setSavingTagForAct(null); }
+                          }}
+                        >×</button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="artist-tag-editor">
+                    <input
+                      type="text"
+                      list={`artist-tags-${act.id}`}
+                      value={tagInputByAct[act.id] ?? ""}
+                      disabled={savingTagForAct === act.id}
+                      placeholder={t("admin.timetable.acts.tags.placeholder")}
+                      aria-label={t("admin.timetable.acts.tags.inputLabel")}
+                      onChange={(event) => setTagInputByAct((current) => ({ ...current, [act.id]: event.target.value }))}
+                    />
+                    <datalist id={`artist-tags-${act.id}`}>
+                      {tags.filter((tag) => !actTags.some((assigned) => assigned.actId === act.id && assigned.id === tag.id)).map((tag) => (
+                        <option key={tag.id} value={tag.name} />
+                      ))}
+                    </datalist>
+                    <button
+                      className="admin-card__reset admin-card__reset--secondary"
+                      type="button"
+                      disabled={savingTagForAct === act.id}
+                      onClick={async () => {
+                        const input = (tagInputByAct[act.id] ?? "").trim();
+                        const existing = tags.find((tag) => tag.name.localeCompare(input, undefined, { sensitivity: "base" }) === 0);
+                        if (existing) {
+                          setSavingTagForAct(act.id);
+                          try { await onAssignTag(act.id, existing.id); setTagInputByAct((current) => ({ ...current, [act.id]: "" })); } finally { setSavingTagForAct(null); }
+                        } else await addTag(act.id);
+                      }}
+                    >{savingTagForAct === act.id ? t("common.saving") : t("admin.timetable.acts.tags.add")}</button>
+                  </div>
                 </div>
 
                 <div className="admin-category-card__controls">

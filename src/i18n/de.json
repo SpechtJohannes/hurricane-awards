@@ -466,6 +466,19 @@
         "delete": "Löschen",
         "deleting": "Lösche...",
         "confirmDelete": "Act \"{{name}}\" wirklich löschen?",
+        "tags": {
+          "assigned": "Zugeordnete Schlagwörter",
+          "inputLabel": "Schlagwort auswählen oder neu eingeben",
+          "placeholder": "Schlagwort eingeben",
+          "add": "Hinzufügen",
+          "remove": "Schlagwort {{name}} entfernen",
+          "errors": {
+            "load": "Die Schlagwörter konnten gerade nicht geladen werden.",
+            "save": "Das Schlagwort konnte gerade nicht hinzugefügt werden.",
+            "remove": "Das Schlagwort konnte gerade nicht entfernt werden.",
+            "required": "Bitte gib ein Schlagwort ein."
+          }
+        },
         "errors": {
           "load": "Die Acts konnten gerade nicht geladen werden.",
           "save": "Der Act konnte gerade nicht gespeichert werden.",

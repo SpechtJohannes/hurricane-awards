@@ -270,6 +270,8 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `festival_days`: Festivaltage fuer den strukturierten Timetable.
 - `timetable_stages`: Buehnen fuer den strukturierten Timetable, optional mit Farbe zur visuellen Unterscheidung.
 - `timetable_acts`: Acts fuer den strukturierten Timetable.
+- `artist_tags`: Zentrale, wiederverwendbare Schlagwoerter; normalisierte Namen sind unabhaengig von Gross-/Kleinschreibung und ueberfluessigen Leerzeichen eindeutig.
+- `timetable_act_artist_tags`: Normalisierte n:m-Beziehung zwischen Acts und Schlagwoertern mit kaskadierender Bereinigung. Sie bildet die Grundlage fuer spaetere Kuenstlerfilter und individuelle Empfehlungen.
 - `timetable_performances`: Auftritte, die je einen Festivaltag, eine Buehne und einen Act verbinden.
 - `participant_timetable_favorites`: Persoenliche Favoriten einzelner Teilnehmer fuer konkrete Timetable-Auftritte.
 - `bingo_rounds`: Bingorunden mit Status. Es darf nur eine aktive Runde geben; beim Start einer neuen Runde werden alte aktive Runden geschlossen. Es gibt keine UI-Historie.
