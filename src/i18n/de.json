@@ -854,6 +854,9 @@
     "eyebrow": "Künstler",
     "loading": "Künstlerdaten und Favoritenstatus werden geladen...",
     "notFound": "Dieser Künstler wurde nicht gefunden oder wurde entfernt.",
+    "tags": {
+      "label": "Schlagwörter"
+    },
     "errors": {
       "load": "Die Künstler- und Auftrittsdaten konnten gerade nicht geladen werden."
     },

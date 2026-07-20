@@ -1,10 +1,12 @@
 import { useMemo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { Timetable } from "../data/timetable";
+import type { ActArtistTag } from "../data/artistTags";
 
 type ArtistDetailProps = {
   timetable: Timetable | null;
   actId: string;
+  artistTags: ActArtistTag[];
   loadError: string;
   favoriteError: string;
   isLoading: boolean;
@@ -16,6 +18,7 @@ type ArtistDetailProps = {
 export function ArtistDetail({
   timetable,
   actId,
+  artistTags,
   loadError,
   favoriteError,
   isLoading,
@@ -47,6 +50,7 @@ export function ArtistDetail({
     timetable?.stages.map((stage) => [stage.id, stage]) ?? [],
   );
   const locale = i18n.language.startsWith("nl") ? "nl-NL" : "de-DE";
+  const assignedTags = artistTags.filter((tag) => tag.actId === actId);
 
   return (
     <section
@@ -73,6 +77,7 @@ export function ArtistDetail({
           <header className="artist-detail__header">
             <p>{t("artistDetail.eyebrow")}</p>
             <h2 id="artist-detail-title">{act.name}</h2>
+            {act.description ? <span className="artist-detail__description">{act.description}</span> : null}
             <button
               type="button"
               className="artist-detail__favorite"
@@ -92,6 +97,12 @@ export function ArtistDetail({
                   : t("artistDetail.favorite.add")}
             </button>
           </header>
+
+          {assignedTags.length > 0 ? (
+            <div className="artist-detail__tags" aria-label={t("artistDetail.tags.label")}>
+              {assignedTags.map((tag) => <span key={tag.id}>{tag.name}</span>)}
+            </div>
+          ) : null}
 
           {favoriteError ? (
             <p className="artist-detail__notice artist-detail__notice--error" role="alert">

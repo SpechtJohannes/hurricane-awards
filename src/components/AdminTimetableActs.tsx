@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import {
   type CreateTimetableActInput,
@@ -51,6 +51,13 @@ export function AdminTimetableActs({
   const [selectedTagByAct, setSelectedTagByAct] = useState<Record<string, string>>({});
   const [tagErrorByAct, setTagErrorByAct] = useState<Record<string, string>>({});
   const [savingTagForAct, setSavingTagForAct] = useState<string | null>(null);
+  const editNameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (form?.id) {
+      editNameInputRef.current?.focus();
+    }
+  }, [form?.id]);
 
   async function addTag(actId: string) {
     const value = (tagInputByAct[actId] ?? "").trim();
@@ -127,6 +134,10 @@ export function AdminTimetableActs({
 
       setForm(null);
     } catch (error) {
+      console.error(
+        form.id ? `Failed to update timetable act ${form.id}` : "Failed to create timetable act",
+        error,
+      );
       setFormError(error instanceof Error ? error.message : String(error));
     } finally {
       setIsSaving(false);
@@ -148,12 +159,13 @@ export function AdminTimetableActs({
             className="admin-card__reset admin-card__reset--primary"
             type="button"
             onClick={startCreate}
+            disabled={form !== null}
           >
             {t("admin.timetable.acts.createButton")}
           </button>
         </div>
 
-        {form ? (
+        {form?.id === null ? (
           <form className="admin-category-form" onSubmit={submitForm}>
             <h3>
               {form.id
@@ -189,7 +201,7 @@ export function AdminTimetableActs({
             </label>
 
             {formError ? (
-              <p className="admin-participant-form__error">{formError}</p>
+              <p className="admin-participant-form__error" role="alert">{formError}</p>
             ) : null}
 
             <div className="admin-participant-form__actions">
@@ -223,8 +235,51 @@ export function AdminTimetableActs({
             {acts.map((act) => (
               <article className="admin-category-card" key={act.id}>
                 <div className="admin-category-card__main">
-                  <h3>{act.name}</h3>
-                  {act.description ? <p>{act.description}</p> : null}
+                  {form?.id === act.id ? (
+                    <form className="admin-category-form admin-category-form--inline" onSubmit={submitForm}>
+                      <h3>{t("admin.timetable.acts.editTitle")}</h3>
+                      <label htmlFor={`admin-timetable-act-name-${act.id}`}>
+                        {t("admin.timetable.acts.nameLabel")}
+                        <input
+                          ref={editNameInputRef}
+                          id={`admin-timetable-act-name-${act.id}`}
+                          type="text"
+                          value={form.name}
+                          disabled={isSaving}
+                          onChange={(event) => {
+                            setForm({ ...form, name: event.target.value });
+                            setFormError("");
+                          }}
+                        />
+                      </label>
+                      <label htmlFor={`admin-timetable-act-description-${act.id}`}>
+                        {t("admin.timetable.acts.descriptionLabel")}
+                        <textarea
+                          id={`admin-timetable-act-description-${act.id}`}
+                          value={form.description}
+                          disabled={isSaving}
+                          onChange={(event) => {
+                            setForm({ ...form, description: event.target.value });
+                            setFormError("");
+                          }}
+                        />
+                      </label>
+                      {formError ? <p className="admin-participant-form__error" role="alert">{formError}</p> : null}
+                      <div className="admin-participant-form__actions">
+                        <button className="admin-card__reset admin-card__reset--primary" type="submit" disabled={isSaving}>
+                          {isSaving ? t("common.saving") : t("admin.timetable.acts.save")}
+                        </button>
+                        <button className="admin-card__reset admin-card__reset--secondary" type="button" disabled={isSaving} onClick={cancelForm}>
+                          {t("admin.timetable.acts.cancel")}
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <>
+                      <h3>{act.name}</h3>
+                      {act.description ? <p>{act.description}</p> : null}
+                    </>
+                  )}
                   <div className="artist-tags" aria-label={t("admin.timetable.acts.tags.assigned")}>
                     {actTags.filter((tag) => tag.actId === act.id).map((tag) => (
                       <span className="artist-tag" key={tag.id}>
@@ -292,12 +347,12 @@ export function AdminTimetableActs({
                   {tagErrorByAct[act.id] ? <p className="admin-participant-form__error" role="alert">{tagErrorByAct[act.id]}</p> : null}
                 </div>
 
-                <div className="admin-category-card__controls">
+                {form?.id !== act.id ? <div className="admin-category-card__controls">
                   <div className="admin-category-card__actions">
                     <button
                       className="admin-card__reset admin-card__reset--secondary"
                       type="button"
-                      disabled={deletingActId === act.id}
+                      disabled={form !== null || deletingActId === act.id}
                       onClick={() => startEdit(act)}
                     >
                       {t("admin.timetable.acts.edit")}
@@ -305,7 +360,7 @@ export function AdminTimetableActs({
                     <button
                       className="admin-card__reset"
                       type="button"
-                      disabled={deletingActId === act.id}
+                      disabled={form !== null || deletingActId === act.id}
                       onClick={() => onDelete(act)}
                     >
                       {deletingActId === act.id
@@ -313,7 +368,7 @@ export function AdminTimetableActs({
                         : t("admin.timetable.acts.delete")}
                     </button>
                   </div>
-                </div>
+                </div> : null}
               </article>
             ))}
           </div>

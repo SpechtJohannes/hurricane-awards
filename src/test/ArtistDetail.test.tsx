@@ -30,7 +30,7 @@ const timetable: Timetable = {
 function renderDetail(overrides: Partial<ComponentProps<typeof ArtistDetail>> = {}) {
   const onToggleFavorite = vi.fn();
   render(
-    <ArtistDetail timetable={timetable} actId="act-1" loadError="" favoriteError="" isLoading={false} isSavingFavorite={false} backButton={<button type="button">Zurück</button>} onToggleFavorite={onToggleFavorite} {...overrides} />,
+    <ArtistDetail timetable={timetable} actId="act-1" artistTags={[]} loadError="" favoriteError="" isLoading={false} isSavingFavorite={false} backButton={<button type="button">Zurück</button>} onToggleFavorite={onToggleFavorite} {...overrides} />,
   );
   return onToggleFavorite;
 }
@@ -82,12 +82,32 @@ describe("ArtistDetail", () => {
   });
 
   it("zeigt Lade-, Ladefehler- und Speicherfehlerzustände", () => {
-    const props: ComponentProps<typeof ArtistDetail> = { timetable: null, actId: "act-1", loadError: "", favoriteError: "", isLoading: true, isSavingFavorite: false, backButton: null, onToggleFavorite: vi.fn() };
+    const props: ComponentProps<typeof ArtistDetail> = { timetable: null, actId: "act-1", artistTags: [], loadError: "", favoriteError: "", isLoading: true, isSavingFavorite: false, backButton: null, onToggleFavorite: vi.fn() };
     const { rerender } = render(<ArtistDetail {...props} />);
     expect(screen.getByRole("status")).toHaveTextContent(/werden geladen/i);
     rerender(<ArtistDetail {...props} isLoading={false} loadError="Laden fehlgeschlagen" />);
     expect(screen.getByRole("alert")).toHaveTextContent("Laden fehlgeschlagen");
     rerender(<ArtistDetail {...props} timetable={timetable} isLoading={false} favoriteError="Speichern fehlgeschlagen" />);
     expect(screen.getByRole("alert")).toHaveTextContent("Speichern fehlgeschlagen");
+  });
+
+  it("zeigt zugeordnete Schlagwörter ausschließlich lesend", () => {
+    renderDetail({
+      artistTags: [
+        { actId: "act-1", id: "rock", name: "Rock" },
+        { actId: "act-1", id: "indie", name: "Indie" },
+        { actId: "act-2", id: "pop", name: "Pop" },
+      ],
+    });
+    const tags = screen.getByLabelText("Schlagwörter");
+    expect(tags).toHaveTextContent("Rock");
+    expect(tags).toHaveTextContent("Indie");
+    expect(tags).not.toHaveTextContent("Pop");
+    expect(within(tags).queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("zeigt für Künstler ohne Schlagwörter keinen leeren Tag-Bereich", () => {
+    renderDetail({ artistTags: [] });
+    expect(screen.queryByLabelText("Schlagwörter")).not.toBeInTheDocument();
   });
 });
