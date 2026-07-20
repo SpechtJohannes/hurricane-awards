@@ -469,6 +469,8 @@
         "tags": {
           "assigned": "Toegewezen tags",
           "inputLabel": "Tag selecteren of nieuw invoeren",
+          "selectLabel": "Bestaande tag selecteren",
+          "selectPlaceholder": "Bestaande tag kiezen",
           "placeholder": "Tag invoeren",
           "add": "Toevoegen",
           "remove": "Tag {{name}} verwijderen",

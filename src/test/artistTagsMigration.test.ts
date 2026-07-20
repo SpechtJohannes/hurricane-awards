@@ -25,5 +25,13 @@ describe("artist tags migration", () => {
   it("rejects empty names and makes assignment idempotent", () => {
     expect(sql).toContain("artist tag name is required");
     expect(sql).toContain("on conflict do nothing");
+    expect(sql).toContain("on conflict (lower(regexp_replace(trim(name)");
+    expect(sql).toContain("do update set name = artist_tags.name");
+  });
+
+  it("removes only the act assignment and retains the reusable tag", () => {
+    const removeFunction = sql.slice(sql.indexOf("create function public.ha_admin_remove_artist_tag"));
+    expect(removeFunction).toContain("delete from public.timetable_act_artist_tags");
+    expect(removeFunction).not.toContain("delete from public.artist_tags");
   });
 });
