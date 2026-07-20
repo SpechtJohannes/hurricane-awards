@@ -159,6 +159,15 @@ import {
   type UpdateTimetableStageInput,
 } from "./data/timetable";
 import {
+  addArtistTag,
+  assignArtistTag,
+  loadActArtistTags,
+  loadArtistTags,
+  removeArtistTag,
+  type ActArtistTag,
+  type ArtistTag,
+} from "./data/artistTags";
+import {
   isSupportedMusicPlaylistLink,
   type MusicPlaylist,
 } from "./data/musicEmbeds";
@@ -1636,6 +1645,9 @@ function App() {
   const [isLoadingAdminTimetableActs, setIsLoadingAdminTimetableActs] =
     useState(false);
   const [deletingActId, setDeletingActId] = useState<string | null>(null);
+  const [artistTags, setArtistTags] = useState<ArtistTag[]>([]);
+  const [actArtistTags, setActArtistTags] = useState<ActArtistTag[]>([]);
+  const [artistTagsError, setArtistTagsError] = useState("");
   const [adminTimetablePerformances, setAdminTimetablePerformances] = useState<
     TimetablePerformance[]
   >([]);
@@ -2506,6 +2518,9 @@ function App() {
         void reloadAdminFestivalDays();
         void reloadAdminTimetableStages();
         void reloadAdminTimetableActs();
+        void reloadArtistTags().catch(() => {
+          setArtistTagsError(t("admin.timetable.acts.tags.errors.load"));
+        });
         void reloadAdminTimetablePerformances();
         void reloadAdminFestivalDocuments();
         void reloadAdminBingoRound();
@@ -2730,6 +2745,56 @@ function App() {
     setAdminTimetableActs(loadedAdminTimetableActs);
     setAdminTimetablePerformances(loadedAdminTimetablePerformances);
     setTimetable(loadedTimetable);
+  }
+
+  async function reloadArtistTags() {
+    const adminContext = getParticipantAdminContext();
+    if (!adminContext) return;
+    const [tags, assignments] = await Promise.all([
+      loadArtistTags(adminContext),
+      loadActArtistTags(adminContext),
+    ]);
+    setArtistTags(tags);
+    setActArtistTags(assignments);
+  }
+
+  async function addAdminArtistTag(actId: string, name: string) {
+    const adminContext = getParticipantAdminContext();
+    if (!adminContext) return;
+    setArtistTagsError("");
+    try {
+      await addArtistTag(actId, name, adminContext);
+      await reloadArtistTags();
+    } catch (error) {
+      setArtistTagsError(t("admin.timetable.acts.tags.errors.save"));
+      throw error;
+    }
+  }
+
+  async function assignAdminArtistTag(actId: string, tagId: string) {
+    const adminContext = getParticipantAdminContext();
+    if (!adminContext) return;
+    setArtistTagsError("");
+    try {
+      await assignArtistTag(actId, tagId, adminContext);
+      await reloadArtistTags();
+    } catch (error) {
+      setArtistTagsError(t("admin.timetable.acts.tags.errors.save"));
+      throw error;
+    }
+  }
+
+  async function removeAdminArtistTag(actId: string, tagId: string) {
+    const adminContext = getParticipantAdminContext();
+    if (!adminContext) return;
+    setArtistTagsError("");
+    try {
+      await removeArtistTag(actId, tagId, adminContext);
+      await reloadArtistTags();
+    } catch (error) {
+      setArtistTagsError(t("admin.timetable.acts.tags.errors.remove"));
+      throw error;
+    }
   }
 
   async function reloadFestivalCode() {
@@ -4825,12 +4890,17 @@ function App() {
               />
               <AdminTimetableActs
                 acts={adminTimetableActs}
-                error={adminTimetableActsError}
+                error={adminTimetableActsError || artistTagsError}
                 isLoading={isLoadingAdminTimetableActs}
                 deletingActId={deletingActId}
+                tags={artistTags}
+                actTags={actArtistTags}
                 onCreate={createAdminTimetableAct}
                 onUpdate={updateAdminTimetableAct}
                 onDelete={deleteAdminTimetableAct}
+                onAddTag={addAdminArtistTag}
+                onAssignTag={assignAdminArtistTag}
+                onRemoveTag={removeAdminArtistTag}
               />
               <AdminTimetablePerformances
                 performances={adminTimetablePerformances}

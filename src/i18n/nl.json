@@ -466,6 +466,19 @@
         "delete": "Verwijderen",
         "deleting": "Verwijderen...",
         "confirmDelete": "Act \"{{name}}\" echt verwijderen?",
+        "tags": {
+          "assigned": "Toegewezen tags",
+          "inputLabel": "Tag selecteren of nieuw invoeren",
+          "placeholder": "Tag invoeren",
+          "add": "Toevoegen",
+          "remove": "Tag {{name}} verwijderen",
+          "errors": {
+            "load": "De tags konden net niet worden geladen.",
+            "save": "De tag kon net niet worden toegevoegd.",
+            "remove": "De tag kon net niet worden verwijderd.",
+            "required": "Voer een tag in."
+          }
+        },
         "errors": {
           "load": "De acts konden net niet worden geladen.",
           "save": "De act kon net niet worden opgeslagen.",
