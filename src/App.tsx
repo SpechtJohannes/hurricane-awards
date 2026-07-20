@@ -1927,6 +1927,7 @@ function App() {
           loadedRandomPairingAssignments,
           loadedTournaments,
           loadedTimetable,
+          loadedActArtistTags,
           loadedStandingsResult,
         ] = await Promise.all([
           loadParticipants(accessContext),
@@ -1940,6 +1941,7 @@ function App() {
           loadRandomPairingAssignments(activeFestival.id, accessContext),
           loadTournaments(activeFestival.id, accessContext),
           loadTimetable(accessContext),
+          loadActArtistTags(accessContext),
           loadAllTimeStandings(accessContext).then(
             (loadedStandings) =>
               ({
@@ -1965,6 +1967,7 @@ function App() {
           setRandomPairingAssignments(loadedRandomPairingAssignments);
           setTournaments(loadedTournaments);
           setTimetable(loadedTimetable);
+          setActArtistTags(loadedActArtistTags);
           setCampLocationOpenError("");
 
           if (loadedStandingsResult.status === "fulfilled") {
@@ -2295,6 +2298,9 @@ function App() {
     setTournamentsError("");
     setTimetable(null);
     setTimetableError("");
+    setArtistTags([]);
+    setActArtistTags([]);
+    setArtistTagsError("");
     setIsLoadingTimetable(false);
     setTogglingFavoritePerformanceId(null);
     setAdminFestivalDays([]);
@@ -5407,6 +5413,7 @@ function App() {
           <ArtistDetail
             timetable={timetable}
             actId={selectedArtistId}
+            artistTags={actArtistTags}
             loadError={timetableError ? t("artistDetail.errors.load") : ""}
             favoriteError={artistFavoriteError}
             isLoading={isLoadingTimetable}

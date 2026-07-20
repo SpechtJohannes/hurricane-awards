@@ -854,6 +854,9 @@
     "eyebrow": "Artiest",
     "loading": "Artiestgegevens en favorietenstatus worden geladen...",
     "notFound": "Deze artiest is niet gevonden of is verwijderd.",
+    "tags": {
+      "label": "Tags"
+    },
     "errors": {
       "load": "De artiest- en optredengegevens konden niet worden geladen."
     },

@@ -143,6 +143,13 @@ import {
   type TimetablePerformance,
   type TimetableStage,
 } from "../data/timetable";
+import {
+  addArtistTag,
+  assignArtistTag,
+  loadActArtistTags,
+  loadArtistTags,
+  removeArtistTag,
+} from "../data/artistTags";
 import type { MusicPlaylist } from "../data/musicEmbeds";
 import i18n from "../i18n";
 
@@ -287,6 +294,14 @@ vi.mock("../data/timetable", () => ({
   updateTimetableAct: vi.fn(),
   updateTimetablePerformance: vi.fn(),
   updateTimetableStage: vi.fn(),
+}));
+
+vi.mock("../data/artistTags", () => ({
+  addArtistTag: vi.fn(),
+  assignArtistTag: vi.fn(),
+  loadActArtistTags: vi.fn(),
+  loadArtistTags: vi.fn(),
+  removeArtistTag: vi.fn(),
 }));
 
 const participants: Participant[] = [
@@ -824,6 +839,11 @@ function mockLoadedData({
     }),
   );
   vi.mocked(loadTimetable).mockResolvedValue(loadedTimetable);
+  vi.mocked(loadArtistTags).mockResolvedValue([]);
+  vi.mocked(loadActArtistTags).mockResolvedValue([]);
+  vi.mocked(addArtistTag).mockResolvedValue({ id: "tag-1", name: "Rock" });
+  vi.mocked(assignArtistTag).mockResolvedValue(undefined);
+  vi.mocked(removeArtistTag).mockResolvedValue(undefined);
   vi.mocked(loadAdminFestivalDays).mockResolvedValue(loadedAdminFestivalDays);
   vi.mocked(loadAdminTimetableStages).mockResolvedValue(
     loadedAdminTimetableStages,

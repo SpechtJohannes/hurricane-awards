@@ -68,7 +68,19 @@ describe("AdminTimetableActs tags", () => {
     fireEvent.change(screen.getByRole("combobox", { name: /Vorhandenes Schlagwort/i }), { target: { value: "indie" } });
     await waitFor(() => expect(baseProps.onAssignTag).toHaveBeenCalledWith("act-1", "indie"));
     fireEvent.click(screen.getByRole("button", { name: "Bearbeiten" }));
-    expect(screen.getByDisplayValue("Band")).toBeInTheDocument();
+    const nameInput = screen.getByDisplayValue("Band");
+    expect(nameInput).toHaveFocus();
+    expect(nameInput.closest("article")).toHaveTextContent("Rock");
+  });
+
+  it("keeps a failed inline edit open and shows the error in its card", async () => {
+    const onUpdate = vi.fn().mockRejectedValue(new Error("Speichern fehlgeschlagen"));
+    render(<AdminTimetableActs {...baseProps} onUpdate={onUpdate} />);
+    fireEvent.click(screen.getByRole("button", { name: "Bearbeiten" }));
+    fireEvent.change(screen.getByDisplayValue("Band"), { target: { value: "Band Neu" } });
+    fireEvent.click(screen.getByRole("button", { name: "Speichern" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Speichern fehlgeschlagen");
+    expect(screen.getByDisplayValue("Band Neu")).toBeInTheDocument();
   });
 
   it("rejects empty tags and exposes Supabase errors", async () => {
