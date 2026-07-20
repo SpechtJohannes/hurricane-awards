@@ -469,6 +469,8 @@
         "tags": {
           "assigned": "Zugeordnete Schlagwörter",
           "inputLabel": "Schlagwort auswählen oder neu eingeben",
+          "selectLabel": "Vorhandenes Schlagwort auswählen",
+          "selectPlaceholder": "Vorhandenes Schlagwort wählen",
           "placeholder": "Schlagwort eingeben",
           "add": "Hinzufügen",
           "remove": "Schlagwort {{name}} entfernen",

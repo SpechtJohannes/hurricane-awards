@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminTimetableActs } from "../components/AdminTimetableActs";
 import "../i18n";
@@ -45,22 +45,39 @@ describe("AdminTimetableActs tags", () => {
   it("shows assigned tags and excludes them from reusable suggestions", () => {
     render(<AdminTimetableActs {...baseProps} />);
     expect(screen.getByText("Rock")).toBeInTheDocument();
-    const list = document.querySelector("datalist");
-    expect(list).not.toBeNull();
-    expect(list?.querySelector('option[value="Rock"]')).toBeNull();
-    expect(list?.querySelector('option[value="Indie"]')).not.toBeNull();
+    const select = screen.getByRole("combobox", { name: /Vorhandenes Schlagwort/i });
+    expect(within(select).queryByRole("option", { name: "Rock" })).not.toBeInTheDocument();
+    expect(within(select).getByRole("option", { name: "Indie" })).toBeInTheDocument();
   });
 
   it("shows saving state while adding and supports removing", async () => {
     let finish: (() => void) | undefined;
     const onAddTag = vi.fn(() => new Promise<void>((resolve) => { finish = resolve; }));
     render(<AdminTimetableActs {...baseProps} onAddTag={onAddTag} />);
-    fireEvent.change(screen.getByLabelText(/Schlagwort auswählen/i), { target: { value: "Electro" } });
+    fireEvent.change(screen.getByPlaceholderText("Schlagwort eingeben"), { target: { value: "Electro" } });
     fireEvent.click(screen.getByRole("button", { name: "Hinzufügen" }));
     expect(await screen.findByText("Speichere...")).toBeInTheDocument();
     finish?.();
     await waitFor(() => expect(onAddTag).toHaveBeenCalledWith("act-1", "Electro"));
     fireEvent.click(screen.getByRole("button", { name: /Rock entfernen/i }));
     await waitFor(() => expect(baseProps.onRemoveTag).toHaveBeenCalledWith("act-1", "rock"));
+  });
+
+  it("assigns an existing tag immediately and keeps act editing functional", async () => {
+    render(<AdminTimetableActs {...baseProps} />);
+    fireEvent.change(screen.getByRole("combobox", { name: /Vorhandenes Schlagwort/i }), { target: { value: "indie" } });
+    await waitFor(() => expect(baseProps.onAssignTag).toHaveBeenCalledWith("act-1", "indie"));
+    fireEvent.click(screen.getByRole("button", { name: "Bearbeiten" }));
+    expect(screen.getByDisplayValue("Band")).toBeInTheDocument();
+  });
+
+  it("rejects empty tags and exposes Supabase errors", async () => {
+    const onAddTag = vi.fn().mockRejectedValue(new Error("database unavailable"));
+    render(<AdminTimetableActs {...baseProps} onAddTag={onAddTag} />);
+    fireEvent.click(screen.getByRole("button", { name: "Hinzufügen" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Bitte gib ein Schlagwort ein");
+    fireEvent.change(screen.getByPlaceholderText("Schlagwort eingeben"), { target: { value: "Metal" } });
+    fireEvent.click(screen.getByRole("button", { name: "Hinzufügen" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("konnte gerade nicht hinzugefügt werden");
   });
 });

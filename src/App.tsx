@@ -2518,7 +2518,8 @@ function App() {
         void reloadAdminFestivalDays();
         void reloadAdminTimetableStages();
         void reloadAdminTimetableActs();
-        void reloadArtistTags().catch(() => {
+        void reloadArtistTags().catch((error: unknown) => {
+          console.error("Failed to load artist tags", error);
           setArtistTagsError(t("admin.timetable.acts.tags.errors.load"));
         });
         void reloadAdminTimetablePerformances();
@@ -2763,9 +2764,17 @@ function App() {
     if (!adminContext) return;
     setArtistTagsError("");
     try {
-      await addArtistTag(actId, name, adminContext);
-      await reloadArtistTags();
+      const tag = await addArtistTag(actId, name, adminContext);
+      setArtistTags((current) => current.some(({ id }) => id === tag.id) ? current : [...current, tag]);
+      setActArtistTags((current) => current.some((item) => item.actId === actId && item.id === tag.id)
+        ? current
+        : [...current, { ...tag, actId }]);
+      await reloadArtistTags().catch((error: unknown) => {
+        console.error("Failed to refresh artist tags after adding", error);
+        setArtistTagsError(t("admin.timetable.acts.tags.errors.load"));
+      });
     } catch (error) {
+      console.error("Failed to add artist tag", error);
       setArtistTagsError(t("admin.timetable.acts.tags.errors.save"));
       throw error;
     }
@@ -2777,8 +2786,18 @@ function App() {
     setArtistTagsError("");
     try {
       await assignArtistTag(actId, tagId, adminContext);
-      await reloadArtistTags();
+      const tag = artistTags.find(({ id }) => id === tagId);
+      if (tag) {
+        setActArtistTags((current) => current.some((item) => item.actId === actId && item.id === tagId)
+          ? current
+          : [...current, { ...tag, actId }]);
+      }
+      await reloadArtistTags().catch((error: unknown) => {
+        console.error("Failed to refresh artist tags after assigning", error);
+        setArtistTagsError(t("admin.timetable.acts.tags.errors.load"));
+      });
     } catch (error) {
+      console.error("Failed to assign artist tag", error);
       setArtistTagsError(t("admin.timetable.acts.tags.errors.save"));
       throw error;
     }
@@ -2790,8 +2809,13 @@ function App() {
     setArtistTagsError("");
     try {
       await removeArtistTag(actId, tagId, adminContext);
-      await reloadArtistTags();
+      setActArtistTags((current) => current.filter((item) => item.actId !== actId || item.id !== tagId));
+      await reloadArtistTags().catch((error: unknown) => {
+        console.error("Failed to refresh artist tags after removing", error);
+        setArtistTagsError(t("admin.timetable.acts.tags.errors.load"));
+      });
     } catch (error) {
+      console.error("Failed to remove artist tag assignment", error);
       setArtistTagsError(t("admin.timetable.acts.tags.errors.remove"));
       throw error;
     }
