@@ -311,6 +311,22 @@
       }
     }
   },
+  "preferences": {
+    "title": "Musikalische Vorlieben",
+    "description": "Wähle mehrere Schlagwörter aus. Wir empfehlen dir Künstler, die dazu passen.",
+    "loading": "Musikalische Vorlieben werden geladen...",
+    "empty": "Aktuell sind keine verwendeten Schlagwörter verfügbar.",
+    "save": "Vorlieben speichern",
+    "saving": "Vorlieben werden gespeichert...",
+    "saved": "Musikalische Vorlieben wurden gespeichert.",
+    "reset": "Alle Vorlieben zurücksetzen",
+    "select": "Vorliebe {{tag}} auswählen",
+    "remove": "Vorliebe {{tag}} entfernen",
+    "errors": {
+      "load": "Deine musikalischen Vorlieben konnten gerade nicht geladen werden.",
+      "save": "Deine musikalischen Vorlieben konnten gerade nicht gespeichert werden."
+    }
+  },
   "admin": {
     "eyebrow": "Admin",
     "title": "Kategorien",
@@ -854,6 +870,14 @@
       "selected": "Ausgewählte Filter",
       "reset": "Alle Filter zurücksetzen",
       "remove": "Filter {{tag}} entfernen"
+    },
+    "recommendations": {
+      "title": "Empfohlen für dich",
+      "loading": "Persönliche Empfehlungen werden geladen...",
+      "reason": "Passend zu: {{tags}}",
+      "noPreferences": "Wähle in deinem Profil musikalische Vorlieben aus, dann erscheinen hier persönliche Empfehlungen.",
+      "openProfile": "Vorlieben im Profil auswählen",
+      "noMatches": "Zu deinen gewählten Vorlieben wurden aktuell keine passenden Künstler gefunden."
     },
     "errors": {
       "load": "Die Künstler konnten gerade nicht geladen werden."

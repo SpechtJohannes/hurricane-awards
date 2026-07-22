@@ -272,8 +272,11 @@ Diese Uebersicht nennt die wichtigsten Tabellen und ihre Rolle. Sie ersetzt kein
 - `timetable_acts`: Acts fuer den strukturierten Timetable.
 - `artist_tags`: Zentrale, wiederverwendbare Schlagwoerter; normalisierte Namen sind unabhaengig von Gross-/Kleinschreibung und ueberfluessigen Leerzeichen eindeutig.
 - `timetable_act_artist_tags`: Normalisierte n:m-Beziehung zwischen Acts und Schlagwoertern mit kaskadierender Bereinigung. Sie bildet die Grundlage fuer spaetere Kuenstlerfilter und individuelle Empfehlungen.
+- `participant_artist_tag_preferences`: Private n:m-Zuordnung der musikalischen Vorlieben eines Teilnehmers zu denselben `artist_tags`. Direkter Browserzugriff ist gesperrt; `ha_get_own_artist_tag_preferences` und `ha_replace_own_artist_tag_preferences` ermitteln den aktiven Teilnehmer ausschließlich aus seinem Zugangscode und ersetzen die Auswahl atomar.
 - `timetable_performances`: Auftritte, die je einen Festivaltag, eine Buehne und einen Act verbinden.
 - `participant_timetable_favorites`: Persoenliche Favoriten einzelner Teilnehmer fuer konkrete Timetable-Auftritte.
+
+Persoenliche Kuenstlerempfehlungen werden im Frontend durch die reine Funktion `recommendArtists` aus den bereits geladenen Acts und Schlagwortzuordnungen berechnet. Ein Act wird bei mindestens einer stabilen Tag-ID-Uebereinstimmung aufgenommen; mehr Uebereinstimmungen stehen zuerst, Gleichstaende werden alphabetisch sortiert. Die abgegrenzte Ergebnisstruktur mit `matchingTags` und `matchCount` erlaubt spaetere zusaetzliche Bewertungsregeln, ohne Datenzugriff oder Darstellung zu koppeln.
 - `bingo_rounds`: Bingorunden mit Status. Es darf nur eine aktive Runde geben; beim Start einer neuen Runde werden alte aktive Runden geschlossen. Es gibt keine UI-Historie.
 - `bingo_cards`: Serverseitig generierte Bingokarten, eindeutig pro Teilnehmer und aktiver Runde.
 - `bingo_marks`: Persistierte Markierungen fuer Zahlen auf einer Bingokarte.

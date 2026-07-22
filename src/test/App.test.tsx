@@ -304,6 +304,11 @@ vi.mock("../data/artistTags", () => ({
   removeArtistTag: vi.fn(),
 }));
 
+vi.mock("../data/artistTagPreferences", () => ({
+  loadArtistTagPreferences: vi.fn().mockResolvedValue([]),
+  replaceArtistTagPreferences: vi.fn().mockResolvedValue([]),
+}));
+
 const participants: Participant[] = [
   {
     id: "alice",
