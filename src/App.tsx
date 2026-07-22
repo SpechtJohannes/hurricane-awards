@@ -167,6 +167,8 @@ import {
   type ActArtistTag,
   type ArtistTag,
 } from "./data/artistTags";
+import { loadArtistTagPreferences, replaceArtistTagPreferences } from "./data/artistTagPreferences";
+import { MusicalPreferences } from "./components/MusicalPreferences";
 import {
   isSupportedMusicPlaylistLink,
   type MusicPlaylist,
@@ -1648,6 +1650,13 @@ function App() {
   const [artistTags, setArtistTags] = useState<ArtistTag[]>([]);
   const [actArtistTags, setActArtistTags] = useState<ActArtistTag[]>([]);
   const [artistTagsError, setArtistTagsError] = useState("");
+  const [preferredArtistTags, setPreferredArtistTags] = useState<ArtistTag[]>([]);
+  const [selectedPreferenceTagIds, setSelectedPreferenceTagIds] = useState<Set<string>>(new Set());
+  const [preferencesLoadError, setPreferencesLoadError] = useState("");
+  const [preferencesSaveError, setPreferencesSaveError] = useState("");
+  const [preferencesSuccess, setPreferencesSuccess] = useState("");
+  const [arePreferencesLoading, setArePreferencesLoading] = useState(false);
+  const [arePreferencesSaving, setArePreferencesSaving] = useState(false);
   const [adminTimetablePerformances, setAdminTimetablePerformances] = useState<
     TimetablePerformance[]
   >([]);
@@ -1903,6 +1912,7 @@ function App() {
       setIsStandingsLoading(true);
       setIsLoadingFestivalDocuments(true);
       setIsLoadingTimetable(true);
+      setArePreferencesLoading(true);
       setParticipantsError("");
       setCategoriesError("");
       setVotesError("");
@@ -1928,6 +1938,7 @@ function App() {
           loadedTournaments,
           loadedTimetable,
           loadedActArtistTags,
+          loadedPreferences,
           loadedStandingsResult,
         ] = await Promise.all([
           loadParticipants(accessContext),
@@ -1942,6 +1953,7 @@ function App() {
           loadTournaments(activeFestival.id, accessContext),
           loadTimetable(accessContext),
           loadActArtistTags(accessContext),
+          loadArtistTagPreferences(accessContext),
           loadAllTimeStandings(accessContext).then(
             (loadedStandings) =>
               ({
@@ -1968,6 +1980,10 @@ function App() {
           setTournaments(loadedTournaments);
           setTimetable(loadedTimetable);
           setActArtistTags(loadedActArtistTags);
+          setPreferredArtistTags(loadedPreferences);
+          setSelectedPreferenceTagIds(new Set(loadedPreferences.map((tag) => tag.id)));
+          setPreferencesLoadError("");
+          setArePreferencesLoading(false);
           setCampLocationOpenError("");
 
           if (loadedStandingsResult.status === "fulfilled") {
@@ -1987,12 +2003,14 @@ function App() {
           setRandomPairingsError(i18n.t("randomPairings.errors.load"));
           setTournamentsError(i18n.t("tournaments.errors.load"));
           setTimetableError(i18n.t("timetable.errors.load"));
+          setPreferencesLoadError(i18n.t("preferences.errors.load"));
         }
       } finally {
         if (isCurrent) {
           setIsLoadingFestivalDocuments(false);
           setIsLoadingTimetable(false);
           setIsStandingsLoading(false);
+          setArePreferencesLoading(false);
         }
       }
 
@@ -2508,6 +2526,33 @@ function App() {
     } finally {
       isSavingProfileRef.current = false;
       setIsSavingProfile(false);
+    }
+  }
+
+  function togglePreference(tagId: string) {
+    setSelectedPreferenceTagIds((current) => {
+      const next = new Set(current);
+      if (next.has(tagId)) next.delete(tagId); else next.add(tagId);
+      return next;
+    });
+    setPreferencesSaveError("");
+    setPreferencesSuccess("");
+  }
+
+  async function savePreferences() {
+    if (!selectedParticipant || arePreferencesSaving) return;
+    setArePreferencesSaving(true);
+    setPreferencesSaveError("");
+    setPreferencesSuccess("");
+    try {
+      const saved = await replaceArtistTagPreferences(Array.from(selectedPreferenceTagIds), { participantAccessCode: selectedParticipant.accessCode });
+      setPreferredArtistTags(saved);
+      setSelectedPreferenceTagIds(new Set(saved.map((tag) => tag.id)));
+      setPreferencesSuccess(t("preferences.saved"));
+    } catch {
+      setPreferencesSaveError(t("preferences.errors.save"));
+    } finally {
+      setArePreferencesSaving(false);
     }
   }
 
@@ -5230,6 +5275,19 @@ function App() {
                   </button>
                 </form>
 
+                <MusicalPreferences
+                  availableTags={Array.from(new Map(actArtistTags.map((tag) => [tag.id, { id: tag.id, name: tag.name }])).values()).sort((a, b) => a.name.localeCompare(b.name, i18n.language, { sensitivity: "base" }))}
+                  selectedTagIds={selectedPreferenceTagIds}
+                  isLoading={arePreferencesLoading}
+                  isSaving={arePreferencesSaving}
+                  loadError={preferencesLoadError}
+                  saveError={preferencesSaveError}
+                  success={preferencesSuccess}
+                  onToggle={togglePreference}
+                  onReset={() => { setSelectedPreferenceTagIds(new Set()); setPreferencesSuccess(""); }}
+                  onSave={savePreferences}
+                />
+
                 {participantsError ? (
                   <p className="identity__error">{participantsError}</p>
                 ) : null}
@@ -5431,6 +5489,11 @@ function App() {
           <Artists
             acts={timetable?.acts ?? null}
             artistTags={actArtistTags}
+            timetable={timetable}
+            preferredTagIds={new Set(preferredArtistTags.map((tag) => tag.id))}
+            preferencesError={preferencesLoadError}
+            arePreferencesLoading={arePreferencesLoading}
+            isSavingFavorite={togglingFavoritePerformanceId !== null}
             error={timetableError ? t("artists.errors.load") : ""}
             isLoading={isLoadingTimetable}
             selectedActId={null}
@@ -5443,6 +5506,8 @@ function App() {
               setArtistFavoriteError("");
               window.location.hash = `#artists/${encodeURIComponent(actId)}`;
             }}
+            onToggleFavorite={toggleArtistFavorite}
+            onOpenProfile={() => navigateMainSection("profile")}
           />
         )
       ) : null}

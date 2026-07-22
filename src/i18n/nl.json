@@ -311,6 +311,22 @@
       }
     }
   },
+  "preferences": {
+    "title": "Muzikale voorkeuren",
+    "description": "Kies meerdere tags. We bevelen artiesten aan die daarbij passen.",
+    "loading": "Muzikale voorkeuren worden geladen...",
+    "empty": "Er zijn momenteel geen gebruikte tags beschikbaar.",
+    "save": "Voorkeuren opslaan",
+    "saving": "Voorkeuren worden opgeslagen...",
+    "saved": "Je muzikale voorkeuren zijn opgeslagen.",
+    "reset": "Alle voorkeuren wissen",
+    "select": "Voorkeur {{tag}} kiezen",
+    "remove": "Voorkeur {{tag}} verwijderen",
+    "errors": {
+      "load": "Je muzikale voorkeuren konden net niet worden geladen.",
+      "save": "Je muzikale voorkeuren konden net niet worden opgeslagen."
+    }
+  },
   "admin": {
     "eyebrow": "Admin",
     "title": "Categorieën",
@@ -854,6 +870,14 @@
       "selected": "Geselecteerde filters",
       "reset": "Alle filters wissen",
       "remove": "Filter {{tag}} verwijderen"
+    },
+    "recommendations": {
+      "title": "Aanbevolen voor jou",
+      "loading": "Persoonlijke aanbevelingen worden geladen...",
+      "reason": "Past bij: {{tags}}",
+      "noPreferences": "Kies muzikale voorkeuren in je profiel; daarna verschijnen hier persoonlijke aanbevelingen.",
+      "openProfile": "Voorkeuren in profiel kiezen",
+      "noMatches": "Er zijn momenteel geen artiesten die bij je gekozen voorkeuren passen."
     },
     "errors": {
       "load": "De artiesten konden niet worden geladen."

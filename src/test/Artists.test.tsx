@@ -31,6 +31,13 @@ function renderArtists(
       error=""
       isLoading={false}
       selectedActId={null}
+      timetable={null}
+      preferredTagIds={new Set()}
+      preferencesError=""
+      arePreferencesLoading={false}
+      isSavingFavorite={false}
+      onToggleFavorite={vi.fn()}
+      onOpenProfile={vi.fn()}
       dashboardBackButton={<button type="button">Zurück</button>}
       onSelectAct={onSelectAct}
       {...overrides}
@@ -134,5 +141,21 @@ describe("Artists", () => {
 
     await user.click(screen.getByRole("button", { name: /Zulu/ }));
     expect(onSelectAct).toHaveBeenCalledWith("z");
+  });
+
+  it("zeigt Empfehlungen mit Begründung und synchronem Favoritenstatus", async () => {
+    const user = userEvent.setup();
+    const onToggleFavorite = vi.fn();
+    renderArtists({ preferredTagIds: new Set(["rock"]), timetable: {
+      acts, festivalDays: [], stages: [],
+      performances: [{ id: "p-z", actId: "z", festivalDayId: "day", stageId: "stage", startsAt: "2026-07-01T12:00:00Z", endsAt: null }],
+      favoritePerformanceIds: ["p-z"], performanceFavorites: [],
+    }, onToggleFavorite });
+    const section = screen.getByRole("heading", { name: /empfohlen für dich/i }).closest("section")!;
+    expect(within(section).getByText(/passend zu: rock/i)).toBeVisible();
+    const favorite = within(section).getByRole("button", { name: /aus favoriten entfernen/i });
+    expect(favorite).toHaveAttribute("aria-pressed", "true");
+    await user.click(favorite);
+    expect(onToggleFavorite).toHaveBeenCalledWith(["p-z"], true);
   });
 });

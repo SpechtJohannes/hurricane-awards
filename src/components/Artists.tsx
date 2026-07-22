@@ -1,8 +1,10 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { TimetableAct } from "../data/timetable";
+import type { Timetable } from "../data/timetable";
 import type { ActArtistTag } from "../data/artistTags";
 import { filterArtists, getAssignedArtistTags, prepareArtists } from "../domain/artistSearch";
+import { recommendArtists } from "../domain/artistRecommendations";
 import { SectionHeader } from "./SectionHeader";
 
 type ArtistsProps = {
@@ -13,6 +15,13 @@ type ArtistsProps = {
   selectedActId: string | null;
   dashboardBackButton: ReactNode;
   onSelectAct: (actId: string) => void;
+  timetable: Timetable | null;
+  preferredTagIds: ReadonlySet<string>;
+  preferencesError: string;
+  arePreferencesLoading: boolean;
+  isSavingFavorite: boolean;
+  onToggleFavorite: (performanceIds: string[], isFavorite: boolean) => void;
+  onOpenProfile: () => void;
 };
 
 export function Artists({
@@ -23,6 +32,13 @@ export function Artists({
   selectedActId,
   dashboardBackButton,
   onSelectAct,
+  timetable,
+  preferredTagIds,
+  preferencesError,
+  arePreferencesLoading,
+  isSavingFavorite,
+  onToggleFavorite,
+  onOpenProfile,
 }: ArtistsProps) {
   const { t, i18n } = useTranslation();
   const [query, setQuery] = useState("");
@@ -31,6 +47,7 @@ export function Artists({
   const preparedArtists = useMemo(() => prepareArtists(acts, artistTags, language), [acts, artistTags, language]);
   const availableTags = useMemo(() => getAssignedArtistTags(preparedArtists, language), [preparedArtists, language]);
   const artists = useMemo(() => filterArtists(preparedArtists, query, selectedTagIds, language), [preparedArtists, query, selectedTagIds, language]);
+  const recommendations = useMemo(() => recommendArtists(preparedArtists, preferredTagIds, language), [preparedArtists, preferredTagIds, language]);
   const selectedTags = availableTags.filter((tag) => selectedTagIds.has(tag.id));
 
   function toggleTag(tagId: string) {
@@ -54,6 +71,23 @@ export function Artists({
         titleId="artists-title"
         description={t("artists.description")}
       />
+
+      <section className="artists__recommendations" aria-labelledby="artist-recommendations-title">
+        <h3 id="artist-recommendations-title">{t("artists.recommendations.title")}</h3>
+        {isLoading || arePreferencesLoading ? <p className="artists__notice" role="status">{t("artists.recommendations.loading")}</p>
+          : preferencesError ? <p className="artists__notice artists__notice--error" role="alert">{preferencesError}</p>
+          : preferredTagIds.size === 0 ? <div className="artists__notice"><p>{t("artists.recommendations.noPreferences")}</p><button type="button" onClick={onOpenProfile}>{t("artists.recommendations.openProfile")}</button></div>
+          : recommendations.length === 0 ? <p className="artists__notice">{t("artists.recommendations.noMatches")}</p>
+          : <ul className="artists__list artists__recommendation-list">{recommendations.map((artist) => {
+              const performanceIds = (timetable?.performances ?? []).filter((performance) => performance.actId === artist.id).map((performance) => performance.id);
+              const favorites = new Set(timetable?.favoritePerformanceIds ?? []);
+              const isFavorite = performanceIds.length > 0 && performanceIds.every((id) => favorites.has(id));
+              return <li key={artist.id} className="artists__recommendation">
+                <button type="button" className="artists__item" onClick={() => onSelectAct(artist.id)}><span className="artists__item-content"><strong>{artist.name}</strong><span className="artists__tags" aria-label={t("artists.tags.label")}>{artist.tags.map((tag) => <span key={tag.id}>{tag.name}</span>)}</span><span className="artists__reason">{t("artists.recommendations.reason", { tags: artist.matchingTags.map((tag) => tag.name).join(", ") })}</span></span></button>
+                <button type="button" className="artists__favorite" aria-pressed={isFavorite} disabled={performanceIds.length === 0 || isSavingFavorite} onClick={() => onToggleFavorite(performanceIds, isFavorite)}>{isFavorite ? t("artistDetail.favorite.remove") : t("artistDetail.favorite.add")}</button>
+              </li>;
+            })}</ul>}
+      </section>
 
       {isLoading ? (
         <p className="artists__notice" role="status">
