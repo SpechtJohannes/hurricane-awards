@@ -1,10 +1,13 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { TimetableAct } from "../data/timetable";
+import type { ActArtistTag } from "../data/artistTags";
+import { filterArtists, getAssignedArtistTags, prepareArtists } from "../domain/artistSearch";
 import { SectionHeader } from "./SectionHeader";
 
 type ArtistsProps = {
   acts: TimetableAct[] | null;
+  artistTags: ActArtistTag[];
   error: string;
   isLoading: boolean;
   selectedActId: string | null;
@@ -14,6 +17,7 @@ type ArtistsProps = {
 
 export function Artists({
   acts,
+  artistTags,
   error,
   isLoading,
   selectedActId,
@@ -22,31 +26,20 @@ export function Artists({
 }: ArtistsProps) {
   const { t, i18n } = useTranslation();
   const [query, setQuery] = useState("");
+  const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set());
   const language = i18n.language;
-  const normalizedQuery = query.trim().toLocaleLowerCase(language);
-  const artists = useMemo(() => {
-    const actsById = new Map<string, TimetableAct>();
+  const preparedArtists = useMemo(() => prepareArtists(acts, artistTags, language), [acts, artistTags, language]);
+  const availableTags = useMemo(() => getAssignedArtistTags(preparedArtists, language), [preparedArtists, language]);
+  const artists = useMemo(() => filterArtists(preparedArtists, query, selectedTagIds, language), [preparedArtists, query, selectedTagIds, language]);
+  const selectedTags = availableTags.filter((tag) => selectedTagIds.has(tag.id));
 
-    for (const act of acts ?? []) {
-      if (!actsById.has(act.id)) {
-        actsById.set(act.id, act);
-      }
-    }
-
-    const uniqueActs = Array.from(actsById.values());
-
-    return uniqueActs
-      .filter((act) =>
-        act.name
-          .toLocaleLowerCase(language)
-          .includes(normalizedQuery),
-      )
-      .sort((first, second) =>
-        first.name.localeCompare(second.name, language, {
-          sensitivity: "base",
-        }),
-      );
-  }, [acts, language, normalizedQuery]);
+  function toggleTag(tagId: string) {
+    setSelectedTagIds((current) => {
+      const next = new Set(current);
+      if (next.has(tagId)) next.delete(tagId); else next.add(tagId);
+      return next;
+    });
+  }
 
   return (
     <section
@@ -84,6 +77,28 @@ export function Artists({
             />
           </label>
 
+          {availableTags.length > 0 ? (
+            <div className="artists__filters">
+              <span className="artists__filter-label">{t("artists.filters.label")}</span>
+              <div className="artists__filter-options" aria-label={t("artists.filters.label")}>
+                {availableTags.map((tag) => (
+                  <button key={tag.id} type="button" aria-pressed={selectedTagIds.has(tag.id)} onClick={() => toggleTag(tag.id)}>{tag.name}</button>
+                ))}
+              </div>
+              {selectedTags.length > 0 ? (
+                <div className="artists__selected-filters">
+                  <span>{t("artists.filters.selected")}</span>
+                  <div className="artists__selected-list">
+                    {selectedTags.map((tag) => (
+                      <button key={tag.id} type="button" onClick={() => toggleTag(tag.id)} aria-label={t("artists.filters.remove", { tag: tag.name })}>{tag.name}<span aria-hidden="true"> ×</span></button>
+                    ))}
+                    <button className="artists__reset" type="button" onClick={() => setSelectedTagIds(new Set())}>{t("artists.filters.reset")}</button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
           {artists.length === 0 ? (
             <p className="artists__notice" role="status">
               {t("artists.noResults")}
@@ -98,7 +113,12 @@ export function Artists({
                     onClick={() => onSelectAct(artist.id)}
                     aria-current={selectedActId === artist.id ? "page" : undefined}
                   >
-                    <span>{artist.name}</span>
+                    <span className="artists__item-content">
+                      <strong>{artist.name}</strong>
+                      {artist.tags.length > 0 ? <span className="artists__tags" aria-label={t("artists.tags.label")}>
+                        {artist.tags.map((tag) => <span key={tag.id}>{tag.name}</span>)}
+                      </span> : null}
+                    </span>
                     <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20">
                       <path d="m9.3 6.7 5.3 5.3-5.3 5.3 1.4 1.4 6.7-6.7-6.7-6.7-1.4 1.4Z" />
                     </svg>

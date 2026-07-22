@@ -2326,6 +2326,16 @@ h1 {
   outline-offset: 2px;
 }
 
+.artists__filters { display: grid; gap: 10px; }
+.artists__filter-label, .artists__selected-filters > span { color: var(--color-text-primary); font-weight: 850; }
+.artists__filter-options, .artists__selected-list, .artists__tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.artists__filter-options button, .artists__selected-list button, .artists__tags > span { padding: 7px 11px; color: var(--color-text-primary); font: inherit; font-size: 0.85rem; font-weight: 750; background: var(--surface-card); border: 1px solid var(--border-subtle); border-radius: 999px; }
+.artists__filter-options button, .artists__selected-list button { cursor: pointer; }
+.artists__filter-options button[aria-pressed="true"] { border-color: var(--section-color); outline: 2px solid var(--section-color); outline-offset: 1px; }
+.artists__filter-options button:focus-visible, .artists__selected-list button:focus-visible { outline: 3px solid var(--section-color); outline-offset: 2px; }
+.artists__selected-filters { display: grid; gap: 8px; padding-top: 4px; }
+.artists__selected-list .artists__reset { background: transparent; border-style: dashed; }
+
 .artists__list {
   display: grid;
   padding: 0;
@@ -2368,6 +2378,10 @@ h1 {
   flex: 0 0 auto;
   fill: currentColor;
 }
+
+.artists__item-content { display: grid; min-width: 0; gap: 7px; }
+.artists__tags { gap: 5px; }
+.artists__tags > span { padding: 3px 7px; font-size: 0.75rem; background: color-mix(in srgb, var(--section-color) 16%, var(--surface-card)); }
 
 .artists__notice {
   width: min(100%, 760px);

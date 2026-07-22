@@ -841,10 +841,19 @@
     "description": "Doorzoek alle acts uit de timetable.",
     "loading": "Artiesten worden geladen...",
     "empty": "Er zijn nog geen artiesten toegevoegd.",
-    "noResults": "Geen artiesten gevonden voor je zoekopdracht.",
+    "noResults": "Geen artiesten passen bij je zoekopdracht of filters.",
     "search": {
       "label": "Artiesten zoeken",
-      "placeholder": "Naam invoeren"
+      "placeholder": "Naam of tag invoeren"
+    },
+    "tags": {
+      "label": "Tags"
+    },
+    "filters": {
+      "label": "Filteren op tags",
+      "selected": "Geselecteerde filters",
+      "reset": "Alle filters wissen",
+      "remove": "Filter {{tag}} verwijderen"
     },
     "errors": {
       "load": "De artiesten konden niet worden geladen."
