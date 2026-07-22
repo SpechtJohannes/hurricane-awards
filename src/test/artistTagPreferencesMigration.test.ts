@@ -10,6 +10,9 @@ describe("artist tag preferences migration", () => {
     expect(sql).toContain("primary key (participant_id, artist_tag_id)");
     expect(sql.match(/on delete cascade/g)).toHaveLength(2);
     expect(sql.trim()).toMatch(/commit;$/);
+    expect(sql).toContain("participant_id text not null references public.participants(id)");
+    expect(sql.match(/v_participant_id text;/g)).toHaveLength(2);
+    expect(sql).not.toContain("ha_participant_id_for_access(p_participant_access_code)::uuid");
   });
   it("denies direct access and exposes only own-preference RPCs", () => {
     expect(sql).toContain("enable row level security");

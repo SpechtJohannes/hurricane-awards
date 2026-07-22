@@ -4,7 +4,7 @@
 begin;
 
 create table public.participant_artist_tag_preferences (
-  participant_id uuid not null references public.participants(id) on delete cascade,
+  participant_id text not null references public.participants(id) on delete cascade,
   artist_tag_id uuid not null references public.artist_tags(id) on delete cascade,
   created_at timestamptz not null default now(),
   primary key (participant_id, artist_tag_id)
@@ -23,9 +23,9 @@ returns table (id uuid, name text)
 language plpgsql security definer set search_path = public
 as $$
 declare
-  v_participant_id uuid;
+  v_participant_id text;
 begin
-  v_participant_id := public.ha_participant_id_for_access(p_participant_access_code)::uuid;
+  v_participant_id := public.ha_participant_id_for_access(p_participant_access_code);
   if v_participant_id is null then
     raise exception 'participant access required' using errcode = '42501';
   end if;
@@ -47,10 +47,10 @@ returns table (id uuid, name text)
 language plpgsql security definer set search_path = public
 as $$
 declare
-  v_participant_id uuid;
+  v_participant_id text;
   v_tag_ids uuid[] := coalesce(p_artist_tag_ids, array[]::uuid[]);
 begin
-  v_participant_id := public.ha_participant_id_for_access(p_participant_access_code)::uuid;
+  v_participant_id := public.ha_participant_id_for_access(p_participant_access_code);
   if v_participant_id is null then
     raise exception 'participant access required' using errcode = '42501';
   end if;
