@@ -841,10 +841,19 @@
     "description": "Durchsuche alle Acts des Timetables.",
     "loading": "Künstler werden geladen...",
     "empty": "Es sind noch keine Künstler angelegt.",
-    "noResults": "Keine Künstler passen zu deiner Suche.",
+    "noResults": "Keine Künstler passen zu deiner Suche oder Filterauswahl.",
     "search": {
       "label": "Künstler suchen",
-      "placeholder": "Name eingeben"
+      "placeholder": "Name oder Schlagwort eingeben"
+    },
+    "tags": {
+      "label": "Schlagwörter"
+    },
+    "filters": {
+      "label": "Nach Schlagwörtern filtern",
+      "selected": "Ausgewählte Filter",
+      "reset": "Alle Filter zurücksetzen",
+      "remove": "Filter {{tag}} entfernen"
     },
     "errors": {
       "load": "Die Künstler konnten gerade nicht geladen werden."

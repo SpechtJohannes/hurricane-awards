@@ -5430,6 +5430,7 @@ function App() {
         ) : (
           <Artists
             acts={timetable?.acts ?? null}
+            artistTags={actArtistTags}
             error={timetableError ? t("artists.errors.load") : ""}
             isLoading={isLoadingTimetable}
             selectedActId={null}
