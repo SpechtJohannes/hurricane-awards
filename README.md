@@ -73,9 +73,9 @@ Die Testdateien liegen unter `src/test`. Das globale Setup befindet sich in `src
 
 ### Automatische Testausführung
 
-Bei jedem Push und bei jedem Pull Request werden die Unit Tests automatisch über GitHub Actions ausgeführt.
+Bei Pull Requests sowie bei Pushes auf den Hauptbranch führt GitHub Actions automatisch ESLint, die TypeScript-Prüfung und die Tests mit Coverage aus. Anschließend analysiert die offizielle SonarQube Cloud Action den Code anhand der `sonar-project.properties`; die Authentifizierung erfolgt über das Repository Secret `SONAR_TOKEN`.
 
-Das Ergebnis der Testausführung ist im GitHub Repository unter **Actions** sichtbar. Schlägt ein Test fehl, kann die Ursache im jeweiligen Workflow Log nachvollzogen werden.
+Die Ergebnisse sind im GitHub Repository unter **Actions** und in SonarQube Cloud sichtbar. Schlägt eine Qualitätsprüfung oder der Scan fehl, schlägt auch der Workflow fehl und die Ursache kann im jeweiligen Workflow-Log nachvollzogen werden.
 
 ## PWA lokal prüfen
 
