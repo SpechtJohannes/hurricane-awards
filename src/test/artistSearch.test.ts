@@ -22,6 +22,29 @@ describe("artistSearch", () => {
     expect(getAssignedArtistTags(artists, "de").map(({ name }) => name)).toEqual(["Rock", "Techno"]);
   });
 
+  it.each(["de-DE", "nl-NL"])(
+    "sortiert sichtbare Namen mit Gross-/Kleinschreibung und Umlaut fuer %s nachvollziehbar",
+    (locale) => {
+      const sortedArtists = prepareArtists(
+        [
+          { id: "zulu", name: "Zulu", description: null },
+          { id: "lower-alpha", name: "alpha", description: null },
+          { id: "umlaut", name: "Ärzte", description: null },
+          { id: "upper-alpha", name: "Alpha", description: null },
+        ],
+        [],
+        locale,
+      );
+
+      expect(sortedArtists.map(({ name }) => name)).toEqual([
+        "alpha",
+        "Alpha",
+        "Ärzte",
+        "Zulu",
+      ]);
+    },
+  );
+
   it("sucht in Namen und Tag-Teilbegriffen und ignoriert leere Suchwerte", () => {
     expect(filterArtists(artists, "ALP", new Set(), "de").map(({ name }) => name)).toEqual(["Alpha"]);
     expect(filterArtists(artists, "  ock ", new Set(), "de").map(({ name }) => name)).toEqual(["Zulu"]);

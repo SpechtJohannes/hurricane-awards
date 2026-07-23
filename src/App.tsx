@@ -1,5 +1,4 @@
 import {
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -151,7 +150,9 @@ import {
   type FestivalDay,
   type Timetable,
   type TimetableAct,
+  type TimetableFavoriteParticipant,
   type TimetablePerformance,
+  type TimetablePerformanceFavorites,
   type TimetableStage,
   type UpdateFestivalDayInput,
   type UpdateTimetableActInput,
@@ -201,6 +202,7 @@ import { EventBrand } from "./components/EventBrand";
 import { Artists } from "./components/Artists";
 import { ArtistDetail } from "./components/ArtistDetail";
 import { useFestivalAccess } from "./hooks/useFestivalAccess";
+import { useFestivalCodeUnlock } from "./hooks/useFestivalCodeUnlock";
 import { avatars } from "./config/avatars";
 import i18n from "./i18n";
 import { supportedLanguages, type SupportedLanguage } from "./i18n";
@@ -224,24 +226,6 @@ type BeforeInstallPromptEvent = Event & {
     platform: string;
   }>;
 };
-
-type DetectedBarcode = {
-  rawValue?: string;
-};
-
-type BarcodeDetectorInstance = {
-  detect: (source: HTMLVideoElement) => Promise<DetectedBarcode[]>;
-};
-
-type BarcodeDetectorConstructor = {
-  new (options: { formats: string[] }): BarcodeDetectorInstance;
-  getSupportedFormats?: () => Promise<string[]>;
-};
-
-type WindowWithBarcodeDetector = Window &
-  typeof globalThis & {
-    BarcodeDetector?: BarcodeDetectorConstructor;
-  };
 
 const fallbackFestivalName = "";
 
@@ -353,6 +337,76 @@ function updateTournamentParticipantName(
       })),
     },
   };
+}
+
+function removeFavoriteParticipant(
+  participants: TimetableFavoriteParticipant[],
+  participantId: string,
+) {
+  return participants.filter(
+    (participant) => participant.participantId !== participantId,
+  );
+}
+
+function replacePerformanceFavorite(
+  favorites: TimetablePerformanceFavorites[],
+  updatedFavorite: TimetablePerformanceFavorites,
+) {
+  return favorites.map((favorite) =>
+    favorite.performanceId === updatedFavorite.performanceId
+      ? updatedFavorite
+      : favorite,
+  );
+}
+
+function updatePerformanceFavorite(
+  favorites: TimetablePerformanceFavorites[],
+  performanceId: string,
+  isFavorite: boolean,
+  participant: Participant,
+) {
+  const existing = favorites.find(
+    (favorite) => favorite.performanceId === performanceId,
+  );
+  const otherParticipants = removeFavoriteParticipant(
+    existing?.participants ?? [],
+    participant.id,
+  );
+  const updatedFavorite = {
+    performanceId,
+    participants: isFavorite
+      ? otherParticipants
+      : [
+          ...otherParticipants,
+          {
+            participantId: participant.id,
+            displayName: participant.displayName,
+            avatarId: participant.avatarId ?? null,
+          },
+        ],
+  };
+
+  return existing
+    ? replacePerformanceFavorite(favorites, updatedFavorite)
+    : [...favorites, updatedFavorite];
+}
+
+function updatePerformanceFavorites(
+  favorites: TimetablePerformanceFavorites[],
+  performanceIds: string[],
+  isFavorite: boolean,
+  participant: Participant,
+) {
+  return performanceIds.reduce(
+    (updatedFavorites, performanceId) =>
+      updatePerformanceFavorite(
+        updatedFavorites,
+        performanceId,
+        isFavorite,
+        participant,
+      ),
+    favorites,
+  );
 }
 
 type MainSection =
@@ -979,7 +1033,9 @@ function TimetableSection({
               ])
               .filter((value): value is string => Boolean(value)),
           ),
-        ).sort();
+        ).sort((firstTimeSlot, secondTimeSlot) =>
+          firstTimeSlot.localeCompare(secondTimeSlot),
+        );
 
         return {
           day,
@@ -1241,200 +1297,18 @@ type FestivalAccessProps = {
 
 function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
   const { t } = useTranslation();
-  const [festivalCode, setFestivalCode] = useState("");
-  const [festivalCodeError, setFestivalCodeError] = useState("");
-  const [isSubmittingFestivalCode, setIsSubmittingFestivalCode] =
-    useState(false);
-  const [qrScannerSupport, setQrScannerSupport] = useState<
-    "checking" | "supported" | "unsupported"
-  >("checking");
-  const [isScanningQrCode, setIsScanningQrCode] = useState(false);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const cameraStreamRef = useRef<MediaStream | null>(null);
-  const scanAnimationFrameRef = useRef<number | null>(null);
-  const isScanningQrCodeRef = useRef(false);
-
-  const stopQrScanner = useCallback(() => {
-    isScanningQrCodeRef.current = false;
-    setIsScanningQrCode(false);
-
-    if (scanAnimationFrameRef.current !== null) {
-      window.cancelAnimationFrame(scanAnimationFrameRef.current);
-      scanAnimationFrameRef.current = null;
-    }
-
-    cameraStreamRef.current?.getTracks().forEach((track) => track.stop());
-    cameraStreamRef.current = null;
-
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-  }, []);
-
-  useEffect(() => {
-    let isCurrent = true;
-
-    async function checkQrScannerSupport() {
-      const BarcodeDetector = (window as WindowWithBarcodeDetector)
-        .BarcodeDetector;
-      const hasCameraSupport =
-        typeof navigator.mediaDevices?.getUserMedia === "function";
-
-      if (!BarcodeDetector || !hasCameraSupport) {
-        if (isCurrent) {
-          setQrScannerSupport("unsupported");
-        }
-
-        return;
-      }
-
-      try {
-        const supportedFormats = BarcodeDetector.getSupportedFormats
-          ? await BarcodeDetector.getSupportedFormats()
-          : ["qr_code"];
-
-        if (isCurrent) {
-          setQrScannerSupport(
-            supportedFormats.includes("qr_code") ? "supported" : "unsupported",
-          );
-        }
-      } catch {
-        if (isCurrent) {
-          setQrScannerSupport("unsupported");
-        }
-      }
-    }
-
-    void checkQrScannerSupport();
-
-    return () => {
-      isCurrent = false;
-      stopQrScanner();
-    };
-  }, [stopQrScanner]);
-
-  async function unlockFestivalCode(
-    code: string,
-    invalidMessage: string,
-  ): Promise<boolean> {
-    const normalizedFestivalCode = code.trim().toUpperCase();
-
-    if (!normalizedFestivalCode) {
-      setFestivalCodeError(invalidMessage);
-      return false;
-    }
-
-    setFestivalCodeError("");
-    setIsSubmittingFestivalCode(true);
-
-    try {
-      if (!(await onUnlock(normalizedFestivalCode))) {
-        setFestivalCodeError(invalidMessage);
-        return false;
-      }
-
-      setFestivalCode("");
-      return true;
-    } catch {
-      setFestivalCodeError(t("festivalAccess.errors.verify"));
-      return false;
-    } finally {
-      setIsSubmittingFestivalCode(false);
-    }
-  }
-
-  async function submitFestivalCode(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    await unlockFestivalCode(
-      festivalCode,
-      t("festivalAccess.errors.invalidCode"),
-    );
-  }
-
-  async function unlockScannedFestivalCode(code: string) {
-    const normalizedFestivalCode = code.trim().toUpperCase();
-
-    setFestivalCode(normalizedFestivalCode);
-    stopQrScanner();
-
-    await unlockFestivalCode(
-      normalizedFestivalCode,
-      t("festivalAccess.qr.errors.invalidCode"),
-    );
-  }
-
-  async function startQrScanner() {
-    const BarcodeDetector = (window as WindowWithBarcodeDetector)
-      .BarcodeDetector;
-
-    if (
-      !BarcodeDetector ||
-      typeof navigator.mediaDevices?.getUserMedia !== "function" ||
-      qrScannerSupport !== "supported"
-    ) {
-      setFestivalCodeError(t("festivalAccess.qr.errors.unsupported"));
-      return;
-    }
-
-    setFestivalCodeError("");
-    setIsScanningQrCode(true);
-    isScanningQrCodeRef.current = true;
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-        audio: false,
-      });
-      const video = videoRef.current;
-
-      if (!video) {
-        stream.getTracks().forEach((track) => track.stop());
-        setFestivalCodeError(t("festivalAccess.qr.errors.camera"));
-        setIsScanningQrCode(false);
-        isScanningQrCodeRef.current = false;
-        return;
-      }
-
-      cameraStreamRef.current = stream;
-      video.srcObject = stream;
-      await video.play();
-
-      const detector = new BarcodeDetector({ formats: ["qr_code"] });
-
-      async function scanFrame() {
-        if (!isScanningQrCodeRef.current || !videoRef.current) {
-          return;
-        }
-
-        try {
-          const barcodes = await detector.detect(videoRef.current);
-          const scannedCode = barcodes.find((barcode) =>
-            Boolean(barcode.rawValue?.trim()),
-          )?.rawValue;
-
-          if (scannedCode) {
-            await unlockScannedFestivalCode(scannedCode);
-            return;
-          }
-
-          scanAnimationFrameRef.current = window.requestAnimationFrame(() => {
-            void scanFrame();
-          });
-        } catch {
-          setFestivalCodeError(t("festivalAccess.qr.errors.scan"));
-          stopQrScanner();
-        }
-      }
-
-      scanAnimationFrameRef.current = window.requestAnimationFrame(() => {
-        void scanFrame();
-      });
-    } catch {
-      setFestivalCodeError(t("festivalAccess.qr.errors.camera"));
-      stopQrScanner();
-    }
-  }
+  const {
+    festivalCode,
+    festivalCodeError,
+    isSubmittingFestivalCode,
+    qrScannerSupport,
+    isScanningQrCode,
+    videoRef,
+    changeFestivalCode,
+    submitFestivalCode,
+    startQrScanner,
+    stopQrScanner,
+  } = useFestivalCodeUnlock(onUnlock);
 
   return (
     <main
@@ -1462,10 +1336,7 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
               type="text"
               value={festivalCode}
               disabled={isSubmittingFestivalCode}
-              onChange={(event) => {
-                setFestivalCode(event.target.value);
-                setFestivalCodeError("");
-              }}
+              onChange={(event) => changeFestivalCode(event.target.value)}
               autoComplete="off"
               inputMode="text"
               placeholder={t("festivalAccess.codePlaceholder")}
@@ -4671,39 +4542,11 @@ function App() {
                       ...targetPerformanceIds,
                     ]),
                   ),
-              performanceFavorites: targetPerformanceIds.reduce(
-                (favorites, performanceId) => {
-                  const existing = favorites.find(
-                    (favorite) => favorite.performanceId === performanceId,
-                  );
-                  const otherParticipants =
-                    existing?.participants.filter(
-                      (participant) =>
-                        participant.participantId !== selectedParticipant.id,
-                    ) ?? [];
-                  const updatedFavorite = {
-                    performanceId,
-                    participants: isFavorite
-                      ? otherParticipants
-                      : [
-                          ...otherParticipants,
-                          {
-                            participantId: selectedParticipant.id,
-                            displayName: selectedParticipant.displayName,
-                            avatarId: selectedParticipant.avatarId ?? null,
-                          },
-                        ],
-                  };
-
-                  return existing
-                    ? favorites.map((favorite) =>
-                        favorite.performanceId === performanceId
-                          ? updatedFavorite
-                          : favorite,
-                      )
-                    : [...favorites, updatedFavorite];
-                },
+              performanceFavorites: updatePerformanceFavorites(
                 currentTimetable.performanceFavorites,
+                targetPerformanceIds,
+                isFavorite,
+                selectedParticipant,
               ),
             }
           : currentTimetable,
