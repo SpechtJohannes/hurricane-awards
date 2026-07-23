@@ -1677,6 +1677,18 @@ describe("Login", () => {
     expect(loadAllTimeStandings).not.toHaveBeenCalled();
   });
 
+  it("prueft einen leeren Eventcode nicht gegen das Backend", async () => {
+    await renderLoadedApp();
+
+    await unlockFestivalWith("   ");
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      /eventcode ist ung.ltig/i,
+    );
+    expect(verifyFestivalAccessCode).not.toHaveBeenCalled();
+    expect(screen.getByRole("textbox", { name: /^eventcode$/i })).toBeVisible();
+  });
+
   it("ueberspringt den Eventcode nach gespeicherter Freischaltung", async () => {
     localStorage.setItem(
       festivalAccessStorageKey,
