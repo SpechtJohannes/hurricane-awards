@@ -6,6 +6,7 @@ import {
   type CSSProperties,
   type FormEvent,
   type MouseEvent,
+  type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -853,6 +854,33 @@ function stageColorStyle(color: string | null): CSSProperties | undefined {
         "--stage-color": color,
       } as CSSProperties)
     : undefined;
+}
+
+function renderWhen(condition: boolean, render: () => ReactNode): ReactNode {
+  return condition ? render() : null;
+}
+
+function renderEither(
+  condition: boolean,
+  renderTruthy: () => ReactNode,
+  renderFalsy: () => ReactNode,
+): ReactNode {
+  return condition ? renderTruthy() : renderFalsy();
+}
+
+function isAuthenticatedSection(
+  participant: Participant | null,
+  activeSection: MainSection,
+  section: MainSection,
+): boolean {
+  return participant !== null && activeSection === section;
+}
+
+function isAdminAreaVisible(
+  participant: Participant | null,
+  isVisible: boolean,
+): boolean {
+  return Boolean(participant?.isAdmin) && isVisible;
 }
 
 type DashboardBackButtonProps = {
@@ -4664,7 +4692,7 @@ function App() {
         <div className="app-header__actions">
           <PwaInstallPrompt />
           <LanguageSwitcher />
-          {selectedParticipant?.isAdmin ? (
+          {renderWhen(Boolean(selectedParticipant?.isAdmin), () => (
             <button
               className="hero__admin"
               type="button"
@@ -4684,11 +4712,11 @@ function App() {
                 {isAdminVisible ? t("hero.adminClose") : t("hero.admin")}
               </span>
             </button>
-          ) : null}
+          ))}
         </div>
       </header>
 
-      {selectedParticipant?.isAdmin && isAdminVisible ? (
+      {renderWhen(isAdminAreaVisible(selectedParticipant, isAdminVisible), () => (
         <section
           className="admin"
           id="admin"
@@ -4932,9 +4960,9 @@ function App() {
             />
           ) : null}
         </section>
-      ) : null}
+      ))}
 
-      {activeMainSection === "dashboard" ? (
+      {renderWhen(activeMainSection === "dashboard", () => (
         <DashboardSection
           festivalName={displayedFestivalName}
           eventLogoUrl={eventLogoUrl}
@@ -4950,9 +4978,9 @@ function App() {
           activeCategory={openCategories[0] ?? null}
           onNavigate={navigateMainSection}
         />
-      ) : null}
+      ))}
 
-      {activeMainSection === "profile" ? (
+      {renderWhen(activeMainSection === "profile", () => (
         <section
           className="identity"
           id="main-profile"
@@ -5184,9 +5212,9 @@ function App() {
             )}
           </div>
         </section>
-      ) : null}
+      ))}
 
-      {selectedParticipant && activeMainSection === "games" ? (
+      {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "games"), () => (
         <section
           className="games"
           id="main-games"
@@ -5295,9 +5323,9 @@ function App() {
             />
           ) : null}
         </section>
-      ) : null}
+      ))}
 
-      {selectedParticipant && activeMainSection === "timetable" ? (
+      {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "timetable"), () => (
         <TimetableSection
           timetable={timetable}
           error={timetableError}
@@ -5307,13 +5335,13 @@ function App() {
           onBackToDashboard={() => navigateMainSection("dashboard")}
           onToggleFavorite={toggleTimetableFavorite}
         />
-      ) : null}
+      ))}
 
-      {selectedParticipant && activeMainSection === "artists" ? (
-        selectedArtistId ? (
+      {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "artists"), () => (
+        renderEither(Boolean(selectedArtistId), () => (
           <ArtistDetail
             timetable={timetable}
-            actId={selectedArtistId}
+            actId={selectedArtistId!}
             artistTags={actArtistTags}
             loadError={timetableError ? t("artistDetail.errors.load") : ""}
             favoriteError={artistFavoriteError}
@@ -5328,7 +5356,7 @@ function App() {
             }
             onToggleFavorite={toggleArtistFavorite}
           />
-        ) : (
+        ), () => (
           <Artists
             acts={timetable?.acts ?? null}
             artistTags={actArtistTags}
@@ -5352,10 +5380,10 @@ function App() {
             onToggleFavorite={toggleArtistFavorite}
             onOpenProfile={() => navigateMainSection("profile")}
           />
-        )
-      ) : null}
+        ))
+      ))}
 
-      {selectedParticipant && activeMainSection === "info" ? (
+      {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "info"), () => (
         <FestivalInfo
           documents={festivalDocuments}
           campLocationLink={campLocationLink}
@@ -5370,9 +5398,9 @@ function App() {
           }
           onOpenCampLocation={openCampLocationLink}
         />
-      ) : null}
+      ))}
 
-      {selectedParticipant && activeMainSection === "voting" ? (
+      {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "voting"), () => (
         <div id="main-voting">
           <section
             className="categories"
@@ -5407,12 +5435,12 @@ function App() {
             <div className="categories__grid">
               {openCategories.map((category) => {
                 const eligibleParticipants = participants.filter(
-                  (participant) => participant.id !== selectedParticipant.id,
+                  (participant) => participant.id !== selectedParticipant!.id,
                 );
                 const selectedVote = selectedVotesByCategory[category.id] ?? "";
                 const hasAlreadyVoted = votes.some(
                   (vote) =>
-                    vote.voterId === selectedParticipant.id &&
+                    vote.voterId === selectedParticipant!.id &&
                     vote.categoryId === category.id,
                 );
                 const selectedParticipantForVote = eligibleParticipants.find(
@@ -5488,9 +5516,9 @@ function App() {
             </div>
           </section>
         </div>
-      ) : null}
+      ))}
 
-      {selectedParticipant && activeMainSection === "awards" ? (
+      {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "awards"), () => (
         <div id="main-awards">
           <section className="results" aria-labelledby="awards-title">
             <DashboardBackButton
@@ -5598,7 +5626,7 @@ function App() {
             )}
           </section>
         </div>
-      ) : null}
+      ))}
       <AppFooter />
     </main>
   );
