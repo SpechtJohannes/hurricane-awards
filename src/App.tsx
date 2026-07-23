@@ -979,7 +979,9 @@ function TimetableSection({
               ])
               .filter((value): value is string => Boolean(value)),
           ),
-        ).sort();
+        ).sort((firstTimeSlot, secondTimeSlot) =>
+          firstTimeSlot.localeCompare(secondTimeSlot),
+        );
 
         return {
           day,
