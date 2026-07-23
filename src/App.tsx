@@ -150,7 +150,9 @@ import {
   type FestivalDay,
   type Timetable,
   type TimetableAct,
+  type TimetableFavoriteParticipant,
   type TimetablePerformance,
+  type TimetablePerformanceFavorites,
   type TimetableStage,
   type UpdateFestivalDayInput,
   type UpdateTimetableActInput,
@@ -335,6 +337,76 @@ function updateTournamentParticipantName(
       })),
     },
   };
+}
+
+function removeFavoriteParticipant(
+  participants: TimetableFavoriteParticipant[],
+  participantId: string,
+) {
+  return participants.filter(
+    (participant) => participant.participantId !== participantId,
+  );
+}
+
+function replacePerformanceFavorite(
+  favorites: TimetablePerformanceFavorites[],
+  updatedFavorite: TimetablePerformanceFavorites,
+) {
+  return favorites.map((favorite) =>
+    favorite.performanceId === updatedFavorite.performanceId
+      ? updatedFavorite
+      : favorite,
+  );
+}
+
+function updatePerformanceFavorite(
+  favorites: TimetablePerformanceFavorites[],
+  performanceId: string,
+  isFavorite: boolean,
+  participant: Participant,
+) {
+  const existing = favorites.find(
+    (favorite) => favorite.performanceId === performanceId,
+  );
+  const otherParticipants = removeFavoriteParticipant(
+    existing?.participants ?? [],
+    participant.id,
+  );
+  const updatedFavorite = {
+    performanceId,
+    participants: isFavorite
+      ? otherParticipants
+      : [
+          ...otherParticipants,
+          {
+            participantId: participant.id,
+            displayName: participant.displayName,
+            avatarId: participant.avatarId ?? null,
+          },
+        ],
+  };
+
+  return existing
+    ? replacePerformanceFavorite(favorites, updatedFavorite)
+    : [...favorites, updatedFavorite];
+}
+
+function updatePerformanceFavorites(
+  favorites: TimetablePerformanceFavorites[],
+  performanceIds: string[],
+  isFavorite: boolean,
+  participant: Participant,
+) {
+  return performanceIds.reduce(
+    (updatedFavorites, performanceId) =>
+      updatePerformanceFavorite(
+        updatedFavorites,
+        performanceId,
+        isFavorite,
+        participant,
+      ),
+    favorites,
+  );
 }
 
 type MainSection =
@@ -4470,39 +4542,11 @@ function App() {
                       ...targetPerformanceIds,
                     ]),
                   ),
-              performanceFavorites: targetPerformanceIds.reduce(
-                (favorites, performanceId) => {
-                  const existing = favorites.find(
-                    (favorite) => favorite.performanceId === performanceId,
-                  );
-                  const otherParticipants =
-                    existing?.participants.filter(
-                      (participant) =>
-                        participant.participantId !== selectedParticipant.id,
-                    ) ?? [];
-                  const updatedFavorite = {
-                    performanceId,
-                    participants: isFavorite
-                      ? otherParticipants
-                      : [
-                          ...otherParticipants,
-                          {
-                            participantId: selectedParticipant.id,
-                            displayName: selectedParticipant.displayName,
-                            avatarId: selectedParticipant.avatarId ?? null,
-                          },
-                        ],
-                  };
-
-                  return existing
-                    ? favorites.map((favorite) =>
-                        favorite.performanceId === performanceId
-                          ? updatedFavorite
-                          : favorite,
-                      )
-                    : [...favorites, updatedFavorite];
-                },
+              performanceFavorites: updatePerformanceFavorites(
                 currentTimetable.performanceFavorites,
+                targetPerformanceIds,
+                isFavorite,
+                selectedParticipant,
               ),
             }
           : currentTimetable,
