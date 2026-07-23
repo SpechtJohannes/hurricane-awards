@@ -220,6 +220,73 @@ type CategoryResult = {
   voteCount: number;
 };
 
+type CategoryResults = {
+  category: Category;
+  results: CategoryResult[];
+  highestVoteCount: number;
+};
+
+function countVotesForParticipant(
+  votes: Vote[],
+  categoryId: string,
+  participantId: string,
+): number {
+  return votes.filter(
+    (vote) =>
+      vote.categoryId === categoryId && vote.votedForId === participantId,
+  ).length;
+}
+
+function createCategoryResult(
+  participant: Participant,
+  categoryId: string,
+  votes: Vote[],
+): CategoryResult {
+  return {
+    participant,
+    voteCount: countVotesForParticipant(votes, categoryId, participant.id),
+  };
+}
+
+function compareCategoryResults(
+  firstResult: CategoryResult,
+  secondResult: CategoryResult,
+): number {
+  if (secondResult.voteCount !== firstResult.voteCount) {
+    return secondResult.voteCount - firstResult.voteCount;
+  }
+
+  return firstResult.participant.displayName.localeCompare(
+    secondResult.participant.displayName,
+  );
+}
+
+function createResultsForCategory(
+  category: Category,
+  participants: Participant[],
+  votes: Vote[],
+): CategoryResults {
+  const results = participants
+    .map((participant) => createCategoryResult(participant, category.id, votes))
+    .sort(compareCategoryResults);
+
+  return {
+    category,
+    results,
+    highestVoteCount: results[0]?.voteCount ?? 0,
+  };
+}
+
+function createResultsByCategory(
+  categories: Category[],
+  participants: Participant[],
+  votes: Vote[],
+): CategoryResults[] {
+  return categories.map((category) =>
+    createResultsForCategory(category, participants, votes),
+  );
+}
+
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{
@@ -1938,35 +2005,7 @@ function App() {
   }, [festivalAccess.isUnlocked, selectedParticipant]);
 
   const resultsByCategory = useMemo(
-    () =>
-      categories.map((category) => {
-        const results = participants
-          .map((participant) => ({
-            participant,
-            voteCount: allVotes.filter(
-              (vote) =>
-                vote.categoryId === category.id &&
-                vote.votedForId === participant.id,
-            ).length,
-          }))
-          .sort((firstResult, secondResult) => {
-            if (secondResult.voteCount !== firstResult.voteCount) {
-              return secondResult.voteCount - firstResult.voteCount;
-            }
-
-            return firstResult.participant.displayName.localeCompare(
-              secondResult.participant.displayName,
-            );
-          });
-
-        const highestVoteCount = results[0]?.voteCount ?? 0;
-
-        return {
-          category,
-          results,
-          highestVoteCount,
-        };
-      }),
+    () => createResultsByCategory(categories, participants, allVotes),
     [allVotes, categories, participants],
   );
 
