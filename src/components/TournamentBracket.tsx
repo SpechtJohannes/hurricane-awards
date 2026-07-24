@@ -15,49 +15,74 @@ type TournamentBracketProps = {
 
 type ResolvedParticipant = { id: string; name: string };
 
-function resolveBracket(tournament: Tournament) {
+function rememberParticipant(
+  participants: Map<string, ResolvedParticipant>,
+  participant: { participantId: string; participantName: string },
+) {
+  participants.set(participant.participantId, {
+    id: participant.participantId,
+    name: participant.participantName,
+  });
+}
+
+function collectParticipants(tournament: Tournament) {
   const participants = new Map<string, ResolvedParticipant>();
-  const winners = new Map<string, ResolvedParticipant>();
-  const matchParticipants = new Map<string, ResolvedParticipant[]>();
 
   for (const round of tournament.bracket.rounds) {
     for (const match of round.matches) {
       for (const slot of [match.participantA, match.participantB]) {
         if (slot.participant) {
-          participants.set(slot.participant.participantId, {
-            id: slot.participant.participantId,
-            name: slot.participant.participantName,
-          });
+          rememberParticipant(participants, slot.participant);
         }
       }
     }
     for (const bye of round.byes ?? []) {
-      participants.set(bye.participantId, {
-        id: bye.participantId,
-        name: bye.participantName,
-      });
+      rememberParticipant(participants, bye);
     }
   }
 
+  return participants;
+}
+
+function resolveMatchParticipants(
+  match: TournamentBracketMatch,
+  participants: Map<string, ResolvedParticipant>,
+  winners: Map<string, ResolvedParticipant>,
+) {
+  return [match.participantA, match.participantB]
+    .map((slot) =>
+      slot.participant
+        ? participants.get(slot.participant.participantId)
+        : winners.get(slot.sourceMatchId ?? ""),
+    )
+    .filter((participant): participant is ResolvedParticipant =>
+      Boolean(participant),
+    );
+}
+
+function rememberMatchWinner(
+  match: TournamentBracketMatch,
+  resolved: ResolvedParticipant[],
+  winners: Map<string, ResolvedParticipant>,
+) {
+  if (!match.winnerParticipantId) return;
+
+  const winner = resolved.find(
+    (participant) => participant.id === match.winnerParticipantId,
+  );
+  if (winner) winners.set(match.id, winner);
+}
+
+function resolveBracket(tournament: Tournament) {
+  const participants = collectParticipants(tournament);
+  const winners = new Map<string, ResolvedParticipant>();
+  const matchParticipants = new Map<string, ResolvedParticipant[]>();
+
   for (const round of tournament.bracket.rounds) {
     for (const match of round.matches) {
-      const resolved = [match.participantA, match.participantB]
-        .map((slot) =>
-          slot.participant
-            ? participants.get(slot.participant.participantId)
-            : winners.get(slot.sourceMatchId ?? ""),
-        )
-        .filter((participant): participant is ResolvedParticipant =>
-          Boolean(participant),
-        );
+      const resolved = resolveMatchParticipants(match, participants, winners);
       matchParticipants.set(match.id, resolved);
-
-      if (match.winnerParticipantId) {
-        const winner = resolved.find(
-          (participant) => participant.id === match.winnerParticipantId,
-        );
-        if (winner) winners.set(match.id, winner);
-      }
+      rememberMatchWinner(match, resolved, winners);
     }
   }
 

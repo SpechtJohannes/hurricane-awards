@@ -27,6 +27,102 @@ type AdminFestivalProps = {
   onRemoveLogo?: () => Promise<void>;
 };
 
+type ArchiveActionsProps = {
+  includeParticipantAccessCodes: boolean;
+  isDisabled: boolean;
+  isArchiving: boolean;
+  isExporting: boolean;
+  exportMessage: string;
+  exportError: string;
+  archiveMessage: string;
+  archiveError: string;
+  onIncludeParticipantAccessCodesChange: (checked: boolean) => void;
+  onExport: () => void;
+  onArchive: () => void;
+};
+
+function ArchiveActions({
+  includeParticipantAccessCodes,
+  isDisabled,
+  isArchiving,
+  isExporting,
+  exportMessage,
+  exportError,
+  archiveMessage,
+  archiveError,
+  onIncludeParticipantAccessCodesChange,
+  onExport,
+  onArchive,
+}: ArchiveActionsProps) {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <SectionHeader
+        title={t("admin.archive.title")}
+        titleId="admin-archive-title"
+        eyebrow={t("admin.archive.eyebrow")}
+      />
+
+      <div className="admin-festival-actions">
+        <label className="admin-festival-actions__option">
+          <input
+            type="checkbox"
+            checked={includeParticipantAccessCodes}
+            disabled={isDisabled}
+            onChange={(event) =>
+              onIncludeParticipantAccessCodesChange(event.target.checked)
+            }
+          />
+          {t("admin.festival.exportIncludeAccessCodes")}
+        </label>
+
+        {includeParticipantAccessCodes ? (
+          <p className="admin-participant-form__error" role="alert">
+            {t("admin.festival.exportAccessCodeWarning")}
+          </p>
+        ) : null}
+
+        <button
+          className="admin-card__reset admin-card__reset--primary"
+          type="button"
+          disabled={isDisabled}
+          onClick={onExport}
+        >
+          {isExporting
+            ? t("admin.festival.exporting")
+            : t("admin.festival.export")}
+        </button>
+
+        {exportMessage ? (
+          <p className="admin-festival-actions__success">{exportMessage}</p>
+        ) : null}
+        {exportError ? (
+          <p className="admin-participant-form__error">{exportError}</p>
+        ) : null}
+
+        <button
+          className="admin-card__reset admin-card__reset--secondary"
+          type="button"
+          disabled={isDisabled}
+          onClick={onArchive}
+        >
+          {isArchiving
+            ? t("admin.festival.archiving")
+            : t("admin.festival.archive")}
+        </button>
+
+        {archiveMessage ? (
+          <p className="admin-festival-actions__success">{archiveMessage}</p>
+        ) : null}
+        {archiveError ? (
+          <p className="admin-participant-form__error">{archiveError}</p>
+        ) : null}
+      </div>
+    </>
+  );
+}
+
 export function AdminFestival({
   mode = "settings",
   festivalName,
@@ -165,91 +261,30 @@ export function AdminFestival({
     }
   }
 
+  const isActionDisabled =
+    isSaving ||
+    isArchiving ||
+    isExporting ||
+    isLoadingFestivalCode ||
+    isSavingFestivalCode;
+
   if (mode === "archive") {
     return (
-      <>
-        <SectionHeader
-          title={t("admin.archive.title")}
-          titleId="admin-archive-title"
-          eyebrow={t("admin.archive.eyebrow")}
-        />
-
-        <div className="admin-festival-actions">
-          <label className="admin-festival-actions__option">
-            <input
-              type="checkbox"
-              checked={includeParticipantAccessCodes}
-              disabled={
-                isSaving ||
-                isArchiving ||
-                isExporting ||
-                isLoadingFestivalCode ||
-                isSavingFestivalCode
-              }
-              onChange={(event) =>
-                setIncludeParticipantAccessCodes(event.target.checked)
-              }
-            />
-            {t("admin.festival.exportIncludeAccessCodes")}
-          </label>
-
-          {includeParticipantAccessCodes ? (
-            <p className="admin-participant-form__error" role="alert">
-              {t("admin.festival.exportAccessCodeWarning")}
-            </p>
-          ) : null}
-
-          <button
-            className="admin-card__reset admin-card__reset--primary"
-            type="button"
-            disabled={
-              isSaving ||
-              isArchiving ||
-              isExporting ||
-              isLoadingFestivalCode ||
-              isSavingFestivalCode
-            }
-            onClick={exportCurrentFestival}
-          >
-            {isExporting
-              ? t("admin.festival.exporting")
-              : t("admin.festival.export")}
-          </button>
-
-          {exportMessage ? (
-            <p className="admin-festival-actions__success">{exportMessage}</p>
-          ) : null}
-
-          {exportError ? (
-            <p className="admin-participant-form__error">{exportError}</p>
-          ) : null}
-
-          <button
-            className="admin-card__reset admin-card__reset--secondary"
-            type="button"
-            disabled={
-              isSaving ||
-              isArchiving ||
-              isExporting ||
-              isLoadingFestivalCode ||
-              isSavingFestivalCode
-            }
-            onClick={archiveCurrentFestival}
-          >
-            {isArchiving
-              ? t("admin.festival.archiving")
-              : t("admin.festival.archive")}
-          </button>
-
-          {archiveMessage ? (
-            <p className="admin-festival-actions__success">{archiveMessage}</p>
-          ) : null}
-
-          {archiveError ? (
-            <p className="admin-participant-form__error">{archiveError}</p>
-          ) : null}
-        </div>
-      </>
+      <ArchiveActions
+        includeParticipantAccessCodes={includeParticipantAccessCodes}
+        isDisabled={isActionDisabled}
+        isArchiving={isArchiving}
+        isExporting={isExporting}
+        exportMessage={exportMessage}
+        exportError={exportError}
+        archiveMessage={archiveMessage}
+        archiveError={archiveError}
+        onIncludeParticipantAccessCodesChange={
+          setIncludeParticipantAccessCodes
+        }
+        onExport={exportCurrentFestival}
+        onArchive={archiveCurrentFestival}
+      />
     );
   }
 
@@ -334,13 +369,7 @@ export function AdminFestival({
         <button
           className="admin-card__reset admin-card__reset--primary"
           type="submit"
-          disabled={
-            isSaving ||
-            isArchiving ||
-            isExporting ||
-            isLoadingFestivalCode ||
-            isSavingFestivalCode
-          }
+          disabled={isActionDisabled}
         >
           {isSaving ? t("common.saving") : t("admin.festival.save")}
         </button>
@@ -389,13 +418,7 @@ export function AdminFestival({
         <button
           className="admin-card__reset admin-card__reset--primary"
           type="submit"
-          disabled={
-            isSaving ||
-            isArchiving ||
-            isExporting ||
-            isLoadingFestivalCode ||
-            isSavingFestivalCode
-          }
+          disabled={isActionDisabled}
         >
           {isSavingFestivalCode
             ? t("common.saving")
