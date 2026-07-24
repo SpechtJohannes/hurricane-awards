@@ -77,6 +77,40 @@ export function AdminTimetableActs({
     }
   }
 
+  async function removeTag(actId: string, tagId: string) {
+    setSavingTagForAct(actId);
+    setTagErrorByAct((current) => ({ ...current, [actId]: "" }));
+    try {
+      await onRemoveTag(actId, tagId);
+    } catch {
+      setTagErrorByAct((current) => ({
+        ...current,
+        [actId]: t("admin.timetable.acts.tags.errors.remove"),
+      }));
+    } finally {
+      setSavingTagForAct(null);
+    }
+  }
+
+  async function assignTag(actId: string, tagId: string) {
+    setSelectedTagByAct((current) => ({ ...current, [actId]: tagId }));
+    if (!tagId) return;
+
+    setSavingTagForAct(actId);
+    setTagErrorByAct((current) => ({ ...current, [actId]: "" }));
+    try {
+      await onAssignTag(actId, tagId);
+      setSelectedTagByAct((current) => ({ ...current, [actId]: "" }));
+    } catch {
+      setTagErrorByAct((current) => ({
+        ...current,
+        [actId]: t("admin.timetable.acts.tags.errors.save"),
+      }));
+    } finally {
+      setSavingTagForAct(null);
+    }
+  }
+
   function startCreate() {
     setFormError("");
     setForm({
@@ -288,17 +322,7 @@ export function AdminTimetableActs({
                           type="button"
                           disabled={savingTagForAct === act.id}
                           aria-label={t("admin.timetable.acts.tags.remove", { name: tag.name })}
-                          onClick={async () => {
-                            setSavingTagForAct(act.id);
-                            setTagErrorByAct((current) => ({ ...current, [act.id]: "" }));
-                            try {
-                              await onRemoveTag(act.id, tag.id);
-                            } catch {
-                              setTagErrorByAct((current) => ({ ...current, [act.id]: t("admin.timetable.acts.tags.errors.remove") }));
-                            } finally {
-                              setSavingTagForAct(null);
-                            }
-                          }}
+                          onClick={() => void removeTag(act.id, tag.id)}
                         >×</button>
                       </span>
                     ))}
@@ -308,21 +332,7 @@ export function AdminTimetableActs({
                       value={selectedTagByAct[act.id] ?? ""}
                       disabled={savingTagForAct === act.id}
                       aria-label={t("admin.timetable.acts.tags.selectLabel")}
-                      onChange={async (event) => {
-                        const tagId = event.target.value;
-                        setSelectedTagByAct((current) => ({ ...current, [act.id]: tagId }));
-                        if (!tagId) return;
-                        setSavingTagForAct(act.id);
-                        setTagErrorByAct((current) => ({ ...current, [act.id]: "" }));
-                        try {
-                          await onAssignTag(act.id, tagId);
-                          setSelectedTagByAct((current) => ({ ...current, [act.id]: "" }));
-                        } catch {
-                          setTagErrorByAct((current) => ({ ...current, [act.id]: t("admin.timetable.acts.tags.errors.save") }));
-                        } finally {
-                          setSavingTagForAct(null);
-                        }
-                      }}
+                      onChange={(event) => void assignTag(act.id, event.target.value)}
                     >
                       <option value="">{t("admin.timetable.acts.tags.selectPlaceholder")}</option>
                       {tags.filter((tag) => !actTags.some((assigned) => assigned.actId === act.id && assigned.id === tag.id)).map((tag) => (
