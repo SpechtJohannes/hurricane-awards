@@ -407,6 +407,47 @@ function updateTournamentParticipantName(
   };
 }
 
+function updateTimetableParticipant(
+  timetable: Timetable | null,
+  participant: Participant,
+): Timetable | null {
+  if (!timetable) return timetable;
+
+  return {
+    ...timetable,
+    performanceFavorites: timetable.performanceFavorites.map((favorite) => ({
+      ...favorite,
+      participants: favorite.participants.map((favoriteParticipant) =>
+        favoriteParticipant.participantId === participant.id
+          ? {
+              ...favoriteParticipant,
+              displayName: participant.displayName,
+              avatarId: participant.avatarId ?? null,
+            }
+          : favoriteParticipant,
+      ),
+    })),
+  };
+}
+
+function updateRandomPairingActionParticipant(
+  action: AdminRandomPairingAction,
+  participant: Participant,
+): AdminRandomPairingAction {
+  return {
+    ...action,
+    assignments: action.assignments.map((assignment) => ({
+      ...assignment,
+      ...(assignment.participantId === participant.id
+        ? { participantName: participant.displayName }
+        : {}),
+      ...(assignment.assignedParticipantId === participant.id
+        ? { assignedParticipantName: participant.displayName }
+        : {}),
+    })),
+  };
+}
+
 function removeFavoriteParticipant(
   participants: TimetableFavoriteParticipant[],
   participantId: string,
@@ -1631,6 +1672,135 @@ function ProfileSection(props: ProfileSectionProps) {
   );
 }
 
+type VotingSectionProps = {
+  participant: Participant;
+  participants: Participant[];
+  categories: Category[];
+  votes: Vote[];
+  selectedVotes: Record<string, string>;
+  statusLabels: Record<CategoryStatus, string>;
+  participantCount: number;
+  votesError: string;
+  categoriesError: string;
+  isLoading: boolean;
+  submittingCategoryId: string | null;
+  onBack: () => void;
+  onSelectVote: (categoryId: string, participantId: string) => void;
+  onSubmitVote: (categoryId: string) => Promise<void>;
+};
+
+function VotingCategory({
+  category,
+  eligibleParticipants,
+  selectedVote,
+  selectedParticipantForVote,
+  hasAlreadyVoted,
+  statusLabel,
+  isSubmitting,
+  onSelectVote,
+  onSubmitVote,
+}: Readonly<{
+  category: Category;
+  eligibleParticipants: Participant[];
+  selectedVote: string;
+  selectedParticipantForVote?: Participant;
+  hasAlreadyVoted: boolean;
+  statusLabel: string;
+  isSubmitting: boolean;
+  onSelectVote: (participantId: string) => void;
+  onSubmitVote: () => void;
+}>) {
+  const { t } = useTranslation();
+
+  return (
+    <article className="category-card">
+      <div className="category-card__topline"><span className={`category-card__status category-card__status--${category.status}`}>{statusLabel}</span></div>
+      <h3>{category.title}</h3><p>{category.description}</p>
+      {hasAlreadyVoted ? <p className="category-card__voted">{t("categories.alreadyVoted")}</p> : (
+        <div className="category-card__vote">
+          <label htmlFor={`vote-${category.id}`}>{t("categories.voteTargetLabel")}</label>
+          <select id={`vote-${category.id}`} value={selectedVote} onChange={(event) => onSelectVote(event.target.value)}>
+            <option value="">{t("categories.selectPerson")}</option>
+            {eligibleParticipants.map((participant) => <option key={participant.id} value={participant.id}>{participant.displayName}</option>)}
+          </select>
+          {selectedVote ? <p className="category-card__selected-vote"><ParticipantName avatarId={selectedParticipantForVote?.avatarId} name={selectedParticipantForVote?.displayName ?? ""} /></p> : null}
+          {selectedVote ? <button className="category-card__submit" type="button" disabled={isSubmitting} onClick={onSubmitVote}>{isSubmitting ? t("common.saving") : t("categories.submitVote")}</button> : null}
+        </div>
+      )}
+    </article>
+  );
+}
+
+function VotingSection(props: Readonly<VotingSectionProps>) {
+  const { t } = useTranslation();
+  const eligibleParticipants = props.participants.filter(
+    (participant) => participant.id !== props.participant.id,
+  );
+
+  return (
+    <div id="main-voting">
+      <section className="categories" id="abstimmung" aria-labelledby="categories-title">
+        <DashboardBackButton onClick={props.onBack} />
+        <SectionHeader title={t("categories.title")} titleId="categories-title" eyebrow={t("categories.eyebrow", { count: props.participantCount })} />
+        {props.votesError ? <p className="categories__notice">{props.votesError}</p> : null}
+        {props.isLoading ? <output className="categories__notice">{t("common.loading")}</output> : null}
+        {props.categoriesError ? <p className="categories__notice">{props.categoriesError}</p> : null}
+        {!props.isLoading && props.categories.length === 0 ? <p className="categories__notice">{t("categories.empty")}</p> : null}
+        <div className="categories__grid">
+          {props.categories.map((category) => {
+            const selectedVote = props.selectedVotes[category.id] ?? "";
+            return (
+              <VotingCategory
+                key={category.id}
+                category={category}
+                eligibleParticipants={eligibleParticipants}
+                selectedVote={selectedVote}
+                selectedParticipantForVote={eligibleParticipants.find((participant) => participant.id === selectedVote)}
+                hasAlreadyVoted={props.votes.some((vote) => vote.voterId === props.participant.id && vote.categoryId === category.id)}
+                statusLabel={props.statusLabels[category.status]}
+                isSubmitting={props.submittingCategoryId === category.id}
+                onSelectVote={(participantId) => props.onSelectVote(category.id, participantId)}
+                onSubmitVote={() => void props.onSubmitVote(category.id)}
+              />
+            );
+          })}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function StandingsContent({ isLoading, error, standings }: Readonly<{ isLoading: boolean; error: string; standings: AllTimeStanding[] }>) {
+  const { t } = useTranslation();
+  if (isLoading) return <output className="standings__notice">{t("standings.loading")}</output>;
+  if (error) return <p className="standings__notice standings__notice--error" role="alert">{error}</p>;
+  if (standings.length === 0) return <p className="standings__notice">{t("standings.empty")}</p>;
+  return (
+    <div className="standings__table" role="table" aria-label={t("standings.title")}>
+      <div className="standings__columns" role="row"><span role="columnheader">{t("standings.columns.rank")}</span><span role="columnheader">{t("standings.columns.name")}</span><span role="columnheader">{t("standings.columns.points")}</span></div>
+      <ol>{standings.map((standing, index) => <li key={standing.participantId} role="row"><span className="standings__rank" role="cell" aria-label={t("standings.rankLabel", { rank: index + 1 })}>{index + 1}</span><strong role="cell">{standing.participantName}</strong><span className="standings__points" role="cell">{standing.totalPoints}</span></li>)}</ol>
+    </div>
+  );
+}
+
+function AwardsSection({ resultsError, hasVotes, results, isStandingsLoading, standingsError, standings, onBack }: Readonly<{ resultsError: string; hasVotes: boolean; results: CategoryResults[]; isStandingsLoading: boolean; standingsError: string; standings: AllTimeStanding[]; onBack: () => void }>) {
+  const { t } = useTranslation();
+  return (
+    <div id="main-awards">
+      <section className="results" aria-labelledby="awards-title"><DashboardBackButton onClick={onBack} /><SectionHeader title={t("awards.title")} titleId="awards-title" eyebrow={t("awards.eyebrow")} description={t("awards.description")} /></section>
+      <section className="results" id="ergebnisse" aria-labelledby="results-title">
+        <SectionHeader title={t("results.title")} titleId="results-title" eyebrow={t("results.eyebrow")} />
+        {resultsError ? <p className="results__notice">{resultsError}</p> : null}
+        {!hasVotes ? <p className="results__notice">{t("results.empty")}</p> : <div className="results__grid">{results.map(({ category, results: categoryResults, highestVoteCount }) => <ResultCard category={category} results={categoryResults} highestVoteCount={highestVoteCount} key={`${category.id}-${category.status}`} />)}</div>}
+      </section>
+      <section className="standings" id="gesamtclassement" aria-labelledby="standings-title">
+        <SectionHeader title={t("standings.title")} titleId="standings-title" eyebrow={t("standings.eyebrow")} />
+        <StandingsContent isLoading={isStandingsLoading} error={standingsError} standings={standings} />
+      </section>
+    </div>
+  );
+}
+
 type FestivalAccessProps = {
   festivalName: string;
   onUnlock: (code: string) => Promise<boolean>;
@@ -2643,25 +2813,7 @@ function App() {
         ),
       );
       setTimetable((currentTimetable) =>
-        currentTimetable
-          ? {
-              ...currentTimetable,
-              performanceFavorites: currentTimetable.performanceFavorites.map(
-                (favorite) => ({
-                  ...favorite,
-                  participants: favorite.participants.map((participant) =>
-                    participant.participantId === updatedParticipant.id
-                      ? {
-                          ...participant,
-                          displayName: updatedParticipant.displayName,
-                          avatarId: updatedParticipant.avatarId ?? null,
-                        }
-                      : participant,
-                  ),
-                }),
-              ),
-            }
-          : currentTimetable,
+        updateTimetableParticipant(currentTimetable, updatedParticipant),
       );
       setRandomPairingAssignments((currentAssignments) =>
         currentAssignments.map((assignment) =>
@@ -2674,18 +2826,9 @@ function App() {
         ),
       );
       setAdminRandomPairingActions((currentActions) =>
-        currentActions.map((action) => ({
-          ...action,
-          assignments: action.assignments.map((assignment) => ({
-            ...assignment,
-            ...(assignment.participantId === updatedParticipant.id
-              ? { participantName: updatedParticipant.displayName }
-              : {}),
-            ...(assignment.assignedParticipantId === updatedParticipant.id
-              ? { assignedParticipantName: updatedParticipant.displayName }
-              : {}),
-          })),
-        })),
+        currentActions.map((action) =>
+          updateRandomPairingActionParticipant(action, updatedParticipant),
+        ),
       );
       setAdminHorseRacingBets((currentBets) =>
         currentBets.map((bet) =>
@@ -5416,231 +5559,34 @@ function App() {
       ))}
 
       {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "voting"), () => (
-        <div id="main-voting">
-          <section
-            className="categories"
-            id="abstimmung"
-            aria-labelledby="categories-title"
-          >
-            <DashboardBackButton
-              onClick={() => navigateMainSection("dashboard")}
-            />
-
-            <SectionHeader
-              title={t("categories.title")}
-              titleId="categories-title"
-              eyebrow={t("categories.eyebrow", { count: participantCount })}
-            />
-
-            {votesError ? (
-              <p className="categories__notice">{votesError}</p>
-            ) : null}
-            {isLoadingData ? (
-              <p className="categories__notice" role="status">
-                {t("common.loading")}
-              </p>
-            ) : null}
-            {categoriesError ? (
-              <p className="categories__notice">{categoriesError}</p>
-            ) : null}
-            {!isLoadingData && openCategories.length === 0 ? (
-              <p className="categories__notice">{t("categories.empty")}</p>
-            ) : null}
-
-            <div className="categories__grid">
-              {openCategories.map((category) => {
-                const eligibleParticipants = participants.filter(
-                  (participant) => participant.id !== selectedParticipant!.id,
-                );
-                const selectedVote = selectedVotesByCategory[category.id] ?? "";
-                const hasAlreadyVoted = votes.some(
-                  (vote) =>
-                    vote.voterId === selectedParticipant!.id &&
-                    vote.categoryId === category.id,
-                );
-                const selectedParticipantForVote = eligibleParticipants.find(
-                  (participant) => participant.id === selectedVote,
-                );
-
-                return (
-                  <article className="category-card" key={category.id}>
-                    <div className="category-card__topline">
-                      <span
-                        className={`category-card__status category-card__status--${category.status}`}
-                      >
-                        {statusLabels[category.status]}
-                      </span>
-                    </div>
-                    <h3>{category.title}</h3>
-                    <p>{category.description}</p>
-
-                    {hasAlreadyVoted ? (
-                      <p className="category-card__voted">
-                        {t("categories.alreadyVoted")}
-                      </p>
-                    ) : (
-                      <div className="category-card__vote">
-                        <label htmlFor={`vote-${category.id}`}>
-                          {t("categories.voteTargetLabel")}
-                        </label>
-                        <select
-                          id={`vote-${category.id}`}
-                          value={selectedVote}
-                          onChange={(event) =>
-                            selectVote(category.id, event.target.value)
-                          }
-                        >
-                          <option value="">
-                            {t("categories.selectPerson")}
-                          </option>
-                          {eligibleParticipants.map((participant) => (
-                            <option key={participant.id} value={participant.id}>
-                              {participant.displayName}
-                            </option>
-                          ))}
-                        </select>
-
-                        {selectedVote ? (
-                          <p className="category-card__selected-vote">
-                            <ParticipantName
-                              avatarId={selectedParticipantForVote?.avatarId}
-                              name={
-                                selectedParticipantForVote?.displayName ?? ""
-                              }
-                            />
-                          </p>
-                        ) : null}
-
-                        {selectedVote ? (
-                          <button
-                            className="category-card__submit"
-                            type="button"
-                            disabled={submittingCategoryId === category.id}
-                            onClick={() => submitVote(category.id)}
-                          >
-                            {submittingCategoryId === category.id
-                              ? t("common.saving")
-                              : t("categories.submitVote")}
-                          </button>
-                        ) : null}
-                      </div>
-                    )}
-                  </article>
-                );
-              })}
-            </div>
-          </section>
-        </div>
+        <VotingSection
+          participant={selectedParticipant!}
+          participants={participants}
+          categories={openCategories}
+          votes={votes}
+          selectedVotes={selectedVotesByCategory}
+          statusLabels={statusLabels}
+          participantCount={participantCount}
+          votesError={votesError}
+          categoriesError={categoriesError}
+          isLoading={isLoadingData}
+          submittingCategoryId={submittingCategoryId}
+          onBack={() => navigateMainSection("dashboard")}
+          onSelectVote={selectVote}
+          onSubmitVote={submitVote}
+        />
       ))}
 
       {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "awards"), () => (
-        <div id="main-awards">
-          <section className="results" aria-labelledby="awards-title">
-            <DashboardBackButton
-              onClick={() => navigateMainSection("dashboard")}
-            />
-
-            <SectionHeader
-              title={t("awards.title")}
-              titleId="awards-title"
-              eyebrow={t("awards.eyebrow")}
-              description={t("awards.description")}
-            />
-          </section>
-
-          <section
-            className="results"
-            id="ergebnisse"
-            aria-labelledby="results-title"
-          >
-            <SectionHeader
-              title={t("results.title")}
-              titleId="results-title"
-              eyebrow={t("results.eyebrow")}
-            />
-
-            {resultsError ? (
-              <p className="results__notice">{resultsError}</p>
-            ) : null}
-
-            {!hasVotes ? (
-              <p className="results__notice">{t("results.empty")}</p>
-            ) : (
-              <div className="results__grid">
-                {resultsByCategory.map(
-                  ({ category, results, highestVoteCount }) => (
-                    <ResultCard
-                      category={category}
-                      results={results}
-                      highestVoteCount={highestVoteCount}
-                      key={`${category.id}-${category.status}`}
-                    />
-                  ),
-                )}
-              </div>
-            )}
-          </section>
-
-          <section
-            className="standings"
-            id="gesamtclassement"
-            aria-labelledby="standings-title"
-          >
-            <SectionHeader
-              title={t("standings.title")}
-              titleId="standings-title"
-              eyebrow={t("standings.eyebrow")}
-            />
-
-            {isStandingsLoading ? (
-              <p className="standings__notice" role="status">
-                {t("standings.loading")}
-              </p>
-            ) : standingsError ? (
-              <p
-                className="standings__notice standings__notice--error"
-                role="alert"
-              >
-                {standingsError}
-              </p>
-            ) : allTimeStandings.length === 0 ? (
-              <p className="standings__notice">{t("standings.empty")}</p>
-            ) : (
-              <div
-                className="standings__table"
-                role="table"
-                aria-label={t("standings.title")}
-              >
-                <div className="standings__columns" role="row">
-                  <span role="columnheader">{t("standings.columns.rank")}</span>
-                  <span role="columnheader">{t("standings.columns.name")}</span>
-                  <span role="columnheader">
-                    {t("standings.columns.points")}
-                  </span>
-                </div>
-                <ol>
-                  {allTimeStandings.map((standing, index) => (
-                    <li key={standing.participantId} role="row">
-                      <span
-                        className="standings__rank"
-                        role="cell"
-                        aria-label={t("standings.rankLabel", {
-                          rank: index + 1,
-                        })}
-                      >
-                        {index + 1}
-                      </span>
-                      <strong role="cell">{standing.participantName}</strong>
-                      <span className="standings__points" role="cell">
-                        {standing.totalPoints}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            )}
-          </section>
-        </div>
+        <AwardsSection
+          resultsError={resultsError}
+          hasVotes={hasVotes}
+          results={resultsByCategory}
+          isStandingsLoading={isStandingsLoading}
+          standingsError={standingsError}
+          standings={allTimeStandings}
+          onBack={() => navigateMainSection("dashboard")}
+        />
       ))}
       <AppFooter />
     </main>
