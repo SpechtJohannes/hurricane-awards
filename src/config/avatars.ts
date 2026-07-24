@@ -11,7 +11,9 @@ const avatarImages = import.meta.glob("../assets/avatars/*.svg", {
   query: "?url",
   import: "default",
 }) as Record<string, string>;
-const avatarImagePaths = Object.keys(avatarImages).sort();
+const avatarImagePaths = Object.keys(avatarImages).sort((first, second) =>
+  first.localeCompare(second),
+);
 
 const avatarDefinitions = [
   { id: "camp-sunrise", label: "Camp Sunrise" },

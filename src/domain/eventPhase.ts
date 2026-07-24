@@ -43,7 +43,9 @@ export function determineEventPhase(
 export function eventDateRangeFromDays(
   dates: ReadonlyArray<string>,
 ): EventDateRange {
-  const sortedDates = dates.filter((date) => validDate(date)).sort();
+  const sortedDates = dates
+    .filter((date) => validDate(date))
+    .sort((first, second) => first.localeCompare(second));
   return {
     startDate: sortedDates[0] ?? null,
     endDate: sortedDates.at(-1) ?? null,

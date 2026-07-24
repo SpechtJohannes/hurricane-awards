@@ -59,6 +59,13 @@ describe("determineEventPhase", () => {
     ).toEqual({ startDate: "2026-06-19", endDate: "2026-06-21" });
   });
 
+  it("keeps identical date-only boundaries", () => {
+    expect(eventDateRangeFromDays(["2026-06-19", "2026-06-19"])).toEqual({
+      startDate: "2026-06-19",
+      endDate: "2026-06-19",
+    });
+  });
+
   it("uses the configured timezone at calendar-day boundaries", () => {
     expect(
       determineEventPhase(
