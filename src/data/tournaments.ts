@@ -400,6 +400,82 @@ export async function deleteTournament(
   }
 }
 
+function resolveMatchParticipantIds(
+  match: TournamentBracketMatch,
+  winners: Map<string, string>,
+) {
+  return [match.participantA, match.participantB].map(
+    (slot) =>
+      slot.participant?.participantId ??
+      winners.get(slot.sourceMatchId ?? "") ??
+      null,
+  );
+}
+
+function setChangedMatchWinner(
+  match: TournamentBracketMatch,
+  participantIds: Array<string | null>,
+  winnerParticipantId: string,
+) {
+  if (!participantIds.includes(winnerParticipantId)) {
+    throw new Error("winner must participate in the match");
+  }
+
+  match.winnerParticipantId = winnerParticipantId;
+  match.winnerResolution = "manual";
+}
+
+function updateUnchangedMatch(
+  match: TournamentBracketMatch,
+  participantIds: Array<string | null>,
+) {
+  const realParticipants = participantIds.filter(
+    (participantId): participantId is string => participantId !== null,
+  );
+
+  if (realParticipants.length === 1) {
+    match.winnerParticipantId = realParticipants[0];
+    match.winnerResolution = "automatic";
+    return;
+  }
+
+  const winnerIsInvalid =
+    match.winnerParticipantId !== null &&
+    !realParticipants.includes(match.winnerParticipantId);
+  const shouldClearWinner =
+    realParticipants.length === 0 ||
+    match.winnerResolution === "automatic" ||
+    winnerIsInvalid;
+
+  if (shouldClearWinner) {
+    match.winnerParticipantId = null;
+    match.winnerResolution = null;
+  }
+}
+
+function updateMatchState(
+  match: TournamentBracketMatch,
+  changedMatchId: string,
+  winnerParticipantId: string,
+  winners: Map<string, string>,
+) {
+  const participantIds = resolveMatchParticipantIds(match, winners);
+  const isChangedMatch = match.id === changedMatchId;
+
+  if (isChangedMatch) {
+    setChangedMatchWinner(match, participantIds, winnerParticipantId);
+  } else {
+    updateUnchangedMatch(match, participantIds);
+  }
+
+  match.status = match.winnerParticipantId ? "completed" : "scheduled";
+  if (match.winnerParticipantId) {
+    winners.set(match.id, match.winnerParticipantId);
+  }
+
+  return isChangedMatch;
+}
+
 export function recalculateTournamentBracket(
   bracket: TournamentBracket,
   changedMatchId: string,
@@ -411,43 +487,13 @@ export function recalculateTournamentBracket(
 
   for (const round of recalculated.rounds) {
     for (const match of round.matches) {
-      const participantIds = [match.participantA, match.participantB].map(
-        (slot) =>
-          slot.participant?.participantId ??
-          winners.get(slot.sourceMatchId ?? "") ??
-          null,
-      );
-
-      if (match.id === changedMatchId) {
-        if (!participantIds.includes(winnerParticipantId)) {
-          throw new Error("winner must participate in the match");
-        }
-        changedMatchFound = true;
-        match.winnerParticipantId = winnerParticipantId;
-        match.winnerResolution = "manual";
-      } else {
-        const realParticipants = participantIds.filter(
-          (participantId): participantId is string => participantId !== null,
-        );
-
-        if (realParticipants.length === 1) {
-          match.winnerParticipantId = realParticipants[0];
-          match.winnerResolution = "automatic";
-        } else if (
-          realParticipants.length === 0 ||
-          match.winnerResolution === "automatic" ||
-          (match.winnerParticipantId !== null &&
-            !realParticipants.includes(match.winnerParticipantId))
-        ) {
-          match.winnerParticipantId = null;
-          match.winnerResolution = null;
-        }
-      }
-
-      match.status = match.winnerParticipantId ? "completed" : "scheduled";
-      if (match.winnerParticipantId) {
-        winners.set(match.id, match.winnerParticipantId);
-      }
+      changedMatchFound =
+        updateMatchState(
+          match,
+          changedMatchId,
+          winnerParticipantId,
+          winners,
+        ) || changedMatchFound;
     }
   }
 
