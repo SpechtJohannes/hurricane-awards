@@ -1699,7 +1699,7 @@ function VotingCategory({
   isSubmitting,
   onSelectVote,
   onSubmitVote,
-}: {
+}: Readonly<{
   category: Category;
   eligibleParticipants: Participant[];
   selectedVote: string;
@@ -1709,7 +1709,7 @@ function VotingCategory({
   isSubmitting: boolean;
   onSelectVote: (participantId: string) => void;
   onSubmitVote: () => void;
-}) {
+}>) {
   const { t } = useTranslation();
 
   return (
@@ -1731,7 +1731,7 @@ function VotingCategory({
   );
 }
 
-function VotingSection(props: VotingSectionProps) {
+function VotingSection(props: Readonly<VotingSectionProps>) {
   const { t } = useTranslation();
   const eligibleParticipants = props.participants.filter(
     (participant) => participant.id !== props.participant.id,
@@ -1743,7 +1743,7 @@ function VotingSection(props: VotingSectionProps) {
         <DashboardBackButton onClick={props.onBack} />
         <SectionHeader title={t("categories.title")} titleId="categories-title" eyebrow={t("categories.eyebrow", { count: props.participantCount })} />
         {props.votesError ? <p className="categories__notice">{props.votesError}</p> : null}
-        {props.isLoading ? <p className="categories__notice" role="status">{t("common.loading")}</p> : null}
+        {props.isLoading ? <output className="categories__notice">{t("common.loading")}</output> : null}
         {props.categoriesError ? <p className="categories__notice">{props.categoriesError}</p> : null}
         {!props.isLoading && props.categories.length === 0 ? <p className="categories__notice">{t("categories.empty")}</p> : null}
         <div className="categories__grid">
@@ -1770,9 +1770,9 @@ function VotingSection(props: VotingSectionProps) {
   );
 }
 
-function StandingsContent({ isLoading, error, standings }: { isLoading: boolean; error: string; standings: AllTimeStanding[] }) {
+function StandingsContent({ isLoading, error, standings }: Readonly<{ isLoading: boolean; error: string; standings: AllTimeStanding[] }>) {
   const { t } = useTranslation();
-  if (isLoading) return <p className="standings__notice" role="status">{t("standings.loading")}</p>;
+  if (isLoading) return <output className="standings__notice">{t("standings.loading")}</output>;
   if (error) return <p className="standings__notice standings__notice--error" role="alert">{error}</p>;
   if (standings.length === 0) return <p className="standings__notice">{t("standings.empty")}</p>;
   return (
@@ -1783,7 +1783,7 @@ function StandingsContent({ isLoading, error, standings }: { isLoading: boolean;
   );
 }
 
-function AwardsSection({ resultsError, hasVotes, results, isStandingsLoading, standingsError, standings, onBack }: { resultsError: string; hasVotes: boolean; results: CategoryResults[]; isStandingsLoading: boolean; standingsError: string; standings: AllTimeStanding[]; onBack: () => void }) {
+function AwardsSection({ resultsError, hasVotes, results, isStandingsLoading, standingsError, standings, onBack }: Readonly<{ resultsError: string; hasVotes: boolean; results: CategoryResults[]; isStandingsLoading: boolean; standingsError: string; standings: AllTimeStanding[]; onBack: () => void }>) {
   const { t } = useTranslation();
   return (
     <div id="main-awards">

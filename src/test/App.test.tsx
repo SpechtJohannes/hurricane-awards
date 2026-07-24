@@ -3418,6 +3418,54 @@ describe("Login", () => {
 });
 
 describe("Kategorien", () => {
+  it("zeigt den Ladezustand semantisch als output", async () => {
+    mockLoadedData();
+    let resolveCategories!: (value: Category[]) => void;
+    vi.mocked(loadCategories).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveCategories = resolve;
+        }),
+    );
+
+    localStorage.setItem(
+      festivalAccessStorageKey,
+      JSON.stringify({ version: festivalAccessVersion }),
+    );
+    sessionStorage.setItem(
+      "hurricane-awards:hurricane-awards-2026:participant",
+      JSON.stringify(participants[0]),
+    );
+    window.location.hash = "#voting";
+    render(<App />);
+
+    await screen.findByRole("heading", { name: /^abstimmungen$/i });
+    const votingSection = sectionForHeading(/^abstimmungen$/i);
+    const loadingOutput = votingSection.querySelector("output");
+    expect(loadingOutput).toHaveTextContent(/lade/i);
+
+    resolveCategories(categories);
+    await waitFor(() => {
+      expect(votingSection.querySelector("output")).not.toBeInTheDocument();
+    });
+  });
+
+  it("zeigt Ladefehler für Kategorien und Stimmen", async () => {
+    mockLoadedData();
+    vi.mocked(loadCategories).mockRejectedValue(new Error("offline"));
+
+    await renderLoadedApp();
+    await loginWith("ALICE42");
+
+    const votingSection = sectionForHeading(/abstimmung/i);
+    expect(
+      within(votingSection).getByText(/kategorien konnten gerade nicht geladen/i),
+    ).toBeVisible();
+    expect(
+      within(votingSection).getByText(/bisherigen stimmen konnten nicht geladen/i),
+    ).toBeVisible();
+  });
+
   it("zeigt einen Hinweis, wenn keine aktiven Abstimmungen vorhanden sind", async () => {
     mockLoadedData({
       loadedCategories: categories.filter(
@@ -3592,6 +3640,51 @@ describe("Ergebnisse", () => {
 });
 
 describe("Ewige Tabelle", () => {
+  it("zeigt den Ladezustand semantisch als output", async () => {
+    mockLoadedData();
+    let resolveStandings!: (value: AllTimeStanding[]) => void;
+    vi.mocked(loadAllTimeStandings).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveStandings = resolve;
+        }),
+    );
+
+    localStorage.setItem(
+      festivalAccessStorageKey,
+      JSON.stringify({ version: festivalAccessVersion }),
+    );
+    sessionStorage.setItem(
+      "hurricane-awards:hurricane-awards-2026:participant",
+      JSON.stringify(participants[0]),
+    );
+    window.location.hash = "#awards";
+    render(<App />);
+
+    await screen.findByRole("heading", { name: /gesamtclassement/i });
+    const standingsSection = sectionForHeading(/gesamtclassement/i);
+    expect(standingsSection.querySelector("output")).toHaveTextContent(/lade/i);
+
+    resolveStandings(standings);
+    await waitFor(() => {
+      expect(standingsSection.querySelector("output")).not.toBeInTheDocument();
+    });
+    expect(within(standingsSection).getByText("Bob")).toBeVisible();
+  });
+
+  it("zeigt einen Fehler beim Laden der Rangliste", async () => {
+    mockLoadedData();
+    vi.mocked(loadAllTimeStandings).mockRejectedValue(new Error("offline"));
+
+    await renderLoadedApp();
+    await loginWith("ALICE42");
+    await switchMainSection(/awards/i);
+
+    expect(
+      within(sectionForHeading(/gesamtclassement/i)).getByRole("alert"),
+    ).toHaveTextContent(/gesamtclassement konnte gerade nicht geladen/i);
+  });
+
   it("laedt und zeigt Daten in geladener Rangfolge", async () => {
     await renderLoadedApp();
     await loginWith("ALICE42");
