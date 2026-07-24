@@ -1385,6 +1385,252 @@ function TimetableSection({
   );
 }
 
+type GamesSectionProps = {
+  activeSection: GameSection;
+  bingoCard: BingoCard | null;
+  bingoError: string;
+  togglingBingoNumber: number | null;
+  horseRacingState: HorseRacingState | null;
+  horseRacingError: string;
+  savingHorseRacingSuit: HorseRacingSuit | null;
+  randomPairingAssignments: RandomPairingParticipantAssignment[];
+  randomPairingsError: string;
+  tournaments: Tournament[];
+  tournamentsError: string;
+  isLoading: boolean;
+  onBack: () => void;
+  onSelectSection: (section: GameSection) => void;
+  onToggleBingoNumber: (number: number) => Promise<void>;
+  onSelectHorseRacingSuit: (suit: HorseRacingSuit) => Promise<void>;
+};
+
+function GameTab({
+  section,
+  activeSection,
+  isDisabled = false,
+  label,
+  onSelect,
+}: {
+  section: GameSection;
+  activeSection: GameSection;
+  isDisabled?: boolean;
+  label: string;
+  onSelect: (section: GameSection) => void;
+}) {
+  const isActive = activeSection === section;
+  const className = `games__tab${isActive ? " is-active" : ""}${
+    isDisabled ? " games__tab--disabled" : ""
+  }`;
+
+  return (
+    <button
+      className={className}
+      type="button"
+      aria-current={isActive ? "page" : undefined}
+      onClick={() => onSelect(section)}
+    >
+      {label}
+    </button>
+  );
+}
+
+function GamesContent({
+  activeSection,
+  bingoCard,
+  bingoError,
+  togglingBingoNumber,
+  horseRacingState,
+  horseRacingError,
+  savingHorseRacingSuit,
+  randomPairingAssignments,
+  randomPairingsError,
+  tournaments,
+  tournamentsError,
+  isLoading,
+  onToggleBingoNumber,
+  onSelectHorseRacingSuit,
+}: Omit<GamesSectionProps, "onBack" | "onSelectSection">) {
+  const { t } = useTranslation();
+
+  if (activeSection === "bingo") {
+    if (!bingoCard) return <p className="games__notice">{t("games.empty")}</p>;
+    return <Bingo card={bingoCard} error={bingoError} togglingNumber={togglingBingoNumber} onToggleNumber={onToggleBingoNumber} />;
+  }
+  if (activeSection === "horseRacing") {
+    return <HorseRacing state={horseRacingState} error={horseRacingError} isSaving={savingHorseRacingSuit !== null} onSelectSuit={onSelectHorseRacingSuit} />;
+  }
+  if (activeSection === "randomPairings") {
+    return <RandomPairings assignments={randomPairingAssignments} error={randomPairingsError} isLoading={isLoading} />;
+  }
+  return <Tournaments tournaments={tournaments} error={tournamentsError} isLoading={isLoading} />;
+}
+
+function GamesSection(props: GamesSectionProps) {
+  const { t } = useTranslation();
+
+  return (
+    <section className="games" id="main-games" aria-labelledby="games-title">
+      <DashboardBackButton onClick={props.onBack} width="narrow" />
+      <SectionHeader title={t("games.title")} titleId="games-title" eyebrow={t("games.eyebrow")} description={t("games.description")} width="narrow" />
+      <nav className="games__navigation" aria-label={t("games.navigationLabel")}>
+        <GameTab section="bingo" activeSection={props.activeSection} label={t("games.bingo")} onSelect={props.onSelectSection} />
+        <GameTab section="horseRacing" activeSection={props.activeSection} isDisabled={!props.horseRacingState?.isEnabled} label={t("games.horseRacing")} onSelect={props.onSelectSection} />
+        <GameTab section="randomPairings" activeSection={props.activeSection} label={t("games.randomPairings")} onSelect={props.onSelectSection} />
+        <GameTab section="tournaments" activeSection={props.activeSection} label={t("games.tournaments")} onSelect={props.onSelectSection} />
+      </nav>
+      <GamesContent {...props} />
+    </section>
+  );
+}
+
+function assignedArtistTags(tags: ActArtistTag[], language: string): ArtistTag[] {
+  return Array.from(
+    new Map(tags.map((tag) => [tag.id, { id: tag.id, name: tag.name }])).values(),
+  ).sort((first, second) =>
+    first.name.localeCompare(second.name, language, { sensitivity: "base" }),
+  );
+}
+
+type ProfileSectionProps = {
+  selectedParticipant: Participant | null;
+  profileAvatarId: string | null;
+  profileDisplayName: string;
+  isSavingProfile: boolean;
+  isAvatarPickerExpanded: boolean;
+  profileError: string;
+  profileSuccess: string;
+  hasProfileChanges: boolean;
+  availableTags: ArtistTag[];
+  selectedPreferenceTagIds: ReadonlySet<string>;
+  arePreferencesLoading: boolean;
+  arePreferencesSaving: boolean;
+  preferencesLoadError: string;
+  preferencesSaveError: string;
+  preferencesSuccess: string;
+  participantsError: string;
+  accessCode: string;
+  accessCodeError: string;
+  isSubmittingAccessCode: boolean;
+  isLoginLocked: boolean;
+  loginLockRemainingSeconds: number;
+  onBack: () => void;
+  onLogout: () => void;
+  onSaveProfile: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  onProfileNameChange: (name: string) => void;
+  onToggleAvatarPicker: () => void;
+  onSelectAvatar: (avatarId: string) => void;
+  onTogglePreference: (tagId: string) => void;
+  onResetPreferences: () => void;
+  onSavePreferences: () => Promise<void>;
+  onSubmitAccessCode: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  onAccessCodeChange: (code: string) => void;
+};
+
+function AvatarPicker({
+  selectedAvatarId,
+  displayName,
+  isExpanded,
+  isSaving,
+  onToggle,
+  onSelect,
+}: {
+  selectedAvatarId: string | null;
+  displayName: string;
+  isExpanded: boolean;
+  isSaving: boolean;
+  onToggle: () => void;
+  onSelect: (avatarId: string) => void;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="avatar-picker">
+      <button className="avatar-picker__toggle" type="button" aria-expanded={isExpanded} aria-controls="avatar-picker-options" onClick={onToggle} disabled={isSaving}>
+        <span className="avatar-picker__toggle-current">
+          <Avatar avatarId={selectedAvatarId} name={displayName} size="medium" />
+          <span><strong>{t("identity.avatar.title")}</strong><small>{t("identity.avatar.toggleHint")}</small></span>
+        </span>
+        <span aria-hidden="true">{isExpanded ? "−" : "+"}</span>
+      </button>
+      {isExpanded ? (
+        <div id="avatar-picker-options" className="avatar-picker__panel" aria-labelledby="avatar-picker-title">
+          <div className="avatar-picker__header"><h4 id="avatar-picker-title">{t("identity.avatar.title")}</h4><p>{t("identity.avatar.description")}</p></div>
+          <div className="avatar-picker__grid">
+            {avatars.map((avatar) => {
+              const isSelected = avatar.id === selectedAvatarId;
+              return (
+                <button className={`avatar-picker__option${isSelected ? " is-selected" : ""}`} type="button" key={avatar.id} onClick={() => onSelect(avatar.id)} disabled={isSaving} aria-pressed={isSelected} aria-label={t("identity.avatar.selectLabel", { avatar: avatar.label })}>
+                  <Avatar avatarId={avatar.id} name={avatar.label} size="large" />
+                  <span>{avatar.label}</span>
+                  {isSelected ? <span className="avatar-picker__selected-badge">{t("identity.avatar.selected")}</span> : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function AuthenticatedProfile(props: ProfileSectionProps & { participant: Participant }) {
+  const { t } = useTranslation();
+  const displayName = props.profileDisplayName.trim() || props.participant.displayName;
+
+  return (
+    <>
+      <SectionHeader title={t("identity.profileTitle")} titleId="identity-title" description={t("identity.profileDescription")} />
+      <div className="identity__selected identity__profile-card">
+        <Avatar avatarId={props.profileAvatarId} name={displayName} size="large" />
+        <div className="identity__profile-copy"><p>{t("identity.loggedInAs")}</p><h3>{props.participant.displayName}</h3></div>
+        <button className="identity__change" type="button" onClick={props.onLogout}>{t("identity.logout")}</button>
+      </div>
+      <form className="profile-editor" onSubmit={props.onSaveProfile}>
+        <h3>{t("identity.profile.editTitle")}</h3>
+        <label htmlFor="profile-display-name">{t("identity.profile.displayName")}</label>
+        <input id="profile-display-name" type="text" value={props.profileDisplayName} maxLength={50} disabled={props.isSavingProfile} onChange={(event) => props.onProfileNameChange(event.target.value)} />
+        <AvatarPicker selectedAvatarId={props.profileAvatarId} displayName={displayName} isExpanded={props.isAvatarPickerExpanded} isSaving={props.isSavingProfile} onToggle={props.onToggleAvatarPicker} onSelect={props.onSelectAvatar} />
+        {props.profileError ? <p className="identity__error" role="alert">{props.profileError}</p> : null}
+        {props.profileSuccess ? <p className="profile-editor__success" role="status">{props.profileSuccess}</p> : null}
+        <button className="identity__submit profile-editor__submit" type="submit" disabled={props.isSavingProfile || !props.hasProfileChanges}>
+          {props.isSavingProfile ? t("identity.profile.saving") : t("identity.profile.save")}
+        </button>
+      </form>
+      <MusicalPreferences availableTags={props.availableTags} selectedTagIds={props.selectedPreferenceTagIds} isLoading={props.arePreferencesLoading} isSaving={props.arePreferencesSaving} loadError={props.preferencesLoadError} saveError={props.preferencesSaveError} success={props.preferencesSuccess} onToggle={props.onTogglePreference} onReset={props.onResetPreferences} onSave={props.onSavePreferences} />
+      {props.participantsError ? <p className="identity__error">{props.participantsError}</p> : null}
+    </>
+  );
+}
+
+function ParticipantLogin(props: ProfileSectionProps) {
+  const { t } = useTranslation();
+  const isDisabled = props.isSubmittingAccessCode || props.isLoginLocked;
+
+  return (
+    <>
+      <SectionHeader title={t("identity.loginTitle")} titleId="identity-title" description={t("identity.loginDescription")} />
+      <form className="identity__form" onSubmit={props.onSubmitAccessCode}>
+        <label htmlFor="participant-access-code">{t("identity.participantCodeLabel")}</label>
+        <input id="participant-access-code" type="text" value={props.accessCode} disabled={isDisabled} onChange={(event) => props.onAccessCodeChange(event.target.value)} autoComplete="off" inputMode="text" placeholder={t("identity.participantCodePlaceholder")} />
+        {props.accessCodeError ? <p className="identity__error">{props.accessCodeError}</p> : null}
+        {props.isLoginLocked ? <p className="identity__error" role="status">{t("identity.locked", { seconds: props.loginLockRemainingSeconds })}</p> : null}
+        <button className="identity__submit" type="submit" disabled={isDisabled}>{props.isSubmittingAccessCode ? t("common.loading") : t("identity.submit")}</button>
+      </form>
+    </>
+  );
+}
+
+function ProfileSection(props: ProfileSectionProps) {
+  return (
+    <section className="identity" id="main-profile" aria-labelledby="identity-title">
+      <div className="identity__content">
+        <DashboardBackButton onClick={props.onBack} />
+        {props.selectedParticipant ? <AuthenticatedProfile {...props} participant={props.selectedParticipant} /> : <ParticipantLogin {...props} />}
+      </div>
+    </section>
+  );
+}
+
 type FestivalAccessProps = {
   festivalName: string;
   onUnlock: (code: string) => Promise<boolean>;
@@ -5020,348 +5266,78 @@ function App() {
       ))}
 
       {renderWhen(activeMainSection === "profile", () => (
-        <section
-          className="identity"
-          id="main-profile"
-          aria-labelledby="identity-title"
-        >
-          <div className="identity__content">
-            <DashboardBackButton
-              onClick={() => navigateMainSection("dashboard")}
-            />
-
-            {selectedParticipant ? (
-              <>
-                <SectionHeader
-                  title={t("identity.profileTitle")}
-                  titleId="identity-title"
-                  description={t("identity.profileDescription")}
-                />
-
-                <div className="identity__selected identity__profile-card">
-                  <Avatar
-                    avatarId={profileAvatarId}
-                    name={
-                      profileDisplayName.trim() ||
-                      selectedParticipant.displayName
-                    }
-                    size="large"
-                  />
-                  <div className="identity__profile-copy">
-                    <p>{t("identity.loggedInAs")}</p>
-                    <h3>{selectedParticipant.displayName}</h3>
-                  </div>
-                  <button
-                    className="identity__change"
-                    type="button"
-                    onClick={logout}
-                  >
-                    {t("identity.logout")}
-                  </button>
-                </div>
-
-                <form className="profile-editor" onSubmit={saveOwnProfile}>
-                  <h3>{t("identity.profile.editTitle")}</h3>
-
-                  <label htmlFor="profile-display-name">
-                    {t("identity.profile.displayName")}
-                  </label>
-                  <input
-                    id="profile-display-name"
-                    type="text"
-                    value={profileDisplayName}
-                    maxLength={50}
-                    disabled={isSavingProfile}
-                    onChange={(event) => {
-                      setProfileDisplayName(event.target.value);
-                      setProfileError("");
-                      setProfileSuccess("");
-                    }}
-                  />
-
-                  <div className="avatar-picker">
-                    <button
-                      className="avatar-picker__toggle"
-                      type="button"
-                      aria-expanded={isAvatarPickerExpanded}
-                      aria-controls="avatar-picker-options"
-                      onClick={() =>
-                        setIsAvatarPickerExpanded((isExpanded) => !isExpanded)
-                      }
-                      disabled={isSavingProfile}
-                    >
-                      <span className="avatar-picker__toggle-current">
-                        <Avatar
-                          avatarId={profileAvatarId}
-                          name={
-                            profileDisplayName.trim() ||
-                            selectedParticipant.displayName
-                          }
-                          size="medium"
-                        />
-                        <span>
-                          <strong>{t("identity.avatar.title")}</strong>
-                          <small>{t("identity.avatar.toggleHint")}</small>
-                        </span>
-                      </span>
-                      <span aria-hidden="true">
-                        {isAvatarPickerExpanded ? "−" : "+"}
-                      </span>
-                    </button>
-
-                    {isAvatarPickerExpanded ? (
-                      <div
-                        id="avatar-picker-options"
-                        className="avatar-picker__panel"
-                        aria-labelledby="avatar-picker-title"
-                      >
-                        <div className="avatar-picker__header">
-                          <h4 id="avatar-picker-title">
-                            {t("identity.avatar.title")}
-                          </h4>
-                          <p>{t("identity.avatar.description")}</p>
-                        </div>
-                        <div className="avatar-picker__grid">
-                          {avatars.map((avatar) => {
-                            const isSelected = avatar.id === profileAvatarId;
-
-                            return (
-                              <button
-                                className={`avatar-picker__option${
-                                  isSelected ? " is-selected" : ""
-                                }`}
-                                type="button"
-                                key={avatar.id}
-                                onClick={() => {
-                                  setProfileAvatarId(avatar.id);
-                                  setProfileError("");
-                                  setProfileSuccess("");
-                                  setIsAvatarPickerExpanded(false);
-                                }}
-                                disabled={isSavingProfile}
-                                aria-pressed={isSelected}
-                                aria-label={t("identity.avatar.selectLabel", {
-                                  avatar: avatar.label,
-                                })}
-                              >
-                                <Avatar
-                                  avatarId={avatar.id}
-                                  name={avatar.label}
-                                  size="large"
-                                />
-                                <span>{avatar.label}</span>
-                                {isSelected ? (
-                                  <span className="avatar-picker__selected-badge">
-                                    {t("identity.avatar.selected")}
-                                  </span>
-                                ) : null}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-
-                  {profileError ? (
-                    <p className="identity__error" role="alert">
-                      {profileError}
-                    </p>
-                  ) : null}
-                  {profileSuccess ? (
-                    <p className="profile-editor__success" role="status">
-                      {profileSuccess}
-                    </p>
-                  ) : null}
-
-                  <button
-                    className="identity__submit profile-editor__submit"
-                    type="submit"
-                    disabled={isSavingProfile || !hasProfileChanges}
-                  >
-                    {isSavingProfile
-                      ? t("identity.profile.saving")
-                      : t("identity.profile.save")}
-                  </button>
-                </form>
-
-                <MusicalPreferences
-                  availableTags={Array.from(new Map(actArtistTags.map((tag) => [tag.id, { id: tag.id, name: tag.name }])).values()).sort((a, b) => a.name.localeCompare(b.name, i18n.language, { sensitivity: "base" }))}
-                  selectedTagIds={selectedPreferenceTagIds}
-                  isLoading={arePreferencesLoading}
-                  isSaving={arePreferencesSaving}
-                  loadError={preferencesLoadError}
-                  saveError={preferencesSaveError}
-                  success={preferencesSuccess}
-                  onToggle={togglePreference}
-                  onReset={() => { setSelectedPreferenceTagIds(new Set()); setPreferencesSuccess(""); }}
-                  onSave={savePreferences}
-                />
-
-                {participantsError ? (
-                  <p className="identity__error">{participantsError}</p>
-                ) : null}
-              </>
-            ) : (
-              <>
-                <SectionHeader
-                  title={t("identity.loginTitle")}
-                  titleId="identity-title"
-                  description={t("identity.loginDescription")}
-                />
-
-                <form className="identity__form" onSubmit={submitAccessCode}>
-                  <label htmlFor="participant-access-code">
-                    {t("identity.participantCodeLabel")}
-                  </label>
-                  <input
-                    id="participant-access-code"
-                    type="text"
-                    value={accessCode}
-                    disabled={isSubmittingAccessCode || isLoginLocked}
-                    onChange={(event) => {
-                      setAccessCode(event.target.value);
-                      setAccessCodeError("");
-                    }}
-                    autoComplete="off"
-                    inputMode="text"
-                    placeholder={t("identity.participantCodePlaceholder")}
-                  />
-                  {accessCodeError ? (
-                    <p className="identity__error">{accessCodeError}</p>
-                  ) : null}
-                  {isLoginLocked ? (
-                    <p className="identity__error" role="status">
-                      {t("identity.locked", {
-                        seconds: loginLockRemainingSeconds,
-                      })}
-                    </p>
-                  ) : null}
-                  <button
-                    className="identity__submit"
-                    type="submit"
-                    disabled={isSubmittingAccessCode || isLoginLocked}
-                  >
-                    {isSubmittingAccessCode
-                      ? t("common.loading")
-                      : t("identity.submit")}
-                  </button>
-                </form>
-              </>
-            )}
-          </div>
-        </section>
+        <ProfileSection
+          selectedParticipant={selectedParticipant}
+          profileAvatarId={profileAvatarId}
+          profileDisplayName={profileDisplayName}
+          isSavingProfile={isSavingProfile}
+          isAvatarPickerExpanded={isAvatarPickerExpanded}
+          profileError={profileError}
+          profileSuccess={profileSuccess}
+          hasProfileChanges={hasProfileChanges}
+          availableTags={assignedArtistTags(actArtistTags, i18n.language)}
+          selectedPreferenceTagIds={selectedPreferenceTagIds}
+          arePreferencesLoading={arePreferencesLoading}
+          arePreferencesSaving={arePreferencesSaving}
+          preferencesLoadError={preferencesLoadError}
+          preferencesSaveError={preferencesSaveError}
+          preferencesSuccess={preferencesSuccess}
+          participantsError={participantsError}
+          accessCode={accessCode}
+          accessCodeError={accessCodeError}
+          isSubmittingAccessCode={isSubmittingAccessCode}
+          isLoginLocked={isLoginLocked}
+          loginLockRemainingSeconds={loginLockRemainingSeconds}
+          onBack={() => navigateMainSection("dashboard")}
+          onLogout={logout}
+          onSaveProfile={saveOwnProfile}
+          onProfileNameChange={(name) => {
+            setProfileDisplayName(name);
+            setProfileError("");
+            setProfileSuccess("");
+          }}
+          onToggleAvatarPicker={() =>
+            setIsAvatarPickerExpanded((isExpanded) => !isExpanded)
+          }
+          onSelectAvatar={(avatarId) => {
+            setProfileAvatarId(avatarId);
+            setProfileError("");
+            setProfileSuccess("");
+            setIsAvatarPickerExpanded(false);
+          }}
+          onTogglePreference={togglePreference}
+          onResetPreferences={() => {
+            setSelectedPreferenceTagIds(new Set());
+            setPreferencesSuccess("");
+          }}
+          onSavePreferences={savePreferences}
+          onSubmitAccessCode={submitAccessCode}
+          onAccessCodeChange={(code) => {
+            setAccessCode(code);
+            setAccessCodeError("");
+          }}
+        />
       ))}
 
       {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "games"), () => (
-        <section
-          className="games"
-          id="main-games"
-          aria-labelledby="games-title"
-        >
-          <DashboardBackButton
-            onClick={() => navigateMainSection("dashboard")}
-            width="narrow"
-          />
-
-          <SectionHeader
-            title={t("games.title")}
-            titleId="games-title"
-            eyebrow={t("games.eyebrow")}
-            description={t("games.description")}
-            width="narrow"
-          />
-
-          <nav
-            className="games__navigation"
-            aria-label={t("games.navigationLabel")}
-          >
-            <button
-              className={`games__tab${
-                activeGameSection === "bingo" ? " is-active" : ""
-              }`}
-              type="button"
-              aria-current={activeGameSection === "bingo" ? "page" : undefined}
-              onClick={() => setActiveGameSection("bingo")}
-            >
-              {t("games.bingo")}
-            </button>
-            <button
-              className={`games__tab${
-                activeGameSection === "horseRacing" ? " is-active" : ""
-              }${horseRacingState?.isEnabled ? "" : " games__tab--disabled"}`}
-              type="button"
-              aria-current={
-                activeGameSection === "horseRacing" ? "page" : undefined
-              }
-              onClick={() => setActiveGameSection("horseRacing")}
-            >
-              {t("games.horseRacing")}
-            </button>
-            <button
-              className={`games__tab${
-                activeGameSection === "randomPairings" ? " is-active" : ""
-              }`}
-              type="button"
-              aria-current={
-                activeGameSection === "randomPairings" ? "page" : undefined
-              }
-              onClick={() => setActiveGameSection("randomPairings")}
-            >
-              {t("games.randomPairings")}
-            </button>
-            <button
-              className={`games__tab${
-                activeGameSection === "tournaments" ? " is-active" : ""
-              }`}
-              type="button"
-              aria-current={
-                activeGameSection === "tournaments" ? "page" : undefined
-              }
-              onClick={() => setActiveGameSection("tournaments")}
-            >
-              {t("games.tournaments")}
-            </button>
-          </nav>
-
-          {activeGameSection === "bingo" && bingoCard ? (
-            <Bingo
-              card={bingoCard}
-              error={bingoError}
-              togglingNumber={togglingBingoNumber}
-              onToggleNumber={toggleBingoNumber}
-            />
-          ) : null}
-
-          {activeGameSection === "bingo" && !bingoCard ? (
-            <p className="games__notice">{t("games.empty")}</p>
-          ) : null}
-
-          {activeGameSection === "horseRacing" ? (
-            <HorseRacing
-              state={horseRacingState}
-              error={horseRacingError}
-              isSaving={savingHorseRacingSuit !== null}
-              onSelectSuit={selectHorseRacingSuit}
-            />
-          ) : null}
-
-          {activeGameSection === "randomPairings" ? (
-            <RandomPairings
-              assignments={randomPairingAssignments}
-              error={randomPairingsError}
-              isLoading={isLoadingData}
-            />
-          ) : null}
-
-          {activeGameSection === "tournaments" ? (
-            <Tournaments
-              tournaments={tournaments}
-              error={tournamentsError}
-              isLoading={isLoadingData}
-            />
-          ) : null}
-        </section>
+        <GamesSection
+          activeSection={activeGameSection}
+          bingoCard={bingoCard}
+          bingoError={bingoError}
+          togglingBingoNumber={togglingBingoNumber}
+          horseRacingState={horseRacingState}
+          horseRacingError={horseRacingError}
+          savingHorseRacingSuit={savingHorseRacingSuit}
+          randomPairingAssignments={randomPairingAssignments}
+          randomPairingsError={randomPairingsError}
+          tournaments={tournaments}
+          tournamentsError={tournamentsError}
+          isLoading={isLoadingData}
+          onBack={() => navigateMainSection("dashboard")}
+          onSelectSection={setActiveGameSection}
+          onToggleBingoNumber={toggleBingoNumber}
+          onSelectHorseRacingSuit={selectHorseRacingSuit}
+        />
       ))}
 
       {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "timetable"), () => (
