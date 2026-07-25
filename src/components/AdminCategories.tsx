@@ -251,9 +251,9 @@ export function AdminCategories({
         ) : null}
 
         {isLoading ? (
-          <p className="admin__notice" role="status">
+          <output className="admin__notice semantic-status">
             {t("admin.categories.loading")}
-          </p>
+          </output>
         ) : (
           <div className="admin-categories__list">
             {categories.map((category) => (

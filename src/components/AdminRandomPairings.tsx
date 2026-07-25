@@ -200,9 +200,9 @@ export function AdminRandomPairings({
         ) : null}
 
         {resetSuccess ? (
-          <p className="admin-random-pairings__notice" role="status">
+          <output className="admin-random-pairings__notice semantic-status">
             {resetSuccess}
-          </p>
+          </output>
         ) : null}
 
         {!isLoading && actions.length === 0 ? (
@@ -338,9 +338,9 @@ export function AdminRandomPairings({
 
       {resetCandidate ? (
         <div className="admin-dialog-backdrop">
-          <div
+          <dialog
             className="admin-dialog"
-            role="dialog"
+            open
             aria-modal="true"
             aria-labelledby="reset-random-pairing-title"
             aria-describedby="reset-random-pairing-description"
@@ -373,7 +373,7 @@ export function AdminRandomPairings({
                   : t("admin.randomPairings.reset.confirm")}
               </button>
             </div>
-          </div>
+          </dialog>
         </div>
       ) : null}
     </>

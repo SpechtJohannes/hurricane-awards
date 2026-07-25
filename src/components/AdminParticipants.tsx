@@ -137,9 +137,9 @@ export function AdminParticipants({
         ) : null}
 
         {isLoading ? (
-          <p className="admin__notice" role="status">
+          <output className="admin__notice semantic-status">
             {t("admin.participants.loading")}
-          </p>
+          </output>
         ) : (
           <div className="admin-participants__list">
             {participants.map((participant) => (

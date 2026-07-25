@@ -217,9 +217,9 @@ export function AdminTimetableDays({
         ) : null}
 
         {isLoading ? (
-          <p className="admin__notice" role="status">
+          <output className="admin__notice semantic-status">
             {t("admin.timetable.days.loading")}
-          </p>
+          </output>
         ) : festivalDays.length === 0 ? (
           <p className="admin__notice">{t("admin.timetable.days.empty")}</p>
         ) : (

@@ -259,9 +259,9 @@ export function AdminTimetableActs({
         ) : null}
 
         {isLoading ? (
-          <p className="admin__notice" role="status">
+          <output className="admin__notice semantic-status">
             {t("admin.timetable.acts.loading")}
-          </p>
+          </output>
         ) : acts.length === 0 ? (
           <p className="admin__notice">{t("admin.timetable.acts.empty")}</p>
         ) : (

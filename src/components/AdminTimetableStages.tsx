@@ -231,9 +231,9 @@ export function AdminTimetableStages({
         ) : null}
 
         {isLoading ? (
-          <p className="admin__notice" role="status">
+          <output className="admin__notice semantic-status">
             {t("admin.timetable.stages.loading")}
-          </p>
+          </output>
         ) : stages.length === 0 ? (
           <p className="admin__notice">{t("admin.timetable.stages.empty")}</p>
         ) : (

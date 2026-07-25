@@ -165,9 +165,9 @@ export function AdminEventLogo({
         </p>
       ) : null}
       {success ? (
-        <p className="admin-festival-actions__success" role="status">
+        <output className="admin-festival-actions__success semantic-status">
           {success}
-        </p>
+        </output>
       ) : null}
     </section>
   );

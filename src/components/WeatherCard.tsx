@@ -28,7 +28,7 @@ export function WeatherCard({ participantAccessCode }: { participantAccessCode: 
   return (
     <article className="dashboard-weather" aria-label={t("dashboard.weather.title")}>
       <span className="dashboard-weather__title">{t("dashboard.weather.title")}</span>
-      {loading ? <p role="status">{t("dashboard.weather.loading")}</p> : null}
+      {loading ? <output className="semantic-status">{t("dashboard.weather.loading")}</output> : null}
       {!loading && (!weather || weather.status === "unavailable") ?
         <p>{t("dashboard.weather.unavailable")}</p> : null}
       {!loading && weather?.status === "missing_location" ?

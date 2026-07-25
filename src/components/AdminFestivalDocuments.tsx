@@ -121,9 +121,9 @@ export function AdminFestivalDocuments({
       ) : null}
 
       {isLoading ? (
-        <p className="admin__notice" role="status">
+        <output className="admin__notice semantic-status">
           {t("admin.documents.loading")}
-        </p>
+        </output>
       ) : null}
 
       <div className="admin-documents">

@@ -148,9 +148,9 @@ function ArtistRecommendations({
 
   if (isLoading || arePreferencesLoading) {
     content = (
-      <p className="artists__notice" role="status">
+      <output className="artists__notice semantic-status">
         {t("artists.recommendations.loading")}
-      </p>
+      </output>
     );
   } else if (preferencesError) {
     content = (
@@ -276,9 +276,9 @@ function ArtistList({
 
   if (artists.length === 0) {
     return (
-      <p className="artists__notice" role="status">
+      <output className="artists__notice semantic-status">
         {t("artists.noResults")}
-      </p>
+      </output>
     );
   }
 
@@ -340,7 +340,7 @@ function ArtistsBody({
   const { t } = useTranslation();
 
   if (isLoading) {
-    return <p className="artists__notice" role="status">{t("artists.loading")}</p>;
+    return <output className="artists__notice semantic-status">{t("artists.loading")}</output>;
   }
   if (error) {
     return <p className="artists__notice artists__notice--error" role="alert">{error}</p>;
