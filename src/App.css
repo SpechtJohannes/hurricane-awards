@@ -721,7 +721,8 @@ h1 {
   overflow-wrap: anywhere;
 }
 
-.dashboard-weather p { margin: 0; color: var(--color-text-secondary); }
+.dashboard-weather p,
+.dashboard-weather output { margin: 0; color: var(--color-text-secondary); }
 .dashboard-weather small { color: var(--color-text-secondary); }
 .dashboard-weather a { color: inherit; }
 .dashboard-weather__title, .dashboard-weather__stale { color: #6ec8ff; font-weight: 900; }
@@ -1238,7 +1239,11 @@ h1 {
 }
 
 .musical-preferences { display: grid; gap: 14px; padding: clamp(18px, 4vw, 28px); border: 1px solid var(--border-subtle); border-radius: 20px; background: var(--surface-card); }
-.musical-preferences h3, .musical-preferences p { margin: 0; }
+.musical-preferences h3, .musical-preferences p, .musical-preferences output { margin: 0; }
+
+.semantic-status {
+  display: block;
+}
 .musical-preferences__options { display: flex; flex-wrap: wrap; gap: 8px; }
 .musical-preferences__options button, .musical-preferences__actions button { padding: 9px 13px; color: var(--color-text-primary); font: inherit; font-weight: 750; border: 1px solid var(--border-subtle); border-radius: 999px; background: var(--surface-card); cursor: pointer; }
 .musical-preferences__options button[aria-pressed="true"] { border-color: var(--color-profile); outline: 2px solid var(--color-profile); outline-offset: 1px; }
@@ -1928,8 +1933,12 @@ h1 {
 }
 
 .admin-dialog {
+  position: static;
   width: min(100%, 34rem);
+  margin: 0;
   padding: 1.5rem;
+  color: inherit;
+  border: 0;
   border-radius: 1rem;
   background: var(--surface, #fff);
   box-shadow: 0 1.5rem 4rem rgb(15 23 42 / 35%);
@@ -2626,6 +2635,7 @@ h1 {
   position: sticky;
   top: 0;
   z-index: 2;
+  margin: 0;
   padding: 12px;
   color: var(--color-text-primary);
   font-size: 0.86rem;
@@ -4058,6 +4068,7 @@ h1 {
 
 .standings__table {
   overflow: hidden;
+  border-spacing: 0;
   background: var(--surface-card);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
@@ -4065,7 +4076,7 @@ h1 {
 }
 
 .standings__columns,
-.standings__table li {
+.standings__table tbody tr {
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr) auto;
   gap: 12px;
@@ -4082,27 +4093,30 @@ h1 {
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.standings__columns span:last-child {
+.standings__columns th {
+  text-align: left;
+}
+
+.standings__columns th:last-child {
   text-align: right;
 }
 
-.standings__table ol {
+.standings__table tbody {
   padding: 0;
   margin: 0;
-  list-style: none;
 }
 
-.standings__table li {
+.standings__table tbody tr {
   min-height: 64px;
   padding: 10px 16px;
   color: var(--color-text-secondary);
 }
 
-.standings__table li + li {
+.standings__table tbody tr + tr {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.standings__table li:nth-child(-n + 3) .standings__rank {
+.standings__table tbody tr:nth-child(-n + 3) .standings__rank {
   color: var(--color-accent-contrast);
   background: var(--section-color);
 }
@@ -4506,7 +4520,7 @@ h1 {
   }
 
   .standings__columns,
-  .standings__table li {
+  .standings__table tbody tr {
     grid-template-columns: 64px minmax(0, 1fr) 100px;
     padding-inline: 24px;
   }

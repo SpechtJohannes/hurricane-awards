@@ -7,6 +7,7 @@ import {
 } from "../data/timetable";
 import type { ActArtistTag, ArtistTag } from "../data/artistTags";
 import { SectionHeader } from "./SectionHeader";
+import { AdminLoadingNotice } from "./AdminLoadingNotice";
 
 type ActFormState = {
   id: string | null;
@@ -259,9 +260,7 @@ export function AdminTimetableActs({
         ) : null}
 
         {isLoading ? (
-          <p className="admin__notice" role="status">
-            {t("admin.timetable.acts.loading")}
-          </p>
+          <AdminLoadingNotice message={t("admin.timetable.acts.loading")} />
         ) : acts.length === 0 ? (
           <p className="admin__notice">{t("admin.timetable.acts.empty")}</p>
         ) : (

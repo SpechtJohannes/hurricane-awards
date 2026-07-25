@@ -361,9 +361,9 @@ export function AdminFestival({
         ) : null}
 
         {saveMessage ? (
-          <p className="admin-festival-actions__success" role="status">
+          <output className="admin-festival-actions__success semantic-status">
             {saveMessage}
-          </p>
+          </output>
         ) : null}
 
         <button

@@ -22,7 +22,7 @@ export function MusicalPreferences({ availableTags, selectedTagIds, isLoading, i
   return <form className="musical-preferences" onSubmit={submit}>
     <h3>{t("preferences.title")}</h3>
     <p>{t("preferences.description")}</p>
-    {isLoading ? <p role="status">{t("preferences.loading")}</p> : loadError ? <p role="alert" className="identity__error">{loadError}</p> : availableTags.length === 0 ? <p>{t("preferences.empty")}</p> : <>
+    {isLoading ? <output className="semantic-status">{t("preferences.loading")}</output> : loadError ? <p role="alert" className="identity__error">{loadError}</p> : availableTags.length === 0 ? <p>{t("preferences.empty")}</p> : <>
       <div className="musical-preferences__options" aria-label={t("preferences.title")}>
         {availableTags.map((tag) => <button key={tag.id} type="button" aria-pressed={selectedTagIds.has(tag.id)} disabled={isSaving} onClick={() => onToggle(tag.id)} aria-label={selectedTagIds.has(tag.id) ? t("preferences.remove", { tag: tag.name }) : t("preferences.select", { tag: tag.name })}>
           <span aria-hidden="true">{selectedTagIds.has(tag.id) ? "✓ " : "+ "}</span>{tag.name}
@@ -34,6 +34,6 @@ export function MusicalPreferences({ availableTags, selectedTagIds, isLoading, i
       </div>
     </>}
     {saveError ? <p role="alert" className="identity__error">{saveError}</p> : null}
-    {success ? <p role="status" className="profile-editor__success">{success}</p> : null}
+    {success ? <output className="profile-editor__success semantic-status">{success}</output> : null}
   </form>;
 }

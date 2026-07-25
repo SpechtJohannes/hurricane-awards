@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ParticipantName } from "./Avatar";
 import { type Participant } from "../data/participants";
 import { SectionHeader } from "./SectionHeader";
+import { AdminLoadingNotice } from "./AdminLoadingNotice";
 
 export type ParticipantFormState = {
   id: string | null;
@@ -137,9 +138,7 @@ export function AdminParticipants({
         ) : null}
 
         {isLoading ? (
-          <p className="admin__notice" role="status">
-            {t("admin.participants.loading")}
-          </p>
+          <AdminLoadingNotice message={t("admin.participants.loading")} />
         ) : (
           <div className="admin-participants__list">
             {participants.map((participant) => (

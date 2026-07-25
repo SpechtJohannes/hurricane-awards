@@ -197,9 +197,9 @@ function ArtistDetailBody({
 
   if (isLoading) {
     return (
-      <p className="artist-detail__notice" role="status">
+      <output className="artist-detail__notice semantic-status">
         {t("artistDetail.loading")}
-      </p>
+      </output>
     );
   }
   if (loadError) {

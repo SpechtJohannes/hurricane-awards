@@ -6,6 +6,7 @@ import {
   type UpdateTimetableStageInput,
 } from "../data/timetable";
 import { SectionHeader } from "./SectionHeader";
+import { AdminLoadingNotice } from "./AdminLoadingNotice";
 
 type StageFormState = {
   id: string | null;
@@ -231,9 +232,7 @@ export function AdminTimetableStages({
         ) : null}
 
         {isLoading ? (
-          <p className="admin__notice" role="status">
-            {t("admin.timetable.stages.loading")}
-          </p>
+          <AdminLoadingNotice message={t("admin.timetable.stages.loading")} />
         ) : stages.length === 0 ? (
           <p className="admin__notice">{t("admin.timetable.stages.empty")}</p>
         ) : (

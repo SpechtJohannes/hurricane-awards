@@ -7,6 +7,7 @@ import {
 } from "../data/festivalDocuments";
 import type { MusicPlaylist } from "../data/musicEmbeds";
 import { SectionHeader } from "./SectionHeader";
+import { AdminLoadingNotice } from "./AdminLoadingNotice";
 
 type AdminFestivalDocumentsProps = {
   documents: FestivalDocument[];
@@ -121,9 +122,7 @@ export function AdminFestivalDocuments({
       ) : null}
 
       {isLoading ? (
-        <p className="admin__notice" role="status">
-          {t("admin.documents.loading")}
-        </p>
+        <AdminLoadingNotice message={t("admin.documents.loading")} />
       ) : null}
 
       <div className="admin-documents">

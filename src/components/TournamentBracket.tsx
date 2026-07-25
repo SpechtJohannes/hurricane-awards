@@ -285,9 +285,9 @@ export function TournamentBracket({
         ))}
       </div>
       {champion ? (
-        <p className="tournament-bracket__champion" role="status">
+        <output className="tournament-bracket__champion semantic-status">
           {t("tournaments.bracket.champion", { name: champion.name })}
-        </p>
+        </output>
       ) : null}
     </div>
   );

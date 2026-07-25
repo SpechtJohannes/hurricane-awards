@@ -1194,9 +1194,9 @@ function TimetableSection({
       />
 
       {isLoading ? (
-        <p className="timetable__notice" role="status">
+        <output className="timetable__notice semantic-status">
           {t("timetable.loading")}
-        </p>
+        </output>
       ) : null}
       {error ? (
         <p className="timetable__notice timetable__notice--error" role="alert">
@@ -1228,7 +1228,7 @@ function TimetableSection({
                   <h3>{day.label}</h3>
                 </div>
 
-                <div className="timetable-grid" role="table">
+                <div className="timetable-grid">
                   <p className="timetable-grid__hint">
                     {t("timetable.scrollHint")}
                   </p>
@@ -1245,10 +1245,9 @@ function TimetableSection({
                       aria-hidden="true"
                     />
                     {timetable.stages.map((stage, stageIndex) => (
-                      <div
+                      <h4
                         className="timetable-grid__stage"
                         key={stage.id}
-                        role="columnheader"
                         style={{
                           gridColumn: stageIndex + 2,
                           gridRow: 1,
@@ -1256,18 +1255,18 @@ function TimetableSection({
                         }}
                       >
                         {stage.name}
-                      </div>
+                      </h4>
                     ))}
 
                     {timeRows.map((slot, slotIndex) => (
-                      <div
+                      <time
                         className="timetable-grid__time"
                         key={slot}
-                        role="rowheader"
+                        dateTime={slot}
                         style={{ gridColumn: 1, gridRow: slotIndex + 2 }}
                       >
                         {timeLabel(slot)}
-                      </div>
+                      </time>
                     ))}
 
                     {timeRows.flatMap((slot, slotIndex) =>
@@ -1627,7 +1626,7 @@ function AuthenticatedProfile(props: ProfileSectionProps & { participant: Partic
         <input id="profile-display-name" type="text" value={props.profileDisplayName} maxLength={50} disabled={props.isSavingProfile} onChange={(event) => props.onProfileNameChange(event.target.value)} />
         <AvatarPicker selectedAvatarId={props.profileAvatarId} displayName={displayName} isExpanded={props.isAvatarPickerExpanded} isSaving={props.isSavingProfile} onToggle={props.onToggleAvatarPicker} onSelect={props.onSelectAvatar} />
         {props.profileError ? <p className="identity__error" role="alert">{props.profileError}</p> : null}
-        {props.profileSuccess ? <p className="profile-editor__success" role="status">{props.profileSuccess}</p> : null}
+        {props.profileSuccess ? <output className="profile-editor__success semantic-status">{props.profileSuccess}</output> : null}
         <button className="identity__submit profile-editor__submit" type="submit" disabled={props.isSavingProfile || !props.hasProfileChanges}>
           {props.isSavingProfile ? t("identity.profile.saving") : t("identity.profile.save")}
         </button>
@@ -1649,7 +1648,7 @@ function ParticipantLogin(props: ProfileSectionProps) {
         <label htmlFor="participant-access-code">{t("identity.participantCodeLabel")}</label>
         <input id="participant-access-code" type="text" value={props.accessCode} disabled={isDisabled} onChange={(event) => props.onAccessCodeChange(event.target.value)} autoComplete="off" inputMode="text" placeholder={t("identity.participantCodePlaceholder")} />
         {props.accessCodeError ? <p className="identity__error">{props.accessCodeError}</p> : null}
-        {props.isLoginLocked ? <p className="identity__error" role="status">{t("identity.locked", { seconds: props.loginLockRemainingSeconds })}</p> : null}
+        {props.isLoginLocked ? <output className="identity__error semantic-status">{t("identity.locked", { seconds: props.loginLockRemainingSeconds })}</output> : null}
         <button className="identity__submit" type="submit" disabled={isDisabled}>{props.isSubmittingAccessCode ? t("common.loading") : t("identity.submit")}</button>
       </form>
     </>
@@ -1771,10 +1770,10 @@ function StandingsContent({ isLoading, error, standings }: Readonly<{ isLoading:
   if (error) return <p className="standings__notice standings__notice--error" role="alert">{error}</p>;
   if (standings.length === 0) return <p className="standings__notice">{t("standings.empty")}</p>;
   return (
-    <div className="standings__table" role="table" aria-label={t("standings.title")}>
-      <div className="standings__columns" role="row"><span role="columnheader">{t("standings.columns.rank")}</span><span role="columnheader">{t("standings.columns.name")}</span><span role="columnheader">{t("standings.columns.points")}</span></div>
-      <ol>{standings.map((standing, index) => <li key={standing.participantId} role="row"><span className="standings__rank" role="cell" aria-label={t("standings.rankLabel", { rank: index + 1 })}>{index + 1}</span><strong role="cell">{standing.participantName}</strong><span className="standings__points" role="cell">{standing.totalPoints}</span></li>)}</ol>
-    </div>
+    <table className="standings__table" aria-label={t("standings.title")}>
+      <thead><tr className="standings__columns"><th scope="col">{t("standings.columns.rank")}</th><th scope="col">{t("standings.columns.name")}</th><th scope="col">{t("standings.columns.points")}</th></tr></thead>
+      <tbody>{standings.map((standing, index) => <tr key={standing.participantId}><td><span className="standings__rank" aria-label={t("standings.rankLabel", { rank: index + 1 })}>{index + 1}</span></td><td><strong>{standing.participantName}</strong></td><td className="standings__points">{standing.totalPoints}</td></tr>)}</tbody>
+    </table>
   );
 }
 
@@ -1878,9 +1877,9 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
                 : t("festivalAccess.qr.start")}
             </button>
             {qrScannerSupport === "unsupported" ? (
-              <p className="qr-access__status" role="status">
+              <output className="qr-access__status semantic-status">
                 {t("festivalAccess.qr.errors.unsupported")}
-              </p>
+              </output>
             ) : null}
             <div className="qr-access__camera" hidden={!isScanningQrCode}>
               <video

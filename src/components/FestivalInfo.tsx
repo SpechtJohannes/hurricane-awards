@@ -81,9 +81,9 @@ export function FestivalInfo({
       />
 
       {isLoading ? (
-        <p className="festival-info__notice" role="status">
+        <output className="festival-info__notice semantic-status">
           {t("info.loading")}
-        </p>
+        </output>
       ) : null}
 
       {error ? (

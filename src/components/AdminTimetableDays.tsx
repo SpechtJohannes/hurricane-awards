@@ -6,6 +6,7 @@ import {
   type UpdateFestivalDayInput,
 } from "../data/timetable";
 import { SectionHeader } from "./SectionHeader";
+import { AdminLoadingNotice } from "./AdminLoadingNotice";
 
 type FestivalDayFormState = {
   id: string | null;
@@ -217,9 +218,7 @@ export function AdminTimetableDays({
         ) : null}
 
         {isLoading ? (
-          <p className="admin__notice" role="status">
-            {t("admin.timetable.days.loading")}
-          </p>
+          <AdminLoadingNotice message={t("admin.timetable.days.loading")} />
         ) : festivalDays.length === 0 ? (
           <p className="admin__notice">{t("admin.timetable.days.empty")}</p>
         ) : (

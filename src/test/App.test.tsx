@@ -2739,27 +2739,29 @@ describe("Login", () => {
     ).toBeVisible();
     expect(within(timetableSection).getByText("2026-06-19")).toBeVisible();
     expect(
-      within(timetableSection).getByRole("columnheader", {
+      within(timetableSection).getByRole("heading", {
         name: "Mainstage",
+        level: 4,
       }),
     ).toBeVisible();
     expect(
       within(timetableSection)
-        .getByRole("columnheader", { name: "Mainstage" })
+        .getByRole("heading", { name: "Mainstage", level: 4 })
         .style.getPropertyValue("--stage-color"),
     ).toBe("#ff006e");
     expect(
-      within(timetableSection).getByRole("columnheader", {
+      within(timetableSection).getByRole("heading", {
         name: "Tent Stage",
+        level: 4,
       }),
     ).toBeVisible();
     expect(
       within(timetableSection)
-        .getByRole("columnheader", { name: "Tent Stage" })
+        .getByRole("heading", { name: "Tent Stage", level: 4 })
         .style.getPropertyValue("--stage-color"),
     ).toBe("");
     expect(
-      within(timetableSection).getByRole("rowheader", { name: "20:00" }),
+      within(timetableSection).getByText("20:00", { selector: "time" }),
     ).toBeVisible();
 
     const performanceTitle = within(timetableSection).getByRole("heading", {
@@ -2874,8 +2876,9 @@ describe("Login", () => {
 
     expect(grid).toHaveStyle("min-width: calc(76px + 7 * 180px)");
     expect(
-      within(timetableSection).getByRole("columnheader", {
+      within(timetableSection).getByRole("heading", {
         name: "Sehr lange Bühne 7",
+        level: 4,
       }),
     ).toBeVisible();
     expect(
