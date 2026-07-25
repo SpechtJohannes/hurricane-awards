@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import {
   createCategory,
   deleteCategory,
@@ -1912,6 +1913,117 @@ function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
   );
 }
 
+function awardsDashboardStatus(
+  t: TFunction,
+  standingsCount: number,
+  voteCount: number,
+): string {
+  if (standingsCount > 0) {
+    return t("dashboard.tiles.awards.status.standings", {
+      count: standingsCount,
+    });
+  }
+
+  if (voteCount > 0) {
+    return t("dashboard.tiles.awards.status.votes", { count: voteCount });
+  }
+
+  return t("dashboard.tiles.awards.status.empty");
+}
+
+function gamesDashboardStatus(
+  t: TFunction,
+  randomPairingCount: number,
+  tournamentCount: number,
+  horseRacingState: HorseRacingState | null,
+  hasBingoCard: boolean,
+): string {
+  if (randomPairingCount > 0) {
+    return t("dashboard.tiles.games.status.randomPairings", {
+      count: randomPairingCount,
+    });
+  }
+
+  if (tournamentCount > 0) {
+    return t("dashboard.tiles.games.status.tournaments", {
+      count: tournamentCount,
+    });
+  }
+
+  if (
+    horseRacingState?.isEnabled &&
+    horseRacingState.bettingStatus === "open"
+  ) {
+    return t("dashboard.tiles.games.status.horseRacing");
+  }
+
+  if (hasBingoCard) {
+    return t("dashboard.tiles.games.status.bingo");
+  }
+
+  return t("dashboard.tiles.games.status.empty");
+}
+
+function timetableDashboardStatus(t: TFunction, performanceCount: number) {
+  if (performanceCount > 0) {
+    return t("dashboard.tiles.timetable.status.available", {
+      count: performanceCount,
+    });
+  }
+
+  return t("dashboard.tiles.timetable.status.empty");
+}
+
+function infoDashboardStatus(
+  t: TFunction,
+  documentCount: number,
+  hasCampLocation: boolean,
+  hasMusicPlaylist: boolean,
+) {
+  const infoCount =
+    documentCount + Number(hasCampLocation) + Number(hasMusicPlaylist);
+
+  if (infoCount > 0) {
+    return t("dashboard.tiles.info.status.available", { count: infoCount });
+  }
+
+  return t("dashboard.tiles.info.status.empty");
+}
+
+function votingDashboardStatus(t: TFunction, categoryCount: number) {
+  if (categoryCount > 0) {
+    return t("dashboard.tiles.voting.status.available", {
+      count: categoryCount,
+    });
+  }
+
+  return t("dashboard.tiles.voting.status.empty");
+}
+
+function profileDashboardDetails(
+  t: TFunction,
+  participant: Participant | null,
+): Pick<DashboardTile, "status" | "detail" | "avatar"> {
+  if (!participant) {
+    return {
+      status: t("dashboard.tiles.profile.status.guest"),
+      detail: t("dashboard.tiles.profile.detailGuest"),
+      avatar: undefined,
+    };
+  }
+
+  return {
+    status: t("dashboard.tiles.profile.status.authenticated", {
+      name: participant.displayName,
+    }),
+    detail: t("dashboard.tiles.profile.detailAuthenticated"),
+    avatar: {
+      avatarId: participant.avatarId,
+      name: participant.displayName,
+    },
+  };
+}
+
 function App() {
   const { t } = useTranslation();
   const festivalAccess = useFestivalAccess(activeFestival);
@@ -2421,26 +2533,17 @@ function App() {
 
   const hasVotes = allVotes.length > 0;
   const timetablePerformanceCount = timetable?.performances.length ?? 0;
-  const festivalInfoCount =
-    festivalDocuments.length +
-    (campLocationLink ? 1 : 0) +
-    (musicPlaylist ? 1 : 0);
   const unsortedDashboardTiles: DashboardTile[] = [
     {
       id: "awards",
       section: "awards",
       title: t("dashboard.tiles.awards.title"),
       description: t("dashboard.tiles.awards.description"),
-      status:
-        allTimeStandings.length > 0
-          ? t("dashboard.tiles.awards.status.standings", {
-              count: allTimeStandings.length,
-            })
-          : hasVotes
-            ? t("dashboard.tiles.awards.status.votes", {
-                count: allVotes.length,
-              })
-            : t("dashboard.tiles.awards.status.empty"),
+      status: awardsDashboardStatus(
+        t,
+        allTimeStandings.length,
+        allVotes.length,
+      ),
       detail: t("dashboard.tiles.awards.detail"),
     },
     {
@@ -2448,12 +2551,7 @@ function App() {
       section: "timetable",
       title: t("dashboard.tiles.timetable.title"),
       description: t("dashboard.tiles.timetable.description"),
-      status:
-        timetablePerformanceCount > 0
-          ? t("dashboard.tiles.timetable.status.available", {
-              count: timetablePerformanceCount,
-            })
-          : t("dashboard.tiles.timetable.status.empty"),
+      status: timetableDashboardStatus(t, timetablePerformanceCount),
       detail: t("dashboard.tiles.timetable.detail"),
     },
     {
@@ -2471,21 +2569,13 @@ function App() {
       section: "games",
       title: t("dashboard.tiles.games.title"),
       description: t("dashboard.tiles.games.description"),
-      status:
-        randomPairingAssignments.length > 0
-          ? t("dashboard.tiles.games.status.randomPairings", {
-              count: randomPairingAssignments.length,
-            })
-          : tournaments.length > 0
-            ? t("dashboard.tiles.games.status.tournaments", {
-                count: tournaments.length,
-              })
-            : horseRacingState?.isEnabled &&
-                horseRacingState.bettingStatus === "open"
-              ? t("dashboard.tiles.games.status.horseRacing")
-              : bingoCard
-                ? t("dashboard.tiles.games.status.bingo")
-                : t("dashboard.tiles.games.status.empty"),
+      status: gamesDashboardStatus(
+        t,
+        randomPairingAssignments.length,
+        tournaments.length,
+        horseRacingState,
+        Boolean(bingoCard),
+      ),
       detail: t("dashboard.tiles.games.detail"),
     },
     {
@@ -2493,12 +2583,12 @@ function App() {
       section: "info",
       title: t("dashboard.tiles.info.title"),
       description: t("dashboard.tiles.info.description"),
-      status:
-        festivalInfoCount > 0
-          ? t("dashboard.tiles.info.status.available", {
-              count: festivalInfoCount,
-            })
-          : t("dashboard.tiles.info.status.empty"),
+      status: infoDashboardStatus(
+        t,
+        festivalDocuments.length,
+        Boolean(campLocationLink),
+        Boolean(musicPlaylist),
+      ),
       detail: t("dashboard.tiles.info.detail"),
     },
     {
@@ -2506,12 +2596,7 @@ function App() {
       section: "voting",
       title: t("dashboard.tiles.voting.title"),
       description: t("dashboard.tiles.voting.description"),
-      status:
-        openCategories.length > 0
-          ? t("dashboard.tiles.voting.status.available", {
-              count: openCategories.length,
-            })
-          : t("dashboard.tiles.voting.status.empty"),
+      status: votingDashboardStatus(t, openCategories.length),
       detail: t("dashboard.tiles.voting.detail"),
     },
     {
@@ -2519,20 +2604,7 @@ function App() {
       section: "profile",
       title: t("dashboard.tiles.profile.title"),
       description: t("dashboard.tiles.profile.description"),
-      status: selectedParticipant
-        ? t("dashboard.tiles.profile.status.authenticated", {
-            name: selectedParticipant.displayName,
-          })
-        : t("dashboard.tiles.profile.status.guest"),
-      detail: selectedParticipant
-        ? t("dashboard.tiles.profile.detailAuthenticated")
-        : t("dashboard.tiles.profile.detailGuest"),
-      avatar: selectedParticipant
-        ? {
-            avatarId: selectedParticipant.avatarId,
-            name: selectedParticipant.displayName,
-          }
-        : undefined,
+      ...profileDashboardDetails(t, selectedParticipant),
     },
   ];
   const eventPhase = determineEventPhase(
