@@ -9,6 +9,7 @@ import {
   type UpdateTimetablePerformanceInput,
 } from "../data/timetable";
 import { SectionHeader } from "./SectionHeader";
+import { AdminLoadingNotice } from "./AdminLoadingNotice";
 
 type PerformanceFormState = {
   id: string | null;
@@ -318,9 +319,9 @@ export function AdminTimetablePerformances({
         ) : null}
 
         {isLoading ? (
-          <output className="admin__notice semantic-status">
-            {t("admin.timetable.performances.loading")}
-          </output>
+          <AdminLoadingNotice
+            message={t("admin.timetable.performances.loading")}
+          />
         ) : performances.length === 0 ? (
           <p className="admin__notice">
             {t("admin.timetable.performances.empty")}

@@ -7,6 +7,7 @@ import {
   type UpdateCategoryInput,
 } from "../data/categories";
 import { SectionHeader } from "./SectionHeader";
+import { AdminLoadingNotice } from "./AdminLoadingNotice";
 
 type CategoryFormState = {
   id: string | null;
@@ -251,9 +252,7 @@ export function AdminCategories({
         ) : null}
 
         {isLoading ? (
-          <output className="admin__notice semantic-status">
-            {t("admin.categories.loading")}
-          </output>
+          <AdminLoadingNotice message={t("admin.categories.loading")} />
         ) : (
           <div className="admin-categories__list">
             {categories.map((category) => (
