@@ -808,17 +808,17 @@ type LegalNoticeProps = {
   festivalName: string;
 };
 
+function navigateBackToApp() {
+  if (window.history.length > 1) {
+    window.history.back();
+    return;
+  }
+
+  window.location.hash = "";
+}
+
 function LegalNotice({ festivalName }: LegalNoticeProps) {
   const { t } = useTranslation();
-
-  function goBack() {
-    if (window.history.length > 1) {
-      window.history.back();
-      return;
-    }
-
-    window.location.hash = "";
-  }
 
   return (
     <main
@@ -844,7 +844,11 @@ function LegalNotice({ festivalName }: LegalNoticeProps) {
             <dd>{t("legal.placeholders.email")}</dd>
           </div>
         </dl>
-        <button className="legal-page__back" type="button" onClick={goBack}>
+        <button
+          className="legal-page__back"
+          type="button"
+          onClick={navigateBackToApp}
+        >
           {t("legal.back")}
         </button>
       </section>
@@ -866,15 +870,6 @@ function PrivacyNotice({ festivalName }: LegalNoticeProps) {
     "contact",
   ];
 
-  function goBack() {
-    if (window.history.length > 1) {
-      window.history.back();
-      return;
-    }
-
-    window.location.hash = "";
-  }
-
   return (
     <main
       className="home legal-page"
@@ -893,7 +888,11 @@ function PrivacyNotice({ festivalName }: LegalNoticeProps) {
             </article>
           ))}
         </div>
-        <button className="legal-page__back" type="button" onClick={goBack}>
+        <button
+          className="legal-page__back"
+          type="button"
+          onClick={navigateBackToApp}
+        >
           {t("privacy.back")}
         </button>
       </section>
