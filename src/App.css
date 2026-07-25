@@ -4258,10 +4258,13 @@ h1 {
   justify-content: center;
   padding: 0 18px;
   color: var(--color-accent-contrast);
+  font: inherit;
   font-weight: 850;
   text-decoration: none;
   background: var(--color-accent);
+  border: 0;
   border-radius: 8px;
+  cursor: pointer;
 }
 
 .legal-page__back:hover,
