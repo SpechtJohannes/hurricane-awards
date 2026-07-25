@@ -5,7 +5,6 @@ import {
   useState,
   type CSSProperties,
   type FormEvent,
-  type MouseEvent,
   type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -812,9 +811,7 @@ type LegalNoticeProps = {
 function LegalNotice({ festivalName }: LegalNoticeProps) {
   const { t } = useTranslation();
 
-  function goBack(event: MouseEvent<HTMLAnchorElement>) {
-    event.preventDefault();
-
+  function goBack() {
     if (window.history.length > 1) {
       window.history.back();
       return;
@@ -847,9 +844,9 @@ function LegalNotice({ festivalName }: LegalNoticeProps) {
             <dd>{t("legal.placeholders.email")}</dd>
           </div>
         </dl>
-        <a className="legal-page__back" href="#" onClick={goBack}>
+        <button className="legal-page__back" type="button" onClick={goBack}>
           {t("legal.back")}
-        </a>
+        </button>
       </section>
     </main>
   );
@@ -869,9 +866,7 @@ function PrivacyNotice({ festivalName }: LegalNoticeProps) {
     "contact",
   ];
 
-  function goBack(event: MouseEvent<HTMLAnchorElement>) {
-    event.preventDefault();
-
+  function goBack() {
     if (window.history.length > 1) {
       window.history.back();
       return;
@@ -898,9 +893,9 @@ function PrivacyNotice({ festivalName }: LegalNoticeProps) {
             </article>
           ))}
         </div>
-        <a className="legal-page__back" href="#" onClick={goBack}>
+        <button className="legal-page__back" type="button" onClick={goBack}>
           {t("privacy.back")}
-        </a>
+        </button>
       </section>
     </main>
   );

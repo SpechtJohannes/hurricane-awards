@@ -1435,7 +1435,7 @@ describe("Impressum", () => {
       screen.getByText("Hermannstraße 2, 38114 Braunschweig, Deutschland"),
     ).toBeVisible();
     expect(screen.getByText("specht.johannes@gmx.de")).toBeVisible();
-    expect(screen.getByRole("link", { name: /zurück zur app/i })).toBeVisible();
+    expect(screen.getByRole("button", { name: /zurück zur app/i })).toBeVisible();
   });
 
   it("ruft bei der Ruecknavigation die Browser-Historie auf", async () => {
@@ -1445,7 +1445,7 @@ describe("Impressum", () => {
     render(<App />);
 
     await userEvent.click(
-      await screen.findByRole("link", { name: /zurück zur app/i }),
+      await screen.findByRole("button", { name: /zurück zur app/i }),
     );
 
     expect(back).toHaveBeenCalled();
@@ -1490,7 +1490,7 @@ describe("Datenschutz", () => {
       screen.getAllByText(/specht.johannes@gmx.de/i).length,
     ).toBeGreaterThan(0);
     expect(screen.getByText(/supabase als backend/i)).toBeVisible();
-    expect(screen.getByRole("link", { name: /zurück zur app/i })).toBeVisible();
+    expect(screen.getByRole("button", { name: /zurück zur app/i })).toBeVisible();
   });
 
   it("ruft bei der Ruecknavigation die Browser-Historie auf", async () => {
@@ -1500,7 +1500,7 @@ describe("Datenschutz", () => {
     render(<App />);
 
     await userEvent.click(
-      await screen.findByRole("link", { name: /zurück zur app/i }),
+      await screen.findByRole("button", { name: /zurück zur app/i }),
     );
 
     expect(back).toHaveBeenCalled();
