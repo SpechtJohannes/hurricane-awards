@@ -1,6 +1,7 @@
 import { activeFestival } from "../config/festivals";
 import { getSupabase } from "../lib/supabase";
 import { participantRpcParams, type AdminAccessContext } from "./accessContext";
+import { trimTrailingHyphens } from "./fileNames";
 
 export const eventLogoBucket = "event-logos";
 export const eventLogoMaxFileSize = 2 * 1024 * 1024;
@@ -34,11 +35,13 @@ export function eventLogoPublicUrl(filePath: string | null) {
 
 function sanitizeFileName(fileName: string) {
   return (
-    fileName
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9._-]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "logo"
+    trimTrailingHyphens(
+      fileName
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9._-]+/g, "-")
+        .replace(/^-+/, ""),
+    ) || "logo"
   );
 }
 

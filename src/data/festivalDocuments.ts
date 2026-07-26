@@ -4,6 +4,7 @@ import {
   type AdminAccessContext,
   type ParticipantAccessContext,
 } from "./accessContext";
+import { trimTrailingHyphens } from "./fileNames";
 
 export const festivalDocumentTypes = ["timetable", "site_map"] as const;
 export type FestivalDocumentType = (typeof festivalDocumentTypes)[number];
@@ -112,11 +113,13 @@ export function isSupportedCampLocationLink(link: string) {
 }
 
 function sanitizeFileName(fileName: string) {
-  const safeFileName = fileName
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+  const safeFileName = trimTrailingHyphens(
+    fileName
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, "-")
+      .replace(/^-+/, ""),
+  );
 
   return safeFileName || "document";
 }

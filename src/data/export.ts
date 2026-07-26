@@ -1,5 +1,6 @@
 import { loadAdminCategories, type Category } from "./categories";
 import { loadFestivalName } from "./festival";
+import { trimTrailingHyphens } from "./fileNames";
 import { loadAdminParticipants, type Participant } from "./participants";
 import { loadVotes, type Vote } from "./votes";
 import type { AdminAccessContext } from "./accessContext";
@@ -130,14 +131,15 @@ export function festivalExportFileName(
   exportedAt = new Date(),
 ) {
   const date = exportedAt.toISOString().slice(0, 10);
-  const slug =
+  const slug = trimTrailingHyphens(
     festivalName
       .trim()
       .toLowerCase()
       .normalize("NFKD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "festival";
+      .replace(/^-+/, ""),
+  ) || "festival";
 
   return `festival-awards-${slug}-${date}.json`;
 }
