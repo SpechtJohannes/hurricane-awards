@@ -137,7 +137,8 @@ export function festivalExportFileName(
       .normalize("NFKD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "festival";
+      .replace(/^-+/, "")
+      .replace(/-+$/, "") || "festival";
 
   return `festival-awards-${slug}-${date}.json`;
 }
