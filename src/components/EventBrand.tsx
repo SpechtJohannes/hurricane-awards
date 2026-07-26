@@ -11,7 +11,7 @@ export function EventBrand({
   festivalName,
   logoUrl,
   onClick,
-}: EventBrandProps) {
+}: Readonly<EventBrandProps>) {
   const { t } = useTranslation();
   const [failedLogoUrl, setFailedLogoUrl] = useState<string | null>(null);
   const showLogo = Boolean(logoUrl) && logoUrl !== failedLogoUrl;

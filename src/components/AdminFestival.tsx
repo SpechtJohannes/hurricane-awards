@@ -53,7 +53,7 @@ function ArchiveActions({
   onIncludeParticipantAccessCodesChange,
   onExport,
   onArchive,
-}: ArchiveActionsProps) {
+}: Readonly<ArchiveActionsProps>) {
   const { t } = useTranslation();
 
   return (
@@ -144,7 +144,7 @@ export function AdminFestival({
   onExport,
   onUploadLogo = async () => undefined,
   onRemoveLogo = async () => undefined,
-}: AdminFestivalProps) {
+}: Readonly<AdminFestivalProps>) {
   const { t } = useTranslation();
   const [name, setName] = useState(festivalName);
   const [startDate, setStartDate] = useState(eventStartDate ?? "");

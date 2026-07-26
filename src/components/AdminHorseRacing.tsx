@@ -26,7 +26,7 @@ export function AdminHorseRacing({
   isLoading,
   isSaving,
   onUpdate,
-}: AdminHorseRacingProps) {
+}: Readonly<AdminHorseRacingProps>) {
   const { t } = useTranslation();
   const [actionError, setActionError] = useState("");
   const isEnabled = state?.isEnabled === true;

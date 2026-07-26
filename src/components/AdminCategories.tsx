@@ -39,7 +39,7 @@ export function AdminCategories({
   onUpdate,
   onChangeStatus,
   onDelete,
-}: AdminCategoriesProps) {
+}: Readonly<AdminCategoriesProps>) {
   const { t } = useTranslation();
   const [form, setForm] = useState<CategoryFormState | null>(null);
   const [formError, setFormError] = useState("");

@@ -14,7 +14,7 @@ export function Bingo({
   error,
   togglingNumber,
   onToggleNumber,
-}: BingoProps) {
+}: Readonly<BingoProps>) {
   const { t } = useTranslation();
   const markedNumbers = new Set(card.markedNumbers);
 

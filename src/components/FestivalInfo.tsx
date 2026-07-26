@@ -40,7 +40,7 @@ export function FestivalInfo({
   isLoading,
   dashboardBackButton,
   onOpenCampLocation,
-}: FestivalInfoProps) {
+}: Readonly<FestivalInfoProps>) {
   const { t } = useTranslation();
   const [musicPlaylistLoadError, setMusicPlaylistLoadError] = useState(false);
   const musicPlayerRef = useRef<HTMLIFrameElement | null>(null);

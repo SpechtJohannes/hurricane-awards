@@ -63,7 +63,7 @@ export function AdminTournaments({
   onUpdate,
   onDelete,
   onSetWinner,
-}: AdminTournamentsProps) {
+}: Readonly<AdminTournamentsProps>) {
   const { t } = useTranslation();
   const [form, setForm] = useState<TournamentFormState | null>(null);
   const [formError, setFormError] = useState("");

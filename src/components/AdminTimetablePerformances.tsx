@@ -48,7 +48,7 @@ export function AdminTimetablePerformances({
   onCreate,
   onUpdate,
   onDelete,
-}: AdminTimetablePerformancesProps) {
+}: Readonly<AdminTimetablePerformancesProps>) {
   const { t } = useTranslation();
   const [form, setForm] = useState<PerformanceFormState | null>(null);
   const [formError, setFormError] = useState("");

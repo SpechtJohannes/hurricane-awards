@@ -32,7 +32,7 @@ export function AdminRandomPairings({
   onUpdateParticipants,
   onDraw,
   onReset,
-}: AdminRandomPairingsProps) {
+}: Readonly<AdminRandomPairingsProps>) {
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [formError, setFormError] = useState("");

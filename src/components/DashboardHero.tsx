@@ -56,7 +56,7 @@ export function DashboardHero({
   participantAccessCode = null,
   onOpenTimetable,
   onOpenVoting,
-}: DashboardHeroProps) {
+}: Readonly<DashboardHeroProps>) {
   const { t, i18n } = useTranslation();
   const [failedLogoUrl, setFailedLogoUrl] = useState<string | null>(null);
   const showEventLogo = Boolean(eventLogoUrl && eventLogoUrl !== failedLogoUrl);

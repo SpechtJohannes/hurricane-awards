@@ -28,7 +28,7 @@ export function HorseRacing({
   error,
   isSaving,
   onSelectSuit,
-}: HorseRacingProps) {
+}: Readonly<HorseRacingProps>) {
   const { t } = useTranslation();
   const isEnabled = state?.isEnabled === true;
   const isOpen = isEnabled && state.bettingStatus === "open";

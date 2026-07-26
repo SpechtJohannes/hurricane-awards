@@ -12,7 +12,7 @@ export function RandomPairings({
   assignments,
   error,
   isLoading,
-}: RandomPairingsProps) {
+}: Readonly<RandomPairingsProps>) {
   const { t } = useTranslation();
 
   return (

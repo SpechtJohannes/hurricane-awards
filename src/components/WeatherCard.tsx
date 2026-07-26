@@ -7,7 +7,7 @@ const weatherIcons: Record<WeatherCondition, string> = {
   rain: "🌧", snow: "❄", showers: "🌦", thunderstorm: "⛈", unknown: "–",
 };
 
-export function WeatherCard({ participantAccessCode }: { participantAccessCode: string | null }) {
+export function WeatherCard({ participantAccessCode }: Readonly<{ participantAccessCode: string | null }>) {
   const { t, i18n } = useTranslation();
   const [weather, setWeather] = useState<WeatherPayload | null>(null);
   const [loading, setLoading] = useState(Boolean(participantAccessCode));
