@@ -3,7 +3,7 @@ import {
   useEffect,
   useRef,
   useState,
-  type FormEvent,
+  type SubmitEvent,
 } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -73,7 +73,7 @@ export function useFestivalCodeUnlock(
     }
   }
 
-  async function submitFestivalCode(event: FormEvent<HTMLFormElement>) {
+  async function submitFestivalCode(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     await unlockFestivalCode(
       festivalCode,

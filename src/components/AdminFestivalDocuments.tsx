@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, type ChangeEvent, type SubmitEvent } from "react";
 import { useTranslation } from "react-i18next";
 import {
   festivalDocumentTypes,
@@ -69,12 +69,12 @@ export function AdminFestivalDocuments({
   );
   const [musicPlaylistMessage, setMusicPlaylistMessage] = useState("");
 
-  function submitCampLocation(event: FormEvent<HTMLFormElement>) {
+  function submitCampLocation(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     onSaveCampLocation(campLocationInput, campLocationQuery);
   }
 
-  async function submitMusicPlaylist(event: FormEvent<HTMLFormElement>) {
+  async function submitMusicPlaylist(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setMusicPlaylistMessage("");
     const wasSaved = await onSaveMusicPlaylist(musicPlaylistInput);

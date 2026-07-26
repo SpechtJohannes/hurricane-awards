@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { AdminRandomPairingAction } from "../data/randomPairings";
 import type { Participant } from "../data/participants";
@@ -50,7 +50,7 @@ export function AdminRandomPairings({
     ]),
   );
 
-  async function submitAction(event: FormEvent<HTMLFormElement>) {
+  async function submitAction(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const trimmedName = name.trim();

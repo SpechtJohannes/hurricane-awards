@@ -1,4 +1,4 @@
-import type { FormEvent } from "react";
+import type { SubmitEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { ArtistTag } from "../data/artistTags";
 
@@ -17,7 +17,7 @@ type Props = {
 
 export function MusicalPreferences({ availableTags, selectedTagIds, isLoading, isSaving, loadError, saveError, success, onToggle, onReset, onSave }: Readonly<Props>) {
   const { t } = useTranslation();
-  function submit(event: FormEvent) { event.preventDefault(); onSave(); }
+  function submit(event: SubmitEvent<HTMLFormElement>) { event.preventDefault(); onSave(); }
 
   return <form className="musical-preferences" onSubmit={submit}>
     <h3>{t("preferences.title")}</h3>

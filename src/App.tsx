@@ -4,7 +4,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type FormEvent,
+  type SubmitEvent,
   type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -1550,14 +1550,14 @@ type ProfileSectionProps = {
   loginLockRemainingSeconds: number;
   onBack: () => void;
   onLogout: () => void;
-  onSaveProfile: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  onSaveProfile: (event: SubmitEvent<HTMLFormElement>) => Promise<void>;
   onProfileNameChange: (name: string) => void;
   onToggleAvatarPicker: () => void;
   onSelectAvatar: (avatarId: string) => void;
   onTogglePreference: (tagId: string) => void;
   onResetPreferences: () => void;
   onSavePreferences: () => Promise<void>;
-  onSubmitAccessCode: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  onSubmitAccessCode: (event: SubmitEvent<HTMLFormElement>) => Promise<void>;
   onAccessCodeChange: (code: string) => void;
 };
 
@@ -2619,7 +2619,7 @@ function App() {
     eventPhase,
   );
 
-  async function submitAccessCode(event: FormEvent<HTMLFormElement>) {
+  async function submitAccessCode(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const now = Date.now();
@@ -2812,7 +2812,7 @@ function App() {
     }));
   }
 
-  async function saveOwnProfile(event: FormEvent<HTMLFormElement>) {
+  async function saveOwnProfile(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!selectedParticipant || isSavingProfileRef.current) {
@@ -3709,7 +3709,7 @@ function App() {
     setParticipantFormError("");
   }
 
-  async function submitParticipantForm(event: FormEvent<HTMLFormElement>) {
+  async function submitParticipantForm(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const adminContext = getParticipantAdminContext();
