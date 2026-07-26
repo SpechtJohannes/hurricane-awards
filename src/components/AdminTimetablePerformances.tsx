@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type SubmitEvent } from "react";
 import { useTranslation } from "react-i18next";
 import {
   type CreateTimetablePerformanceInput,
@@ -97,7 +97,7 @@ export function AdminTimetablePerformances({
     setFormError("");
   }
 
-  async function submitForm(event: FormEvent<HTMLFormElement>) {
+  async function submitForm(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!form) {

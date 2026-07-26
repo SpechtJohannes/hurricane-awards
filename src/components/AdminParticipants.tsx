@@ -1,4 +1,4 @@
-import { type FormEvent } from "react";
+import { type SubmitEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { ParticipantName } from "./Avatar";
 import { type Participant } from "../data/participants";
@@ -22,7 +22,7 @@ type AdminParticipantsProps = {
   onCreate: () => void;
   onEdit: (participant: Participant) => void;
   onCancelForm: () => void;
-  onSubmitForm: (event: FormEvent<HTMLFormElement>) => void;
+  onSubmitForm: (event: SubmitEvent<HTMLFormElement>) => void;
   onChangeForm: (form: ParticipantFormState) => void;
   onClearFormError: () => void;
   onDeactivate: (participant: Participant) => void;

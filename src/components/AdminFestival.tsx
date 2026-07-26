@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { SectionHeader } from "./SectionHeader";
 import type { EventSettings } from "../data/festival";
@@ -161,7 +161,7 @@ export function AdminFestival({
     useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
 
-  async function submitForm(event: FormEvent<HTMLFormElement>) {
+  async function submitForm(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const trimmedName = name.trim();
@@ -200,7 +200,7 @@ export function AdminFestival({
     }
   }
 
-  async function submitCodeForm(event: FormEvent<HTMLFormElement>) {
+  async function submitCodeForm(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const trimmedCode = code.trim().toUpperCase();
