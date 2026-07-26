@@ -14,7 +14,7 @@ export function ParticipantAvatar({
   avatarId,
   name,
   size = "medium",
-}: AvatarProps) {
+}: Readonly<AvatarProps>) {
   const avatar = avatarById(avatarId);
 
   return (

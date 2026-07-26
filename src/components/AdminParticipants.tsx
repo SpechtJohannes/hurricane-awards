@@ -45,7 +45,7 @@ export function AdminParticipants({
   onClearFormError,
   onDeactivate,
   onReactivate,
-}: AdminParticipantsProps) {
+}: Readonly<AdminParticipantsProps>) {
   const { t } = useTranslation();
 
   return (

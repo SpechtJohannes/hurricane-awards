@@ -4,6 +4,6 @@ type AdminLoadingNoticeProps = {
   message: ReactNode;
 };
 
-export function AdminLoadingNotice({ message }: AdminLoadingNoticeProps) {
+export function AdminLoadingNotice({ message }: Readonly<AdminLoadingNoticeProps>) {
   return <output className="admin__notice semantic-status">{message}</output>;
 }

@@ -11,7 +11,7 @@ export function EventStatusCard({
   startDate,
   endDate,
   referenceInstant,
-}: EventStatusCardProps) {
+}: Readonly<EventStatusCardProps>) {
   const { t } = useTranslation();
   const status = eventStatus(startDate, endDate, referenceInstant);
   if (!status) return null;

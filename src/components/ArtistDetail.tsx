@@ -45,7 +45,7 @@ function ArtistPerformances({
   performances,
   timetable,
   locale,
-}: Pick<ArtistContentProps, "performances" | "timetable" | "locale">) {
+}: Readonly<Pick<ArtistContentProps, "performances" | "timetable" | "locale">>) {
   const { t } = useTranslation();
   const dayById = new Map(
     timetable?.festivalDays.map((day) => [day.id, day]) ?? [],
@@ -114,7 +114,7 @@ function ArtistContent({
   isSavingFavorite,
   locale,
   onToggleFavorite,
-}: ArtistContentProps) {
+}: Readonly<ArtistContentProps>) {
   const { t } = useTranslation();
   const performanceIds = performances.map((performance) => performance.id);
   const favoriteLabel = favoriteButtonLabel(isSavingFavorite, isFavorite, {
@@ -180,7 +180,7 @@ function ArtistDetailBody({
   isLoading,
   isSavingFavorite,
   onToggleFavorite,
-}: Omit<ArtistDetailProps, "backButton">) {
+}: Readonly<Omit<ArtistDetailProps, "backButton">>) {
   const { t, i18n } = useTranslation();
   const act = timetable?.acts.find((entry) => entry.id === actId) ?? null;
   const performances = useMemo(
@@ -253,7 +253,7 @@ export function ArtistDetail({
   isSavingFavorite,
   backButton,
   onToggleFavorite,
-}: ArtistDetailProps) {
+}: Readonly<ArtistDetailProps>) {
   return (
     <section
       className="artist-detail"

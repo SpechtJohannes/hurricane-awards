@@ -37,7 +37,7 @@ export function AdminTimetableDays({
   onUpdate,
   onDelete,
   onMove,
-}: AdminTimetableDaysProps) {
+}: Readonly<AdminTimetableDaysProps>) {
   const { t } = useTranslation();
   const [form, setForm] = useState<FestivalDayFormState | null>(null);
   const [formError, setFormError] = useState("");

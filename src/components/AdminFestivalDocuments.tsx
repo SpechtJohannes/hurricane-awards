@@ -58,7 +58,7 @@ export function AdminFestivalDocuments({
   onClearMusicPlaylistError,
   onUpload,
   onRemove,
-}: AdminFestivalDocumentsProps) {
+}: Readonly<AdminFestivalDocumentsProps>) {
   const { t } = useTranslation();
   const [campLocationInput, setCampLocationInput] = useState(
     campLocationLink ?? "",

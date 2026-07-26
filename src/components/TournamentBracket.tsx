@@ -118,12 +118,12 @@ function MatchSlot({
   slot,
   winners,
   openLabel,
-}: {
+}: Readonly<{
   match: TournamentBracketMatch;
   slot: TournamentBracketSlot;
   winners: Map<string, ResolvedParticipant>;
   openLabel: string;
-}) {
+}>) {
   const label = slotLabel(slot, winners, openLabel);
 
   if (!label) {
@@ -174,7 +174,7 @@ export function TournamentBracket({
   tournament,
   onSetWinner,
   savingMatchId,
-}: TournamentBracketProps) {
+}: Readonly<TournamentBracketProps>) {
   const { t } = useTranslation();
   const { winners, matchParticipants } = useMemo(
     () => resolveBracket(tournament),

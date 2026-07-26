@@ -15,7 +15,7 @@ type Props = {
   onSave: () => void;
 };
 
-export function MusicalPreferences({ availableTags, selectedTagIds, isLoading, isSaving, loadError, saveError, success, onToggle, onReset, onSave }: Props) {
+export function MusicalPreferences({ availableTags, selectedTagIds, isLoading, isSaving, loadError, saveError, success, onToggle, onReset, onSave }: Readonly<Props>) {
   const { t } = useTranslation();
   function submit(event: FormEvent) { event.preventDefault(); onSave(); }
 

@@ -13,7 +13,7 @@ export function Tournaments({
   tournaments,
   error,
   isLoading,
-}: TournamentsProps) {
+}: Readonly<TournamentsProps>) {
   const { t } = useTranslation();
 
   return (

@@ -19,7 +19,7 @@ export function AdminBingo({
   isSaving,
   onStart,
   onClose,
-}: AdminBingoProps) {
+}: Readonly<AdminBingoProps>) {
   const { t } = useTranslation();
   const [actionError, setActionError] = useState("");
   const isDisabled = isLoading || isSaving;

@@ -16,7 +16,7 @@ export function SectionHeader({
   description,
   width = "standard",
   className,
-}: SectionHeaderProps) {
+}: Readonly<SectionHeaderProps>) {
   const classNames = [
     "section-header",
     width === "narrow" ? "section-header--narrow" : "",

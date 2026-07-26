@@ -59,13 +59,13 @@ function RecommendationList({
   isSavingFavorite,
   onSelectAct,
   onToggleFavorite,
-}: {
+}: Readonly<{
   recommendations: ArtistRecommendation[];
   timetable: Timetable | null;
   isSavingFavorite: boolean;
   onSelectAct: ArtistsProps["onSelectAct"];
   onToggleFavorite: ArtistsProps["onToggleFavorite"];
-}) {
+}>) {
   const { t } = useTranslation();
 
   return (
@@ -203,12 +203,12 @@ function ArtistFilters({
   selectedTagIds,
   onToggleTag,
   onReset,
-}: {
+}: Readonly<{
   availableTags: ArtistTag[];
   selectedTagIds: ReadonlySet<string>;
   onToggleTag: (tagId: string) => void;
   onReset: () => void;
-}) {
+}>) {
   const { t } = useTranslation();
   const selectedTags = availableTags.filter((tag) =>
     selectedTagIds.has(tag.id),
@@ -267,11 +267,11 @@ function ArtistList({
   artists,
   selectedActId,
   onSelectAct,
-}: {
+}: Readonly<{
   artists: ArtistWithTags[];
   selectedActId: string | null;
   onSelectAct: ArtistsProps["onSelectAct"];
-}) {
+}>) {
   const { t } = useTranslation();
 
   if (artists.length === 0) {
@@ -390,7 +390,7 @@ export function Artists({
   isSavingFavorite,
   onToggleFavorite,
   onOpenProfile,
-}: ArtistsProps) {
+}: Readonly<ArtistsProps>) {
   const { t, i18n } = useTranslation();
   const [query, setQuery] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set());

@@ -563,7 +563,7 @@ type ResultCardProps = {
   highestVoteCount: number;
 };
 
-function ResultCard({ category, results, highestVoteCount }: ResultCardProps) {
+function ResultCard({ category, results, highestVoteCount }: Readonly<ResultCardProps>) {
   const { t } = useTranslation();
   const statusLabels: Record<CategoryStatus, string> = {
     upcoming: t("status.upcoming"),
@@ -818,7 +818,7 @@ function navigateBackToApp() {
   window.location.hash = "";
 }
 
-function LegalNotice({ festivalName }: LegalNoticeProps) {
+function LegalNotice({ festivalName }: Readonly<LegalNoticeProps>) {
   const { t } = useTranslation();
 
   return (
@@ -857,7 +857,7 @@ function LegalNotice({ festivalName }: LegalNoticeProps) {
   );
 }
 
-function PrivacyNotice({ festivalName }: LegalNoticeProps) {
+function PrivacyNotice({ festivalName }: Readonly<LegalNoticeProps>) {
   const { t } = useTranslation();
   const sections = [
     "controller",
@@ -994,7 +994,7 @@ type DashboardBackButtonProps = {
 function DashboardBackButton({
   onClick,
   width = "standard",
-}: DashboardBackButtonProps) {
+}: Readonly<DashboardBackButtonProps>) {
   const { t } = useTranslation();
 
   return (
@@ -1031,7 +1031,7 @@ function DashboardSection({
   timetable,
   activeCategory,
   onNavigate,
-}: DashboardSectionProps) {
+}: Readonly<DashboardSectionProps>) {
   const { t } = useTranslation();
   const showEventStatus =
     selectDashboardModules(
@@ -1102,7 +1102,7 @@ function TimetableSection({
   togglingPerformanceId,
   onBackToDashboard,
   onToggleFavorite,
-}: TimetableSectionProps) {
+}: Readonly<TimetableSectionProps>) {
   const { t } = useTranslation();
   const hasTimetableStructure = Boolean(
     timetable &&
@@ -1445,13 +1445,13 @@ function GameTab({
   isDisabled = false,
   label,
   onSelect,
-}: {
+}: Readonly<{
   section: GameSection;
   activeSection: GameSection;
   isDisabled?: boolean;
   label: string;
   onSelect: (section: GameSection) => void;
-}) {
+}>) {
   const isActive = activeSection === section;
   const className = `games__tab${isActive ? " is-active" : ""}${
     isDisabled ? " games__tab--disabled" : ""
@@ -1484,7 +1484,7 @@ function GamesContent({
   isLoading,
   onToggleBingoNumber,
   onSelectHorseRacingSuit,
-}: Omit<GamesSectionProps, "onBack" | "onSelectSection">) {
+}: Readonly<Omit<GamesSectionProps, "onBack" | "onSelectSection">>) {
   const { t } = useTranslation();
 
   if (activeSection === "bingo") {
@@ -1500,7 +1500,7 @@ function GamesContent({
   return <Tournaments tournaments={tournaments} error={tournamentsError} isLoading={isLoading} />;
 }
 
-function GamesSection(props: GamesSectionProps) {
+function GamesSection(props: Readonly<GamesSectionProps>) {
   const { t } = useTranslation();
 
   return (
@@ -1568,14 +1568,14 @@ function AvatarPicker({
   isSaving,
   onToggle,
   onSelect,
-}: {
+}: Readonly<{
   selectedAvatarId: string | null;
   displayName: string;
   isExpanded: boolean;
   isSaving: boolean;
   onToggle: () => void;
   onSelect: (avatarId: string) => void;
-}) {
+}>) {
   const { t } = useTranslation();
 
   return (
@@ -1637,7 +1637,7 @@ function AuthenticatedProfile(props: ProfileSectionProps & { participant: Partic
   );
 }
 
-function ParticipantLogin(props: ProfileSectionProps) {
+function ParticipantLogin(props: Readonly<ProfileSectionProps>) {
   const { t } = useTranslation();
   const isDisabled = props.isSubmittingAccessCode || props.isLoginLocked;
 
@@ -1655,7 +1655,7 @@ function ParticipantLogin(props: ProfileSectionProps) {
   );
 }
 
-function ProfileSection(props: ProfileSectionProps) {
+function ProfileSection(props: Readonly<ProfileSectionProps>) {
   return (
     <section className="identity" id="main-profile" aria-labelledby="identity-title">
       <div className="identity__content">
@@ -1800,7 +1800,7 @@ type FestivalAccessProps = {
   onUnlock: (code: string) => Promise<boolean>;
 };
 
-function FestivalAccess({ festivalName, onUnlock }: FestivalAccessProps) {
+function FestivalAccess({ festivalName, onUnlock }: Readonly<FestivalAccessProps>) {
   const { t } = useTranslation();
   const {
     festivalCode,

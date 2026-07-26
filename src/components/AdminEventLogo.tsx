@@ -19,7 +19,7 @@ export function AdminEventLogo({
   isRemoving,
   onUpload,
   onRemove,
-}: AdminEventLogoProps) {
+}: Readonly<AdminEventLogoProps>) {
   const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);

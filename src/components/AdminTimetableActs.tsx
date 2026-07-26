@@ -43,7 +43,7 @@ export function AdminTimetableActs({
   onAddTag,
   onAssignTag,
   onRemoveTag,
-}: AdminTimetableActsProps) {
+}: Readonly<AdminTimetableActsProps>) {
   const { t } = useTranslation();
   const [form, setForm] = useState<ActFormState | null>(null);
   const [formError, setFormError] = useState("");

@@ -38,7 +38,7 @@ export function AdminTimetableStages({
   onUpdate,
   onDelete,
   onMove,
-}: AdminTimetableStagesProps) {
+}: Readonly<AdminTimetableStagesProps>) {
   const { t } = useTranslation();
   const [form, setForm] = useState<StageFormState | null>(null);
   const [formError, setFormError] = useState("");
