@@ -216,6 +216,12 @@ export function AdminRandomPairings({
             const isDrawn = action.status === "drawn";
             const isSaving = savingActionId === action.id;
             const actionError = actionErrors[action.id] ?? "";
+            let drawLabel = t("admin.randomPairings.draw");
+            if (isSaving) {
+              drawLabel = t("common.saving");
+            } else if (isDrawn) {
+              drawLabel = t("admin.randomPairings.redraw");
+            }
 
             return (
               <article className="admin-random-pairing" key={action.id}>
@@ -242,11 +248,7 @@ export function AdminRandomPairings({
                       void drawAction(action);
                     }}
                   >
-                    {isSaving
-                      ? t("common.saving")
-                      : isDrawn
-                        ? t("admin.randomPairings.redraw")
-                        : t("admin.randomPairings.draw")}
+                    {drawLabel}
                   </button>
                 </div>
 

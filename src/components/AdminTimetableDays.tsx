@@ -219,9 +219,11 @@ export function AdminTimetableDays({
 
         {isLoading ? (
           <AdminLoadingNotice message={t("admin.timetable.days.loading")} />
-        ) : festivalDays.length === 0 ? (
+        ) : null}
+        {!isLoading && festivalDays.length === 0 ? (
           <p className="admin__notice">{t("admin.timetable.days.empty")}</p>
-        ) : (
+        ) : null}
+        {!isLoading && festivalDays.length > 0 ? (
           <div className="admin-categories__list">
             {festivalDays.map((festivalDay, index) => {
               const isBusy =
@@ -286,7 +288,7 @@ export function AdminTimetableDays({
               );
             })}
           </div>
-        )}
+        ) : null}
       </div>
     </>
   );

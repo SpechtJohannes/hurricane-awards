@@ -253,6 +253,12 @@ export function AdminFestivalDocuments({
           const inputId = `admin-document-${documentType}`;
           const isUploading = uploadingDocumentType === documentType;
           const isRemoving = removingDocumentType === documentType;
+          let uploadLabel = t("admin.documents.upload");
+          if (isUploading) {
+            uploadLabel = t("admin.documents.uploading");
+          } else if (document) {
+            uploadLabel = t("admin.documents.replace");
+          }
 
           return (
             <article className="admin-document-card" key={documentType}>
@@ -287,11 +293,7 @@ export function AdminFestivalDocuments({
                   className="admin-card__reset admin-card__reset--primary"
                   htmlFor={inputId}
                 >
-                  {isUploading
-                    ? t("admin.documents.uploading")
-                    : document
-                      ? t("admin.documents.replace")
-                      : t("admin.documents.upload")}
+                  {uploadLabel}
                 </label>
                 <input
                   id={inputId}

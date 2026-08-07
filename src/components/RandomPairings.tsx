@@ -40,9 +40,11 @@ export function RandomPairings({
 
       {isLoading ? (
         <p className="random-pairings__notice">{t("randomPairings.loading")}</p>
-      ) : assignments.length === 0 ? (
+      ) : null}
+      {!isLoading && assignments.length === 0 ? (
         <p className="random-pairings__notice">{t("randomPairings.empty")}</p>
-      ) : (
+      ) : null}
+      {!isLoading && assignments.length > 0 ? (
         <div className="random-pairings__list">
           {assignments.map((assignment) => (
             <article
@@ -55,7 +57,7 @@ export function RandomPairings({
             </article>
           ))}
         </div>
-      )}
+      ) : null}
     </section>
   );
 }

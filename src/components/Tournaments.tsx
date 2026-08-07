@@ -41,9 +41,11 @@ export function Tournaments({
 
       {isLoading ? (
         <p className="tournaments__notice">{t("tournaments.loading")}</p>
-      ) : tournaments.length === 0 ? (
+      ) : null}
+      {!isLoading && tournaments.length === 0 ? (
         <p className="tournaments__notice">{t("tournaments.empty")}</p>
-      ) : (
+      ) : null}
+      {!isLoading && tournaments.length > 0 ? (
         <div className="tournaments__list">
           {tournaments.map((tournament) => (
             <article className="tournament-card" key={tournament.id}>
@@ -61,7 +63,7 @@ export function Tournaments({
             </article>
           ))}
         </div>
-      )}
+      ) : null}
     </section>
   );
 }

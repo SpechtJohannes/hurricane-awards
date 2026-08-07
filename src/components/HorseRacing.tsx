@@ -33,15 +33,16 @@ export function HorseRacing({
   const isEnabled = state?.isEnabled === true;
   const isOpen = isEnabled && state.bettingStatus === "open";
   const selectedSuit = state?.selectedSuit ?? null;
-  const notice = !isEnabled
-    ? t("horseRacing.disabled")
-    : isOpen
-      ? selectedSuit
-        ? t("horseRacing.openWithSelection")
-        : t("horseRacing.open")
-      : selectedSuit
-        ? t("horseRacing.closedWithSelection")
-        : t("horseRacing.closedWithoutSelection");
+  let notice = t("horseRacing.disabled");
+  if (isOpen) {
+    notice = selectedSuit
+      ? t("horseRacing.openWithSelection")
+      : t("horseRacing.open");
+  } else if (isEnabled) {
+    notice = selectedSuit
+      ? t("horseRacing.closedWithSelection")
+      : t("horseRacing.closedWithoutSelection");
+  }
 
   return (
     <section

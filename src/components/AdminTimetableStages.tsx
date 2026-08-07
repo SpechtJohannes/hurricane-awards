@@ -233,9 +233,11 @@ export function AdminTimetableStages({
 
         {isLoading ? (
           <AdminLoadingNotice message={t("admin.timetable.stages.loading")} />
-        ) : stages.length === 0 ? (
+        ) : null}
+        {!isLoading && stages.length === 0 ? (
           <p className="admin__notice">{t("admin.timetable.stages.empty")}</p>
-        ) : (
+        ) : null}
+        {!isLoading && stages.length > 0 ? (
           <div className="admin-categories__list">
             {stages.map((stage, index) => {
               const isBusy =
@@ -311,7 +313,7 @@ export function AdminTimetableStages({
               );
             })}
           </div>
-        )}
+        ) : null}
       </div>
     </>
   );
