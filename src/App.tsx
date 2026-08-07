@@ -1192,8 +1192,7 @@ function TimetableSection({
       ) : null}
       {!isLoading &&
       !error &&
-      timetable &&
-      timetable.performances.length === 0 ? (
+      timetable?.performances.length === 0 ? (
         <p className="timetable__notice">{t("timetable.empty")}</p>
       ) : null}
       {!isLoading &&
@@ -3697,7 +3696,7 @@ function App() {
         await suggestParticipantAccessCode(adminContext);
 
       setParticipantForm((currentForm) =>
-        currentForm && currentForm.id === null
+        currentForm?.id === null
           ? { ...currentForm, accessCode: suggestedAccessCode }
           : currentForm,
       );
