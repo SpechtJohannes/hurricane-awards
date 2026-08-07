@@ -1608,7 +1608,31 @@ function AvatarPicker({
   );
 }
 
-function AuthenticatedProfile(props: ProfileSectionProps & { participant: Participant }) {
+type AuthenticatedProfileProps = Omit<
+  ProfileSectionProps,
+  | "selectedParticipant"
+  | "accessCode"
+  | "accessCodeError"
+  | "isSubmittingAccessCode"
+  | "isLoginLocked"
+  | "loginLockRemainingSeconds"
+  | "onBack"
+  | "onSubmitAccessCode"
+  | "onAccessCodeChange"
+> & { participant: Participant };
+
+type ParticipantLoginProps = Pick<
+  ProfileSectionProps,
+  | "accessCode"
+  | "accessCodeError"
+  | "isSubmittingAccessCode"
+  | "isLoginLocked"
+  | "loginLockRemainingSeconds"
+  | "onSubmitAccessCode"
+  | "onAccessCodeChange"
+>;
+
+function AuthenticatedProfile(props: Readonly<AuthenticatedProfileProps>) {
   const { t } = useTranslation();
   const displayName = props.profileDisplayName.trim() || props.participant.displayName;
 
@@ -1637,7 +1661,7 @@ function AuthenticatedProfile(props: ProfileSectionProps & { participant: Partic
   );
 }
 
-function ParticipantLogin(props: Readonly<ProfileSectionProps>) {
+function ParticipantLogin(props: Readonly<ParticipantLoginProps>) {
   const { t } = useTranslation();
   const isDisabled = props.isSubmittingAccessCode || props.isLoginLocked;
 
