@@ -5,7 +5,6 @@ import {
   useState,
   type CSSProperties,
   type SubmitEvent,
-  type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -957,18 +956,6 @@ function stageColorStyle(color: string | null): CSSProperties | undefined {
         "--stage-color": color,
       } as CSSProperties)
     : undefined;
-}
-
-function renderWhen(condition: boolean, render: () => ReactNode): ReactNode {
-  return condition ? render() : null;
-}
-
-function renderEither(
-  condition: boolean,
-  renderTruthy: () => ReactNode,
-  renderFalsy: () => ReactNode,
-): ReactNode {
-  return condition ? renderTruthy() : renderFalsy();
 }
 
 function isAuthenticatedSection(
@@ -5209,7 +5196,7 @@ function App() {
         <div className="app-header__actions">
           <PwaInstallPrompt />
           <LanguageSwitcher />
-          {renderWhen(Boolean(selectedParticipant?.isAdmin), () => (
+          {Boolean(selectedParticipant?.isAdmin) && (
             <button
               className="hero__admin"
               type="button"
@@ -5229,11 +5216,11 @@ function App() {
                 {isAdminVisible ? t("hero.adminClose") : t("hero.admin")}
               </span>
             </button>
-          ))}
+          )}
         </div>
       </header>
 
-      {renderWhen(isAdminAreaVisible(selectedParticipant, isAdminVisible), () => (
+      {isAdminAreaVisible(selectedParticipant, isAdminVisible) && (
         <section
           className="admin"
           id="admin"
@@ -5477,9 +5464,9 @@ function App() {
             />
           ) : null}
         </section>
-      ))}
+      )}
 
-      {renderWhen(activeMainSection === "dashboard", () => (
+      {activeMainSection === "dashboard" && (
         <DashboardSection
           festivalName={displayedFestivalName}
           eventLogoUrl={eventLogoUrl}
@@ -5495,9 +5482,9 @@ function App() {
           activeCategory={openCategories[0] ?? null}
           onNavigate={navigateMainSection}
         />
-      ))}
+      )}
 
-      {renderWhen(activeMainSection === "profile", () => (
+      {activeMainSection === "profile" && (
         <ProfileSection
           selectedParticipant={selectedParticipant}
           profileAvatarId={profileAvatarId}
@@ -5549,9 +5536,9 @@ function App() {
             setAccessCodeError("");
           }}
         />
-      ))}
+      )}
 
-      {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "games"), () => (
+      {isAuthenticatedSection(selectedParticipant, activeMainSection, "games") && (
         <GamesSection
           activeSection={activeGameSection}
           bingoCard={bingoCard}
@@ -5570,9 +5557,9 @@ function App() {
           onToggleBingoNumber={toggleBingoNumber}
           onSelectHorseRacingSuit={selectHorseRacingSuit}
         />
-      ))}
+      )}
 
-      {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "timetable"), () => (
+      {isAuthenticatedSection(selectedParticipant, activeMainSection, "timetable") && (
         <TimetableSection
           timetable={timetable}
           error={timetableError}
@@ -5582,10 +5569,10 @@ function App() {
           onBackToDashboard={() => navigateMainSection("dashboard")}
           onToggleFavorite={toggleTimetableFavorite}
         />
-      ))}
+      )}
 
-      {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "artists"), () => (
-        renderEither(Boolean(selectedArtistId), () => (
+      {isAuthenticatedSection(selectedParticipant, activeMainSection, "artists") && (
+        selectedArtistId ? (
           <ArtistDetail
             timetable={timetable}
             actId={selectedArtistId!}
@@ -5603,7 +5590,7 @@ function App() {
             }
             onToggleFavorite={toggleArtistFavorite}
           />
-        ), () => (
+        ) : (
           <Artists
             acts={timetable?.acts ?? null}
             artistTags={actArtistTags}
@@ -5627,10 +5614,10 @@ function App() {
             onToggleFavorite={toggleArtistFavorite}
             onOpenProfile={() => navigateMainSection("profile")}
           />
-        ))
-      ))}
+        )
+      )}
 
-      {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "info"), () => (
+      {isAuthenticatedSection(selectedParticipant, activeMainSection, "info") && (
         <FestivalInfo
           documents={festivalDocuments}
           campLocationLink={campLocationLink}
@@ -5645,9 +5632,9 @@ function App() {
           }
           onOpenCampLocation={openCampLocationLink}
         />
-      ))}
+      )}
 
-      {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "voting"), () => (
+      {isAuthenticatedSection(selectedParticipant, activeMainSection, "voting") && (
         <VotingSection
           participant={selectedParticipant!}
           participants={participants}
@@ -5664,9 +5651,9 @@ function App() {
           onSelectVote={selectVote}
           onSubmitVote={submitVote}
         />
-      ))}
+      )}
 
-      {renderWhen(isAuthenticatedSection(selectedParticipant, activeMainSection, "awards"), () => (
+      {isAuthenticatedSection(selectedParticipant, activeMainSection, "awards") && (
         <AwardsSection
           resultsError={resultsError}
           hasVotes={hasVotes}
@@ -5676,7 +5663,7 @@ function App() {
           standings={allTimeStandings}
           onBack={() => navigateMainSection("dashboard")}
         />
-      ))}
+      )}
       <AppFooter />
     </main>
   );
