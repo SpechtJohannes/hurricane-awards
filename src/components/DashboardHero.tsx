@@ -123,14 +123,14 @@ export function DashboardHero({
 
       <div className="dashboard-hero__modules">
         <WeatherCard participantAccessCode={participantAccessCode} />
-        {showEventStatus ? (
-          eventStartDate && eventEndDate ? (
+        {showEventStatus && eventStartDate && eventEndDate ? (
             <EventStatusCard
               startDate={eventStartDate}
               endDate={eventEndDate}
               referenceInstant={referenceInstant}
             />
-          ) : (
+        ) : null}
+        {showEventStatus && (!eventStartDate || !eventEndDate) ? (
             <article
               className="dashboard-event-status"
               aria-label={t("dashboard.eventStatus.label")}
@@ -138,7 +138,6 @@ export function DashboardHero({
               <span>{t("dashboard.eventStatus.label")}</span>
               <strong>{t("dashboard.eventStatus.missing")}</strong>
             </article>
-          )
         ) : null}
 
         {nextFavorite && act && stage && favoriteTime ? (

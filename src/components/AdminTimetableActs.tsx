@@ -261,9 +261,11 @@ export function AdminTimetableActs({
 
         {isLoading ? (
           <AdminLoadingNotice message={t("admin.timetable.acts.loading")} />
-        ) : acts.length === 0 ? (
+        ) : null}
+        {!isLoading && acts.length === 0 ? (
           <p className="admin__notice">{t("admin.timetable.acts.empty")}</p>
-        ) : (
+        ) : null}
+        {!isLoading && acts.length > 0 ? (
           <div className="admin-categories__list">
             {acts.map((act) => (
               <article className="admin-category-card" key={act.id}>
@@ -381,7 +383,7 @@ export function AdminTimetableActs({
               </article>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
     </>
   );

@@ -322,11 +322,13 @@ export function AdminTimetablePerformances({
           <AdminLoadingNotice
             message={t("admin.timetable.performances.loading")}
           />
-        ) : performances.length === 0 ? (
+        ) : null}
+        {!isLoading && performances.length === 0 ? (
           <p className="admin__notice">
             {t("admin.timetable.performances.empty")}
           </p>
-        ) : (
+        ) : null}
+        {!isLoading && performances.length > 0 ? (
           <div className="admin-categories__list">
             {performances.map((performance) => (
               <article className="admin-category-card" key={performance.id}>
@@ -390,7 +392,7 @@ export function AdminTimetablePerformances({
               </article>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
     </section>
   );

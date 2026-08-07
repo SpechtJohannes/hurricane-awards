@@ -33,6 +33,13 @@ export function AdminHorseRacing({
   const bettingStatus = state?.bettingStatus ?? "closed";
   const isBettingOpen = isEnabled && bettingStatus === "open";
   const isDisabled = isLoading || isSaving;
+  let status = t("admin.horseRacing.disabled");
+  if (isEnabled) {
+    status = t(
+      isBettingOpen ? "admin.horseRacing.open" : "admin.horseRacing.closed",
+      { count: state?.betCount ?? 0 },
+    );
+  }
 
   async function updateState(input: {
     isEnabled: boolean;
@@ -62,15 +69,7 @@ export function AdminHorseRacing({
           </p>
         ) : (
           <p className="admin-bingo__status">
-            {isEnabled
-              ? isBettingOpen
-                ? t("admin.horseRacing.open", {
-                    count: state?.betCount ?? 0,
-                  })
-                : t("admin.horseRacing.closed", {
-                    count: state?.betCount ?? 0,
-                  })
-              : t("admin.horseRacing.disabled")}
+            {status}
           </p>
         )}
 

@@ -59,15 +59,17 @@ export function AdminBingo({
       <div className="admin-bingo">
         {isLoading ? (
           <p className="admin-bingo__status">{t("admin.bingo.loading")}</p>
-        ) : round ? (
+        ) : null}
+        {!isLoading && round ? (
           <p className="admin-bingo__status">
             {t("admin.bingo.active", {
               startedAt: new Date(round.startedAt).toLocaleString(),
             })}
           </p>
-        ) : (
+        ) : null}
+        {!isLoading && !round ? (
           <p className="admin-bingo__status">{t("admin.bingo.inactive")}</p>
-        )}
+        ) : null}
 
         {error ? (
           <p className="admin-participant-form__error" role="alert">
