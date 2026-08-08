@@ -4,6 +4,36 @@ All notable changes between releases of this project are documented in this file
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+
+## 1.9.0
+
+### Codequalität und Wartbarkeit
+
+Diese Version konzentriert sich auf die technische Qualität und Wartbarkeit der Anwendung.
+
+#### SonarQube und Codequalität
+
+* SonarQube Findings im bestehenden Code systematisch bereinigt
+* Cognitive Complexity in komplexen Funktionen reduziert
+* Redundanten und unnötig verschachtelten Code vereinfacht
+* Veraltete und nicht mehr empfohlene TypeScript Muster ersetzt
+* Typdefinitionen und Zugriffe vereinfacht
+* Lesbarkeit und Wartbarkeit verschiedener Komponenten verbessert
+* Weitere kleinere Code Smells und Maintainability Findings beseitigt
+* SonarQube Quality Gate vollständig erfüllt
+
+#### Tests und Qualitätssicherung
+
+* Bestehende Tests im Zuge der Refactorings angepasst und stabilisiert
+* Testabdeckung auf hohem Niveau gehalten
+* 379 automatisierte Tests erfolgreich
+* Coverage von über 80 Prozent für Statements und Lines
+* Linting, TypeScript Prüfung und Test Suite erfolgreich
+
+### Technisches Ergebnis
+
+Mit Version 1.9.0 ist die Anwendung technisch für die nächsten größeren funktionalen Änderungen vorbereitet. Der bestehende SonarQube Bestand wurde bereinigt und die Codebasis hinsichtlich Wartbarkeit, Lesbarkeit und Testbarkeit verbessert.
+
 ## 1.7.0
 
 ### Neu
