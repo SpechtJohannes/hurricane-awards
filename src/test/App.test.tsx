@@ -3208,9 +3208,7 @@ describe("Login", () => {
       const input = screen.getByRole("textbox", { name: /^teilnehmercode$/i });
 
       fireEvent.change(input, { target: { value: code } });
-      await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: /code/i }));
-      });
+      await user.click(screen.getByRole("button", { name: /code/i }));
     }
 
     expect(screen.getByText(/warte kurz/i)).toBeVisible();
@@ -3253,9 +3251,7 @@ describe("Login", () => {
         target: { value: "FALSCH" },
       },
     );
-    await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /code/i }));
-    });
+    await user.click(screen.getByRole("button", { name: /code/i }));
 
     expect(screen.getByRole("button", { name: /code/i })).toBeDisabled();
     expect(

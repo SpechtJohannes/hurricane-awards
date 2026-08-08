@@ -44,7 +44,7 @@ function spotifyPlaylistIdFromUrl(link: string): string | null {
 }
 
 function spotifyPlaylistIdFromUri(link: string): string | null {
-  const match = link.match(/^spotify:playlist:([A-Za-z0-9]{22})$/);
+  const match = /^spotify:playlist:([A-Za-z0-9]{22})$/.exec(link);
 
   return match?.[1] ?? null;
 }
