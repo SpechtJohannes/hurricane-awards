@@ -3,7 +3,7 @@ import { loadFestivalName } from "./festival";
 import { trimTrailingHyphens } from "./fileNames";
 import { loadAdminParticipants, type Participant } from "./participants";
 import { loadVotes, type Vote } from "./votes";
-import type { AdminAccessContext } from "./accessContext";
+import type { ParticipantAccessContext } from "./accessContext";
 
 export const festivalExportFormatVersion = 1;
 
@@ -51,7 +51,7 @@ export type CreateFestivalExportInput = {
 };
 
 export async function loadFestivalExportData(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
   festivalSource: FestivalExportSource,
   exportedAt = new Date(),
   options: FestivalExportOptions = {},

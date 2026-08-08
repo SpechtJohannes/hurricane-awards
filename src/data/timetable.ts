@@ -1,7 +1,6 @@
 import { getSupabase } from "../lib/supabase";
 import {
   participantRpcParams,
-  type AdminAccessContext,
   type ParticipantAccessContext,
 } from "./accessContext";
 
@@ -265,7 +264,7 @@ export async function removeTimetableFavorite(
 }
 
 export async function loadAdminFestivalDays(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<FestivalDay[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc(
@@ -282,7 +281,7 @@ export async function loadAdminFestivalDays(
 
 export async function createFestivalDay(
   input: CreateFestivalDayInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<FestivalDay> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc("ha_create_festival_day", {
@@ -303,7 +302,7 @@ export async function createFestivalDay(
 
 export async function updateFestivalDay(
   input: UpdateFestivalDayInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<FestivalDay> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc("ha_update_festival_day", {
@@ -325,7 +324,7 @@ export async function updateFestivalDay(
 
 export async function deleteFestivalDay(
   festivalDayId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<void> {
   const supabase = getSupabase();
   const { error } = await supabase.rpc("ha_delete_festival_day", {
@@ -339,7 +338,7 @@ export async function deleteFestivalDay(
 }
 
 export async function loadAdminTimetableStages(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<TimetableStage[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc(
@@ -356,7 +355,7 @@ export async function loadAdminTimetableStages(
 
 export async function createTimetableStage(
   input: CreateTimetableStageInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<TimetableStage> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc("ha_create_timetable_stage", {
@@ -375,7 +374,7 @@ export async function createTimetableStage(
 
 export async function updateTimetableStage(
   input: UpdateTimetableStageInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<TimetableStage> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc("ha_update_timetable_stage", {
@@ -395,7 +394,7 @@ export async function updateTimetableStage(
 
 export async function deleteTimetableStage(
   stageId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<void> {
   const supabase = getSupabase();
   const { error } = await supabase.rpc("ha_delete_timetable_stage", {
@@ -409,7 +408,7 @@ export async function deleteTimetableStage(
 }
 
 export async function loadAdminTimetableActs(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<TimetableAct[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc(
@@ -426,7 +425,7 @@ export async function loadAdminTimetableActs(
 
 export async function createTimetableAct(
   input: CreateTimetableActInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<TimetableAct> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc("ha_create_timetable_act", {
@@ -444,7 +443,7 @@ export async function createTimetableAct(
 
 export async function updateTimetableAct(
   input: UpdateTimetableActInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<TimetableAct> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc("ha_update_timetable_act", {
@@ -463,7 +462,7 @@ export async function updateTimetableAct(
 
 export async function deleteTimetableAct(
   actId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<void> {
   const supabase = getSupabase();
   const { error } = await supabase.rpc("ha_delete_timetable_act", {
@@ -477,7 +476,7 @@ export async function deleteTimetableAct(
 }
 
 export async function loadAdminTimetablePerformances(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<TimetablePerformance[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc(
@@ -494,7 +493,7 @@ export async function loadAdminTimetablePerformances(
 
 export async function createTimetablePerformance(
   input: CreateTimetablePerformanceInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<TimetablePerformance> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc(
@@ -520,7 +519,7 @@ export async function createTimetablePerformance(
 
 export async function updateTimetablePerformance(
   input: UpdateTimetablePerformanceInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<TimetablePerformance> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc(
@@ -547,7 +546,7 @@ export async function updateTimetablePerformance(
 
 export async function deleteTimetablePerformance(
   performanceId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<void> {
   const supabase = getSupabase();
   const { error } = await supabase.rpc("ha_delete_timetable_performance", {

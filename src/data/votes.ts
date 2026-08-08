@@ -1,7 +1,6 @@
 import { getSupabase } from "../lib/supabase";
 import {
   participantRpcParams,
-  type AdminAccessContext,
   type ParticipantAccessContext,
 } from "./accessContext";
 
@@ -65,7 +64,7 @@ export async function loadVotes(
 
 export async function deleteVotesForCategory(
   categoryId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<void> {
   const supabase = getSupabase();
 

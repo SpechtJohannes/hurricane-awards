@@ -1,7 +1,6 @@
 import { getSupabase } from "../lib/supabase";
 import {
   participantRpcParams,
-  type AdminAccessContext,
   type ParticipantAccessContext,
 } from "./accessContext";
 
@@ -108,7 +107,7 @@ export async function setBingoMark(
 }
 
 export async function loadAdminBingoRound(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<BingoRound | null> {
   const supabase = getSupabase();
 
@@ -127,7 +126,7 @@ export async function loadAdminBingoRound(
 }
 
 export async function startBingoRound(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<BingoRound> {
   const supabase = getSupabase();
 
@@ -150,7 +149,7 @@ export async function startBingoRound(
 }
 
 export async function closeBingoRound(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<void> {
   const supabase = getSupabase();
 

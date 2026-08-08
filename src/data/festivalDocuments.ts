@@ -1,7 +1,6 @@
 import { getSupabase } from "../lib/supabase";
 import {
   participantRpcParams,
-  type AdminAccessContext,
   type ParticipantAccessContext,
 } from "./accessContext";
 import { trimTrailingHyphens } from "./fileNames";
@@ -191,7 +190,7 @@ export async function loadFestivalDocuments(
 }
 
 export async function loadAdminFestivalDocuments(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<FestivalDocument[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc(
@@ -208,7 +207,7 @@ export async function loadAdminFestivalDocuments(
 
 export async function uploadFestivalDocument(
   input: UploadFestivalDocumentInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<FestivalDocument> {
   if (!isSupportedFestivalDocumentFile(input.file)) {
     throw new Error("unsupported document file type");
@@ -259,7 +258,7 @@ export async function uploadFestivalDocument(
 
 export async function deleteFestivalDocument(
   documentType: FestivalDocumentType,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<void> {
   const supabase = getSupabase();
   const { error } = await supabase.rpc("ha_delete_festival_document", {
@@ -289,7 +288,7 @@ export async function loadCampLocation(
 }
 
 export async function loadAdminCampLocation(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<CampLocation | null> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc(
@@ -312,7 +311,7 @@ export async function loadCampLocationLink(context: ParticipantAccessContext): P
   return mapCampLocation(data)?.mapUrl ?? null;
 }
 
-export async function loadAdminCampLocationLink(context: AdminAccessContext): Promise<CampLocationLink> {
+export async function loadAdminCampLocationLink(context: ParticipantAccessContext): Promise<CampLocationLink> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc("ha_admin_get_camp_location_link", participantRpcParams(context));
   if (error) throw error;
@@ -322,8 +321,8 @@ export async function loadAdminCampLocationLink(context: AdminAccessContext): Pr
 
 export async function updateCampLocationLink(
   link: string,
-  locationOrContext: Omit<CampLocation, "mapUrl"> | AdminAccessContext,
-  possibleContext?: AdminAccessContext,
+  locationOrContext: Omit<CampLocation, "mapUrl"> | ParticipantAccessContext,
+  possibleContext?: ParticipantAccessContext,
 ): Promise<string> {
   const normalizedLink = link.trim();
 
@@ -331,7 +330,7 @@ export async function updateCampLocationLink(
     throw new Error("unsupported camp location link");
   }
 
-  const context = possibleContext ?? (locationOrContext as AdminAccessContext);
+  const context = possibleContext ?? (locationOrContext as ParticipantAccessContext);
   const location = possibleContext ? locationOrContext as Omit<CampLocation, "mapUrl"> : null;
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc("ha_update_camp_location_link", {
@@ -358,7 +357,7 @@ export class GeocodingNotFoundError extends Error {
   }
 }
 
-export async function geocodeCampLocation(query: string, context: AdminAccessContext) {
+export async function geocodeCampLocation(query: string, context: ParticipantAccessContext) {
   const { data, error } = await getSupabase().functions.invoke("geocode_camp_location", {
     body: { participantAccessCode: context.participantAccessCode, query: query.trim() },
   });
@@ -370,7 +369,7 @@ export async function geocodeCampLocation(query: string, context: AdminAccessCon
 }
 
 export async function deleteCampLocationLink(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<void> {
   const supabase = getSupabase();
   const { error } = await supabase.rpc(

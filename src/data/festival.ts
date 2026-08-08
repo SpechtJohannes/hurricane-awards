@@ -1,5 +1,5 @@
 import { getSupabase } from "../lib/supabase";
-import { participantRpcParams, type AdminAccessContext } from "./accessContext";
+import { participantRpcParams, type ParticipantAccessContext } from "./accessContext";
 import { eventLogoPublicUrl } from "./festivalLogo";
 
 type FestivalAccessCodeRow = {
@@ -56,7 +56,7 @@ export async function loadEventSettings(): Promise<EventSettings> {
 
 export async function updateEventSettings(
   settings: EventSettings,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<EventSettings> {
   const { data, error } = await getSupabase().rpc(
     "ha_admin_update_event_settings",
@@ -111,7 +111,7 @@ export async function loadFestivalName(): Promise<string> {
 
 export async function updateFestivalName(
   name: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<string> {
   const supabase = getSupabase();
 
@@ -156,7 +156,7 @@ export async function verifyFestivalAccessCode(
 }
 
 export async function loadFestivalAccessCode(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<FestivalAccessCodeSettings> {
   const supabase = getSupabase();
 
@@ -174,7 +174,7 @@ export async function loadFestivalAccessCode(
 
 export async function updateFestivalAccessCode(
   code: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<FestivalAccessCodeSettings> {
   const supabase = getSupabase();
 
