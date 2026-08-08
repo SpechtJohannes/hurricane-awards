@@ -4,6 +4,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type ReactNode,
   type SubmitEvent,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -534,6 +535,37 @@ type AdminSection =
   | "games"
   | "info"
   | "archive";
+
+function ActiveAdminSection({
+  activeSection,
+  section,
+  children,
+}: {
+  activeSection: AdminSection;
+  section: AdminSection;
+  children: ReactNode;
+}) {
+  if (activeSection !== section) {
+    return null;
+  }
+
+  return children;
+}
+
+function AdminArea({
+  isVisible,
+  children,
+}: {
+  isVisible: boolean;
+  children: ReactNode;
+}) {
+  if (!isVisible) {
+    return null;
+  }
+
+  return children;
+}
+
 type GameSection = "bingo" | "horseRacing" | "randomPairings" | "tournaments";
 
 const mainSectionHashes: Record<Exclude<MainSection, "dashboard">, string> = {
@@ -2031,6 +2063,21 @@ function profileDashboardDetails(
       name: participant.displayName,
     },
   };
+}
+
+function legalPageForHash(
+  locationHash: string,
+  festivalName: string,
+): ReactNode | null {
+  if (locationHash === "#impressum") {
+    return <LegalNotice festivalName={festivalName} />;
+  }
+
+  if (locationHash === "#datenschutz") {
+    return <PrivacyNotice festivalName={festivalName} />;
+  }
+
+  return null;
 }
 
 function App() {
@@ -5160,12 +5207,10 @@ function App() {
     }
   }
 
-  if (locationHash === "#impressum") {
-    return <LegalNotice festivalName={displayedFestivalName} />;
-  }
+  const legalPage = legalPageForHash(locationHash, displayedFestivalName);
 
-  if (locationHash === "#datenschutz") {
-    return <PrivacyNotice festivalName={displayedFestivalName} />;
+  if (legalPage) {
+    return legalPage;
   }
 
   if (!festivalAccess.isUnlocked) {
@@ -5219,7 +5264,9 @@ function App() {
         </div>
       </header>
 
-      {isAdminAreaVisible(selectedParticipant, isAdminVisible) && (
+      <AdminArea
+        isVisible={isAdminAreaVisible(selectedParticipant, isAdminVisible)}
+      >
         <section
           className="admin"
           id="admin"
@@ -5244,7 +5291,10 @@ function App() {
             ))}
           </nav>
 
-          {activeAdminSection === "festival" ? (
+          <ActiveAdminSection
+            activeSection={activeAdminSection}
+            section="festival"
+          >
             <AdminFestival
               key={`festival-${festivalName}-${eventStartDate}-${eventEndDate}-${festivalCode}`}
               mode="settings"
@@ -5268,9 +5318,12 @@ function App() {
               onUploadLogo={uploadFestivalLogo}
               onRemoveLogo={removeFestivalLogo}
             />
-          ) : null}
+          </ActiveAdminSection>
 
-          {activeAdminSection === "participants" ? (
+          <ActiveAdminSection
+            activeSection={activeAdminSection}
+            section="participants"
+          >
             <AdminParticipants
               participants={adminParticipants}
               error={adminParticipantsError}
@@ -5288,9 +5341,9 @@ function App() {
               onDeactivate={deactivateAdminParticipant}
               onReactivate={reactivateAdminParticipant}
             />
-          ) : null}
+          </ActiveAdminSection>
 
-          {activeAdminSection === "awards" ? (
+          <ActiveAdminSection activeSection={activeAdminSection} section="awards">
             <>
               {adminError ? (
                 <p className="admin__notice">{adminError}</p>
@@ -5311,9 +5364,12 @@ function App() {
                 onDelete={deleteAdminCategory}
               />
             </>
-          ) : null}
+          </ActiveAdminSection>
 
-          {activeAdminSection === "timetable" ? (
+          <ActiveAdminSection
+            activeSection={activeAdminSection}
+            section="timetable"
+          >
             <>
               <AdminTimetableDays
                 festivalDays={adminFestivalDays}
@@ -5364,9 +5420,9 @@ function App() {
                 onDelete={deleteAdminTimetablePerformance}
               />
             </>
-          ) : null}
+          </ActiveAdminSection>
 
-          {activeAdminSection === "games" ? (
+          <ActiveAdminSection activeSection={activeAdminSection} section="games">
             <>
               <AdminBingo
                 round={adminBingoRound}
@@ -5410,9 +5466,9 @@ function App() {
                 onSetWinner={saveAdminTournamentMatchWinner}
               />
             </>
-          ) : null}
+          </ActiveAdminSection>
 
-          {activeAdminSection === "info" ? (
+          <ActiveAdminSection activeSection={activeAdminSection} section="info">
             <AdminFestivalDocuments
               key={`documents-${adminCampLocationLink ?? "empty"}`}
               documents={adminFestivalDocuments}
@@ -5435,9 +5491,12 @@ function App() {
               onUpload={uploadAdminFestivalDocument}
               onRemove={removeAdminFestivalDocument}
             />
-          ) : null}
+          </ActiveAdminSection>
 
-          {activeAdminSection === "archive" ? (
+          <ActiveAdminSection
+            activeSection={activeAdminSection}
+            section="archive"
+          >
             <AdminFestival
               key={`archive-${festivalName}-${festivalCode}`}
               mode="archive"
@@ -5461,9 +5520,9 @@ function App() {
               onUploadLogo={uploadFestivalLogo}
               onRemoveLogo={removeFestivalLogo}
             />
-          ) : null}
+          </ActiveAdminSection>
         </section>
-      )}
+      </AdminArea>
 
       {activeMainSection === "dashboard" && (
         <DashboardSection
