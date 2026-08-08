@@ -1,7 +1,6 @@
 import { getSupabase } from "../lib/supabase";
 import {
   participantRpcParams,
-  type AdminAccessContext,
   type ParticipantAccessContext,
 } from "./accessContext";
 import {
@@ -56,7 +55,7 @@ export async function loadMusicPlaylist(
 }
 
 export async function loadAdminMusicPlaylist(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<MusicPlaylist | null> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc(
@@ -73,7 +72,7 @@ export async function loadAdminMusicPlaylist(
 
 export async function updateMusicPlaylist(
   link: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<MusicPlaylist> {
   const normalizedPlaylist = normalizeSpotifyPlaylistLink(link);
 
@@ -95,7 +94,7 @@ export async function updateMusicPlaylist(
 }
 
 export async function deleteMusicPlaylist(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<void> {
   const supabase = getSupabase();
   const { error } = await supabase.rpc(

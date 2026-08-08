@@ -1,7 +1,6 @@
 import { getSupabase } from "../lib/supabase";
 import {
   participantRpcParams,
-  type AdminAccessContext,
   type ParticipantAccessContext,
 } from "./accessContext";
 
@@ -283,7 +282,7 @@ export async function loadTournaments(
 
 export async function loadAdminTournaments(
   festivalId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Tournament[]> {
   const supabase = getSupabase();
 
@@ -302,7 +301,7 @@ export async function loadAdminTournaments(
 export async function createTournament(
   festivalId: string,
   input: TournamentInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Tournament> {
   const supabase = getSupabase();
 
@@ -330,7 +329,7 @@ export async function createTournament(
 export async function updateTournament(
   tournamentId: string,
   input: TournamentInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Tournament> {
   const supabase = getSupabase();
 
@@ -358,7 +357,7 @@ export async function updateTournament(
 export async function updateTournamentQualificationRanking(
   tournamentId: string,
   participantIds: string[],
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Tournament> {
   const supabase = getSupabase();
 
@@ -386,7 +385,7 @@ export async function updateTournamentQualificationRanking(
 
 export async function deleteTournament(
   tournamentId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<void> {
   const supabase = getSupabase();
 
@@ -508,7 +507,7 @@ export async function setTournamentMatchWinner(
   tournamentId: string,
   matchId: string,
   winnerParticipantId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Tournament> {
   const supabase = getSupabase();
   const { data, error } = await supabase.rpc(

@@ -1,7 +1,6 @@
 import { getSupabase } from "../lib/supabase";
 import {
   participantRpcParams,
-  type AdminAccessContext,
   type ParticipantAccessContext,
 } from "./accessContext";
 
@@ -144,7 +143,7 @@ export async function loadRandomPairingAssignments(
 
 export async function loadAdminRandomPairingActions(
   festivalId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<AdminRandomPairingAction[]> {
   const supabase = getSupabase();
 
@@ -166,7 +165,7 @@ export async function loadAdminRandomPairingActions(
 export async function createRandomPairingAction(
   festivalId: string,
   name: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<AdminRandomPairingAction> {
   const supabase = getSupabase();
 
@@ -195,7 +194,7 @@ export async function createRandomPairingAction(
 export async function updateRandomPairingParticipants(
   actionId: string,
   participantIds: string[],
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<AdminRandomPairingAction> {
   const supabase = getSupabase();
 
@@ -224,7 +223,7 @@ export async function updateRandomPairingParticipants(
 export async function drawRandomPairingAction(
   actionId: string,
   replaceExisting: boolean,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<AdminRandomPairingAction> {
   const supabase = getSupabase();
 
@@ -253,7 +252,7 @@ export async function drawRandomPairingAction(
 export async function resetRandomPairingAction(
   festivalId: string,
   actionId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<AdminRandomPairingAction> {
   const supabase = getSupabase();
 

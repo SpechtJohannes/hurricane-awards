@@ -1,6 +1,6 @@
 import { activeFestival } from "../config/festivals";
 import { getSupabase } from "../lib/supabase";
-import { participantRpcParams, type AdminAccessContext } from "./accessContext";
+import { participantRpcParams, type ParticipantAccessContext } from "./accessContext";
 import { trimTrailingHyphens } from "./fileNames";
 
 export const eventLogoBucket = "event-logos";
@@ -47,7 +47,7 @@ function sanitizeFileName(fileName: string) {
 
 export async function uploadEventLogo(
   file: File,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<string> {
   if (!isSupportedEventLogoFile(file)) {
     throw new Error("unsupported event logo file type");
@@ -90,7 +90,7 @@ export async function uploadEventLogo(
   return String(data ?? slot.file_path);
 }
 
-export async function removeEventLogo(context: AdminAccessContext) {
+export async function removeEventLogo(context: ParticipantAccessContext) {
   const { error } = await getSupabase().rpc("ha_admin_remove_event_logo", {
     ...participantRpcParams(context),
     p_festival_id: activeFestival.id,

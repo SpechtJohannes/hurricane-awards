@@ -1,7 +1,6 @@
 import { getSupabase } from "../lib/supabase";
 import {
   participantRpcParams,
-  type AdminAccessContext,
   type ParticipantAccessContext,
 } from "./accessContext";
 
@@ -132,7 +131,7 @@ export async function saveHorseRacingBet(
 
 export async function loadAdminHorseRacingState(
   festivalId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<AdminHorseRacingState | null> {
   const supabase = getSupabase();
 
@@ -159,7 +158,7 @@ export async function updateAdminHorseRacingState(
     isEnabled: boolean;
     bettingStatus: HorseRacingBettingStatus;
   },
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<AdminHorseRacingState> {
   const supabase = getSupabase();
 
@@ -188,7 +187,7 @@ export async function updateAdminHorseRacingState(
 
 export async function loadAdminHorseRacingBets(
   festivalId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<AdminHorseRacingBet[]> {
   const supabase = getSupabase();
 

@@ -1,7 +1,6 @@
 import { getSupabase } from "../lib/supabase";
 import {
   participantRpcParams,
-  type AdminAccessContext,
   type ParticipantAccessContext,
 } from "./accessContext";
 
@@ -143,7 +142,7 @@ export async function loginParticipant(
 }
 
 export async function loadAdminParticipants(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Participant[]> {
   const supabase = getSupabase();
 
@@ -160,7 +159,7 @@ export async function loadAdminParticipants(
 }
 
 export async function suggestParticipantAccessCode(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<string> {
   const supabase = getSupabase();
 
@@ -178,7 +177,7 @@ export async function suggestParticipantAccessCode(
 
 export async function createParticipant(
   input: CreateParticipantInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Participant> {
   const supabase = getSupabase();
 
@@ -197,7 +196,7 @@ export async function createParticipant(
 
 export async function updateParticipant(
   input: UpdateParticipantInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Participant> {
   const supabase = getSupabase();
 
@@ -260,7 +259,7 @@ export async function updateOwnProfile(
 
 export async function deactivateParticipant(
   participantId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Participant> {
   const supabase = getSupabase();
 
@@ -278,7 +277,7 @@ export async function deactivateParticipant(
 
 export async function reactivateParticipant(
   participantId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Participant> {
   const supabase = getSupabase();
 

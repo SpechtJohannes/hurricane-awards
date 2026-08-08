@@ -1,5 +1,5 @@
 import { getSupabase } from "../lib/supabase";
-import { participantRpcParams, type AdminAccessContext, type ParticipantAccessContext } from "./accessContext";
+import { participantRpcParams, type ParticipantAccessContext } from "./accessContext";
 
 export type ArtistTag = { id: string; name: string };
 export type ActArtistTag = ArtistTag & { actId: string };
@@ -18,18 +18,18 @@ export async function loadActArtistTags(context: ParticipantAccessContext): Prom
   return ((data ?? []) as ActArtistTagRow[]).map(({ act_id, id, name }) => ({ actId: act_id, id, name }));
 }
 
-export async function addArtistTag(actId: string, name: string, context: AdminAccessContext): Promise<ArtistTag> {
+export async function addArtistTag(actId: string, name: string, context: ParticipantAccessContext): Promise<ArtistTag> {
   const { data, error } = await getSupabase().rpc("ha_admin_add_artist_tag", { ...participantRpcParams(context), p_act_id: actId, p_name: name });
   if (error) throw error;
   return (Array.isArray(data) ? data[0] : data) as ArtistTagRow;
 }
 
-export async function assignArtistTag(actId: string, tagId: string, context: AdminAccessContext): Promise<void> {
+export async function assignArtistTag(actId: string, tagId: string, context: ParticipantAccessContext): Promise<void> {
   const { error } = await getSupabase().rpc("ha_admin_assign_artist_tag", { ...participantRpcParams(context), p_act_id: actId, p_tag_id: tagId });
   if (error) throw error;
 }
 
-export async function removeArtistTag(actId: string, tagId: string, context: AdminAccessContext): Promise<void> {
+export async function removeArtistTag(actId: string, tagId: string, context: ParticipantAccessContext): Promise<void> {
   const { error } = await getSupabase().rpc("ha_admin_remove_artist_tag", { ...participantRpcParams(context), p_act_id: actId, p_tag_id: tagId });
   if (error) throw error;
 }

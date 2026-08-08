@@ -1,7 +1,6 @@
 import { getSupabase } from "../lib/supabase";
 import {
   participantRpcParams,
-  type AdminAccessContext,
   type ParticipantAccessContext,
 } from "./accessContext";
 
@@ -77,7 +76,7 @@ export async function loadCategories(
 }
 
 export async function loadAdminCategories(
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Category[]> {
   const supabase = getSupabase();
 
@@ -95,7 +94,7 @@ export async function loadAdminCategories(
 
 export async function createCategory(
   input: CreateCategoryInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Category> {
   const supabase = getSupabase();
 
@@ -117,7 +116,7 @@ export async function createCategory(
 export async function updateCategoryStatus(
   categoryId: string,
   status: CategoryStatus,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Category> {
   const supabase = getSupabase();
 
@@ -138,7 +137,7 @@ export async function updateCategoryStatus(
 
 export async function updateCategory(
   input: UpdateCategoryInput,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<Category> {
   const supabase = getSupabase();
 
@@ -160,7 +159,7 @@ export async function updateCategory(
 
 export async function deleteCategory(
   categoryId: string,
-  context: AdminAccessContext,
+  context: ParticipantAccessContext,
 ): Promise<void> {
   const supabase = getSupabase();
 
