@@ -67,6 +67,13 @@ const eventLogoMigration = readFileSync(
   ),
   "utf8",
 );
+const participantAreaVisibilityMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    "supabase/migrations/20260809080000_manage_participant_area_visibility.sql",
+  ),
+  "utf8",
+);
 const festivalArchiveMigration = readFileSync(
   resolve(
     process.cwd(),
@@ -649,6 +656,38 @@ describe("Supabase Sicherheitsmigration", () => {
       "event end date must not be before start date",
     );
     expect(eventPeriodMigration).toContain("notify pgrst, 'reload schema'");
+  });
+
+  it("speichert Sichtbarkeit mit sicheren Standardwerten und Adminschutz", () => {
+    expect(participantAreaVisibilityMigration).toContain(
+      "'participant_area_visibility'",
+    );
+    for (const area of [
+      "info",
+      "profile",
+      "timetable",
+      "artists",
+      "awards",
+      "voting",
+      "games",
+    ]) {
+      expect(participantAreaVisibilityMigration).toContain(`"${area}":true`);
+    }
+    expect(participantAreaVisibilityMigration).toContain(
+      "ha_get_participant_area_visibility",
+    );
+    expect(participantAreaVisibilityMigration).toContain(
+      "ha_admin_update_participant_area_visibility",
+    );
+    expect(participantAreaVisibilityMigration).toContain(
+      "if not public.ha_has_admin_access(p_participant_access_code) then",
+    );
+    expect(participantAreaVisibilityMigration).toContain(
+      "p_area_key not in",
+    );
+    expect(participantAreaVisibilityMigration).toContain(
+      "jsonb_set",
+    );
   });
 
   it("verwaltet Eventlogos ueber einen abgesicherten Storage Bucket", () => {

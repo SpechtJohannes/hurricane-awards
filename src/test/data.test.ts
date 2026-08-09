@@ -35,6 +35,10 @@ import {
   verifyFestivalAccessCode,
 } from "../data/festival";
 import {
+  loadParticipantAreaVisibility,
+  updateParticipantAreaVisibility,
+} from "../data/participantAreaVisibility";
+import {
   eventLogoMaxFileSize,
   eventLogoPublicUrl,
   isEventLogoFileSizeAllowed,
@@ -217,6 +221,48 @@ describe("Supabase Datenzugriffe", () => {
       logoPath: null,
       logoUrl: null,
     });
+  });
+
+  it("laedt und aktualisiert typisierte Teilnehmerbereich-Sichtbarkeit", async () => {
+    const row = {
+      info_visible: true,
+      profile_visible: false,
+      timetable_visible: true,
+      artists_visible: true,
+      awards_visible: true,
+      voting_visible: true,
+      games_visible: false,
+    };
+    rpcMock.mockResolvedValueOnce({ data: [row], error: null });
+
+    await expect(loadParticipantAreaVisibility()).resolves.toEqual({
+      info: true,
+      profile: false,
+      timetable: true,
+      artists: true,
+      awards: true,
+      voting: true,
+      games: false,
+    });
+    expect(rpcMock).toHaveBeenLastCalledWith(
+      "ha_get_participant_area_visibility",
+    );
+
+    rpcMock.mockResolvedValueOnce({
+      data: [{ ...row, profile_visible: true }],
+      error: null,
+    });
+    await updateParticipantAreaVisibility("profile", true, {
+      participantAccessCode: "ALICE42",
+    });
+    expect(rpcMock).toHaveBeenLastCalledWith(
+      "ha_admin_update_participant_area_visibility",
+      {
+        p_participant_access_code: "ALICE42",
+        p_area_key: "profile",
+        p_is_visible: true,
+      },
+    );
   });
 
   it("validiert und verwaltet Eventlogos ueber Storage und Admin RPCs", async () => {

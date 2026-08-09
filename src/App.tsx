@@ -192,6 +192,7 @@ import { AdminTimetableDays } from "./components/AdminTimetableDays";
 import { AdminTimetablePerformances } from "./components/AdminTimetablePerformances";
 import { AdminTimetableStages } from "./components/AdminTimetableStages";
 import { AdminView, CollapsibleAdminSection } from "./components/AdminView";
+import { AdminAreaVisibilitySettings } from "./components/AdminAreaVisibilitySettings";
 import { Bingo } from "./components/Bingo";
 import { HorseRacing } from "./components/HorseRacing";
 import { RandomPairings } from "./components/RandomPairings";
@@ -209,6 +210,12 @@ import { avatars } from "./config/avatars";
 import i18n from "./i18n";
 import { supportedLanguages, type SupportedLanguage } from "./i18n";
 import { determineEventPhase } from "./domain/eventPhase";
+import {
+  defaultParticipantAreaVisibility,
+  loadParticipantAreaVisibility,
+  updateParticipantAreaVisibility,
+  type ParticipantAreaKey,
+} from "./data/participantAreaVisibility";
 import type { EventPhase } from "./domain/eventPhase";
 import {
   dashboardModuleConfig,
@@ -2256,6 +2263,17 @@ function App() {
   const [isAdminVisible, setIsAdminVisible] = useState(
     () => Boolean(selectedParticipant?.isAdmin) && window.location.hash === "#admin",
   );
+  const [participantAreaVisibility, setParticipantAreaVisibility] = useState(
+    defaultParticipantAreaVisibility,
+  );
+  const [isLoadingAreaVisibility, setIsLoadingAreaVisibility] = useState(
+    () => Boolean(selectedParticipant?.isAdmin) && window.location.hash === "#admin",
+  );
+  const [savingVisibilityArea, setSavingVisibilityArea] =
+    useState<ParticipantAreaKey | null>(null);
+  const [savedVisibilityArea, setSavedVisibilityArea] =
+    useState<ParticipantAreaKey | null>(null);
+  const [areaVisibilityError, setAreaVisibilityError] = useState("");
   const [activeMainSection, setActiveMainSection] = useState<MainSection>(
     () => mainSectionFromHash(window.location.hash) ?? "dashboard",
   );
@@ -2355,6 +2373,28 @@ function App() {
       window.removeEventListener("hashchange", handleHashChange);
     };
   }, [selectedParticipant]);
+
+  useEffect(() => {
+    if (!isAdminVisible || !selectedParticipant?.isAdmin) return;
+
+    let isCurrent = true;
+    void loadParticipantAreaVisibility()
+      .then((visibility) => {
+        if (isCurrent) setParticipantAreaVisibility(visibility);
+      })
+      .catch(() => {
+        if (isCurrent) {
+          setAreaVisibilityError(i18n.t("admin.visibility.errors.load"));
+        }
+      })
+      .finally(() => {
+        if (isCurrent) setIsLoadingAreaVisibility(false);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [isAdminVisible, selectedParticipant?.isAdmin]);
 
   function navigateMainSection(section: MainSection) {
     const hash = section === "dashboard" ? "" : mainSectionHashes[section];
@@ -2985,6 +3025,8 @@ function App() {
     }
 
     setIsAdminVisible(true);
+    setIsLoadingAreaVisibility(true);
+    setAreaVisibilityError("");
     window.location.hash = "#admin";
     void reloadFestivalCode();
     void reloadAdminCategories();
@@ -3002,6 +3044,45 @@ function App() {
     void reloadAdminHorseRacing();
     void reloadAdminRandomPairings();
     void reloadAdminTournaments();
+  }
+
+  async function changeParticipantAreaVisibility(
+    area: ParticipantAreaKey,
+    isVisible: boolean,
+  ) {
+    const context = getParticipantAdminContext();
+    if (!context) return;
+
+    setSavingVisibilityArea(area);
+    setSavedVisibilityArea(null);
+    setAreaVisibilityError("");
+    try {
+      const visibility = await updateParticipantAreaVisibility(
+        area,
+        isVisible,
+        context,
+      );
+      setParticipantAreaVisibility(visibility);
+      setSavedVisibilityArea(area);
+    } catch {
+      setAreaVisibilityError(t("admin.visibility.errors.save"));
+    } finally {
+      setSavingVisibilityArea(null);
+    }
+  }
+
+  function areaVisibilitySettings(areas: ParticipantAreaKey[]) {
+    return (
+      <AdminAreaVisibilitySettings
+        areas={areas}
+        visibility={participantAreaVisibility}
+        isLoading={isLoadingAreaVisibility}
+        savingArea={savingVisibilityArea}
+        savedArea={savedVisibilityArea}
+        error={areaVisibilityError}
+        onChange={changeParticipantAreaVisibility}
+      />
+    );
   }
 
   function closeAdminView() {
@@ -5264,6 +5345,7 @@ function App() {
             id="participants"
             title={t("admin.navigation.participants")}
           >
+            {areaVisibilitySettings(["profile"])}
             <AdminParticipants
               participants={adminParticipants}
               error={adminParticipantsError}
@@ -5288,6 +5370,7 @@ function App() {
             title={t("admin.navigation.awards")}
           >
             <>
+              {areaVisibilitySettings(["awards", "voting"])}
               {adminError ? (
                 <p className="admin__notice">{adminError}</p>
               ) : null}
@@ -5314,6 +5397,7 @@ function App() {
             title={t("admin.navigation.timetable")}
           >
             <>
+              {areaVisibilitySettings(["timetable", "artists"])}
               <AdminTimetableDays
                 festivalDays={adminFestivalDays}
                 error={adminFestivalDaysError}
@@ -5370,6 +5454,7 @@ function App() {
             title={t("admin.navigation.games")}
           >
             <>
+              {areaVisibilitySettings(["games"])}
               <AdminBingo
                 round={adminBingoRound}
                 error={adminBingoError}
@@ -5418,6 +5503,7 @@ function App() {
             id="info"
             title={t("admin.navigation.info")}
           >
+            {areaVisibilitySettings(["info"])}
             <AdminFestivalDocuments
               key={`documents-${adminCampLocationLink ?? "empty"}`}
               documents={adminFestivalDocuments}

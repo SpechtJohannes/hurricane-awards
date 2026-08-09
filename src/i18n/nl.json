@@ -331,6 +331,26 @@
     "eyebrow": "Admin",
     "viewTitle": "Administratie",
     "backToApp": "Terug naar de app",
+    "visibility": {
+      "legend": "Zichtbaarheid voor deelnemers",
+      "visible": "Zichtbaar voor deelnemers",
+      "hidden": "Verborgen voor deelnemers",
+      "loading": "Zichtbaarheid wordt geladen...",
+      "saved": "De zichtbaarheid is opgeslagen.",
+      "areas": {
+        "info": "Info",
+        "profile": "Profiel",
+        "timetable": "Timetable",
+        "artists": "Artiesten",
+        "awards": "Awards",
+        "voting": "Stemmingen",
+        "games": "Spellen"
+      },
+      "errors": {
+        "load": "De zichtbaarheidsinstellingen konden niet worden geladen.",
+        "save": "De zichtbaarheidsinstelling kon niet worden opgeslagen."
+      }
+    },
     "title": "Categorieën",
     "changeStatus": "Status wijzigen",
     "navigation": {

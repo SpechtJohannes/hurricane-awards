@@ -1635,6 +1635,55 @@ h1 {
   display: none;
 }
 
+.admin-visibility {
+  display: grid;
+  width: min(100%, 960px);
+  padding: 16px;
+  margin: 0 auto 18px;
+  gap: 10px;
+  background: rgba(246, 195, 68, 0.06);
+  border: 1px solid rgba(246, 195, 68, 0.26);
+  border-radius: 8px;
+}
+
+.admin-visibility legend {
+  padding: 0 6px;
+  color: var(--color-accent);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.admin-visibility__option {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+}
+
+.admin-visibility__option > span {
+  display: grid;
+  gap: 3px;
+}
+
+.admin-visibility__option small {
+  color: var(--color-text-secondary);
+  font-weight: 650;
+}
+
+.admin-visibility__option input {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  accent-color: var(--color-accent);
+}
+
+.admin-visibility__option input:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
 @media (max-width: 640px) {
   .admin-view {
     padding: 28px 16px 48px;
