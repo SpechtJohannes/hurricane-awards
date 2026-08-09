@@ -358,6 +358,7 @@
       "festival": "Event",
       "participants": "Teilnehmer",
       "awards": "Awards",
+      "artists": "Künstler",
       "timetable": "Timetable",
       "games": "Spiele",
       "info": "Infos",
@@ -425,6 +426,44 @@
         "invalid": "Bitte gib einen gültigen Spotify Playlist Link ein.",
         "save": "Die Playlist konnte gerade nicht gespeichert werden.",
         "remove": "Die Playlist konnte gerade nicht entfernt werden."
+      }
+    },
+    "artists": {
+      "eyebrow": "Künstler",
+      "title": "Künstler",
+      "loading": "Künstler werden geladen...",
+      "empty": "Noch keine Künstler angelegt.",
+      "createButton": "Künstler anlegen",
+      "createTitle": "Künstler anlegen",
+      "editTitle": "Künstler bearbeiten",
+      "nameLabel": "Name",
+      "descriptionLabel": "Beschreibung",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "deleting": "Lösche...",
+      "confirmDelete": "Künstler \"{{name}}\" wirklich löschen?",
+      "tags": {
+        "assigned": "Zugeordnete Schlagwörter",
+        "inputLabel": "Schlagwort auswählen oder neu eingeben",
+        "selectLabel": "Vorhandenes Schlagwort auswählen",
+        "selectPlaceholder": "Vorhandenes Schlagwort wählen",
+        "placeholder": "Schlagwort eingeben",
+        "add": "Hinzufügen",
+        "remove": "Schlagwort {{name}} entfernen",
+        "errors": {
+          "load": "Die Schlagwörter konnten gerade nicht geladen werden.",
+          "save": "Das Schlagwort konnte gerade nicht hinzugefügt werden.",
+          "remove": "Das Schlagwort konnte gerade nicht entfernt werden.",
+          "required": "Bitte gib ein Schlagwort ein."
+        }
+      },
+      "errors": {
+        "load": "Die Künstler konnten gerade nicht geladen werden.",
+        "save": "Der Künstler konnte gerade nicht gespeichert werden.",
+        "deleteHasPerformances": "Dieser Künstler kann nicht gelöscht werden, solange Auftritte zugeordnet sind.",
+        "nameRequired": "Der Name ist erforderlich."
       }
     },
     "timetable": {

@@ -187,7 +187,7 @@ import { AdminBingo } from "./components/AdminBingo";
 import { AdminHorseRacing } from "./components/AdminHorseRacing";
 import { AdminRandomPairings } from "./components/AdminRandomPairings";
 import { AdminTournaments } from "./components/AdminTournaments";
-import { AdminTimetableActs } from "./components/AdminTimetableActs";
+import { AdminArtists } from "./components/AdminArtists";
 import { AdminTimetableDays } from "./components/AdminTimetableDays";
 import { AdminTimetablePerformances } from "./components/AdminTimetablePerformances";
 import { AdminTimetableStages } from "./components/AdminTimetableStages";
@@ -3036,7 +3036,7 @@ function App() {
     void reloadAdminTimetableActs();
     void reloadArtistTags().catch((error: unknown) => {
       console.error("Failed to load artist tags", error);
-      setArtistTagsError(t("admin.timetable.acts.tags.errors.load"));
+      setArtistTagsError(t("admin.artists.tags.errors.load"));
     });
     void reloadAdminTimetablePerformances();
     void reloadAdminFestivalDocuments();
@@ -3184,14 +3184,14 @@ function App() {
     const message = technicalErrorMessage(error);
 
     if (message.includes("act name is required")) {
-      return t("admin.timetable.acts.errors.nameRequired");
+      return t("admin.artists.errors.nameRequired");
     }
 
     if (message.includes("act cannot be deleted while performances exist")) {
-      return t("admin.timetable.acts.errors.deleteHasPerformances");
+      return t("admin.artists.errors.deleteHasPerformances");
     }
 
-    return t("admin.timetable.acts.errors.save");
+    return t("admin.artists.errors.save");
   }
 
   function timetablePerformanceMutationErrorMessage(error: unknown) {
@@ -3321,11 +3321,11 @@ function App() {
         : [...current, { ...tag, actId }]);
       await reloadArtistTags().catch((error: unknown) => {
         console.error("Failed to refresh artist tags after adding", error);
-        setArtistTagsError(t("admin.timetable.acts.tags.errors.load"));
+        setArtistTagsError(t("admin.artists.tags.errors.load"));
       });
     } catch (error) {
       console.error("Failed to add artist tag", error);
-      setArtistTagsError(t("admin.timetable.acts.tags.errors.save"));
+      setArtistTagsError(t("admin.artists.tags.errors.save"));
       throw error;
     }
   }
@@ -3344,11 +3344,11 @@ function App() {
       }
       await reloadArtistTags().catch((error: unknown) => {
         console.error("Failed to refresh artist tags after assigning", error);
-        setArtistTagsError(t("admin.timetable.acts.tags.errors.load"));
+        setArtistTagsError(t("admin.artists.tags.errors.load"));
       });
     } catch (error) {
       console.error("Failed to assign artist tag", error);
-      setArtistTagsError(t("admin.timetable.acts.tags.errors.save"));
+      setArtistTagsError(t("admin.artists.tags.errors.save"));
       throw error;
     }
   }
@@ -3362,11 +3362,11 @@ function App() {
       setActArtistTags((current) => current.filter((item) => item.actId !== actId || item.id !== tagId));
       await reloadArtistTags().catch((error: unknown) => {
         console.error("Failed to refresh artist tags after removing", error);
-        setArtistTagsError(t("admin.timetable.acts.tags.errors.load"));
+        setArtistTagsError(t("admin.artists.tags.errors.load"));
       });
     } catch (error) {
       console.error("Failed to remove artist tag assignment", error);
-      setArtistTagsError(t("admin.timetable.acts.tags.errors.remove"));
+      setArtistTagsError(t("admin.artists.tags.errors.remove"));
       throw error;
     }
   }
@@ -3471,7 +3471,7 @@ function App() {
 
       setAdminTimetableActs(loadedActs);
     } catch {
-      setAdminTimetableActsError(t("admin.timetable.acts.errors.load"));
+      setAdminTimetableActsError(t("admin.artists.errors.load"));
     } finally {
       setIsLoadingAdminTimetableActs(false);
     }
@@ -4324,7 +4324,7 @@ function App() {
     }
 
     const shouldDelete = window.confirm(
-      t("admin.timetable.acts.confirmDelete", {
+      t("admin.artists.confirmDelete", {
         name: act.name,
       }),
     );
@@ -5393,11 +5393,34 @@ function App() {
           </CollapsibleAdminSection>
 
           <CollapsibleAdminSection
+            id="artists"
+            title={t("admin.navigation.artists")}
+          >
+            <>
+              {areaVisibilitySettings(["artists"])}
+              <AdminArtists
+                acts={adminTimetableActs}
+                error={adminTimetableActsError || artistTagsError}
+                isLoading={isLoadingAdminTimetableActs}
+                deletingActId={deletingActId}
+                tags={artistTags}
+                actTags={actArtistTags}
+                onCreate={createAdminTimetableAct}
+                onUpdate={updateAdminTimetableAct}
+                onDelete={deleteAdminTimetableAct}
+                onAddTag={addAdminArtistTag}
+                onAssignTag={assignAdminArtistTag}
+                onRemoveTag={removeAdminArtistTag}
+              />
+            </>
+          </CollapsibleAdminSection>
+
+          <CollapsibleAdminSection
             id="timetable"
             title={t("admin.navigation.timetable")}
           >
             <>
-              {areaVisibilitySettings(["timetable", "artists"])}
+              {areaVisibilitySettings(["timetable"])}
               <AdminTimetableDays
                 festivalDays={adminFestivalDays}
                 error={adminFestivalDaysError}
@@ -5419,20 +5442,6 @@ function App() {
                 onUpdate={updateAdminTimetableStage}
                 onDelete={deleteAdminTimetableStage}
                 onMove={moveAdminTimetableStage}
-              />
-              <AdminTimetableActs
-                acts={adminTimetableActs}
-                error={adminTimetableActsError || artistTagsError}
-                isLoading={isLoadingAdminTimetableActs}
-                deletingActId={deletingActId}
-                tags={artistTags}
-                actTags={actArtistTags}
-                onCreate={createAdminTimetableAct}
-                onUpdate={updateAdminTimetableAct}
-                onDelete={deleteAdminTimetableAct}
-                onAddTag={addAdminArtistTag}
-                onAssignTag={assignAdminArtistTag}
-                onRemoveTag={removeAdminArtistTag}
               />
               <AdminTimetablePerformances
                 performances={adminTimetablePerformances}
