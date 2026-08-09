@@ -3746,6 +3746,10 @@ describe("Admin", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /^admin$/i }));
 
+    expect(
+      screen.getByRole("heading", { name: /^administration$/i }),
+    ).toBeVisible();
+    expect(window.location.hash).toBe("#admin");
     expect(screen.getByRole("heading", { name: /eventlogo/i })).toBeVisible();
     await switchAdminSection(/^awards$/i);
 
@@ -3759,6 +3763,36 @@ describe("Admin", () => {
     expect(loadFestivalAccessCode).toHaveBeenCalledWith({
       participantAccessCode: "ALICE42",
     });
+  });
+
+  it("kehrt aus der Admin-Ansicht in die normale Anwendung zurueck", async () => {
+    await renderLoadedApp();
+    const user = await loginWith("ALICE42");
+
+    await user.click(screen.getByRole("button", { name: /^admin$/i }));
+    await user.click(
+      screen.getByRole("button", { name: /zurueck zur anwendung|zurück zur anwendung/i }),
+    );
+
+    expect(screen.getByRole("heading", { name: /hallo alice/i })).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: /^administration$/i }),
+    ).not.toBeInTheDocument();
+    expect(window.location.hash).toBe("");
+  });
+
+  it("verhindert den direkten Admin-Aufruf ohne Adminrechte", async () => {
+    await renderLoadedApp();
+    await loginWith("BOB42");
+
+    window.location.hash = "#admin";
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+
+    await waitFor(() => expect(window.location.hash).toBe(""));
+    expect(
+      screen.queryByRole("heading", { name: /^administration$/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /hallo bob/i })).toBeVisible();
   });
 
   it("zeigt die Teilnehmerverwaltung mit aktiven und deaktivierten Teilnehmern", async () => {
@@ -4807,6 +4841,9 @@ describe("Admin", () => {
 
   it("startet und beendet eine Bingorunde im Adminbereich", async () => {
     mockLoadedData();
+    vi.mocked(loadAdminBingoRound)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(bingoRound);
     vi.mocked(loadOrCreateBingoCard).mockResolvedValueOnce(null);
     vi.mocked(loadOrCreateBingoCard).mockResolvedValueOnce(bingoCard);
 
@@ -4852,9 +4889,11 @@ describe("Admin", () => {
     await switchMainSection(/^spiele$/i);
     expect(screen.getByRole("button", { name: "1" })).toBeVisible();
 
+    await user.click(screen.getByRole("button", { name: /^admin$/i }));
     await switchAdminSection(/^spiele$/i);
+    const reopenedAdminBingoSection = sectionForHeading(/^bingo$/i);
     await user.click(
-      within(adminBingoSection).getByRole("button", {
+      within(reopenedAdminBingoSection).getByRole("button", {
         name: /bingorunde beenden/i,
       }),
     );

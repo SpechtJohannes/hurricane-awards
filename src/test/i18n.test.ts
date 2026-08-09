@@ -194,6 +194,8 @@ describe("i18n test infrastructure", () => {
   it("enthaelt Admin Texte fuer Festivaltage auf Deutsch und Niederlaendisch", async () => {
     await i18n.changeLanguage("de");
 
+    expect(i18n.t("admin.viewTitle")).toBe("Administration");
+    expect(i18n.t("admin.backToApp")).toBe("Zurück zur Anwendung");
     expect(i18n.t("admin.navigation.timetable")).toBe("Timetable");
     expect(i18n.t("admin.timetable.days.createButton")).toBe(
       "Festivaltag anlegen",
@@ -208,6 +210,8 @@ describe("i18n test infrastructure", () => {
 
     await i18n.changeLanguage("nl");
 
+    expect(i18n.t("admin.viewTitle")).toBe("Administratie");
+    expect(i18n.t("admin.backToApp")).toBe("Terug naar de app");
     expect(i18n.t("admin.navigation.timetable")).toBe("Timetable");
     expect(i18n.t("admin.timetable.days.createButton")).toBe(
       "Festivaldag aanmaken",
