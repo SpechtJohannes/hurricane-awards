@@ -329,6 +329,8 @@
   },
   "admin": {
     "eyebrow": "Admin",
+    "viewTitle": "Administratie",
+    "backToApp": "Terug naar de app",
     "title": "Categorieën",
     "changeStatus": "Status wijzigen",
     "navigation": {

@@ -329,6 +329,8 @@
   },
   "admin": {
     "eyebrow": "Admin",
+    "viewTitle": "Administration",
+    "backToApp": "Zurück zur Anwendung",
     "title": "Kategorien",
     "changeStatus": "Status ändern",
     "navigation": {
