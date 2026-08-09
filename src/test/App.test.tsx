@@ -1139,7 +1139,8 @@ async function loginWith(code: string) {
 }
 
 function sectionForHeading(name: RegExp) {
-  const heading = screen.getByRole("heading", { name });
+  const headings = screen.getAllByRole("heading", { name });
+  const heading = headings.at(-1)!;
   const section = heading.closest("section");
 
   expect(section).not.toBeNull();
@@ -1192,9 +1193,11 @@ async function switchMainSection(name: RegExp) {
 
 async function switchAdminSection(name: RegExp) {
   const user = userEvent.setup();
-  const navigation = screen.getByRole("navigation", { name: /adminbereiche/i });
+  const toggle = screen.getByRole("button", { name });
 
-  await user.click(within(navigation).getByRole("button", { name }));
+  if (toggle.getAttribute("aria-expanded") === "false") {
+    await user.click(toggle);
+  }
 
   return user;
 }
@@ -3738,6 +3741,67 @@ describe("Admin", () => {
     expect(updateFestivalAccessCode).not.toHaveBeenCalled();
   });
 
+  it("zeigt alle Adminabschnitte initial geschlossen und kann sie unabhaengig oeffnen", async () => {
+    await renderLoadedApp();
+    const user = await loginWith("ALICE42");
+    await user.click(screen.getByRole("button", { name: /^admin$/i }));
+
+    for (const title of [
+      "Event",
+      "Teilnehmer",
+      "Awards",
+      "Timetable",
+      "Spiele",
+      "Infos",
+      "Archiv",
+    ]) {
+      expect(screen.getByRole("button", { name: title })).toHaveAttribute(
+        "aria-expanded",
+        "false",
+      );
+    }
+    expect(
+      document.getElementById("admin-section-festival"),
+    ).not.toBeInTheDocument();
+
+    const eventToggle = screen.getByRole("button", { name: /^event$/i });
+    const participantsToggle = screen.getByRole("button", {
+      name: /^teilnehmer$/i,
+    });
+    await user.click(eventToggle);
+    await user.click(participantsToggle);
+
+    expect(eventToggle).toHaveAttribute("aria-expanded", "true");
+    expect(participantsToggle).toHaveAttribute("aria-expanded", "true");
+    expect(document.getElementById("admin-section-festival")).toBeVisible();
+    expect(document.getElementById("admin-section-participants")).toBeVisible();
+
+    const eventNameInput = screen.getByLabelText(/^eventname$/i);
+    await user.clear(eventNameInput);
+    await user.type(eventNameInput, "Nicht gespeicherter Entwurf");
+    await user.click(eventToggle);
+    expect(eventToggle).toHaveAttribute("aria-expanded", "false");
+    expect(participantsToggle).toHaveAttribute("aria-expanded", "true");
+    await user.click(eventToggle);
+    expect(screen.getByLabelText(/^eventname$/i)).toHaveValue(
+      "Nicht gespeicherter Entwurf",
+    );
+  });
+
+  it("bedient einen Adminabschnitt per Tastatur", async () => {
+    await renderLoadedApp();
+    await loginWith("ALICE42");
+    await userEvent.click(screen.getByRole("button", { name: /^admin$/i }));
+
+    const eventToggle = screen.getByRole("button", { name: /^event$/i });
+    eventToggle.focus();
+    await userEvent.keyboard("{Enter}");
+
+    expect(eventToggle).toHaveFocus();
+    expect(eventToggle).toHaveAttribute("aria-expanded", "true");
+    expect(eventToggle).toHaveAttribute("aria-controls", "admin-section-festival");
+  });
+
   it("macht Admin-Aktionen erst in der Admin-Ansicht verfuegbar", async () => {
     await renderLoadedApp();
     await loginWith("ALICE42");
@@ -3750,6 +3814,7 @@ describe("Admin", () => {
       screen.getByRole("heading", { name: /^administration$/i }),
     ).toBeVisible();
     expect(window.location.hash).toBe("#admin");
+    await switchAdminSection(/^event$/i);
     expect(screen.getByRole("heading", { name: /eventlogo/i })).toBeVisible();
     await switchAdminSection(/^awards$/i);
 
@@ -3859,6 +3924,7 @@ describe("Admin", () => {
     const user = await loginWith("ALICE42");
 
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
+    await switchAdminSection(/^event$/i);
 
     const festivalSection = sectionForHeading(/^event$/i);
     const nameInput = within(festivalSection).getByLabelText(/^eventname$/i);
@@ -3892,6 +3958,7 @@ describe("Admin", () => {
     const user = await loginWith("ALICE42");
 
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
+    await switchAdminSection(/^event$/i);
 
     const festivalSection = sectionForHeading(/^event$/i);
     const nameInput = within(festivalSection).getByLabelText(/^eventname$/i);
@@ -3918,6 +3985,7 @@ describe("Admin", () => {
     const user = await loginWith("ALICE42");
 
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
+    await switchAdminSection(/^event$/i);
 
     const festivalSection = sectionForHeading(/^event$/i);
     const nameInput = within(festivalSection).getByLabelText(/^eventname$/i);
@@ -3945,6 +4013,7 @@ describe("Admin", () => {
     const user = await loginWith("ALICE42");
 
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
+    await switchAdminSection(/^event$/i);
 
     const festivalSection = sectionForHeading(/^event$/i);
     const codeInput =
@@ -3974,6 +4043,7 @@ describe("Admin", () => {
     const user = await loginWith("ALICE42");
 
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
+    await switchAdminSection(/^event$/i);
 
     const festivalSection = sectionForHeading(/^event$/i);
     const codeInput =
@@ -4851,15 +4921,11 @@ describe("Admin", () => {
     const user = await loginWith("ALICE42");
 
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
-    const adminNavigation = screen.getByRole("navigation", {
-      name: /adminbereiche/i,
-    });
-
     expect(
-      within(adminNavigation).getByRole("button", { name: /^spiele$/i }),
+      screen.getByRole("button", { name: /^spiele$/i }),
     ).toBeVisible();
     expect(
-      within(adminNavigation).queryByRole("button", { name: /^bingo$/i }),
+      screen.queryByRole("button", { name: /^bingo$/i }),
     ).not.toBeInTheDocument();
 
     await switchAdminSection(/^spiele$/i);

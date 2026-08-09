@@ -1571,13 +1571,68 @@ h1 {
   outline-offset: 3px;
 }
 
-.admin-view__content {
+.admin-view__sections {
+  display: grid;
   width: min(100%, 960px);
   margin: 0 auto;
+  gap: 12px;
 }
 
-.admin-view .admin-navigation {
-  margin-bottom: 28px;
+.admin-section {
+  overflow: hidden;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+}
+
+.admin-section__heading {
+  margin: 0;
+}
+
+.admin-section__toggle {
+  display: flex;
+  width: 100%;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 850;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.admin-section__toggle:hover,
+.admin-section__toggle:focus-visible {
+  background: var(--surface-card-hover);
+}
+
+.admin-section__toggle:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: -3px;
+}
+
+.admin-section__toggle svg {
+  flex: 0 0 auto;
+  fill: currentColor;
+  transition: transform 180ms ease;
+}
+
+.admin-section__toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.admin-section__content {
+  padding: 8px 18px 22px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.admin-section__content[hidden] {
+  display: none;
 }
 
 @media (max-width: 640px) {
@@ -1593,6 +1648,15 @@ h1 {
 
   .admin-view__back {
     width: 100%;
+  }
+
+  .admin-section__toggle {
+    min-height: 58px;
+    padding: 12px 14px;
+  }
+
+  .admin-section__content {
+    padding: 8px 12px 16px;
   }
 }
 
