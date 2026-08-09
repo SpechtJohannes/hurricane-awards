@@ -196,6 +196,10 @@ describe("i18n test infrastructure", () => {
 
     expect(i18n.t("admin.viewTitle")).toBe("Administration");
     expect(i18n.t("admin.backToApp")).toBe("Zurück zur Anwendung");
+    expect(i18n.t("admin.visibility.visible")).toBe(
+      "Für Teilnehmende sichtbar",
+    );
+    expect(i18n.t("admin.visibility.areas.artists")).toBe("Künstler");
     expect(i18n.t("admin.navigation.timetable")).toBe("Timetable");
     expect(i18n.t("admin.timetable.days.createButton")).toBe(
       "Festivaltag anlegen",
@@ -212,6 +216,10 @@ describe("i18n test infrastructure", () => {
 
     expect(i18n.t("admin.viewTitle")).toBe("Administratie");
     expect(i18n.t("admin.backToApp")).toBe("Terug naar de app");
+    expect(i18n.t("admin.visibility.visible")).toBe(
+      "Zichtbaar voor deelnemers",
+    );
+    expect(i18n.t("admin.visibility.areas.artists")).toBe("Artiesten");
     expect(i18n.t("admin.navigation.timetable")).toBe("Timetable");
     expect(i18n.t("admin.timetable.days.createButton")).toBe(
       "Festivaldag aanmaken",

@@ -331,6 +331,26 @@
     "eyebrow": "Admin",
     "viewTitle": "Administration",
     "backToApp": "Zurück zur Anwendung",
+    "visibility": {
+      "legend": "Sichtbarkeit für Teilnehmende",
+      "visible": "Für Teilnehmende sichtbar",
+      "hidden": "Für Teilnehmende ausgeblendet",
+      "loading": "Sichtbarkeit wird geladen...",
+      "saved": "Die Sichtbarkeit wurde gespeichert.",
+      "areas": {
+        "info": "Infos",
+        "profile": "Profil",
+        "timetable": "Timetable",
+        "artists": "Künstler",
+        "awards": "Awards",
+        "voting": "Abstimmungen",
+        "games": "Spiele"
+      },
+      "errors": {
+        "load": "Die Sichtbarkeitseinstellungen konnten gerade nicht geladen werden.",
+        "save": "Die Sichtbarkeitseinstellung konnte gerade nicht gespeichert werden."
+      }
+    },
     "title": "Kategorien",
     "changeStatus": "Status ändern",
     "navigation": {

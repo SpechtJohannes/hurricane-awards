@@ -151,6 +151,11 @@ import {
   removeArtistTag,
 } from "../data/artistTags";
 import type { MusicPlaylist } from "../data/musicEmbeds";
+import {
+  defaultParticipantAreaVisibility,
+  loadParticipantAreaVisibility,
+  updateParticipantAreaVisibility,
+} from "../data/participantAreaVisibility";
 import i18n from "../i18n";
 
 vi.mock("../data/categories", () => ({
@@ -235,6 +240,17 @@ vi.mock("../data/festivalMusic", () => ({
   loadMusicPlaylist: vi.fn(),
   updateMusicPlaylist: vi.fn(),
 }));
+
+vi.mock("../data/participantAreaVisibility", async (importOriginal) => {
+  const actual = await importOriginal<
+    typeof import("../data/participantAreaVisibility")
+  >();
+  return {
+    ...actual,
+    loadParticipantAreaVisibility: vi.fn(),
+    updateParticipantAreaVisibility: vi.fn(),
+  };
+});
 
 vi.mock("../data/bingo", () => ({
   closeBingoRound: vi.fn(),
@@ -675,6 +691,15 @@ function mockLoadedData({
     code: loadedFestivalAccessCode,
     version: loadedFestivalAccessVersion,
   });
+  vi.mocked(loadParticipantAreaVisibility).mockResolvedValue({
+    ...defaultParticipantAreaVisibility,
+  });
+  vi.mocked(updateParticipantAreaVisibility).mockImplementation(
+    async (area, isVisible) => ({
+      ...defaultParticipantAreaVisibility,
+      [area]: isVisible,
+    }),
+  );
   vi.mocked(loadParticipants).mockResolvedValue(loadedParticipants);
   vi.mocked(loadAdminParticipants).mockResolvedValue(loadedAdminParticipants);
   vi.mocked(loginParticipant).mockImplementation(async (accessCode) => {
@@ -3739,6 +3764,8 @@ describe("Admin", () => {
     expect(archiveFestival).not.toHaveBeenCalled();
     expect(loadFestivalExportData).not.toHaveBeenCalled();
     expect(updateFestivalAccessCode).not.toHaveBeenCalled();
+    expect(loadParticipantAreaVisibility).not.toHaveBeenCalled();
+    expect(updateParticipantAreaVisibility).not.toHaveBeenCalled();
   });
 
   it("zeigt alle Adminabschnitte initial geschlossen und kann sie unabhaengig oeffnen", async () => {
@@ -3800,6 +3827,84 @@ describe("Admin", () => {
     expect(eventToggle).toHaveFocus();
     expect(eventToggle).toHaveAttribute("aria-expanded", "true");
     expect(eventToggle).toHaveAttribute("aria-controls", "admin-section-festival");
+  });
+
+  it("konfiguriert alle Teilnehmerbereiche unabhaengig und dauerhaft", async () => {
+    mockLoadedData();
+    vi.mocked(loadParticipantAreaVisibility).mockResolvedValue({
+      ...defaultParticipantAreaVisibility,
+      games: false,
+    });
+    vi.mocked(updateParticipantAreaVisibility).mockImplementation(
+      async (area, isVisible) => ({
+        ...defaultParticipantAreaVisibility,
+        games: false,
+        [area]: isVisible,
+      }),
+    );
+    await renderLoadedApp();
+    const user = await loginWith("ALICE42");
+    await user.click(screen.getByRole("button", { name: /^admin$/i }));
+
+    for (const section of [/^teilnehmer$/i, /^awards$/i, /^timetable$/i, /^spiele$/i, /^infos$/i]) {
+      await switchAdminSection(section);
+    }
+
+    for (const area of [
+      /profil/i,
+      /^awards/i,
+      /abstimmungen/i,
+      /^timetable/i,
+      /künstler/i,
+      /^spiele/i,
+      /^infos/i,
+    ]) {
+      expect(screen.getByRole("checkbox", { name: area })).toBeVisible();
+    }
+
+    const gamesToggle = screen.getByRole("checkbox", { name: /^spiele/i });
+    const profileToggle = screen.getByRole("checkbox", { name: /profil/i });
+    expect(gamesToggle).not.toBeChecked();
+    expect(profileToggle).toBeChecked();
+
+    profileToggle.focus();
+    await user.keyboard(" ");
+    expect(updateParticipantAreaVisibility).toHaveBeenCalledWith(
+      "profile",
+      false,
+      { participantAccessCode: "ALICE42" },
+    );
+    expect(gamesToggle).not.toBeChecked();
+    expect(deactivateParticipant).not.toHaveBeenCalled();
+    expect(deleteCategory).not.toHaveBeenCalled();
+    expect(deleteTournament).not.toHaveBeenCalled();
+
+    await user.click(profileToggle);
+    expect(updateParticipantAreaVisibility).toHaveBeenLastCalledWith(
+      "profile",
+      true,
+      { participantAccessCode: "ALICE42" },
+    );
+  });
+
+  it("laedt die gespeicherte Sichtbarkeit beim erneuten Oeffnen neu", async () => {
+    mockLoadedData();
+    vi.mocked(loadParticipantAreaVisibility)
+      .mockResolvedValueOnce({ ...defaultParticipantAreaVisibility })
+      .mockResolvedValueOnce({
+        ...defaultParticipantAreaVisibility,
+        info: false,
+      });
+    await renderLoadedApp();
+    const user = await loginWith("ALICE42");
+
+    await user.click(screen.getByRole("button", { name: /^admin$/i }));
+    await user.click(screen.getByRole("button", { name: /zurück zur anwendung/i }));
+    await user.click(screen.getByRole("button", { name: /^admin$/i }));
+    await switchAdminSection(/^infos$/i);
+
+    expect(screen.getByRole("checkbox", { name: /^infos/i })).not.toBeChecked();
+    expect(loadParticipantAreaVisibility).toHaveBeenCalledTimes(2);
   });
 
   it("macht Admin-Aktionen erst in der Admin-Ansicht verfuegbar", async () => {
