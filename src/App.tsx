@@ -191,7 +191,7 @@ import { AdminTimetableActs } from "./components/AdminTimetableActs";
 import { AdminTimetableDays } from "./components/AdminTimetableDays";
 import { AdminTimetablePerformances } from "./components/AdminTimetablePerformances";
 import { AdminTimetableStages } from "./components/AdminTimetableStages";
-import { AdminView } from "./components/AdminView";
+import { AdminView, CollapsibleAdminSection } from "./components/AdminView";
 import { Bingo } from "./components/Bingo";
 import { HorseRacing } from "./components/HorseRacing";
 import { RandomPairings } from "./components/RandomPairings";
@@ -528,31 +528,6 @@ type MainSection =
   | "games"
   | "info"
   | "profile";
-type AdminSection =
-  | "festival"
-  | "participants"
-  | "awards"
-  | "timetable"
-  | "games"
-  | "info"
-  | "archive";
-
-function ActiveAdminSection({
-  activeSection,
-  section,
-  children,
-}: {
-  activeSection: AdminSection;
-  section: AdminSection;
-  children: ReactNode;
-}) {
-  if (activeSection !== section) {
-    return null;
-  }
-
-  return children;
-}
-
 function AdminArea({
   isVisible,
   children,
@@ -2287,8 +2262,6 @@ function App() {
   const selectedArtistId = window.location.hash.startsWith("#artists/")
     ? window.location.hash.slice("#artists/".length)
     : null;
-  const [activeAdminSection, setActiveAdminSection] =
-    useState<AdminSection>("festival");
   const [activeGameSection, setActiveGameSection] =
     useState<GameSection>("bingo");
   const [isLoadingData, setIsLoadingData] = useState(
@@ -2331,17 +2304,6 @@ function App() {
     : 0;
   const loginLockRemainingSeconds = Math.ceil(loginLockRemainingMs / 1000);
   const isLoginLocked = loginLockRemainingMs > 0;
-  const adminNavigationItems: Array<{ section: AdminSection; label: string }> =
-    [
-      { section: "festival", label: t("admin.navigation.festival") },
-      { section: "participants", label: t("admin.navigation.participants") },
-      { section: "awards", label: t("admin.navigation.awards") },
-      { section: "timetable", label: t("admin.navigation.timetable") },
-      { section: "games", label: t("admin.navigation.games") },
-      { section: "info", label: t("admin.navigation.info") },
-      { section: "archive", label: t("admin.navigation.archive") },
-    ];
-
   const savedProfileAvatarId =
     selectedParticipant?.avatarId ?? avatars[0]?.id ?? "";
   const normalizedProfileDisplayName = profileDisplayName.trim();
@@ -2863,7 +2825,6 @@ function App() {
     setIsAvatarPickerExpanded(false);
     setIsAdminVisible(false);
     navigateMainSection("dashboard");
-    setActiveAdminSection("festival");
     setSelectedVotesByCategory({});
 
     if (window.location.hash) {
@@ -5269,16 +5230,10 @@ function App() {
       </header>
 
       <AdminArea isVisible={Boolean(selectedParticipant?.isAdmin) && isAdminVisible}>
-        <AdminView
-          activeSection={activeAdminSection}
-          navigationItems={adminNavigationItems}
-          onBack={closeAdminView}
-          onSelectSection={(section) => setActiveAdminSection(section as AdminSection)}
-        >
-
-          <ActiveAdminSection
-            activeSection={activeAdminSection}
-            section="festival"
+        <AdminView onBack={closeAdminView}>
+          <CollapsibleAdminSection
+            id="festival"
+            title={t("admin.navigation.festival")}
           >
             <AdminFestival
               key={`festival-${festivalName}-${eventStartDate}-${eventEndDate}-${festivalCode}`}
@@ -5303,11 +5258,11 @@ function App() {
               onUploadLogo={uploadFestivalLogo}
               onRemoveLogo={removeFestivalLogo}
             />
-          </ActiveAdminSection>
+          </CollapsibleAdminSection>
 
-          <ActiveAdminSection
-            activeSection={activeAdminSection}
-            section="participants"
+          <CollapsibleAdminSection
+            id="participants"
+            title={t("admin.navigation.participants")}
           >
             <AdminParticipants
               participants={adminParticipants}
@@ -5326,9 +5281,12 @@ function App() {
               onDeactivate={deactivateAdminParticipant}
               onReactivate={reactivateAdminParticipant}
             />
-          </ActiveAdminSection>
+          </CollapsibleAdminSection>
 
-          <ActiveAdminSection activeSection={activeAdminSection} section="awards">
+          <CollapsibleAdminSection
+            id="awards"
+            title={t("admin.navigation.awards")}
+          >
             <>
               {adminError ? (
                 <p className="admin__notice">{adminError}</p>
@@ -5349,11 +5307,11 @@ function App() {
                 onDelete={deleteAdminCategory}
               />
             </>
-          </ActiveAdminSection>
+          </CollapsibleAdminSection>
 
-          <ActiveAdminSection
-            activeSection={activeAdminSection}
-            section="timetable"
+          <CollapsibleAdminSection
+            id="timetable"
+            title={t("admin.navigation.timetable")}
           >
             <>
               <AdminTimetableDays
@@ -5405,9 +5363,12 @@ function App() {
                 onDelete={deleteAdminTimetablePerformance}
               />
             </>
-          </ActiveAdminSection>
+          </CollapsibleAdminSection>
 
-          <ActiveAdminSection activeSection={activeAdminSection} section="games">
+          <CollapsibleAdminSection
+            id="games"
+            title={t("admin.navigation.games")}
+          >
             <>
               <AdminBingo
                 round={adminBingoRound}
@@ -5451,9 +5412,12 @@ function App() {
                 onSetWinner={saveAdminTournamentMatchWinner}
               />
             </>
-          </ActiveAdminSection>
+          </CollapsibleAdminSection>
 
-          <ActiveAdminSection activeSection={activeAdminSection} section="info">
+          <CollapsibleAdminSection
+            id="info"
+            title={t("admin.navigation.info")}
+          >
             <AdminFestivalDocuments
               key={`documents-${adminCampLocationLink ?? "empty"}`}
               documents={adminFestivalDocuments}
@@ -5476,11 +5440,11 @@ function App() {
               onUpload={uploadAdminFestivalDocument}
               onRemove={removeAdminFestivalDocument}
             />
-          </ActiveAdminSection>
+          </CollapsibleAdminSection>
 
-          <ActiveAdminSection
-            activeSection={activeAdminSection}
-            section="archive"
+          <CollapsibleAdminSection
+            id="archive"
+            title={t("admin.navigation.archive")}
           >
             <AdminFestival
               key={`archive-${festivalName}-${festivalCode}`}
@@ -5505,7 +5469,7 @@ function App() {
               onUploadLogo={uploadFestivalLogo}
               onRemoveLogo={removeFestivalLogo}
             />
-          </ActiveAdminSection>
+          </CollapsibleAdminSection>
         </AdminView>
       </AdminArea>
 
