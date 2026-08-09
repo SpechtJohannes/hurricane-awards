@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type SubmitEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEventHandler,
+  type Ref,
+  type SubmitEvent,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
   type CreateTimetableActInput,
@@ -14,6 +21,79 @@ type ActFormState = {
   name: string;
   description: string;
 };
+
+type ArtistFormProps = {
+  form: ActFormState;
+  formError: string;
+  isSaving: boolean;
+  nameInputRef?: Ref<HTMLInputElement>;
+  onChange: (field: "name" | "description", value: string) => void;
+  onCancel: () => void;
+  onSubmit: FormEventHandler<HTMLFormElement>;
+};
+
+function ArtistForm({
+  form,
+  formError,
+  isSaving,
+  nameInputRef,
+  onChange,
+  onCancel,
+  onSubmit,
+}: Readonly<ArtistFormProps>) {
+  const { t } = useTranslation();
+  const isEdit = form.id !== null;
+  const inputSuffix = isEdit ? `-${form.id}` : "";
+
+  return (
+    <form
+      className={`admin-category-form${isEdit ? " admin-category-form--inline" : ""}`}
+      onSubmit={onSubmit}
+    >
+      <h3>{t(isEdit ? "admin.artists.editTitle" : "admin.artists.createTitle")}</h3>
+      <label htmlFor={`admin-timetable-act-name${inputSuffix}`}>
+        {t("admin.artists.nameLabel")}
+        <input
+          ref={nameInputRef}
+          id={`admin-timetable-act-name${inputSuffix}`}
+          type="text"
+          value={form.name}
+          disabled={isSaving}
+          onChange={(event) => onChange("name", event.target.value)}
+        />
+      </label>
+      <label htmlFor={`admin-timetable-act-description${inputSuffix}`}>
+        {t("admin.artists.descriptionLabel")}
+        <textarea
+          id={`admin-timetable-act-description${inputSuffix}`}
+          value={form.description}
+          disabled={isSaving}
+          onChange={(event) => onChange("description", event.target.value)}
+        />
+      </label>
+      {formError ? (
+        <p className="admin-participant-form__error" role="alert">{formError}</p>
+      ) : null}
+      <div className="admin-participant-form__actions">
+        <button
+          className="admin-card__reset admin-card__reset--primary"
+          type="submit"
+          disabled={isSaving}
+        >
+          {isSaving ? t("common.saving") : t("admin.artists.save")}
+        </button>
+        <button
+          className="admin-card__reset admin-card__reset--secondary"
+          type="button"
+          disabled={isSaving}
+          onClick={onCancel}
+        >
+          {t("admin.artists.cancel")}
+        </button>
+      </div>
+    </form>
+  );
+}
 
 type AdminArtistsProps = {
   acts: TimetableAct[];
@@ -135,6 +215,11 @@ export function AdminArtists({
     setFormError("");
   }
 
+  function changeForm(field: "name" | "description", value: string) {
+    setForm((current) => current ? { ...current, [field]: value } : current);
+    setFormError("");
+  }
+
   async function submitForm(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -201,62 +286,14 @@ export function AdminArtists({
         </div>
 
         {form?.id === null ? (
-          <form className="admin-category-form" onSubmit={submitForm}>
-            <h3>
-              {form.id
-                ? t("admin.artists.editTitle")
-                : t("admin.artists.createTitle")}
-            </h3>
-
-            <label htmlFor="admin-timetable-act-name">
-              {t("admin.artists.nameLabel")}
-              <input
-                id="admin-timetable-act-name"
-                type="text"
-                value={form.name}
-                disabled={isSaving}
-                onChange={(event) => {
-                  setForm({ ...form, name: event.target.value });
-                  setFormError("");
-                }}
-              />
-            </label>
-
-            <label htmlFor="admin-timetable-act-description">
-              {t("admin.artists.descriptionLabel")}
-              <textarea
-                id="admin-timetable-act-description"
-                value={form.description}
-                disabled={isSaving}
-                onChange={(event) => {
-                  setForm({ ...form, description: event.target.value });
-                  setFormError("");
-                }}
-              />
-            </label>
-
-            {formError ? (
-              <p className="admin-participant-form__error" role="alert">{formError}</p>
-            ) : null}
-
-            <div className="admin-participant-form__actions">
-              <button
-                className="admin-card__reset admin-card__reset--primary"
-                type="submit"
-                disabled={isSaving}
-              >
-                {isSaving ? t("common.saving") : t("admin.artists.save")}
-              </button>
-              <button
-                className="admin-card__reset admin-card__reset--secondary"
-                type="button"
-                disabled={isSaving}
-                onClick={cancelForm}
-              >
-                {t("admin.artists.cancel")}
-              </button>
-            </div>
-          </form>
+          <ArtistForm
+            form={form}
+            formError={formError}
+            isSaving={isSaving}
+            onChange={changeForm}
+            onCancel={cancelForm}
+            onSubmit={submitForm}
+          />
         ) : null}
 
         {isLoading ? (
@@ -271,44 +308,15 @@ export function AdminArtists({
               <article className="admin-category-card" key={act.id}>
                 <div className="admin-category-card__main">
                   {form?.id === act.id ? (
-                    <form className="admin-category-form admin-category-form--inline" onSubmit={submitForm}>
-                      <h3>{t("admin.artists.editTitle")}</h3>
-                      <label htmlFor={`admin-timetable-act-name-${act.id}`}>
-                        {t("admin.artists.nameLabel")}
-                        <input
-                          ref={editNameInputRef}
-                          id={`admin-timetable-act-name-${act.id}`}
-                          type="text"
-                          value={form.name}
-                          disabled={isSaving}
-                          onChange={(event) => {
-                            setForm({ ...form, name: event.target.value });
-                            setFormError("");
-                          }}
-                        />
-                      </label>
-                      <label htmlFor={`admin-timetable-act-description-${act.id}`}>
-                        {t("admin.artists.descriptionLabel")}
-                        <textarea
-                          id={`admin-timetable-act-description-${act.id}`}
-                          value={form.description}
-                          disabled={isSaving}
-                          onChange={(event) => {
-                            setForm({ ...form, description: event.target.value });
-                            setFormError("");
-                          }}
-                        />
-                      </label>
-                      {formError ? <p className="admin-participant-form__error" role="alert">{formError}</p> : null}
-                      <div className="admin-participant-form__actions">
-                        <button className="admin-card__reset admin-card__reset--primary" type="submit" disabled={isSaving}>
-                          {isSaving ? t("common.saving") : t("admin.artists.save")}
-                        </button>
-                        <button className="admin-card__reset admin-card__reset--secondary" type="button" disabled={isSaving} onClick={cancelForm}>
-                          {t("admin.artists.cancel")}
-                        </button>
-                      </div>
-                    </form>
+                    <ArtistForm
+                      form={form}
+                      formError={formError}
+                      isSaving={isSaving}
+                      nameInputRef={editNameInputRef}
+                      onChange={changeForm}
+                      onCancel={cancelForm}
+                      onSubmit={submitForm}
+                    />
                   ) : (
                     <>
                       <h3>{act.name}</h3>
