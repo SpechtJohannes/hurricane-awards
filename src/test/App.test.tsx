@@ -3846,7 +3846,7 @@ describe("Admin", () => {
     const user = await loginWith("ALICE42");
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
 
-    for (const section of [/^teilnehmer$/i, /^awards$/i, /^timetable$/i, /^spiele$/i, /^infos$/i]) {
+    for (const section of [/^teilnehmer$/i, /^awards$/i, /^künstler$/i, /^timetable$/i, /^spiele$/i, /^infos$/i]) {
       await switchAdminSection(section);
     }
 
@@ -4680,7 +4680,7 @@ describe("Admin", () => {
     ).toBeVisible();
   });
 
-  it("verwaltet Acts im Adminbereich Timetable", async () => {
+  it("verwaltet Kuenstler im eigenen Adminbereich", async () => {
     mockLoadedData({
       loadedTimetable: {
         ...emptyTimetable,
@@ -4716,16 +4716,19 @@ describe("Admin", () => {
     const user = await loginWith("ALICE42");
 
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
-    await switchAdminSection(/^timetable$/i);
+    await switchAdminSection(/^künstler$/i);
 
-    const actsSection = sectionForHeading(/^acts$/i);
+    const actsSection = sectionForHeading(/^künstler$/i);
 
-    expect(loadAdminTimetableActs).toHaveBeenCalledWith({
-      participantAccessCode: "ALICE42",
-    });
+    await waitFor(() =>
+      expect(loadAdminTimetableActs).toHaveBeenCalledWith({
+        participantAccessCode: "ALICE42",
+      }),
+    );
+    expect(await within(actsSection).findByText("The Headliners")).toBeVisible();
 
     await user.click(
-      within(actsSection).getByRole("button", { name: /act anlegen/i }),
+      within(actsSection).getByRole("button", { name: /künstler anlegen/i }),
     );
     await user.type(
       within(actsSection).getByLabelText(/^name$/i),
@@ -4815,9 +4818,10 @@ describe("Admin", () => {
     const user = await loginWith("ALICE42");
 
     await user.click(screen.getByRole("button", { name: /^admin$/i }));
-    await switchAdminSection(/^timetable$/i);
+    await switchAdminSection(/^künstler$/i);
 
-    const actsSection = sectionForHeading(/^acts$/i);
+    const actsSection = sectionForHeading(/^künstler$/i);
+    expect(await within(actsSection).findByText("The Headliners")).toBeVisible();
     const headlinersCard = within(actsSection)
       .getByRole("heading", { name: "The Headliners" })
       .closest("article");
@@ -4877,6 +4881,17 @@ describe("Admin", () => {
     await switchAdminSection(/^timetable$/i);
 
     const performancesSection = sectionForHeading(/^auftritte$/i);
+
+    expect(
+      screen.queryByRole("button", { name: /künstler anlegen/i }),
+    ).not.toBeInTheDocument();
+    const timetableAdminSection = performancesSection.closest(".admin-section");
+    expect(timetableAdminSection).not.toBeNull();
+    expect(
+      within(timetableAdminSection as HTMLElement).queryByRole("heading", {
+        name: /^künstler$/i,
+      }),
+    ).not.toBeInTheDocument();
 
     expect(loadAdminTimetablePerformances).toHaveBeenCalledWith({
       participantAccessCode: "ALICE42",

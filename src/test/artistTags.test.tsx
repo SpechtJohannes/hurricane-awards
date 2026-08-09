@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AdminTimetableActs } from "../components/AdminTimetableActs";
+import { AdminArtists } from "../components/AdminArtists";
 import "../i18n";
 import { addArtistTag, assignArtistTag, loadActArtistTags, loadArtistTags, removeArtistTag } from "../data/artistTags";
 
@@ -30,7 +30,7 @@ describe("artist tag data access", () => {
   });
 });
 
-describe("AdminTimetableActs tags", () => {
+describe("AdminArtists tags", () => {
   const baseProps = {
     acts: [{ id: "act-1", name: "Band", description: null }],
     tags: [{ id: "rock", name: "Rock" }, { id: "indie", name: "Indie" }],
@@ -42,8 +42,29 @@ describe("AdminTimetableActs tags", () => {
     onRemoveTag: vi.fn().mockResolvedValue(undefined),
   };
 
+  it("creates artists in the dedicated artist administration", async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined);
+    render(<AdminArtists {...baseProps} onCreate={onCreate} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Künstler anlegen" }));
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Neue Band" },
+    });
+    fireEvent.change(screen.getByLabelText("Beschreibung"), {
+      target: { value: "Live" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Speichern" }));
+
+    await waitFor(() =>
+      expect(onCreate).toHaveBeenCalledWith({
+        name: "Neue Band",
+        description: "Live",
+      }),
+    );
+  });
+
   it("shows assigned tags and excludes them from reusable suggestions", () => {
-    render(<AdminTimetableActs {...baseProps} />);
+    render(<AdminArtists {...baseProps} />);
     expect(screen.getByText("Rock")).toBeInTheDocument();
     const select = screen.getByRole("combobox", { name: /Vorhandenes Schlagwort/i });
     expect(within(select).queryByRole("option", { name: "Rock" })).not.toBeInTheDocument();
@@ -53,7 +74,7 @@ describe("AdminTimetableActs tags", () => {
   it("shows saving state while adding and supports removing", async () => {
     let finish: (() => void) | undefined;
     const onAddTag = vi.fn(() => new Promise<void>((resolve) => { finish = resolve; }));
-    render(<AdminTimetableActs {...baseProps} onAddTag={onAddTag} />);
+    render(<AdminArtists {...baseProps} onAddTag={onAddTag} />);
     fireEvent.change(screen.getByPlaceholderText("Schlagwort eingeben"), { target: { value: "Electro" } });
     fireEvent.click(screen.getByRole("button", { name: "Hinzufügen" }));
     expect(await screen.findByText("Speichere...")).toBeInTheDocument();
@@ -64,7 +85,7 @@ describe("AdminTimetableActs tags", () => {
   });
 
   it("assigns an existing tag immediately and keeps act editing functional", async () => {
-    render(<AdminTimetableActs {...baseProps} />);
+    render(<AdminArtists {...baseProps} />);
     fireEvent.change(screen.getByRole("combobox", { name: /Vorhandenes Schlagwort/i }), { target: { value: "indie" } });
     await waitFor(() => expect(baseProps.onAssignTag).toHaveBeenCalledWith("act-1", "indie"));
     fireEvent.click(screen.getByRole("button", { name: "Bearbeiten" }));
@@ -75,7 +96,7 @@ describe("AdminTimetableActs tags", () => {
 
   it("keeps a failed inline edit open and shows the error in its card", async () => {
     const onUpdate = vi.fn().mockRejectedValue(new Error("Speichern fehlgeschlagen"));
-    render(<AdminTimetableActs {...baseProps} onUpdate={onUpdate} />);
+    render(<AdminArtists {...baseProps} onUpdate={onUpdate} />);
     fireEvent.click(screen.getByRole("button", { name: "Bearbeiten" }));
     fireEvent.change(screen.getByDisplayValue("Band"), { target: { value: "Band Neu" } });
     fireEvent.click(screen.getByRole("button", { name: "Speichern" }));
@@ -85,7 +106,7 @@ describe("AdminTimetableActs tags", () => {
 
   it("rejects empty tags and exposes Supabase errors", async () => {
     const onAddTag = vi.fn().mockRejectedValue(new Error("database unavailable"));
-    render(<AdminTimetableActs {...baseProps} onAddTag={onAddTag} />);
+    render(<AdminArtists {...baseProps} onAddTag={onAddTag} />);
     fireEvent.click(screen.getByRole("button", { name: "Hinzufügen" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Bitte gib ein Schlagwort ein");
     fireEvent.change(screen.getByPlaceholderText("Schlagwort eingeben"), { target: { value: "Metal" } });

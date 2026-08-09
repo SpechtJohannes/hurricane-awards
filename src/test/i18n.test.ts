@@ -207,7 +207,8 @@ describe("i18n test infrastructure", () => {
     expect(i18n.t("admin.timetable.stages.createButton")).toBe("Bühne anlegen");
     expect(i18n.t("admin.timetable.stages.colorLabel")).toBe("Farbe");
     expect(i18n.t("admin.timetable.stages.defaultColor")).toBe("Standard");
-    expect(i18n.t("admin.timetable.acts.createButton")).toBe("Act anlegen");
+    expect(i18n.t("admin.navigation.artists")).toBe("Künstler");
+    expect(i18n.t("admin.artists.createButton")).toBe("Künstler anlegen");
     expect(i18n.t("admin.timetable.performances.createButton")).toBe(
       "Auftritt anlegen",
     );
@@ -229,7 +230,8 @@ describe("i18n test infrastructure", () => {
     );
     expect(i18n.t("admin.timetable.stages.colorLabel")).toBe("Kleur");
     expect(i18n.t("admin.timetable.stages.defaultColor")).toBe("Standaard");
-    expect(i18n.t("admin.timetable.acts.createButton")).toBe("Act aanmaken");
+    expect(i18n.t("admin.navigation.artists")).toBe("Artiesten");
+    expect(i18n.t("admin.artists.createButton")).toBe("Artiest aanmaken");
     expect(i18n.t("admin.timetable.performances.createButton")).toBe(
       "Optreden aanmaken",
     );

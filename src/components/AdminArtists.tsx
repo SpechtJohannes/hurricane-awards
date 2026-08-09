@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type SubmitEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEventHandler,
+  type Ref,
+  type SubmitEvent,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
   type CreateTimetableActInput,
@@ -15,7 +22,80 @@ type ActFormState = {
   description: string;
 };
 
-type AdminTimetableActsProps = {
+type ArtistFormProps = {
+  form: ActFormState;
+  formError: string;
+  isSaving: boolean;
+  nameInputRef?: Ref<HTMLInputElement>;
+  onChange: (field: "name" | "description", value: string) => void;
+  onCancel: () => void;
+  onSubmit: FormEventHandler<HTMLFormElement>;
+};
+
+function ArtistForm({
+  form,
+  formError,
+  isSaving,
+  nameInputRef,
+  onChange,
+  onCancel,
+  onSubmit,
+}: Readonly<ArtistFormProps>) {
+  const { t } = useTranslation();
+  const isEdit = form.id !== null;
+  const inputSuffix = isEdit ? `-${form.id}` : "";
+
+  return (
+    <form
+      className={`admin-category-form${isEdit ? " admin-category-form--inline" : ""}`}
+      onSubmit={onSubmit}
+    >
+      <h3>{t(isEdit ? "admin.artists.editTitle" : "admin.artists.createTitle")}</h3>
+      <label htmlFor={`admin-timetable-act-name${inputSuffix}`}>
+        {t("admin.artists.nameLabel")}
+        <input
+          ref={nameInputRef}
+          id={`admin-timetable-act-name${inputSuffix}`}
+          type="text"
+          value={form.name}
+          disabled={isSaving}
+          onChange={(event) => onChange("name", event.target.value)}
+        />
+      </label>
+      <label htmlFor={`admin-timetable-act-description${inputSuffix}`}>
+        {t("admin.artists.descriptionLabel")}
+        <textarea
+          id={`admin-timetable-act-description${inputSuffix}`}
+          value={form.description}
+          disabled={isSaving}
+          onChange={(event) => onChange("description", event.target.value)}
+        />
+      </label>
+      {formError ? (
+        <p className="admin-participant-form__error" role="alert">{formError}</p>
+      ) : null}
+      <div className="admin-participant-form__actions">
+        <button
+          className="admin-card__reset admin-card__reset--primary"
+          type="submit"
+          disabled={isSaving}
+        >
+          {isSaving ? t("common.saving") : t("admin.artists.save")}
+        </button>
+        <button
+          className="admin-card__reset admin-card__reset--secondary"
+          type="button"
+          disabled={isSaving}
+          onClick={onCancel}
+        >
+          {t("admin.artists.cancel")}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+type AdminArtistsProps = {
   acts: TimetableAct[];
   error: string;
   isLoading: boolean;
@@ -30,7 +110,7 @@ type AdminTimetableActsProps = {
   onRemoveTag: (actId: string, tagId: string) => Promise<void>;
 };
 
-export function AdminTimetableActs({
+export function AdminArtists({
   acts,
   error,
   isLoading,
@@ -43,7 +123,7 @@ export function AdminTimetableActs({
   onAddTag,
   onAssignTag,
   onRemoveTag,
-}: Readonly<AdminTimetableActsProps>) {
+}: Readonly<AdminArtistsProps>) {
   const { t } = useTranslation();
   const [form, setForm] = useState<ActFormState | null>(null);
   const [formError, setFormError] = useState("");
@@ -63,7 +143,7 @@ export function AdminTimetableActs({
   async function addTag(actId: string) {
     const value = (tagInputByAct[actId] ?? "").trim();
     if (!value) {
-      setTagErrorByAct((current) => ({ ...current, [actId]: t("admin.timetable.acts.tags.errors.required") }));
+      setTagErrorByAct((current) => ({ ...current, [actId]: t("admin.artists.tags.errors.required") }));
       return;
     }
     setSavingTagForAct(actId);
@@ -72,7 +152,7 @@ export function AdminTimetableActs({
       await onAddTag(actId, value);
       setTagInputByAct((current) => ({ ...current, [actId]: "" }));
     } catch {
-      setTagErrorByAct((current) => ({ ...current, [actId]: t("admin.timetable.acts.tags.errors.save") }));
+      setTagErrorByAct((current) => ({ ...current, [actId]: t("admin.artists.tags.errors.save") }));
     } finally {
       setSavingTagForAct(null);
     }
@@ -86,7 +166,7 @@ export function AdminTimetableActs({
     } catch {
       setTagErrorByAct((current) => ({
         ...current,
-        [actId]: t("admin.timetable.acts.tags.errors.remove"),
+        [actId]: t("admin.artists.tags.errors.remove"),
       }));
     } finally {
       setSavingTagForAct(null);
@@ -105,7 +185,7 @@ export function AdminTimetableActs({
     } catch {
       setTagErrorByAct((current) => ({
         ...current,
-        [actId]: t("admin.timetable.acts.tags.errors.save"),
+        [actId]: t("admin.artists.tags.errors.save"),
       }));
     } finally {
       setSavingTagForAct(null);
@@ -135,6 +215,11 @@ export function AdminTimetableActs({
     setFormError("");
   }
 
+  function changeForm(field: "name" | "description", value: string) {
+    setForm((current) => current ? { ...current, [field]: value } : current);
+    setFormError("");
+  }
+
   async function submitForm(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -146,7 +231,7 @@ export function AdminTimetableActs({
     const description = form.description.trim();
 
     if (!name) {
-      setFormError(t("admin.timetable.acts.errors.nameRequired"));
+      setFormError(t("admin.artists.errors.nameRequired"));
       return;
     }
 
@@ -182,8 +267,8 @@ export function AdminTimetableActs({
   return (
     <>
       <SectionHeader
-        title={t("admin.timetable.acts.title")}
-        eyebrow={t("admin.timetable.eyebrow")}
+        title={t("admin.artists.title")}
+        eyebrow={t("admin.artists.eyebrow")}
       />
 
       {error ? <p className="admin__notice">{error}</p> : null}
@@ -196,74 +281,26 @@ export function AdminTimetableActs({
             onClick={startCreate}
             disabled={form !== null}
           >
-            {t("admin.timetable.acts.createButton")}
+            {t("admin.artists.createButton")}
           </button>
         </div>
 
         {form?.id === null ? (
-          <form className="admin-category-form" onSubmit={submitForm}>
-            <h3>
-              {form.id
-                ? t("admin.timetable.acts.editTitle")
-                : t("admin.timetable.acts.createTitle")}
-            </h3>
-
-            <label htmlFor="admin-timetable-act-name">
-              {t("admin.timetable.acts.nameLabel")}
-              <input
-                id="admin-timetable-act-name"
-                type="text"
-                value={form.name}
-                disabled={isSaving}
-                onChange={(event) => {
-                  setForm({ ...form, name: event.target.value });
-                  setFormError("");
-                }}
-              />
-            </label>
-
-            <label htmlFor="admin-timetable-act-description">
-              {t("admin.timetable.acts.descriptionLabel")}
-              <textarea
-                id="admin-timetable-act-description"
-                value={form.description}
-                disabled={isSaving}
-                onChange={(event) => {
-                  setForm({ ...form, description: event.target.value });
-                  setFormError("");
-                }}
-              />
-            </label>
-
-            {formError ? (
-              <p className="admin-participant-form__error" role="alert">{formError}</p>
-            ) : null}
-
-            <div className="admin-participant-form__actions">
-              <button
-                className="admin-card__reset admin-card__reset--primary"
-                type="submit"
-                disabled={isSaving}
-              >
-                {isSaving ? t("common.saving") : t("admin.timetable.acts.save")}
-              </button>
-              <button
-                className="admin-card__reset admin-card__reset--secondary"
-                type="button"
-                disabled={isSaving}
-                onClick={cancelForm}
-              >
-                {t("admin.timetable.acts.cancel")}
-              </button>
-            </div>
-          </form>
+          <ArtistForm
+            form={form}
+            formError={formError}
+            isSaving={isSaving}
+            onChange={changeForm}
+            onCancel={cancelForm}
+            onSubmit={submitForm}
+          />
         ) : null}
 
         {isLoading ? (
-          <AdminLoadingNotice message={t("admin.timetable.acts.loading")} />
+          <AdminLoadingNotice message={t("admin.artists.loading")} />
         ) : null}
         {!isLoading && acts.length === 0 ? (
-          <p className="admin__notice">{t("admin.timetable.acts.empty")}</p>
+          <p className="admin__notice">{t("admin.artists.empty")}</p>
         ) : null}
         {!isLoading && acts.length > 0 ? (
           <div className="admin-categories__list">
@@ -271,58 +308,29 @@ export function AdminTimetableActs({
               <article className="admin-category-card" key={act.id}>
                 <div className="admin-category-card__main">
                   {form?.id === act.id ? (
-                    <form className="admin-category-form admin-category-form--inline" onSubmit={submitForm}>
-                      <h3>{t("admin.timetable.acts.editTitle")}</h3>
-                      <label htmlFor={`admin-timetable-act-name-${act.id}`}>
-                        {t("admin.timetable.acts.nameLabel")}
-                        <input
-                          ref={editNameInputRef}
-                          id={`admin-timetable-act-name-${act.id}`}
-                          type="text"
-                          value={form.name}
-                          disabled={isSaving}
-                          onChange={(event) => {
-                            setForm({ ...form, name: event.target.value });
-                            setFormError("");
-                          }}
-                        />
-                      </label>
-                      <label htmlFor={`admin-timetable-act-description-${act.id}`}>
-                        {t("admin.timetable.acts.descriptionLabel")}
-                        <textarea
-                          id={`admin-timetable-act-description-${act.id}`}
-                          value={form.description}
-                          disabled={isSaving}
-                          onChange={(event) => {
-                            setForm({ ...form, description: event.target.value });
-                            setFormError("");
-                          }}
-                        />
-                      </label>
-                      {formError ? <p className="admin-participant-form__error" role="alert">{formError}</p> : null}
-                      <div className="admin-participant-form__actions">
-                        <button className="admin-card__reset admin-card__reset--primary" type="submit" disabled={isSaving}>
-                          {isSaving ? t("common.saving") : t("admin.timetable.acts.save")}
-                        </button>
-                        <button className="admin-card__reset admin-card__reset--secondary" type="button" disabled={isSaving} onClick={cancelForm}>
-                          {t("admin.timetable.acts.cancel")}
-                        </button>
-                      </div>
-                    </form>
+                    <ArtistForm
+                      form={form}
+                      formError={formError}
+                      isSaving={isSaving}
+                      nameInputRef={editNameInputRef}
+                      onChange={changeForm}
+                      onCancel={cancelForm}
+                      onSubmit={submitForm}
+                    />
                   ) : (
                     <>
                       <h3>{act.name}</h3>
                       {act.description ? <p>{act.description}</p> : null}
                     </>
                   )}
-                  <div className="artist-tags" aria-label={t("admin.timetable.acts.tags.assigned")}>
+                  <div className="artist-tags" aria-label={t("admin.artists.tags.assigned")}>
                     {actTags.filter((tag) => tag.actId === act.id).map((tag) => (
                       <span className="artist-tag" key={tag.id}>
                         {tag.name}
                         <button
                           type="button"
                           disabled={savingTagForAct === act.id}
-                          aria-label={t("admin.timetable.acts.tags.remove", { name: tag.name })}
+                          aria-label={t("admin.artists.tags.remove", { name: tag.name })}
                           onClick={() => void removeTag(act.id, tag.id)}
                         >×</button>
                       </span>
@@ -332,10 +340,10 @@ export function AdminTimetableActs({
                     <select
                       value={selectedTagByAct[act.id] ?? ""}
                       disabled={savingTagForAct === act.id}
-                      aria-label={t("admin.timetable.acts.tags.selectLabel")}
+                      aria-label={t("admin.artists.tags.selectLabel")}
                       onChange={(event) => void assignTag(act.id, event.target.value)}
                     >
-                      <option value="">{t("admin.timetable.acts.tags.selectPlaceholder")}</option>
+                      <option value="">{t("admin.artists.tags.selectPlaceholder")}</option>
                       {tags.filter((tag) => !actTags.some((assigned) => assigned.actId === act.id && assigned.id === tag.id)).map((tag) => (
                         <option key={tag.id} value={tag.id}>{tag.name}</option>
                       ))}
@@ -344,8 +352,8 @@ export function AdminTimetableActs({
                       type="text"
                       value={tagInputByAct[act.id] ?? ""}
                       disabled={savingTagForAct === act.id}
-                      placeholder={t("admin.timetable.acts.tags.placeholder")}
-                      aria-label={t("admin.timetable.acts.tags.inputLabel")}
+                      placeholder={t("admin.artists.tags.placeholder")}
+                      aria-label={t("admin.artists.tags.inputLabel")}
                       onChange={(event) => setTagInputByAct((current) => ({ ...current, [act.id]: event.target.value }))}
                     />
                     <button
@@ -353,7 +361,7 @@ export function AdminTimetableActs({
                       type="button"
                       disabled={savingTagForAct === act.id}
                       onClick={() => addTag(act.id)}
-                    >{savingTagForAct === act.id ? t("common.saving") : t("admin.timetable.acts.tags.add")}</button>
+                    >{savingTagForAct === act.id ? t("common.saving") : t("admin.artists.tags.add")}</button>
                   </div>
                   {tagErrorByAct[act.id] ? <p className="admin-participant-form__error" role="alert">{tagErrorByAct[act.id]}</p> : null}
                 </div>
@@ -366,7 +374,7 @@ export function AdminTimetableActs({
                       disabled={form !== null || deletingActId === act.id}
                       onClick={() => startEdit(act)}
                     >
-                      {t("admin.timetable.acts.edit")}
+                      {t("admin.artists.edit")}
                     </button>
                     <button
                       className="admin-card__reset"
@@ -375,8 +383,8 @@ export function AdminTimetableActs({
                       onClick={() => onDelete(act)}
                     >
                       {deletingActId === act.id
-                        ? t("admin.timetable.acts.deleting")
-                        : t("admin.timetable.acts.delete")}
+                        ? t("admin.artists.deleting")
+                        : t("admin.artists.delete")}
                     </button>
                   </div>
                 </div> : null}
