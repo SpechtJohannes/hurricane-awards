@@ -143,6 +143,30 @@ describe("Artists", () => {
     expect(onSelectAct).toHaveBeenCalledWith("z");
   });
 
+  it("klappt Empfehlungen mit Anzahl ein und wieder auf", async () => {
+    const user = userEvent.setup();
+    renderArtists({ preferredTagIds: new Set(["rock"]) });
+    const toggle = screen.getByRole("button", { name: /empfohlen für dich \(1\)/i });
+    const heading = screen.getByRole("heading", { name: /empfohlen für dich \(1\)/i });
+    const content = document.getElementById("artist-recommendations-content")!;
+    const recommendation = within(content).getByText("Zulu");
+
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(toggle).toHaveAttribute("aria-controls", "artist-recommendations-content");
+    expect(heading).toBeVisible();
+    expect(recommendation).toBeVisible();
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(heading).toBeVisible();
+    expect(heading).toHaveTextContent("(1)");
+    expect(recommendation).not.toBeVisible();
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(recommendation).toBeVisible();
+  });
+
   it("zeigt Empfehlungen mit Begründung und synchronem Favoritenstatus", async () => {
     const user = userEvent.setup();
     const onToggleFavorite = vi.fn();
