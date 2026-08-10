@@ -1512,14 +1512,6 @@ function GamesSection(props: Readonly<GamesSectionProps>) {
   );
 }
 
-function assignedArtistTags(tags: ActArtistTag[], language: string): ArtistTag[] {
-  return Array.from(
-    new Map(tags.map((tag) => [tag.id, { id: tag.id, name: tag.name }])).values(),
-  ).sort((first, second) =>
-    first.name.localeCompare(second.name, language, { sensitivity: "base" }),
-  );
-}
-
 type ProfileSectionProps = {
   selectedParticipant: Participant | null;
   profileAvatarId: string | null;
@@ -2496,6 +2488,7 @@ function App() {
           loadedRandomPairingAssignments,
           loadedTournaments,
           loadedTimetable,
+          loadedArtistTags,
           loadedActArtistTags,
           loadedPreferences,
           loadedStandingsResult,
@@ -2511,6 +2504,7 @@ function App() {
           loadRandomPairingAssignments(activeFestival.id, accessContext),
           loadTournaments(activeFestival.id, accessContext),
           loadTimetable(accessContext),
+          loadArtistTags(accessContext),
           loadActArtistTags(accessContext),
           loadArtistTagPreferences(accessContext),
           loadAllTimeStandings(accessContext).then(
@@ -2538,6 +2532,7 @@ function App() {
           setRandomPairingAssignments(loadedRandomPairingAssignments);
           setTournaments(loadedTournaments);
           setTimetable(loadedTimetable);
+          setArtistTags(loadedArtistTags);
           setActArtistTags(loadedActArtistTags);
           setPreferredArtistTags(loadedPreferences);
           setSelectedPreferenceTagIds(new Set(loadedPreferences.map((tag) => tag.id)));
@@ -3002,13 +2997,13 @@ function App() {
     setPreferencesSuccess("");
   }
 
-  async function savePreferences() {
+  async function persistPreferences(tagIds: readonly string[]) {
     if (!selectedParticipant || arePreferencesSaving) return;
     setArePreferencesSaving(true);
     setPreferencesSaveError("");
     setPreferencesSuccess("");
     try {
-      const saved = await replaceArtistTagPreferences(Array.from(selectedPreferenceTagIds), { participantAccessCode: selectedParticipant.accessCode });
+      const saved = await replaceArtistTagPreferences(tagIds, { participantAccessCode: selectedParticipant.accessCode });
       setPreferredArtistTags(saved);
       setSelectedPreferenceTagIds(new Set(saved.map((tag) => tag.id)));
       setPreferencesSuccess(t("preferences.saved"));
@@ -3017,6 +3012,10 @@ function App() {
     } finally {
       setArePreferencesSaving(false);
     }
+  }
+
+  function savePreferences() {
+    return persistPreferences(Array.from(selectedPreferenceTagIds));
   }
 
   function openAdminView() {
@@ -5598,7 +5597,7 @@ function App() {
           profileError={profileError}
           profileSuccess={profileSuccess}
           hasProfileChanges={hasProfileChanges}
-          availableTags={assignedArtistTags(actArtistTags, i18n.language)}
+          availableTags={artistTags}
           selectedPreferenceTagIds={selectedPreferenceTagIds}
           arePreferencesLoading={arePreferencesLoading}
           arePreferencesSaving={arePreferencesSaving}
@@ -5629,10 +5628,7 @@ function App() {
             setIsAvatarPickerExpanded(false);
           }}
           onTogglePreference={togglePreference}
-          onResetPreferences={() => {
-            setSelectedPreferenceTagIds(new Set());
-            setPreferencesSuccess("");
-          }}
+          onResetPreferences={() => void persistPreferences([])}
           onSavePreferences={savePreferences}
           onSubmitAccessCode={submitAccessCode}
           onAccessCodeChange={(code) => {
