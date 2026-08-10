@@ -28,7 +28,7 @@ type ArtistsProps = {
   arePreferencesLoading: boolean;
   isSavingFavorite: boolean;
   onToggleFavorite: (performanceIds: string[], isFavorite: boolean) => void;
-  onOpenProfile: () => void;
+  onOpenProfile: (() => void) | null;
 };
 
 type ArtistFavorite = {
@@ -164,9 +164,11 @@ function ArtistRecommendations({
     content = (
       <div className="artists__notice">
         <p>{t("artists.recommendations.noPreferences")}</p>
-        <button type="button" onClick={onOpenProfile}>
-          {t("artists.recommendations.openProfile")}
-        </button>
+        {onOpenProfile ? (
+          <button type="button" onClick={onOpenProfile}>
+            {t("artists.recommendations.openProfile")}
+          </button>
+        ) : null}
       </div>
     );
   } else if (recommendations.length === 0) {

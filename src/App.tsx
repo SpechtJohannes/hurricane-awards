@@ -221,6 +221,10 @@ import {
   dashboardModuleConfig,
   selectDashboardModules,
 } from "./domain/dashboardModules";
+import {
+  filterVisibleParticipantAreas,
+  resolveParticipantDestination,
+} from "./domain/participantAreas";
 import "./App.css";
 
 type CategoryResult = {
@@ -934,7 +938,7 @@ type TimetableDaySchedule = {
 
 type DashboardTile = {
   id: string;
-  section: MainSection;
+  section: Exclude<MainSection, "dashboard">;
   title: string;
   description: string;
   status: string;
@@ -958,6 +962,8 @@ type DashboardSectionProps = {
   referenceInstant: Date;
   timetable: Timetable | null;
   activeCategory: Category | null;
+  showTimetableLink: boolean;
+  showVotingLink: boolean;
   onNavigate: (section: MainSection) => void;
 };
 
@@ -1025,6 +1031,8 @@ function DashboardSection({
   referenceInstant,
   timetable,
   activeCategory,
+  showTimetableLink,
+  showVotingLink,
   onNavigate,
 }: Readonly<DashboardSectionProps>) {
   const { t } = useTranslation();
@@ -1053,6 +1061,8 @@ function DashboardSection({
         timetable={timetable}
         activeCategory={activeCategory}
         showEventStatus={showEventStatus}
+        showTimetableLink={showTimetableLink}
+        showVotingLink={showVotingLink}
         onOpenTimetable={() => onNavigate("timetable")}
         onOpenVoting={() => onNavigate(isAuthenticated ? "voting" : "profile")}
       />
@@ -2258,6 +2268,12 @@ function App() {
   const [participantAreaVisibility, setParticipantAreaVisibility] = useState(
     defaultParticipantAreaVisibility,
   );
+  const participantViewVisibility = useMemo(
+    () => selectedParticipant
+      ? participantAreaVisibility
+      : { ...participantAreaVisibility, profile: true },
+    [participantAreaVisibility, selectedParticipant],
+  );
   const [isLoadingAreaVisibility, setIsLoadingAreaVisibility] = useState(
     () => Boolean(selectedParticipant?.isAdmin) && window.location.hash === "#admin",
   );
@@ -2350,8 +2366,17 @@ function App() {
       }
 
       setIsAdminVisible(false);
-      const section = mainSectionFromHash(window.location.hash);
-      if (section) {
+      const requestedSection = mainSectionFromHash(window.location.hash);
+      if (requestedSection) {
+        const section = resolveParticipantDestination(requestedSection, participantViewVisibility);
+        if (section === "dashboard") {
+          window.history.replaceState(
+            null,
+            "",
+            `${window.location.pathname}${window.location.search}`,
+          );
+          setLocationHash("");
+        }
         setActiveMainSection(section);
       } else if (!window.location.hash) {
         setActiveMainSection("dashboard");
@@ -2364,10 +2389,10 @@ function App() {
     return () => {
       window.removeEventListener("hashchange", handleHashChange);
     };
-  }, [selectedParticipant]);
+  }, [participantViewVisibility, selectedParticipant]);
 
   useEffect(() => {
-    if (!isAdminVisible || !selectedParticipant?.isAdmin) return;
+    if (!festivalAccess.isUnlocked) return;
 
     let isCurrent = true;
     void loadParticipantAreaVisibility()
@@ -2386,12 +2411,13 @@ function App() {
     return () => {
       isCurrent = false;
     };
-  }, [isAdminVisible, selectedParticipant?.isAdmin]);
+  }, [festivalAccess.isUnlocked]);
 
   function navigateMainSection(section: MainSection) {
-    const hash = section === "dashboard" ? "" : mainSectionHashes[section];
+    const destination = resolveParticipantDestination(section, participantViewVisibility);
+    const hash = destination === "dashboard" ? "" : mainSectionHashes[destination];
     if (window.location.hash === hash) {
-      setActiveMainSection(section);
+      setActiveMainSection(destination);
       return;
     }
     window.location.hash = hash;
@@ -2681,7 +2707,7 @@ function App() {
     eventReferenceInstant,
   );
   const dashboardTiles = selectDashboardModules(
-    unsortedDashboardTiles,
+    filterVisibleParticipantAreas(unsortedDashboardTiles, participantViewVisibility),
     dashboardModuleConfig,
     eventPhase,
   );
@@ -3025,7 +3051,6 @@ function App() {
     }
 
     setIsAdminVisible(true);
-    setIsLoadingAreaVisibility(true);
     setAreaVisibilityError("");
     window.location.hash = "#admin";
     void reloadFestivalCode();
@@ -5584,6 +5609,8 @@ function App() {
           referenceInstant={eventReferenceInstant}
           timetable={timetable}
           activeCategory={openCategories[0] ?? null}
+          showTimetableLink={participantViewVisibility.timetable}
+          showVotingLink={participantViewVisibility.voting}
           onNavigate={navigateMainSection}
         />
       )}
@@ -5713,7 +5740,7 @@ function App() {
               window.location.hash = `#artists/${encodeURIComponent(actId)}`;
             }}
             onToggleFavorite={toggleArtistFavorite}
-            onOpenProfile={() => navigateMainSection("profile")}
+            onOpenProfile={participantViewVisibility.profile ? () => navigateMainSection("profile") : null}
           />
         )
       )}

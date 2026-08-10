@@ -35,6 +35,7 @@ import {
   verifyFestivalAccessCode,
 } from "../data/festival";
 import {
+  defaultParticipantAreaVisibility,
   loadParticipantAreaVisibility,
   updateParticipantAreaVisibility,
 } from "../data/participantAreaVisibility";
@@ -263,6 +264,23 @@ describe("Supabase Datenzugriffe", () => {
         p_is_visible: true,
       },
     );
+  });
+
+  it("verwendet bei fehlender Sichtbarkeitskonfiguration den zentralen Default", async () => {
+    rpcMock.mockResolvedValueOnce({ data: null, error: null });
+
+    await expect(loadParticipantAreaVisibility()).resolves.toEqual(
+      defaultParticipantAreaVisibility,
+    );
+
+    rpcMock.mockResolvedValueOnce({
+      data: [{ artists_visible: "invalid", timetable_visible: false }],
+      error: null,
+    });
+    await expect(loadParticipantAreaVisibility()).resolves.toEqual({
+      ...defaultParticipantAreaVisibility,
+      timetable: false,
+    });
   });
 
   it("validiert und verwaltet Eventlogos ueber Storage und Admin RPCs", async () => {
