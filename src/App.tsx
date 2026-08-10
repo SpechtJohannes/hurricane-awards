@@ -3007,7 +3007,8 @@ function App() {
       setPreferredArtistTags(saved);
       setSelectedPreferenceTagIds(new Set(saved.map((tag) => tag.id)));
       setPreferencesSuccess(t("preferences.saved"));
-    } catch {
+    } catch (error) {
+      console.error("Failed to save artist tag preferences", error);
       setPreferencesSaveError(t("preferences.errors.save"));
     } finally {
       setArePreferencesSaving(false);
