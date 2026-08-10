@@ -144,6 +144,8 @@ function ArtistRecommendations({
   | "onOpenProfile"
 > & { recommendations: ArtistRecommendation[] }) {
   const { t } = useTranslation();
+  const [isExpanded, setIsExpanded] = useState(true);
+  const contentId = "artist-recommendations-content";
   let content: ReactNode;
 
   if (isLoading || arePreferencesLoading) {
@@ -190,10 +192,21 @@ function ArtistRecommendations({
       className="artists__recommendations"
       aria-labelledby="artist-recommendations-title"
     >
-      <h3 id="artist-recommendations-title">
-        {t("artists.recommendations.title")}
+      <h3 id="artist-recommendations-title" className="artists__recommendations-heading">
+        <button
+          type="button"
+          className="artists__recommendations-toggle"
+          aria-expanded={isExpanded}
+          aria-controls={contentId}
+          onClick={() => setIsExpanded((current) => !current)}
+        >
+          <span>{t("artists.recommendations.title")} ({recommendations.length})</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22">
+            <path d="m6.7 9.3 5.3 5.29 5.3-5.3 1.4 1.42-6.7 6.7-6.7-6.7 1.4-1.42Z" />
+          </svg>
+        </button>
       </h3>
-      {content}
+      <div id={contentId} hidden={!isExpanded}>{content}</div>
     </section>
   );
 }

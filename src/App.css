@@ -2508,7 +2508,13 @@ h1 {
   gap: 18px;
 }
 .artists__recommendations { display: grid; gap: 12px; margin: 22px 0; padding: clamp(16px, 4vw, 24px); border: 1px solid var(--border-subtle); border-radius: 20px; background: color-mix(in srgb, var(--section-color) 8%, var(--surface-card)); }
-.artists__recommendations h3 { margin: 0; }
+.artists__recommendations-heading { margin: 0; }
+.artists__recommendations-toggle { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 4px; color: var(--color-text-primary); font: inherit; font-weight: inherit; text-align: left; border: 0; border-radius: 8px; background: transparent; cursor: pointer; }
+.artists__recommendations-toggle:hover { color: var(--section-color); }
+.artists__recommendations-toggle:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
+.artists__recommendations-toggle svg { flex: 0 0 auto; fill: currentColor; transition: transform 180ms ease; }
+.artists__recommendations-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+.artists__recommendations [hidden] { display: none; }
 .artists__recommendation { position: relative; display: grid; gap: 8px; }
 .artists__recommendation .artists__item { padding-bottom: 56px; }
 .artists__reason { color: var(--color-text-secondary); font-size: 0.86rem; font-weight: 750; }
