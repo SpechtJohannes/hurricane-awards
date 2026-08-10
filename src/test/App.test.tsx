@@ -150,6 +150,10 @@ import {
   loadArtistTags,
   removeArtistTag,
 } from "../data/artistTags";
+import {
+  loadArtistTagPreferences,
+  replaceArtistTagPreferences,
+} from "../data/artistTagPreferences";
 import type { MusicPlaylist } from "../data/musicEmbeds";
 import {
   defaultParticipantAreaVisibility,
@@ -871,6 +875,8 @@ function mockLoadedData({
   vi.mocked(loadTimetable).mockResolvedValue(loadedTimetable);
   vi.mocked(loadArtistTags).mockResolvedValue([]);
   vi.mocked(loadActArtistTags).mockResolvedValue([]);
+  vi.mocked(loadArtistTagPreferences).mockResolvedValue([]);
+  vi.mocked(replaceArtistTagPreferences).mockResolvedValue([]);
   vi.mocked(addArtistTag).mockResolvedValue({ id: "tag-1", name: "Rock" });
   vi.mocked(assignArtistTag).mockResolvedValue(undefined);
   vi.mocked(removeArtistTag).mockResolvedValue(undefined);
@@ -1781,6 +1787,95 @@ describe("Login", () => {
         name: /mit teilnehmercode anmelden/i,
       }),
     ).not.toBeInTheDocument();
+  });
+
+  it("zeigt alle artist_tags und laedt mehrere gespeicherte Vorlieben", async () => {
+    const tags = [
+      { id: "tag-rock", name: "Rock" },
+      { id: "tag-pop", name: "Pop" },
+      { id: "tag-punk", name: "Punk" },
+    ];
+    vi.mocked(loadArtistTags).mockResolvedValue(tags);
+    vi.mocked(loadActArtistTags).mockResolvedValue([
+      { id: "tag-rock", name: "Rock", actId: "act-1" },
+    ]);
+    vi.mocked(loadArtistTagPreferences).mockResolvedValue([tags[0], tags[2]]);
+
+    await renderLoadedApp();
+    await loginWith("ALICE42");
+    await switchMainSection(/profil/i);
+
+    expect(screen.getByRole("button", { name: /vorliebe rock entfernen/i })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /vorliebe punk entfernen/i })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /vorliebe pop ausw.hlen/i })).toHaveAttribute("aria-pressed", "false");
+    expect(loadArtistTags).toHaveBeenCalledWith({ participantAccessCode: "ALICE42" });
+  });
+
+  it("waehlt mehrere Vorlieben aus, speichert sie und kann die Auswahl aendern", async () => {
+    const tags = [
+      { id: "tag-rock", name: "Rock" },
+      { id: "tag-pop", name: "Pop" },
+      { id: "tag-punk", name: "Punk" },
+    ];
+    vi.mocked(loadArtistTags).mockResolvedValue(tags);
+    vi.mocked(loadArtistTagPreferences).mockResolvedValue([tags[0]]);
+    vi.mocked(replaceArtistTagPreferences).mockImplementation(async (tagIds) =>
+      tags.filter((tag) => tagIds.includes(tag.id)),
+    );
+
+    await renderLoadedApp();
+    const user = await loginWith("ALICE42");
+    await switchMainSection(/profil/i);
+    await user.click(screen.getByRole("button", { name: /vorliebe pop ausw.hlen/i }));
+    await user.click(screen.getByRole("button", { name: /vorliebe punk ausw.hlen/i }));
+    await user.click(screen.getByRole("button", { name: /vorlieben speichern/i }));
+
+    expect(replaceArtistTagPreferences).toHaveBeenLastCalledWith(
+      expect.arrayContaining(["tag-rock", "tag-pop", "tag-punk"]),
+      { participantAccessCode: "ALICE42" },
+    );
+    expect(await screen.findByText(/musikalische vorlieben wurden gespeichert/i)).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: /vorliebe rock entfernen/i }));
+    await user.click(screen.getByRole("button", { name: /vorlieben speichern/i }));
+    expect(replaceArtistTagPreferences).toHaveBeenLastCalledWith(
+      expect.arrayContaining(["tag-pop", "tag-punk"]),
+      { participantAccessCode: "ALICE42" },
+    );
+    expect(vi.mocked(replaceArtistTagPreferences).mock.calls.at(-1)?.[0]).not.toContain("tag-rock");
+  });
+
+  it("setzt alle Vorlieben dauerhaft zurueck", async () => {
+    const rock = { id: "tag-rock", name: "Rock" };
+    vi.mocked(loadArtistTags).mockResolvedValue([rock]);
+    vi.mocked(loadArtistTagPreferences).mockResolvedValue([rock]);
+
+    await renderLoadedApp();
+    const user = await loginWith("ALICE42");
+    await switchMainSection(/profil/i);
+    await user.click(screen.getByRole("button", { name: /alle vorlieben zur.cksetzen/i }));
+
+    expect(replaceArtistTagPreferences).toHaveBeenCalledWith([], { participantAccessCode: "ALICE42" });
+    expect(await screen.findByRole("button", { name: /vorliebe rock ausw.hlen/i })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("zeigt einen verstaendlichen Fehler beim Laden der Vorlieben", async () => {
+    vi.mocked(loadArtistTags).mockRejectedValueOnce(new Error("load failed"));
+    await renderLoadedApp();
+    await loginWith("ALICE42");
+    await switchMainSection(/profil/i);
+    expect(await screen.findByText(/vorlieben konnten gerade nicht geladen werden/i)).toBeVisible();
+  });
+
+  it("zeigt einen verstaendlichen Fehler beim Speichern der Vorlieben", async () => {
+    vi.mocked(loadArtistTags).mockResolvedValue([{ id: "tag-rock", name: "Rock" }]);
+    vi.mocked(replaceArtistTagPreferences).mockRejectedValueOnce(new Error("save failed"));
+    await renderLoadedApp();
+    const user = await loginWith("ALICE42");
+    await switchMainSection(/profil/i);
+    await user.click(screen.getByRole("button", { name: /vorliebe rock ausw.hlen/i }));
+    await user.click(screen.getByRole("button", { name: /vorlieben speichern/i }));
+    expect(await screen.findByText(/vorlieben konnten gerade nicht gespeichert werden/i)).toBeVisible();
   });
 
   it("zeigt den aktuellen Namen und speichert einen neuen Anzeigenamen", async () => {
