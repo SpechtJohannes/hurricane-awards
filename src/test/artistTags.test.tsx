@@ -19,6 +19,12 @@ describe("artist tag data access", () => {
     await expect(loadActArtistTags(context)).resolves.toEqual([{ actId: "act-1", id: "rock", name: "Rock" }]);
   });
 
+  it("returns no act tag assignments when the RPC returns null data", async () => {
+    rpc.mockResolvedValueOnce({ data: null, error: null });
+
+    await expect(loadActArtistTags(context)).resolves.toEqual([]);
+  });
+
   it("creates or reuses, assigns and removes tags through protected RPCs", async () => {
     rpc.mockResolvedValue({ data: [{ id: "rock", name: "Rock" }], error: null });
     await addArtistTag("act-1", " Rock ", context);
