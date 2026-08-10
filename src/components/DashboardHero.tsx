@@ -16,6 +16,8 @@ type DashboardHeroProps = {
   timetable: Timetable | null;
   activeCategory: Category | null;
   showEventStatus: boolean;
+  showTimetableLink?: boolean;
+  showVotingLink?: boolean;
   participantAccessCode?: string | null;
   onOpenTimetable: () => void;
   onOpenVoting: () => void;
@@ -53,6 +55,8 @@ export function DashboardHero({
   timetable,
   activeCategory,
   showEventStatus,
+  showTimetableLink = true,
+  showVotingLink = true,
   participantAccessCode = null,
   onOpenTimetable,
   onOpenVoting,
@@ -140,7 +144,7 @@ export function DashboardHero({
             </article>
         ) : null}
 
-        {nextFavorite && act && stage && favoriteTime ? (
+        {showTimetableLink && nextFavorite && act && stage && favoriteTime ? (
           <button
             className="dashboard-hero__module dashboard-hero__module--favorite"
             type="button"
@@ -157,7 +161,7 @@ export function DashboardHero({
           </button>
         ) : null}
 
-        {activeCategory ? (
+        {showVotingLink && activeCategory ? (
           <button
             className="dashboard-hero__module dashboard-hero__module--voting"
             type="button"

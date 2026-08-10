@@ -2607,6 +2607,89 @@ describe("Login", () => {
     expect(screen.getByText(/angemeldet als:/i)).toBeVisible();
   });
 
+  it("zeigt nur aktivierte Dashboardbereiche und wertet gekoppelte Bereiche unabhängig aus", async () => {
+    vi.mocked(loadParticipantAreaVisibility).mockResolvedValue({
+      ...defaultParticipantAreaVisibility,
+      artists: false,
+      awards: false,
+      games: false,
+      info: false,
+    });
+    await renderLoadedApp();
+    await loginWith("ALICE42");
+    await switchMainSection(/^start$/i);
+    const dashboard = sectionForHeading(/hallo alice/i);
+    const tiles = within(dashboard).getByLabelText(/schnellzugriff/i);
+
+    expect(within(tiles).getAllByRole("button")).toHaveLength(3);
+    expect(within(tiles).getByRole("button", { name: /timetable/i })).toBeVisible();
+    expect(within(tiles).getByRole("button", { name: /abstimmungen/i })).toBeVisible();
+    expect(within(tiles).getByRole("button", { name: /profil/i })).toBeVisible();
+    expect(within(tiles).queryByRole("button", { name: /künstler/i })).not.toBeInTheDocument();
+    expect(within(tiles).queryByRole("button", { name: /^awards/i })).not.toBeInTheDocument();
+  });
+
+  it("fängt direkte Aufrufe deaktivierter Bereiche mit dem Dashboard ab", async () => {
+    vi.mocked(loadParticipantAreaVisibility).mockResolvedValue({
+      ...defaultParticipantAreaVisibility,
+      artists: false,
+      awards: false,
+      games: false,
+    });
+    await renderLoadedApp();
+    await loginWith("ALICE42");
+
+    window.location.hash = "#artists/act-1";
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+
+    await waitFor(() => expect(window.location.hash).toBe(""));
+    expect(screen.getByRole("heading", { name: /hallo alice/i })).toBeVisible();
+
+    window.location.hash = "#timetable";
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    expect(await screen.findByRole("heading", { name: /^timetable$/i })).toBeVisible();
+  });
+
+  it("berücksichtigt geänderte Sichtbarkeit nach einem erneuten Laden", async () => {
+    vi.mocked(loadParticipantAreaVisibility).mockResolvedValueOnce({
+      ...defaultParticipantAreaVisibility,
+    });
+    const firstView = await renderLoadedApp();
+    await unlockFestivalWith();
+    await waitFor(() => expect(loadParticipantAreaVisibility).toHaveBeenCalledTimes(1));
+    firstView.unmount();
+
+    vi.mocked(loadParticipantAreaVisibility).mockResolvedValueOnce({
+      ...defaultParticipantAreaVisibility,
+      artists: false,
+    });
+    await renderLoadedApp();
+
+    await waitFor(() => expect(loadParticipantAreaVisibility).toHaveBeenCalledTimes(2));
+    const dashboard = sectionForHeading(/hallo eventcrew/i);
+    expect(within(dashboard).queryByRole("button", { name: /künstler/i })).not.toBeInTheDocument();
+    expect(within(dashboard).getByRole("button", { name: /timetable/i })).toBeVisible();
+  });
+
+  it("blendet interne Verweise auf deaktivierte Bereiche aus", async () => {
+    vi.mocked(loadParticipantAreaVisibility).mockResolvedValue({
+      ...defaultParticipantAreaVisibility,
+      profile: false,
+      timetable: false,
+      voting: false,
+    });
+    await renderLoadedApp();
+    await loginWith("ALICE42");
+    await switchMainSection(/^start$/i);
+
+    expect(screen.queryByText(/nächster favorit/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/aktive abstimmung/i)).not.toBeInTheDocument();
+
+    await switchMainSection(/^künstler$/i);
+    expect(screen.getByText(/wähle in deinem profil musikalische vorlieben/i)).toBeVisible();
+    expect(screen.queryByRole("button", { name: /vorlieben im profil/i })).not.toBeInTheDocument();
+  });
+
   it("zeigt Spiele ohne aktive Runde mit Hinweis und ohne Bingo Hauptnavpunkt", async () => {
     await renderLoadedApp();
     await loginWith("ALICE42");
@@ -3859,7 +3942,7 @@ describe("Admin", () => {
     expect(archiveFestival).not.toHaveBeenCalled();
     expect(loadFestivalExportData).not.toHaveBeenCalled();
     expect(updateFestivalAccessCode).not.toHaveBeenCalled();
-    expect(loadParticipantAreaVisibility).not.toHaveBeenCalled();
+    expect(loadParticipantAreaVisibility).toHaveBeenCalledTimes(1);
     expect(updateParticipantAreaVisibility).not.toHaveBeenCalled();
   });
 
@@ -3982,14 +4065,12 @@ describe("Admin", () => {
     );
   });
 
-  it("laedt die gespeicherte Sichtbarkeit beim erneuten Oeffnen neu", async () => {
+  it("verwendet im Adminbereich die bereits zentral geladene Sichtbarkeit", async () => {
     mockLoadedData();
-    vi.mocked(loadParticipantAreaVisibility)
-      .mockResolvedValueOnce({ ...defaultParticipantAreaVisibility })
-      .mockResolvedValueOnce({
-        ...defaultParticipantAreaVisibility,
-        info: false,
-      });
+    vi.mocked(loadParticipantAreaVisibility).mockResolvedValue({
+      ...defaultParticipantAreaVisibility,
+      info: false,
+    });
     await renderLoadedApp();
     const user = await loginWith("ALICE42");
 
@@ -3999,7 +4080,7 @@ describe("Admin", () => {
     await switchAdminSection(/^infos$/i);
 
     expect(screen.getByRole("checkbox", { name: /^infos/i })).not.toBeChecked();
-    expect(loadParticipantAreaVisibility).toHaveBeenCalledTimes(2);
+    expect(loadParticipantAreaVisibility).toHaveBeenCalledTimes(1);
   });
 
   it("macht Admin-Aktionen erst in der Admin-Ansicht verfuegbar", async () => {
