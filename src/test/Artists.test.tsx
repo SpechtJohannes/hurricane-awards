@@ -158,4 +158,17 @@ describe("Artists", () => {
     await user.click(favorite);
     expect(onToggleFavorite).toHaveBeenCalledWith(["p-z"], true);
   });
+
+  it("zeigt Roy Bianco bei einer gespeicherten italo-Schlager-PrÃ¤ferenz", () => {
+    const italoSchlagerId = "45ed53bb-ffbd-4d24-bca8-a103fcd52b84";
+    renderArtists({
+      acts: [{ id: "roy-bianco", name: "Roy Bianco & Die Abbrunzati Boys", description: null }],
+      artistTags: [{ actId: "roy-bianco", id: italoSchlagerId, name: "italo Schlager" }],
+      preferredTagIds: new Set([italoSchlagerId]),
+    });
+
+    const recommendations = document.getElementById("artist-recommendations-title")!.closest("section")!;
+    expect(within(recommendations).getByText("Roy Bianco & Die Abbrunzati Boys")).toBeVisible();
+    expect(within(recommendations).getByText(/passend zu: italo schlager/i)).toBeVisible();
+  });
 });

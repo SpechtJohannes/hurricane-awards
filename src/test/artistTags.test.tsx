@@ -14,7 +14,7 @@ describe("artist tag data access", () => {
 
   it("loads available tags and act assignments", async () => {
     rpc.mockResolvedValueOnce({ data: [{ id: "rock", name: "Rock" }], error: null });
-    rpc.mockResolvedValueOnce({ data: [{ act_id: "act-1", id: "rock", name: "Rock" }], error: null });
+    rpc.mockResolvedValueOnce({ data: [{ act_id: "act-1", tag_id: "rock", name: "Rock" }], error: null });
     await expect(loadArtistTags(context)).resolves.toEqual([{ id: "rock", name: "Rock" }]);
     await expect(loadActArtistTags(context)).resolves.toEqual([{ actId: "act-1", id: "rock", name: "Rock" }]);
   });
