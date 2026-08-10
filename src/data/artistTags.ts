@@ -4,7 +4,7 @@ import { participantRpcParams, type ParticipantAccessContext } from "./accessCon
 export type ArtistTag = { id: string; name: string };
 export type ActArtistTag = ArtistTag & { actId: string };
 type ArtistTagRow = { id: string; name: string };
-type ActArtistTagRow = ArtistTagRow & { act_id: string };
+type ActArtistTagRow = { act_id: string; tag_id: string; name: string };
 
 export async function loadArtistTags(context: ParticipantAccessContext): Promise<ArtistTag[]> {
   const { data, error } = await getSupabase().rpc("ha_list_artist_tags", participantRpcParams(context));
@@ -15,7 +15,7 @@ export async function loadArtistTags(context: ParticipantAccessContext): Promise
 export async function loadActArtistTags(context: ParticipantAccessContext): Promise<ActArtistTag[]> {
   const { data, error } = await getSupabase().rpc("ha_list_act_artist_tags", participantRpcParams(context));
   if (error) throw error;
-  return ((data ?? []) as ActArtistTagRow[]).map(({ act_id, id, name }) => ({ actId: act_id, id, name }));
+  return ((data ?? []) as ActArtistTagRow[]).map(({ act_id, tag_id, name }) => ({ actId: act_id, id: tag_id, name }));
 }
 
 export async function addArtistTag(actId: string, name: string, context: ParticipantAccessContext): Promise<ArtistTag> {

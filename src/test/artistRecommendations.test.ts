@@ -19,4 +19,29 @@ describe("recommendArtists", () => {
   it("does not recommend artists without a matching tag", () => {
     expect(recommendArtists(artists, new Set(["pop"]), "de").map((artist) => artist.name)).toEqual(["Other"]);
   });
+
+  it("recommends Roy Bianco for the same italo Schlager tag id", () => {
+    const italoSchlagerId = "45ed53bb-ffbd-4d24-bca8-a103fcd52b84";
+    const royBianco: ArtistWithTags = {
+      id: "roy-bianco",
+      name: "Roy Bianco & Die Abbrunzati Boys",
+      description: null,
+      tags: [
+        { id: "another-tag", name: "Schlager" },
+        { id: italoSchlagerId, name: "italo Schlager" },
+      ],
+    };
+
+    expect(
+      recommendArtists([royBianco], new Set([italoSchlagerId]), "de").map(
+        (artist) => artist.name,
+      ),
+    ).toEqual(["Roy Bianco & Die Abbrunzati Boys"]);
+  });
+
+  it("returns each artist once for multiple matches and none without preferences", () => {
+    const result = recommendArtists(artists, new Set(["rock", "indie"]), "de");
+    expect(result.filter((artist) => artist.id === "b")).toHaveLength(1);
+    expect(recommendArtists(artists, new Set(), "de")).toEqual([]);
+  });
 });
